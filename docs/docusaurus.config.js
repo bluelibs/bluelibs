@@ -23,7 +23,7 @@ module.exports = {
     navbar: {
       title: "",
       logo: {
-        alt: "BlueLibsJs",
+        alt: "BlueLibsyar",
         src: "img/logo.png",
       },
       items: [

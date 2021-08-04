@@ -14,7 +14,7 @@ export function PackageHeader({
         </a>
       )} */}
       <a
-        href={`https://github.com/bluelibs/${packageName}`}
+        href={`https://github.com/bluelibs/bluelibs/tree/main/packages/${packageName}`}
         target="_blank"
         className="link"
       >
