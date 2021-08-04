@@ -21,7 +21,7 @@ import { IApolloBundleConfig } from "./defs";
 import { IRouteType } from "./defs";
 import { LoggerService } from "@bluelibs/logger-bundle";
 import { GraphQLUpload, graphqlUploadExpress } from "graphql-upload";
-import { GraphQLError } from "../../graphql-final/error/GraphQLError";
+import { GraphQLError } from "graphql";
 
 export class ApolloBundle extends Bundle<IApolloBundleConfig> {
   defaultConfig = {
