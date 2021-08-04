@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bluelibs/mongo-bundle"
+    "url": "https://github.com/bluelibs/bluelibs"
   },
   "scripts": {
     "compile": "tsc",

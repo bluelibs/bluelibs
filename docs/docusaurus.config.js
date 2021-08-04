@@ -109,7 +109,7 @@ module.exports = {
           // It is recommended to set document id as docs home page (`docs/` path).
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: "https://github.com/bluelibs/docs/edit/master",
+          editUrl: "https://github.com/bluelibs/bluelibs/tree/main/docs",
         },
         theme: {
           disableSwitch: true,

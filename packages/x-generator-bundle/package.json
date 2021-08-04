@@ -64,8 +64,8 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bluelibs/x-terminal-bundle/issues"
+    "url": "https://github.com/bluelibs/bluelibs"
   },
-  "homepage": "https://github.com/bluelibs/x-terminal-bundle#readme",
+  "homepage": "https://github.com/bluelibs/bluelibs",
   "author": "Theodor Diaconu"
 }
