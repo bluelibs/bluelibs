@@ -34,12 +34,6 @@ module.exports = {
           position: "left",
         },
         { to: "blog", label: "Blog", position: "left" }, // or position: 'right'
-        {
-          to: "excel2app/",
-          activeBasePath: "excel2app",
-          label: "Excel 2 App",
-          position: "left",
-        },
         // {
         //   href: "https://www.reddit.com/r/BlueLibs",
         //   label: "Reddit",

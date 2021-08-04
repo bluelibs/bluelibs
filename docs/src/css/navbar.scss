@@ -13,11 +13,11 @@
       padding: 9px 15px;
       line-height: 1em;
       &:hover {
-        border-bottom: 2px solid red;
+        border-bottom: 2px solid $mainColor;
       }
       &.navbar__link {
         &--active {
-          border-bottom: 2px solid red;
+          border-bottom: 2px solid $mainColor;
         }
       }
     }

@@ -13,7 +13,7 @@
 @import "docs.scss";
 
 :root {
-  --ifm-color-primary: red;
+  --ifm-color-primary: $mainColor;
   --ifm-color-primary-dark: rgb(0, 21, 139);
   --ifm-color-primary-darker: rgb(31, 165, 136);
   --ifm-color-primary-darkest: rgb(26, 136, 112);
@@ -25,7 +25,7 @@
 }
 
 .experimental-mode-warning {
-  background: red;
+  background: $mainColor;
   color: #fff;
   padding: 10px 5px;
   text-align: center;

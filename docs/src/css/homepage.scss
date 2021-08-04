@@ -26,9 +26,9 @@
   text-align: center;
   .feature-header {
     background: #fff;
-    border-color: red;
+    border-color: $mainColor;
     border-radius: $radius;
-    border: 7px solid red;
+    border: 7px solid $mainColor;
     border-bottom: none;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -36,10 +36,10 @@
     padding: 16px;
   }
   .feature-description {
-    // background: red;
+    // background: $mainColor;
     // color: #fff;
     border-radius: $radius;
-    border: 7px solid red;
+    border: 7px solid $mainColor;
     border-top: none;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -48,7 +48,7 @@
   .icon {
     color: $contrastColor;
     font-size: 3.2rem;
-    // background: red;
+    // background: $mainColor;
   }
 }
 .feature-element .feature-element .icon:hover {
@@ -58,7 +58,7 @@
 .explained-container {
   text-align: center;
   padding: 60px 0;
-  border-top: 16px solid red;
+  border-top: 16px solid $mainColor;
 
   h1 {
     margin-bottom: 25px;
@@ -82,7 +82,7 @@
 .newsletter-container {
   padding: 60px 30px;
   text-align: center;
-  border-top: 6px solid red;
+  border-top: 6px solid $mainColor;
 }
 
 .newsletter-container .signup-button {
