@@ -7,8 +7,9 @@ import {
 import { Collection } from "@bluelibs/mongo-bundle";
 
 export class PermissionsCollection<T extends IPermission>
-  extends Collection<T>
-  implements IPermissionPersistance {
+  extends Collection<IPermission>
+  implements IPermissionPersistance
+{
   static collectionName = "permissions";
 
   async insertPermission(permission: T): Promise<any> {

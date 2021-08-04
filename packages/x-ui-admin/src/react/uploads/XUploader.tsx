@@ -2,7 +2,7 @@ import { Service } from "@bluelibs/core";
 import { ApolloClient, Collection } from "@bluelibs/x-ui";
 import { ObjectId } from "@bluelibs/ejson";
 import { UPLOAD_FILE, UPLOAD_FILE_TO_GROUP } from "./graphql";
-import { UploadFile } from "antd/lib/upload/interface";
+import { RcFile, UploadFile } from "antd/lib/upload/interface";
 
 export type AppFile = {
   _id: ObjectId;
@@ -124,7 +124,7 @@ export class XUploader {
 
   uploadFileToGroup(
     groupId: string | ObjectId,
-    file: File,
+    file: RcFile | File,
     context?: string
   ): Promise<AppFile> {
     return this.apolloClient

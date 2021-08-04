@@ -49,7 +49,7 @@ export function AdminFileUpload(props: AdminFileUploadProps) {
     async customRequest(options) {
       // const { originFileObj: file } = currentFile;
 
-      const appFile = await uploader.uploadFile(options.file);
+      const appFile = await uploader.uploadFile(options.file as File);
       const uploadFile = uploader.transformToUploadFile(appFile);
 
       setCurrentAppFile(uploadFile);

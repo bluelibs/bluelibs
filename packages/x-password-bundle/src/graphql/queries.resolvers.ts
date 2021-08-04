@@ -8,6 +8,7 @@ import { XPasswordService } from "../services/XPasswordService";
 import { ChangePasswordInput } from "../inputs/ChangePasswordInput";
 import { IXPasswordBundleConfig } from "../defs";
 import { IFunctionMap } from "@bluelibs/graphql-bundle";
+import { ContainerInstance } from "@bluelibs/core";
 import {
   UsersCollection,
   USERS_COLLECTION_TOKEN,
@@ -25,7 +26,9 @@ export default (config: IXPasswordBundleConfig) => {
       X.CheckLoggedIn(),
       (_, args, context, ast) => {
         const userId = (context as any).userId;
-        const usersCollection = context.container.get<UsersCollection<any>>(
+        const container = context.container as ContainerInstance;
+
+        const usersCollection = container.get<UsersCollection<any>>(
           USERS_COLLECTION_TOKEN
         );
 
@@ -35,7 +38,9 @@ export default (config: IXPasswordBundleConfig) => {
           },
           intersect: {
             _id: 1,
+            // @ts-ignore
             email: 1,
+            fullName: 1,
             roles: 1,
             profile: 1,
           },

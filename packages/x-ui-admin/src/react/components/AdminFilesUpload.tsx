@@ -66,7 +66,7 @@ export function AdminFilesUpload(props: AdminFilesUploadProps) {
     },
 
     async customRequest(options) {
-      const appFile = await uploader.uploadFile(options.file);
+      const appFile = await uploader.uploadFile(options.file as File);
 
       options.onSuccess(appFile, null);
     },

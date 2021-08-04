@@ -70,7 +70,10 @@ export function AdminFileGroupUpload(props: AdminFileGroupUploadProps) {
         createdFileGroup = true;
       }
 
-      const appFile = await uploader.uploadFileToGroup(groupId, options.file);
+      const appFile = await uploader.uploadFileToGroup(
+        groupId,
+        options.file as File
+      );
       options.onSuccess(appFile, null);
 
       if (createdFileGroup) {

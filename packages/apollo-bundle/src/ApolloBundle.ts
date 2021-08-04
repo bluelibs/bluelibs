@@ -95,7 +95,7 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
 
     // server starting
     return new Promise((resolve) => {
-      httpServer.listen(this.config.port, (data) => {
+      httpServer.listen(this.config.port, () => {
         resolve();
         manager.emit(
           new ApolloServerAfterInitEvent({
@@ -197,12 +197,8 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
       });
     }
 
-    const {
-      typeDefs,
-      resolvers,
-      schemaDirectives,
-      contextReducers,
-    } = loader.getSchema();
+    const { typeDefs, resolvers, schemaDirectives, contextReducers } =
+      loader.getSchema();
 
     const config: ApolloServerExpressConfig = Object.assign(
       {

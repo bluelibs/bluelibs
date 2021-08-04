@@ -4,12 +4,17 @@ import {
   IBlueprintWriterOperation,
   IBlueprintSessionCommitOptions,
 } from "../defs";
-import { Service, Constructor, ContainerInstance, Inject } from "@bluelibs/core";
+import {
+  Service,
+  Constructor,
+  ContainerInstance,
+  Inject,
+} from "@bluelibs/core";
 import * as path from "path";
 import * as fs from "fs";
 import * as mkdirp from "mkdirp";
 import * as mergeDeep from "merge-deep";
-import * as recursiveCopy from "recursive-copy";
+import recursiveCopy from "recursive-copy";
 
 @Service({
   transient: true,
