@@ -161,9 +161,9 @@ export const map: IElementMap = {
           package: "x-bundle",
         },
         {
-          id: "x-generator-bundle",
+          id: "x-cli",
           title: "Command-line",
-          package: "x-generator-bundle",
+          package: "x",
         },
         {
           id: "x-cron-bundle",

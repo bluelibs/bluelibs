@@ -48,7 +48,7 @@ module.exports = {
             "label": "Server",
             "items": [
                 "package-x-bundle",
-                "package-x-generator-bundle",
+                "package-x-cli",
                 "package-x-cron-bundle",
                 "package-x-password-bundle",
                 "package-x-s3-uploads",

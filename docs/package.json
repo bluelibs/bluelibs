@@ -6,7 +6,9 @@
     "start": "docusaurus start",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy"
+    "deploy": "docusaurus deploy",
+    "docs:generate": "ts-node scripts/generate-docs.ts",
+    "prebuild": "npm run docs:generate"
   },
   "dependencies": {
     "@docusaurus/core": "^2.0.0-beta.4",
