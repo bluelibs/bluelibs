@@ -47,8 +47,8 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@bluelibs/core": "^1.2.4",
-    "@bluelibs/ejson": "^1.2.7",
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0"
   }
 }

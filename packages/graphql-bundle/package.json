@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/graphql-bundle",
-  "version": "1.1.6",
+  "version": "1.0.0",
   "description": "Abstract GraphQL Bundle responsible of loading all configurations needed for a server to run. Works with all types of GraphQL servers (including Apollo)",
   "main": "dist/index.js",
   "repository": {
@@ -27,11 +27,11 @@
     "@graphql-tools/merge": "6.2.14"
   },
   "peerDependencies": {
-    "@bluelibs/core": "^1.1.1",
+    "@bluelibs/core": "^1.0.0",
     "graphql": "^15.3.0"
   },
   "devDependencies": {
-    "@bluelibs/core": "^1.1.1",
+    "@bluelibs/core": "^1.0.0",
     "@types/chai": "^4.2.3",
     "@types/chai-as-promised": "^7.1.2",
     "@types/graphql": "^0.11.3",

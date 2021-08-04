@@ -52,7 +52,7 @@
     "express": "^4.17.1"
   },
   "peerDependencies": {
-    "@bluelibs/core": "^1.2.4",
+    "@bluelibs/core": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0"
   }
 }

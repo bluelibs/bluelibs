@@ -45,7 +45,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@bluelibs/core": "^1.2.4",
+    "@bluelibs/core": "^1.0.0",
     "@mikro-orm/core": "^4.5.7"
   }
 }

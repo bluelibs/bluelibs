@@ -27,12 +27,12 @@
     "ms": "^2.1.2"
   },
   "peerDependencies": {
-    "@bluelibs/core": "^1.2.2",
-    "@bluelibs/ejson": "^1.2.7"
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/ejson": "^1.0.0"
   },
   "devDependencies": {
-    "@bluelibs/core": "^1.2.2",
-    "@bluelibs/ejson": "^1.2.7",
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/ejson": "^1.0.0",
     "@types/chai-as-promised": "^7.1.2",
     "@types/jest": "^25.2.3",
     "@types/jsonwebtoken": "^8.3.9",

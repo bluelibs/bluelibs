@@ -26,9 +26,9 @@
   },
   "dependencies": {
     "@graphql-tools/merge": "^6.0.7",
-    "@bluelibs/core": "^1.1.1",
-    "@bluelibs/ejson": "^1.2.2",
-    "@bluelibs/terminal-bundle": "^1.1.0",
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/ejson": "^1.0.0",
+    "@bluelibs/terminal-bundle": "^1.0.0",
     "@types/faker": "^5.5.7",
     "faker": "^5.5.3",
     "fast-glob": "^3.2.2",

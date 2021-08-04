@@ -686,7 +686,7 @@ export class StudioWriter {
     const npmPackages = {
       "aws-sdk": "^2.948.0",
       "graphql-upload": "^11.0.0",
-      "@bluelibs/x-s3-bundle": "^1.1.0",
+      "@bluelibs/x-s3-bundle": "^1.0.0",
     };
 
     for (const pack in npmPackages) {
