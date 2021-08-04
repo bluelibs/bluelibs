@@ -33,7 +33,7 @@ module.exports = {
           label: "Docs",
           position: "left",
         },
-        { to: "blog", label: "Blog", position: "left" }, // or position: 'right'
+        // { to: "blog", label: "Blog", position: "left" }, // or position: 'right'
         // {
         //   href: "https://www.reddit.com/r/BlueLibs",
         //   label: "Reddit",
