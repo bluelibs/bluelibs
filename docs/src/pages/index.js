@@ -69,7 +69,7 @@ function Home() {
         <div className="container">
           <embed src="/img/logo.svg" height="100px" alt="BlueLibs Logo" />
           <p className="hero__subtitle">
-            fast like a prototype, scalable like enterprise
+            a collection of open-source softworks designed for the modern web
             <br />
           </p>
           <div className={styles.buttons}>
