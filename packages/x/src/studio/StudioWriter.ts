@@ -108,7 +108,7 @@ export class StudioWriter {
     );
 
     session.setMicroservicePath(backendMicroservicePath);
-    if (true || !fs.existsSync(backendMicroservicePath)) {
+    if (!fs.existsSync(backendMicroservicePath)) {
       await this.createBackendMicroservice(studioApp, session, commit);
     } else {
       console.log(`➤ Backend microservice already exists. Skipping.`);
@@ -136,7 +136,7 @@ export class StudioWriter {
     );
 
     session.setMicroservicePath(frontendMicroservicePath);
-    if (true || !fs.existsSync(frontendMicroservicePath)) {
+    if (!fs.existsSync(frontendMicroservicePath)) {
       await this.createFrontendMicroservice(studioApp, session, commit);
     } else {
       console.log(`➤ Frontend microservice already exists. Skipping.`);
@@ -514,9 +514,8 @@ export class StudioWriter {
 
         const graphqlInputModel = new Models.GraphQLInputModel();
         graphqlInputModel.bundleName = "AppBundle";
-        graphqlInputModel.genericModel = Models.GenericModel.clone(
-          genericModel
-        );
+        graphqlInputModel.genericModel =
+          Models.GenericModel.clone(genericModel);
         graphqlInputModel.genericModel.race = ModelRaceEnum.GRAPHQL_INPUT;
         graphqlInputModel.genericModel.isBaseExtendMode = true;
 

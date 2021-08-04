@@ -1,0 +1,15 @@
+{
+  "name": "{{ name }}",
+  "version": "1.0.0",
+  "scripts": {
+    "blueprint:generate": "ts-node blueprint.ts"
+  },
+  "dependencies": {},
+  "bluelibs": {
+    "type": "project"
+  },
+  "devDependencies": {
+    "@bluelibs/x": "^1.0.0",
+    "ts-node": "^10.1.0"
+  }
+}
