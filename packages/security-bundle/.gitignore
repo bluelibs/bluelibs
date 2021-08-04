@@ -1,0 +1,11 @@
+.DS_Store
+coverage
+dist
+node_modules
+npm-debug.log
+package-lock.json
+typings
+yarn-error.log
+yarn.lock
+typeDocs
+.vscode

@@ -1,0 +1,16 @@
+.DS_Store
+.vscode
+coverage
+dist
+node_modules
+npm-debug.log
+package-lock.json
+typings
+yarn-error.log
+yarn.lock
+typeDocs
+packages/developer-playground*
+packages/dp-*
+packages/graphql-final
+packages/x-cell-bundle
+packages/apollo-lambda-bundle

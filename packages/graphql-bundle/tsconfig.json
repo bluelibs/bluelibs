@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "lib": ["es6", "dom", "esnext"],
+    "noImplicitAny": false,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "pretty": true,
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "typeRoots": ["node_modules/@types"]
+  },
+
+  "include": ["src/**/*.ts", "src/**/*.graphql"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,3 @@
+.{{ cssClass "create" }} {
+  // Go crazy!
+}

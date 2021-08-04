@@ -1,0 +1,15 @@
+language: node_js
+node_js:
+  - "14"
+
+services:
+  - mongodb
+
+install:
+  - npm install -g coveralls
+  - npm install
+
+script:
+  - npm test
+  - npm run coverage
+  - coveralls < ./coverage/lcov.info || true # ignore coveralls error

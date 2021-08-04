@@ -1,0 +1,47 @@
+---
+title: MongoDB vs SQL
+author: Theodor Diaconu
+author_title: Creator of BlueLibs
+author_url: https://github.com/theodorDiaconu
+tags: [mongodb, bluelibs, mongodb-vs-sql]
+description: With the help of Nova we achieved 8.4x speeds vs SQL in some queries
+image: https://miro.medium.com/max/2910/1*uholdYDSjM-a75MVwoY1Zw.png
+hide_table_of_contents: false
+---
+
+In this post we're going to explore how we use MongoDB to achieve relational support that surpasses SQL by 840% in some cases.
+
+<!--truncate-->
+
+## Context
+
+[Nova](https://github.com/bluelibs/nova) is a Node MongoDB driver extension which enables collection linking and fetching data relationally. It brings beautiful developer experience when fetching relational data.
+
+Because of our love for MongoDB we really wanted it to make it work without the hassle of denormalising data, so we found a way called [Hypernova](https://www.bluelibs.com/docs/package-nova#hypernova)
+in which we do queries efficiently. Besides that, we also wanted to bring in the beautiful relational experience such as filtering by elements in another collection or sorting by them.
+We did that with Nova. It is a work-in-progress for over 4 years. It is battle-tested, used in production for some large-scale apps, it's not a toy.
+
+We did not want to compete with SQL, we just loved the simplicity of Mongo and the developer experience. However, SQL has a big flaw when it comes to retrieving joined data, it polutes the response, and when you want to deconstruct the data into objects, as you can see in the results it can get quite heavy. As you can see, if you want the "ORM" experience of Sequelize,
+there's a big price you have to pay that translates in compute resources in your instances.
+
+## Test Results
+
+Bottom line, for certain queries we have 8.4x improvement over SQL.
+
+- [Test results in local network](https://docs.google.com/spreadsheets/d/1cA2c6e9YvE-fA8LEaDwukgrvYNOIo8RmNjy8cPWby1g/edit#gid=0)
+- [The code used for benchmarking and testing methodology](https://github.com/bluelibs/nova/tree/master/benchmarks/sql)
+
+As you can see, all RAW SQL queries are faster than Nova, but Nova does the processing as well, not just the db queries.
+
+## Conclusions
+
+We are not claiming that Nova is faster than SQL, that would be a stupid claim, but we've beaten it by 840% in some cases.
+Absolutely ridiculous (in a good way). Mongo is still lagging when it comes to relational sorting, or relational filtering,
+which in some use-cases it what you need from your database.
+
+While SQL can be faster in some cases, Nova beats it in the most real-world scenarios that we had in our applications at [Cult of Coders](https://www.cultofcoders.com).
+
+## Give a star to BlueLibs
+
+Dear developer, we at BlueLibs are working to solve the hard problems of web-development. It would be helpful for us to get traction and allow other developers
+to discover BlueLibs. So, [give a star, to BlueLibs](https://github.com/bluelibs/bluelibs)!

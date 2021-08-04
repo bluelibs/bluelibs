@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "lib": ["es6", "esnext"],
+    "noImplicitAny": false,
+    "allowJs": false,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "pretty": true,
+    "removeComments": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "typeRoots": ["node_modules/@types"]
+  },
+
+  "include": ["src/**/*.ts"]
+}

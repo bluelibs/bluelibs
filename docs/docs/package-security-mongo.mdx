@@ -1,0 +1,77 @@
+---
+id: package-security-mongo
+title: Security with MongoDB
+---
+
+import { PackageHeader } from "@site/src/components/PackageHeader";
+
+<PackageHeader version="1.0.8" packageName="security-mongo-bundle" containsTypeDefs />
+
+In this bundle we're overriding the persistence layers from SecurityBundle to make them work with MongoBundle.
+
+## Install
+
+```bash
+npm i -S @bluelibs/security-bundle @bluelibs-security-mongo-bundle
+```
+
+```js
+import { SecurityBundle } from "@bluelibs/security-bundle";
+import { SecurityMongoBundle } from "@bluelibs/security-mongo-bundle";
+import { MongoBundle } from "@bluelibs/mongo-bundle";
+
+kernel.addBundles([
+  // Make sure you have both security and mongo bundle in your kernel
+  new SecurityBundle({
+    // options
+  }),
+  new MongoBundle({
+    uri: "your mongo url",
+  }),
+
+  // Order doesn't really matter.
+  new SecurityMongoBundle(),
+]);
+```
+
+## Overriding
+
+You have the option to make changes to your collection, for example if you user is linked to other collections or you simply want a different collectio name:
+
+```typescript
+import {
+  UsersCollection,
+  PermissionsCollection,
+} from "@bluelibs/security-mongo-bundle";
+import { IUser } from "@bluelibs/security-bundle";
+
+// We make the type behave with all of our needs
+interface IAppUser extends IUser {
+  profileId: ObjectID;
+}
+
+class AppUsersCollection extends UsersCollection<IAppUser> {
+  static collectionName = "User"; // override it, by default it's users
+
+  static links = {
+    profile: {
+      collection: () => ProfilesCollection,
+      field: "profileId",
+    },
+  };
+
+  static indexes = [
+    {
+      key: {
+        profileId: 1,
+      },
+    },
+  ];
+}
+```
+
+```typescript
+new SecurityMongoBundle({
+  usersCollection: AppUsersCollection,
+});
+```

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/graphql-voyager@1.0.0-rc.31/dist/voyager.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/graphql-voyager@1.0.0-rc.31/dist/voyager.min.css"
+    />
+  </head>
+
+  <body>
+    <div id="voyager">Loading...</div>
+    <script>
+      const GRAPHQL_ENDPOINT = "http://localhost:4000/graphql";
+
+      function introspectionProvider(query) {
+        return fetch(GRAPHQL_ENDPOINT, {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: query }),
+        }).then((response) => response.json());
+      }
+      // Render <Voyager />
+      GraphQLVoyager.init(document.getElementById("voyager"), {
+        introspection: introspectionProvider,
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+#x-ui-admin .logo {
+  height: 28px;
+  margin: 16px;
+  text-align: center;
+}
+
+#x-ui-admin .logo img {
+  height: 32px;
+}

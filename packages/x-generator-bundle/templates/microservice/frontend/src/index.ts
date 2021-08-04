@@ -1,0 +1,2 @@
+require("./startup/index");
+export {};

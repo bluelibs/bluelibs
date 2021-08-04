@@ -1,0 +1,53 @@
+{
+  "name": "@bluelibs/core",
+  "version": "1.2.5",
+  "description": "A powerful and lightweight module composition strategy responsible for orchestrating your logic, enabling you to easily respect SOLID principles within your infinitely-scalable app.",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluelibs/core"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "pretest": "npm run compile",
+    "test": "jest --verbose dist/__tests__/index.js",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
+    "test:clean": "jest --clearCache",
+    "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "testonly": "npm test",
+    "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "coverage": "npm test -- --coverage",
+    "coverage:upload": "codecov",
+    "prepublishOnly": "npm run compile"
+  },
+  "dependencies": {
+    "reflect-metadata": "^0.1.13",
+    "typedi": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.3",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/graphql": "^0.11.3",
+    "@types/jest": "^26.0.24",
+    "@types/node": "^14.14.22",
+    "@typescript-eslint/eslint-plugin": "2.3.0",
+    "@typescript-eslint/parser": "2.34.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "jest": "^27.0.6",
+    "jest-junit": "^12.0.0",
+    "prettier": "^1.18.2",
+    "source-map-support": "^0.5.13",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.1.3"
+  },
+  "types": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "license": "MIT"
+}

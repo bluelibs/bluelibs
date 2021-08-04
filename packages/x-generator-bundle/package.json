@@ -1,0 +1,71 @@
+{
+  "name": "@bluelibs/x",
+  "version": "1.3.1",
+  "description": "Scaffolding tool for BlueLibs Framework using X-Framework.",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluelibs/x-generator-bundle.git"
+  },
+  "bin": {
+    "x": "dist/cli.js"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "pretest": "npm run compile",
+    "test": "jest --verbose dist/__tests__/index.js --passWithNoTests",
+    "test:clean": "jest --clearCache",
+    "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "testonly": "npm test",
+    "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "coverage": "npm test -- --coverage",
+    "coverage:upload": "codecov",
+    "prepublishOnly": "npm run compile",
+    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
+  },
+  "dependencies": {
+    "@graphql-tools/merge": "^6.0.7",
+    "@bluelibs/core": "^1.1.1",
+    "@bluelibs/ejson": "^1.2.2",
+    "@bluelibs/terminal-bundle": "^1.1.0",
+    "@types/faker": "^5.5.7",
+    "faker": "^5.5.3",
+    "fast-glob": "^3.2.2",
+    "fs-extra": "^9.0.0",
+    "graphql": "^15.3.0",
+    "handlebars": "^4.7.6",
+    "inflected": "^2.1.0",
+    "lodash": "^4.17.15",
+    "prettier": "^2.0.5"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.3",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/fs-extra": "^9.0.1",
+    "@types/jest": "^25.2.1",
+    "@types/lodash": "^4.14.154",
+    "@types/node": "^12.12.43",
+    "@typescript-eslint/eslint-plugin": "2.3.0",
+    "@typescript-eslint/parser": "2.3.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "6.3.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "jest": "^26.0.0",
+    "jest-junit": "^10.0.0",
+    "source-map-support": "^0.5.13",
+    "typescript": "^4.0.2"
+  },
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bluelibs/x-terminal-bundle/issues"
+  },
+  "homepage": "https://github.com/bluelibs/x-terminal-bundle#readme",
+  "author": "Theodor Diaconu"
+}

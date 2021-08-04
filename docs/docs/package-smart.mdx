@@ -1,0 +1,206 @@
+---
+id: package-smart
+title: Smart
+---
+
+import { PackageHeader } from "@site/src/components/PackageHeader";
+
+<PackageHeader version="1.5.1" packageName="smart"  />
+
+Smart is a very small library which helps decouple state management and non-ui-related actions to separate classes. Behind the scenes it's just hooks, nothing fancy.
+
+Let us a imagine a counter model:
+
+```ts
+import * as React from "react";
+import { Smart } from "@bluelibs/smart";
+
+interface IState {
+  count: number;
+}
+
+/**
+ * We need to create a static context for each model, because it will allow us to use multiple smart models * together and we must have a way to differentiate them
+ */
+const CounterContext = React.createContext(null);
+
+class CounterModel extends Smart<IState> {
+  state: IState = {
+    count: 1,
+  };
+
+  increment() {
+    // Imutable state
+    this.setState({ count: this.state.count + 1 });
+  }
+
+  static getContext = () => CounterContext;
+}
+```
+
+Above we see that our model only has an initial state, and then it exposes certain actions and uses `setState` to introduce the new `immutable` state.
+
+Using it can be done like this:
+
+```tsx
+function Basic() {
+  // Api here will be a fresh instance of CounterModel + full autocompletion
+  const api = useSmart(CounterModel);
+  // Note that you can have multiple "smarts" with different models
+
+  // You'll have autocompletion on api.state
+  // This will be re-rendered when state changes
+  const { state } = api;
+  return (
+    <div>
+      Count: {state.count}
+      <br />
+      <button onClick={() => api.increment()}>Increment</button>
+    </div>
+  );
+}
+
+const Component = smart(CounterModel)(Basic);
+```
+
+Another, more verbose way to create it would be like this:
+
+```tsx
+function Component{
+  const [api, Provider] = newSmart(CounterModel);
+
+  return (
+    <Provider>
+      <Basic />
+    </Provider>
+  );
+};
+```
+
+This would be helpful when you want to have multiple `hooks` in the same component.
+
+The model can be configured and act differently based on a configuration it receives:
+
+```ts
+import { Smart } from "@bluelibs/smart";
+
+interface IState {
+  loading: boolean;
+  results: any[];
+}
+
+interface IConfig {
+  endpoint: string;
+}
+
+const HTTPLoaderContext = React.createContext(null);
+
+class HTTPLoader extends Smart<IState, IConfig> {
+  state: IState = {
+    loading: true,
+    results: [],
+  };
+
+  async init() {
+    this.load();
+  }
+
+  async destroy() {
+    // Perform things such as cleanup when the component gets unmounted
+    // This is very useful for subscriptions()
+  }
+
+  load() {
+    fetch(this.config.endpoint).then((results) => {
+      this.setState({
+        loading: false,
+        results,
+      });
+    });
+  }
+
+  static getContext = () => HTTPLoaderContext;
+}
+```
+
+Now, we can use this configurable state as so:
+
+```tsx
+const endpoint = "https://donuts.com/api/flavors";
+
+// You benefit of autocompletion
+const Component = smart(HTTPLoader, { endpoint })(Donuts);
+const [api, Provider] = newSmart(HTTPLoader, { endpoint });
+```
+
+There is another argument called `options` when creating a smart:
+
+```tsx
+smart(CustomModel, config, {
+  factory(classType, configuration) {
+    // you can create the class via a container maybe
+    // default it's just
+    new classType();
+
+    // Configuration is set later via `setConfig()`
+  },
+);
+```
+
+To be able to properly manipulate complex models with state, we recommend [immer](https://immerjs.github.io/immer/docs/introduction)
+
+## Silence & Isolation
+
+If you want to perform state changes without triggering an event, because maybe you want to do some modifications in batches, you can use the silent: true option:
+
+```ts
+api.updateState({ user }, { silent: true });
+api.updateState({ isLoggedIn: true }, { silent: true });
+// Now send the changes
+api.inform();
+```
+
+If you want to have components which only access the api methods or you simply do not want a re-render when state changes:
+
+```ts
+function Component() {
+  const api = useSmart(SmartModel, {
+    isolated: true,
+  });
+
+  // No re-render on state changes
+}
+```
+
+Same concept applies when you are creating the smart. You may have a component that simply handles instantiations and the children react, thus removing the need of unnecessary re-renders when state changes
+
+```tsx
+function Component() {
+  // The second {} is the config of the model
+  const [api, Provider] = newSmart(
+    CounterModel,
+    {},
+    {
+      isolated: true,
+    }
+  );
+
+  return (
+    <Provider>
+      <Basic />
+    </Provider>
+  );
+}
+```
+
+## Debugging
+
+If you want to see how a Smart changes its state and dispatches the changes use this:
+
+```tsx
+class MySmart extends Smart {
+  isDebug() {
+    return true;
+  }
+}
+```

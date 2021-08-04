@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "13"
+
+install:
+  - npm install -g coveralls
+  - npm install
+  - npm install graphql@15
+
+script:
+  - npm test
+  - npm run coverage
+  - coveralls < ./coverage/lcov.info || true # ignore coveralls error

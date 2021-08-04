@@ -1,0 +1,60 @@
+{
+  "name": "@bluelibs/graphql-bundle",
+  "version": "1.1.6",
+  "description": "Abstract GraphQL Bundle responsible of loading all configurations needed for a server to run. Works with all types of GraphQL servers (including Apollo)",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluelibs/graphql-bundle"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "pretest": "npm run compile",
+    "test": "jest --verbose dist/__tests__/index.js",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
+    "test:clean": "jest --clearCache",
+    "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "testonly": "npm test",
+    "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "coverage": "npm test -- --coverage",
+    "coverage:upload": "codecov",
+    "prepublishOnly": "npm run compile",
+    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
+  },
+  "dependencies": {
+    "@graphql-tools/load-files": "^6.0.3",
+    "@graphql-tools/merge": "6.2.14"
+  },
+  "peerDependencies": {
+    "@bluelibs/core": "^1.1.1",
+    "graphql": "^15.3.0"
+  },
+  "devDependencies": {
+    "@bluelibs/core": "^1.1.1",
+    "@types/chai": "^4.2.3",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/graphql": "^0.11.3",
+    "@types/jest": "^26.0.0",
+    "@types/node": "^8.0.28",
+    "@typescript-eslint/eslint-plugin": "2.3.0",
+    "@typescript-eslint/parser": "2.3.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "6.3.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "graphql": "^15.3.0",
+    "jest": "^27.0.6",
+    "jest-junit": "^10.0.0",
+    "prettier": "^2.0.5",
+    "source-map-support": "^0.5.13",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.1.3"
+  },
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "license": "MIT"
+}

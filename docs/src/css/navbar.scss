@@ -1,0 +1,25 @@
+.navbar {
+  .navbar__inner {
+    .navbar__items {
+      // background: pink;
+    }
+    .navbar__item {
+      // background: $contrastColor;
+      // font-size: 1.2em;
+      // font-weight: 800;
+      color: $contrastColor;
+      // border-bottom: 2px solid #fff;
+      margin-right: 15px;
+      padding: 9px 15px;
+      line-height: 1em;
+      &:hover {
+        border-bottom: 2px solid red;
+      }
+      &.navbar__link {
+        &--active {
+          border-bottom: 2px solid red;
+        }
+      }
+    }
+  }
+}

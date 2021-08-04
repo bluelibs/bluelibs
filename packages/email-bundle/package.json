@@ -1,0 +1,64 @@
+{
+  "name": "@bluelibs/email-bundle",
+  "version": "1.1.2",
+  "description": "Provides easy strategy to send emails using server-side rendered React templates",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluelibs/email-bundle"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "pretest": "npm run compile",
+    "test": "jest --verbose dist/__tests__/index.js",
+    "test:clean": "jest --clearCache",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
+    "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "testonly": "npm test",
+    "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "coverage": "npm test -- --coverage",
+    "coverage:upload": "codecov",
+    "prepublishOnly": "npm run compile",
+    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
+  },
+  "dependencies": {
+    "nodemailer": "^6.4.6"
+  },
+  "peerDependencies": {
+    "@bluelibs/core": "^1.1.1",
+    "@bluelibs/logger-bundle": "^1.0.0",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0"
+  },
+  "devDependencies": {
+    "@bluelibs/core": "^1.1.1",
+    "@bluelibs/logger-bundle": "^1.0.0",
+    "@types/chai": "^4.2.3",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/graphql": "^0.11.3",
+    "@types/jest": "^25.2.3",
+    "@types/node": "^8.0.28",
+    "@types/nodemailer": "^6.4.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@typescript-eslint/eslint-plugin": "2.3.0",
+    "@typescript-eslint/parser": "2.3.0",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "6.3.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "jest": "^27.0.0",
+    "jest-junit": "^10.0.0",
+    "prettier": "^2.0.5",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "source-map-support": "^0.5.13",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.0.2"
+  },
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "license": "MIT"
+}

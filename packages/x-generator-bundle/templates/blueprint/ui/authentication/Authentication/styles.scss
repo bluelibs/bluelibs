@@ -1,0 +1,13 @@
+.authentication-form {
+  // max-width: 400px;
+  .authentication-form-forgot {
+    float: right;
+  }
+  .authentication-form-button {
+    width: 100%;
+  }
+}
+
+.ant-col-rtl .login-form-forgot {
+  float: left;
+}

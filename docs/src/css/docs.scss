@@ -1,0 +1,30 @@
+.docPage {
+  > div {
+    // This is the navbar
+    // background: pink;
+    ul {
+      li {
+        font-weight: 400;
+      }
+    }
+  }
+  .docPage--main {
+    h1 {
+      font-size: 1.8em;
+      font-weight: 300;
+      color: $contrastColor;
+      border: 1px dashed $contrastColor;
+      text-align: center;
+      padding: 9px;
+      // border-radius: $radius;
+    }
+    h2 {
+      font-weight: 500;
+      font-size: 1.8em;
+    }
+    h3 {
+      font-size: 1.2em;
+      font-weight: 500;
+    }
+  }
+}

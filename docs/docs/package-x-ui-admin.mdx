@@ -1,0 +1,120 @@
+---
+id: package-x-ui-admin
+title: Administration
+---
+
+import { PackageHeader } from "@site/src/components/PackageHeader";
+
+<PackageHeader version="1.3.0" packageName="x-ui-admin"  />
+
+This is the place where you configure your enterprise level applications Administration interface. This bundle makes use of `@bluelibs/x-ui`, so it is best if you familiarise yourself with it first.
+
+This bundle uses `Ant Design` to leverage its Admin interface. Allowing you to focus on creating Menu Routes that can be role-dependent. This enables `Wordpress-like` functionality where external bundles that you just add to your `Kernel` extend the menu nicely.
+
+## Basics
+
+```tsx
+// kernel
+
+kernel.addBundles([new XUIBundle(), new XUIAdminBundle()]);
+```
+
+## UI
+
+Let's explore a bit about the structure, by creating our first layout:
+
+```tsx title="components/Layout.tsx"
+import { useUIComponents } from "@bluelibs/x-ui";
+
+// This is to illustrate how you can have a custom layout:
+function Dashboard() {
+  const Components = useUIComponents();
+
+  return (
+    <Components.AdminLayout content={}>
+      <h1>Hello world!</h1>
+    </Components.AdminLayout>
+  );
+}
+```
+
+Now we need to create a route, and because we don't rely on strings for routing, we should read them from a separate place, and register them in our bundle:
+
+```tsx title="routes.ts"
+import { IRoute } from "@bluelibs/x-ui";
+
+export const DASHBOARD = {
+  path: "/dashboard",
+  component: Dashboard,
+  // optionally require certain roles that you can define in a Roles enum
+  roles: [Roles.ADMIN],
+  menu: {
+    icon: RightOutlined, // Use any from: https://ant.design/components/icon/
+    key: "DASHBOARD", // a unique name
+    label: "Dashboard",
+    order: 0, // If you want it to hold priority. The menus will be sorted by order, otherwise, by the order they have been added into the menu
+  },
+};
+```
+
+This is done only once, but ensure you load your routes in bundle init:
+
+```ts
+// In your bundle:
+import * as Routes from "./routes";
+
+export class UIAppBundle extends Bundle {
+  async function init() {
+    const router = this.container.get(XRouter);
+
+    router.add(Routes);
+  }
+}
+```
+
+## Form Consumer
+
+In order to have a mechanism of using forms in a nice descriptive manner, we created a `Consumer` class which allows us to construct it with a set of data and then consume elements one by one, and ability to display the rest of unconsumed elements.
+
+The API is simple and straight forward:
+
+```ts
+import { Consumer } from "@bluelibs/x-ui-admin";
+
+const elements = [
+  {
+    id: "1",
+    name: 123,
+  },
+  {
+    id: "2",
+    name: 124,
+  },
+  {
+    id: "3",
+    name: 125,
+  },
+];
+
+const consumer = new Consumer(elements);
+
+// Check if we finished consumption, ofcourse, it's false
+consumer.isConsumed();
+
+const e1 = consumer.consume("1"); // this is the "1" element
+
+consumer.isElementConsumed("1"); // true
+consumer.isElementConsumed("2"); // false
+consumer.isConsumed(); // false
+
+consumer.consume("4"); // throws error: Consumer.Errors.ElementNotFound
+
+const rest = consumer.rest(); // returns an array "2" and "3" elements
+consumer.isConsumed(); // true
+consumer.isElementConsumed("2"); // true
+consumer.isElementConsumed("3"); // true
+
+consumer.consume("1"); // throws error: Consumer.Errors.AlreadyConsumed
+```
+
+You can also benefit of autocompletion like: `new Consumer<MyType>()` as long as MyType has an `id: string` attached to it.

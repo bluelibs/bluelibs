@@ -1,0 +1,7 @@
+*
+!src/**/*
+!dist/**/*
+!templates/**/*
+dist/**/*.test.*
+!package.json
+!README.md

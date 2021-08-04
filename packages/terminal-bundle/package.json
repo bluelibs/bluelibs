@@ -1,0 +1,62 @@
+{
+  "name": "@bluelibs/terminal-bundle",
+  "version": "1.1.0",
+  "description": "Offers the toolkit to build highly scalable and decoupled terminal interogations and file system writes.",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluelibs/terminal-bundle"
+  },
+  "scripts": {
+    "command": "dist/cli.js",
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "pretest": "npm run compile",
+    "test": "jest --verbose dist/__tests__/index.js --passWithNoTests",
+    "test:clean": "jest --clearCache",
+    "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "testonly": "npm test",
+    "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "coverage": "npm test -- --coverage",
+    "coverage:upload": "codecov",
+    "prepublishOnly": "npm run compile",
+    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
+  },
+  "dependencies": {
+    "chalk": "^4.0.0",
+    "commander": "^5.1.0",
+    "fuzzy": "^0.1.3",
+    "glob": "^7.1.6",
+    "inquirer": "^7.1.0",
+    "inquirer-autocomplete-prompt": "^1.0.2",
+    "inquirer-search-list": "^1.2.6",
+    "merge-deep": "^3.0.2",
+    "mkdirp": "^1.0.4",
+    "recursive-copy": "^2.0.10"
+  },
+  "devDependencies": {
+    "@bluelibs/core": "^1.1.1",
+    "@types/chai": "^4.2.3",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/graphql": "^0.11.3",
+    "@types/jest": "^25.2.1",
+    "@types/node": "^8.0.28",
+    "@typescript-eslint/eslint-plugin": "2.3.0",
+    "@typescript-eslint/parser": "2.3.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "6.3.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "jest": "^26.0.0",
+    "jest-junit": "^10.0.0",
+    "prettier": "^2.0.5",
+    "source-map-support": "^0.5.13",
+    "typescript": "^4.0.2"
+  },
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "license": "MIT"
+}

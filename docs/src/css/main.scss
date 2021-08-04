@@ -1,0 +1,115 @@
+/* stylelint-disable docusaurus/copyright-header */
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+@import "variables.scss";
+@import "navbar.scss";
+@import "homepage.scss";
+@import "buttons.scss";
+@import "docs.scss";
+
+:root {
+  --ifm-color-primary: red;
+  --ifm-color-primary-dark: rgb(0, 21, 139);
+  --ifm-color-primary-darker: rgb(31, 165, 136);
+  --ifm-color-primary-darkest: rgb(26, 136, 112);
+  --ifm-color-primary-light: rgb(70, 203, 174);
+  --ifm-color-primary-lighter: rgb(102, 212, 189);
+  --ifm-color-primary-lightest: rgb(146, 224, 208);
+  --ifm-code-font-size: 95%;
+  font-size: 14px;
+}
+
+.experimental-mode-warning {
+  background: red;
+  color: #fff;
+  padding: 10px 5px;
+  text-align: center;
+  font-size: 1.2em;
+}
+
+.text-highlight {
+  /* font-weight: bold; */
+  display: inline-block;
+  text-decoration: underline;
+  text-decoration-color: #ddd;
+}
+
+.text-highlight-strong {
+  text-decoration: none;
+  color: #fff;
+  background: var(--ifm-color-primary);
+  /* background: var(--ifm-color-primary); */
+  display: inline-block;
+  padding-left: 7px;
+  padding-right: 7px;
+  border-radius: 15px;
+}
+
+.docusaurus-highlight-code-line {
+  background-color: rgb(72, 77, 91);
+  display: block;
+  margin: 0 calc(-1 * var(--ifm-pre-padding));
+  padding: 0 var(--ifm-pre-padding);
+}
+
+.package-header-container {
+  margin-bottom: 20px;
+  text-align: right;
+  width: 100%;
+}
+
+.package-header-container .link {
+  display: inline-block;
+  padding: 2px 15px;
+  border-radius: 3px;
+  border: 1px solid var(--ifm-color-primary);
+  margin-right: 5px;
+}
+
+.package-header-container .link:last-child {
+  margin-right: 0;
+}
+
+.package-header-container .link:hover {
+  text-decoration: none;
+  color: #fff;
+  background: var(--ifm-color-primary);
+}
+
+.package-header-container .version {
+  cursor: default;
+}
+
+.dark-section {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 32px;
+}
+
+.excel2app {
+  .hero {
+    background: #fff;
+    color: #000;
+    margin-bottom: 32px;
+  }
+  section {
+    margin-bottom: 32px;
+  }
+  .demo {
+    &.demo-dark {
+      background: rgb(0, 0, 0);
+      color: #fff;
+    }
+    padding: 24px;
+    text-align: center;
+    h1 {
+      margin-bottom: 32px;
+    }
+  }
+}

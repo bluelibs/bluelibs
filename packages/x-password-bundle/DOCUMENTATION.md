@@ -1,0 +1,213 @@
+This package from X-Framework gives you fully integrated passwords system, with GraphQL endpoints and customisable emails. This bundle makes use of the original `PasswordBundle` to allow-it plug-in into your X-stack.
+
+## Install
+
+```typescript
+import { XPasswordBundle } from "@bluelibs/x-password-bundle";
+
+// For this to work you need the following: SecurityBundle, ApolloBundle, ApolloSecurityBundle, SecurityMongoBundle, XBundle
+
+kernel.addBundle(new XPasswordBundle());
+```
+
+Ensure you have a type user in your graphql, or disable the me query:
+
+```typescript file="graphql/entities/User.graphql.ts"
+type User {
+  _id: ObjectID!
+}
+```
+
+```ts
+new XPasswordBundle({
+  graphql: {
+    queries: {
+      me: false,
+    },
+  },
+});
+```
+
+## Emails
+
+We have the following emails setup:
+
+1. `Welcome` once that user has registered
+2. `Verify Email` when we want to verify the user's email
+3. `Forgot Password` to receive the reset password link on your email
+4. `Reset Password Confirmation` after you've reset your password you'll get a confirmation.
+
+All these emails can be overriden like this:
+
+### Customise
+
+```tsx
+import { IReactEmailTemplate } from "@bluelibs/email-bundle";
+import { IWelcomeEmailProps } from "@bluelibs/x-password-bundle";
+
+export const CustomWelcomeEmail: IReactEmailTemplate<IWelcomeEmailProps> = (
+  props
+) => (
+  <div>
+    <p>Hello {props.name},</p>
+    Go here: <a href={props.welcomeUrl}>{props.welcomeUrl}</a>
+    <p>
+      Regards, <br />
+      {props.regardsName}
+    </p>
+  </div>
+);
+
+new XPasswordBundle({
+  emails: {
+    templates: {
+      welcome: CustomWelcomeEmail,
+      verifyEmail: "...",
+      forgotPassword: "...",
+      resetPasswordConfirmation: "...",
+    },
+  },
+});
+```
+
+## Registration Flow
+
+- User registers with `firstName`, `lastName`, `email` and `password`
+- We assume that the username will be the email. This can be customised by you.
+- If verify email is enabled, the `VerifyEmail` will be sent (if `sendEmailVerification` )
+  - After the email gets verified, the `WelcomeEmail` is sent (if `sendWelcomeEmail` is enabled)
+- If verify email is disabled and `sendWelcomeEmail` is enabled, the `WelcomeEmail` will be initially sent.
+
+By default user is able to login without having the email verified. However, using the `emails.requiresEmailVerificationBeforeLoggingIn` config on the bundle, this will not be an option. The `register` will return a null token and user cannot login until his email gets verified.
+
+This is done by playing with `isEnabled` from `IUser` which doesn't allow the user to login.
+
+After email gets verified, `isEnabled` is marked as true.
+
+:::caution
+If you later introduce processes of email verification (like when he changes the email, etc) please note that we mark `isEnabled` to true. So if you have suspended the user and somehow he can request an email verification, be careful.
+:::
+
+### Urls
+
+You can also modify the paths based on the X-Framework application url:
+
+```ts
+new XPasswordBundle({
+  emails: {
+    paths: {
+      welcomePath: "/welcome",
+      resetPasswordPath: "/reset-password/:token",
+      verifyEmailPath: "/verify-email/:token",
+    },
+  },
+});
+```
+
+### Other Configuration
+
+```ts
+new XPasswordBundle({
+  emails: {
+    applicationName: "My App";
+    regardsName: "My App Team";
+    // Sometimes the email verification can be the welcome one
+    // In that case, don't send an welcome email and customise your email verification one
+    sendEmailVerification: true;
+    sendWelcomeEmail: true;
+  }
+  // Don't allow users with email unverified to login:
+  requiresEmailVerificationBeforeLoggingIn: false,
+})
+```
+
+## Mutations
+
+Once you added this bundle, you will see some mutations appearing in your GraphQL docs, these can be toggled on/off using this:
+
+```ts
+// The configuration is:
+export interface IXPasswordBundleConfig {
+  graphql: {
+    mutations: {
+      register: boolean;
+      changePassword: boolean;
+      login: boolean;
+      logout: boolean;
+      resetPassword: boolean;
+      forgotPassword: boolean;
+      verifyEmail: boolean;
+    };
+  };
+}
+```
+
+## Custom Registration
+
+By default registration accepts `firstName`, `lastName`, `email` and `password`. If you have a more complex registration, we recommend disabling `register` mutation as shown above and implement your own:
+
+```graphql
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+}
+
+type RegisterResponse {
+  token: String
+}
+
+type Mutation {
+  register(input: RegisterInput!): RegisterResponse
+}
+```
+
+```ts
+import { IGraphQLContext, InputType } from "@bluelibs/graphql-bundle";
+import { RegisterInput, XPasswordService } from "@bluelibs/x-password-bundle";
+
+class MyCustomInput extends RegisterInput {
+  age: string;
+}
+
+function register(_, args: InputType<RegisterInput>, context: IGraphQLContext) {
+  const { input } = args;
+  const xPasswordService = context.container.get(XPasswordService);
+
+  const { email, password, firstName, lastName } = input;
+  const { userId, token } = xPasswordService.register({
+    email,
+    password,
+    firstName,
+    lastName,
+  });
+
+  // Do additional operations, call another service with the "age" part.
+  return {
+    token,
+  };
+}
+```
+
+## Override Logic
+
+You can modify behavior of your mutation resolvers by creating your own `XPasswordService`:
+
+```ts
+import { RegistrationInput, XPasswordService } from "@bluelibs/x-password-bundle";
+
+class MyXPasswordService extends XPasswordService {
+  register(input: RegistrationInput) {
+    // Do your thingie here.
+    // Or you can disable the mutation, and simply implement your own.
+  }
+}
+
+// ...
+new XPasswordBundle({
+  services: {
+    XPasswordService: MyXPasswordService,
+  },
+});
+```

@@ -1,0 +1,245 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@bluelibs/nova</title>
+	<meta name="description" content="Documentation for @bluelibs/nova">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@bluelibs/nova</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>@bluelibs/nova</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<h1 align="center">BlueLibs NOVA</h1>
+				<p align="center">
+					<a href="https://travis-ci.org/bluelibs/nova">
+						<img src="https://api.travis-ci.org/bluelibs/nova.svg?branch=master" />
+					</a>
+					<a href="https://coveralls.io/github/bluelibs/nova?branch=master">
+						<img src="https://coveralls.io/repos/github/bluelibs/nova/badge.svg?branch=master" />
+					</a>
+				</p>
+				<br />
+				<br />
+				<p>Nova is the fetching layer on top of MongoDB Node Driver, which allows SQL-comparable speeds for retrieving relational data.</p>
+				<p>GraphQL is treated as a first-class citizen, by offering ability to transform the GraphQL query into a Nova query. <strong>You do not have to use GraphQL to use this library</strong>.</p>
+				<p>The incredible speed boost is possible thanks to the technology called Hypernova, you can read more about it <a href="./docs/index.md#hypernova">inside the documentation</a>.</p>
+				<a href="#what-does-it-solve" id="what-does-it-solve" style="color: inherit; text-decoration: none;">
+					<h2>What does it solve?</h2>
+				</a>
+				<ul>
+					<li>It makes it a joy to use MongoDB as a relational database</li>
+					<li>Support for relational filtering &amp; sorting</li>
+					<li>Speeds surpassing SQL in various scenarios</li>
+					<li>Lower bandwidth used than SQL for joined documents</li>
+					<li>Works with the default MongoDB Node Drivers</li>
+					<li>Super light-weight integration for GraphQL</li>
+				</ul>
+				<a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
+					<h2><a href="./DOCUMENTATION.md">Documentation</a></h2>
+				</a>
+				<p><a href="./DOCUMENTATION.md">Click here to go to the documentation</a></p>
+				<a href="#sample" id="sample" style="color: inherit; text-decoration: none;">
+					<h2>Sample</h2>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">import</span> { query, manyToOne } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@bluelibs/nova&quot;</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">test</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> Post = <span class="hljs-keyword">await</span> db.createCollection(<span class="hljs-string">&quot;Post&quot;</span>);
+  <span class="hljs-keyword">const</span> Comments = <span class="hljs-keyword">await</span> db.createCollection(<span class="hljs-string">&quot;Comments&quot;</span>);
+
+  manyToOne(Comments, Post, {
+    <span class="hljs-comment">// will automatically read from postId inside Comments</span>
+    <span class="hljs-attr">linkName</span>: <span class="hljs-string">&quot;post&quot;</span>,
+    <span class="hljs-attr">inversedLinkName</span>: <span class="hljs-string">&quot;comments&quot;</span>,
+  }); <span class="hljs-comment">// also available manyToMany and manyToOne</span>
+
+  query(Post, {
+    <span class="hljs-attr">$</span>: {
+      <span class="hljs-attr">filters</span>: {
+        <span class="hljs-attr">isApproved</span>: <span class="hljs-literal">true</span>
+      }
+    }
+    <span class="hljs-attr">title</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">comments</span>: {
+      <span class="hljs-attr">name</span>: <span class="hljs-number">1</span>
+    }
+  })
+}</code></pre>
+				<a href="#graphql" id="graphql" style="color: inherit; text-decoration: none;">
+					<h2><a href="./docs/index.md#graphql-integration">GraphQL</a></h2>
+				</a>
+				<pre><code class="language-js"><span class="hljs-keyword">import</span> { query } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@bluelibs/nova&quot;</span>;
+
+<span class="hljs-keyword">const</span> Query = {
+  <span class="hljs-comment">// Automatically fetches everything in the minimum amount of queries</span>
+  users(_, args, ctx, info) {
+    <span class="hljs-keyword">return</span> query.graphql(Posts, info).fetch();
+  },
+};</code></pre>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Internals</span>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/___tests___connection_.html">&quot;__tests__/connection&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/___tests___integration_helpers_.html">&quot;__tests__/integration/helpers&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_api_.html">&quot;core/api&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_constants_.html">&quot;core/constants&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_defs_.html">&quot;core/defs&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_graphql_asttoquery_.html">&quot;core/graphql/ast<wbr>ToQuery&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_graphql_intersectdeep_.html">&quot;core/graphql/intersect<wbr>Deep&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_linker_.html">&quot;core/query/<wbr>Linker&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_query_.html">&quot;core/query/<wbr>Query&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_hypernova_hypernova_.html">&quot;core/query/hypernova/hypernova&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_hypernova_processdirectnode_.html">&quot;core/query/hypernova/process<wbr>Direct<wbr>Node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_hypernova_processrecursivenode_.html">&quot;core/query/hypernova/process<wbr>Recursive<wbr>Node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_hypernova_processvirtualnode_.html">&quot;core/query/hypernova/process<wbr>Virtual<wbr>Node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_hypernova_storehypernovaresults_.html">&quot;core/query/hypernova/store<wbr>Hypernova<wbr>Results&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_lib_computereducers_.html">&quot;core/query/lib/compute<wbr>Reducers&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_lib_createfilters_.html">&quot;core/query/lib/create<wbr>Filters&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_lib_preparefordelivery_.html">&quot;core/query/lib/prepare<wbr>For<wbr>Delivery&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_lib_projectgraphtodataset_.html">&quot;core/query/lib/project<wbr>Graph<wbr>ToData<wbr>Set&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_nodes_collectionnode_.html">&quot;core/query/nodes/<wbr>Collection<wbr>Node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_nodes_fieldnode_.html">&quot;core/query/nodes/<wbr>Field<wbr>Node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_nodes_inode_.html">&quot;core/query/nodes/INode&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_nodes_projectionnode_.html">&quot;core/query/nodes/<wbr>Projection<wbr>Node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_query_nodes_reducernode_.html">&quot;core/query/nodes/<wbr>Reducer<wbr>Node&quot;</a>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_core_quicklinkers_.html">&quot;core/quick<wbr>Linkers&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

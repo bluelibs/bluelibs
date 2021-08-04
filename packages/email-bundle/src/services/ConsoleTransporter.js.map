@@ -1,0 +1,1 @@
+{"version":3,"file":"ConsoleTransporter.js","sourceRoot":"","sources":["ConsoleTransporter.ts"],"names":[],"mappings":";;;AAEa,QAAA,kBAAkB,GAAc;IAC3C,IAAI,EAAE,SAAS;IACf,OAAO,EAAE,OAAO;IAChB,IAAI,CAAC,IAAI,EAAE,QAAQ;QACjB,OAAO,CAAC,GAAG,CAAC,sCAAsC,EAAE,IAAI,CAAC,IAAI,CAAC,CAAC;QAC/D,QAAQ,CAAC,IAAI,EAAE,IAAI,CAAC,IAAI,CAAC,CAAC;IAC5B,CAAC;CACF,CAAC"}
