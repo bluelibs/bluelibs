@@ -1,4 +1,4 @@
-import { Studio } from "@kaviar/x";
+import { Studio } from "@bluelibs/x";
 import * as faker from "faker";
 
 const {
@@ -12,7 +12,7 @@ const {
   GeneratorKind,
 } = Studio;
 
-const blogs = app({
+const application = app({
   id: "{{ name }}",
   sharedModels: [
     // Configure shared models
@@ -58,7 +58,7 @@ const blogs = app({
   ],
 });
 
-generateProject(blogs, {
+generateProject(application, {
   // Mark this as true when you want to override even the non-overridable files
   // override: true,
 });
