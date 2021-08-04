@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/security-mongo-bundle",
-  "version": "1.0.8",
+  "version": "1.0.0",
   "description": "Persistance layer using MongoDB for BlueLibs Security",
   "main": "dist/index.js",
   "repository": {

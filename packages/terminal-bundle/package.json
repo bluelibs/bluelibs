@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/terminal-bundle",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "description": "Offers the toolkit to build highly scalable and decoupled terminal interogations and file system writes.",
   "main": "dist/index.js",
   "repository": {
