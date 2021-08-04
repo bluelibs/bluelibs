@@ -1,4 +1,4 @@
-This bundle integrates BlueLibs's Core with [MikroORM](<(https://mikro-orm.io/docs/installation)>). A solution that allows us to easily work with SQL databases in a type-safe way.
+This bundle integrates BlueLibs's Core with [MikroORM](https://mikro-orm.io/docs/installation). A solution that allows us to easily work with SQL databases in a type-safe way.
 
 ## Install
 
