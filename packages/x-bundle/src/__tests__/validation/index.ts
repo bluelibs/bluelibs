@@ -1,13 +1,20 @@
-import { Schema, Is, a, an, ValidatorService } from "@bluelibs/validator-bundle";
+import {
+  Schema,
+  Is,
+  a,
+  an,
+  ValidatorService,
+} from "@bluelibs/validator-bundle";
 import { ObjectId } from "@bluelibs/ejson";
-import { createEcosystem } from "./createEcosystem";
+import { createKernel } from "./createEcosystem";
 import { Collection } from "@bluelibs/mongo-bundle";
 import { Service } from "@bluelibs/core";
 
 describe("validation", () => {
   test("it should work ok", async () => {
-    const container = await createEcosystem();
-
+    const kernel = createKernel();
+    await kernel.init();
+    const container = kernel.container;
     @Service()
     class Messages extends Collection {
       static collectionName = "messages";
@@ -43,10 +50,14 @@ describe("validation", () => {
 
     await messagesCollection.insertOne({ text: "hello" });
     await expect(validator.validate(result)).rejects.toBeInstanceOf(Error);
+
+    await kernel.shutdown();
   });
 
   test("Works with optional objectId", async () => {
-    const container = await createEcosystem();
+    const kernel = createKernel();
+    await kernel.init();
+    const container = kernel.container;
 
     @Schema()
     class Dummy {
@@ -59,5 +70,7 @@ describe("validation", () => {
     const validator = container.get(ValidatorService);
 
     const result = await validator.validate(dummy); // should be ok
+
+    await kernel.shutdown();
   });
 });

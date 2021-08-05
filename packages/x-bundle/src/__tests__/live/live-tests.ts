@@ -19,13 +19,36 @@ beforeEach(async () => {
 afterAll(async () => {
   if (container) {
     const kernel = container.get(Kernel);
-    const currentServer = container.get(ApolloBundle).httpServer;
-    const dbService = container.get(DatabaseService);
 
-    // await dbService.client.close();
-    await currentServer.close();
+    await kernel.shutdown();
   }
 });
+
+const sleep = (sleepTime) =>
+  new Promise((resolve) => setTimeout(resolve, sleepTime));
+
+/**
+ * This function is a helper to allow us to use done() type of behavior in async functions
+ * @returns
+ */
+const createTestFinisher = () => {
+  let _resolve;
+  let _reject;
+  const promise = new Promise((resolve, reject) => {
+    _resolve = resolve;
+    _reject = reject;
+  });
+  return {
+    done(err?: string) {
+      if (err) {
+        _reject(err);
+      } else {
+        _resolve();
+      }
+    },
+    callback: promise,
+  };
+};
 
 test("Should work with default strategy", async () => {
   const postsCollection = container.get(PostsCollection);
@@ -131,7 +154,7 @@ test("Should work with limit-sort strategy", async () => {
   await subscription.stop();
 });
 
-test("Test changes are detected for top-fields", async (done) => {
+test("Test changes are detected for top-fields", async () => {
   const postsCollection = container.get(PostsCollection);
   const result = await postsCollection.insertOne({
     title: "Hello",
@@ -154,7 +177,7 @@ test("Test changes are detected for top-fields", async (done) => {
       onChanged(documentId, set) {
         expect(set.title).toBe("Goodbye");
         subscription.stop();
-        done();
+        // done();
       },
     }
   );
@@ -169,7 +192,7 @@ test("Test changes are detected for top-fields", async (done) => {
   );
 });
 
-test("Test changes are detected for nested fields also", async (done) => {
+test("Test changes are detected for nested fields also", async () => {
   const postsCollection = container.get(PostsCollection);
   const result = await postsCollection.insertOne({
     ok: true,
@@ -178,6 +201,7 @@ test("Test changes are detected for nested fields also", async (done) => {
       age: 123,
     },
   });
+  const finisher = createTestFinisher();
 
   const subscriptionStore = container.get(SubscriptionStore);
   const subscription = await subscriptionStore.createSubscription(
@@ -197,7 +221,7 @@ test("Test changes are detected for nested fields also", async (done) => {
         expect(set.profile.name).toBe("123");
 
         subscription.stop();
-        done();
+        finisher.done();
       },
     }
   );
@@ -210,10 +234,14 @@ test("Test changes are detected for nested fields also", async (done) => {
       },
     }
   );
+
+  await finisher.callback;
 });
 
-test("Test whether limit-sort respects the propper 'collection view' after insertion, change, change-non-interesting, removed", async (done) => {
+test("Test whether limit-sort respects the propper 'collection view' after insertion, change, change-non-interesting, removed", async () => {
   const postsCollection = container.get(PostsCollection);
+  const finisher = createTestFinisher();
+
   const result1 = await postsCollection.insertOne({
     number: 1,
     initialNumber: 1,
@@ -258,7 +286,7 @@ test("Test whether limit-sort respects the propper 'collection view' after inser
   subscription.onAdded((document) => {
     expect(document._id.toString()).toBe(result2.insertedId.toString());
     subscription.stop();
-    done();
+    finisher.done();
   });
 
   await postsCollection.updateOne(
@@ -269,9 +297,11 @@ test("Test whether limit-sort respects the propper 'collection view' after inser
       },
     }
   );
+
+  await finisher.callback;
 });
 
-test("Ensure that if you're following certain fields and I change another field I will not be notified", async (done) => {
+test("Ensure that if you're following certain fields and I change another field I will not be notified", async () => {
   const postsCollection = container.get(PostsCollection);
   const context = Math.random();
   const result = await postsCollection.insertOne({
@@ -293,13 +323,13 @@ test("Ensure that if you're following certain fields and I change another field 
     },
     {
       onChanged(document, set) {
-        done("Should not be triggered");
         subscription.stop();
+        throw new Error("Should not be triggered");
       },
     }
   );
 
-  postsCollection.updateOne(
+  await postsCollection.updateOne(
     { _id: result.insertedId },
     {
       $set: {
@@ -308,11 +338,12 @@ test("Ensure that if you're following certain fields and I change another field 
     }
   );
 
-  done();
+  await sleep(100);
 });
 
-test("Check update with positional property", async (done) => {
+test("Check update with positional property", async () => {
   const postsCollection = container.get(PostsCollection);
+  const finisher = createTestFinisher();
   const result = await postsCollection.insertOne({
     title: "Hello",
     bom: [
@@ -351,7 +382,7 @@ test("Check update with positional property", async (done) => {
           }
         });
         subscription.stop();
-        done();
+        finisher.done();
       },
     }
   );
@@ -362,15 +393,18 @@ test("Check update with positional property", async (done) => {
       $set: { "bom.$.quantity": 30 },
     }
   );
+
+  await finisher.callback;
 });
 
-test("Should be able to skip live changes", async (done) => {
+test("Should be able to skip live changes", async () => {
   const postsCollection = container.get(PostsCollection);
   const context = Math.random();
   const result = await postsCollection.insertOne({
     title: "Hello",
     context,
   });
+  const finisher = createTestFinisher();
 
   const subscriptionStore = container.get(SubscriptionStore);
   const subscription = await subscriptionStore.createSubscription(
@@ -386,7 +420,7 @@ test("Should be able to skip live changes", async (done) => {
     },
     {
       onChanged(document) {
-        done("Should not be triggered");
+        finisher.done("Should not be triggered");
         subscription.stop();
       },
     }
@@ -406,16 +440,18 @@ test("Should be able to skip live changes", async (done) => {
     }
   );
 
-  done();
+  finisher.done();
+  await finisher.callback;
 });
 
-test("Ensure multi-update multi-removed are detected properly", async (done) => {
+test("Ensure multi-update multi-removed are detected properly", async () => {
   const postsCollection = container.get(PostsCollection);
   const context = Math.random();
   const result = await postsCollection.insertOne({
     title: "Hello",
     context,
   });
+  const finisher = createTestFinisher();
 
   const subscriptionStore = container.get(SubscriptionStore);
   const subscription = await subscriptionStore.createSubscription(
@@ -433,7 +469,7 @@ test("Ensure multi-update multi-removed are detected properly", async (done) => 
       onChanged(document, set) {
         expect(set.title).toBe("Goodbye");
         subscription.stop();
-        done();
+        finisher.done();
       },
     }
   );
@@ -446,6 +482,8 @@ test("Ensure multi-update multi-removed are detected properly", async (done) => 
       $set: { title: "Goodbye" },
     }
   );
+
+  await finisher.callback;
 });
 
 // If you specify the field "profile.name", and what changes is "profile.age", we shouldn't receive a changed event

@@ -9,13 +9,15 @@ import { LoggerBundle } from "@bluelibs/logger-bundle";
 export async function createEcosystem(): Promise<ContainerInstance> {
   const kernel = new Kernel({
     bundles: [
-      new LoggerBundle(),
+      new LoggerBundle({
+        console: false,
+      }),
       new MongoBundle({
         uri: "mongodb://localhost:27017/tests",
       }),
       new XBundle({
         live: {
-          debug: true,
+          debug: false,
           redis: {
             host: "127.0.0.1",
             port: 6379,

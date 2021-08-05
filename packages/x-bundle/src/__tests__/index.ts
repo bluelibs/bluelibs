@@ -1,3 +1,3 @@
 import "../index";
-// import "./live";
+import "./live";
 import "./validation";

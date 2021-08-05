@@ -7,8 +7,8 @@ import { XBundle } from "../../XBundle";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
 import { ValidatorBundle } from "@bluelibs/validator-bundle";
 
-export async function createEcosystem(): Promise<ContainerInstance> {
-  const kernel = new Kernel({
+export function createKernel(): Kernel {
+  return new Kernel({
     bundles: [
       new LoggerBundle(),
       new MongoBundle({
@@ -21,8 +21,4 @@ export async function createEcosystem(): Promise<ContainerInstance> {
       testing: true,
     },
   });
-
-  await kernel.init();
-
-  return kernel.container;
 }
