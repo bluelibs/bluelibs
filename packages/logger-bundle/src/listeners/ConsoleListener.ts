@@ -1,7 +1,5 @@
 import { Listener, Service } from "@bluelibs/core";
 import { LogEvent } from "../events";
-import { LogLevel } from "../defs";
-import { Log } from "../models/Log";
 
 @Service()
 export class ConsoleListener extends Listener {
