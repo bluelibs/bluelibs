@@ -7,8 +7,10 @@ import {
   IElementGroup,
   isElementSingle,
   isElementGroup,
-} from "./blueprint";
+  ElementOrElementGroup,
+} from "./docs-structure";
 import { execSync } from "child_process";
+
 import * as fse from "fs-extra";
 
 const PACKAGE_DIR = path.join(__dirname, "..", "..", "packages");
@@ -17,31 +19,49 @@ const DOCS_DIR = path.join(__dirname, "..", "docs");
 const DOC_FILE = "DOCUMENTATION.md";
 const SIDEBARS_FILE = path.join(__dirname, "..", "sidebars.js");
 
-const sidebar = {};
-for (const sidebarGroup in map) {
-  const elements: Array<IElement | IElementGroup> = map[sidebarGroup];
+function run() {
+  const sidebar = [];
+  for (const sidebarGroup in map) {
+    const elements = map[sidebarGroup];
+    const isArray = Array.isArray(elements);
 
-  // write sidebar.js
-  sidebar[sidebarGroup] = processSidebarElements(elements);
+    // write sidebar.js
+    if (Array.isArray(elements)) {
+      const items = getSidebarElements(elements);
+
+      sidebar.push({
+        type: "category",
+        label: sidebarGroup,
+        items,
+      });
+    } else {
+      sidebar.push({
+        type: "doc",
+        label: sidebarGroup,
+        id: `package-${elements.package}`,
+      });
+    }
+  }
+
+  const contents = `
+  module.exports = {
+    someSidebar: ${JSON.stringify(sidebar, null, 4)}
+  }
+  `;
+
+  fs.writeFileSync(SIDEBARS_FILE, contents);
+
+  console.log("Completed generating documentation.");
 }
 
-const contents = `
-module.exports = {
-  someSidebar: ${JSON.stringify(sidebar, null, 4)}
-}
-`;
-
-fs.writeFileSync(SIDEBARS_FILE, contents);
-
-console.log("Completed generating documentation.");
+// ACTUALLY RUN THE GENERATION
+run();
 
 /**
  * Returns doc ids
  * @param elements
  */
-function processSidebarElements(
-  elements: Array<IElement | IElementGroup>
-): string[] {
+function getSidebarElements(elements: Array<ElementOrElementGroup>): string[] {
   const result = [];
   elements.forEach((element) => {
     if (isElementSingle(element)) {

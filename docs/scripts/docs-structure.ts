@@ -17,8 +17,10 @@ export function isElementSingle(arg: any): arg is IElement {
   return arg.groupLabel === undefined;
 }
 
+export type ElementOrElementGroup = IElement | IElementGroup;
+
 export interface IElementMap {
-  [key: string]: Array<IElementGroup | IElement>;
+  [key: string]: IElement | Array<ElementOrElementGroup>;
 }
 
 export const map: IElementMap = {
@@ -42,12 +44,6 @@ export const map: IElementMap = {
           id: "mongo",
           title: "MongoDB",
           package: "mongo-bundle",
-          typeDocs: true,
-        },
-        {
-          id: "nova",
-          title: "Nova",
-          package: "nova",
           typeDocs: true,
         },
         {
@@ -147,6 +143,12 @@ export const map: IElementMap = {
       typeDocs: true,
     },
   ],
+  Nova: {
+    id: "nova",
+    title: "Nova",
+    package: "nova",
+    typeDocs: true,
+  },
   "X-Framework": [
     {
       id: "x-framework-introduction",

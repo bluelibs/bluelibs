@@ -1,11 +1,11 @@
 module.exports = {
   title: "BlueLibs",
-  tagline: "fast like a prototype — scalable like enterprise",
+  tagline: "a collection of open-source softworks designed for the modern web",
   url: "https://www.bluelibs.com",
   baseUrl: "/",
   favicon: "img/favicon.ico",
-  organizationName: "facebook", // Usually your GitHub org/user name.
-  projectName: "BlueLibsJS", // Usually your repo name.
+  organizationName: "bluelibs", // Usually your GitHub org/user name.
+  projectName: "BlueLibs", // Usually your repo name.
   onBrokenLinks: "warn",
   plugins: ["docusaurus-plugin-sass"],
   themeConfig: {
