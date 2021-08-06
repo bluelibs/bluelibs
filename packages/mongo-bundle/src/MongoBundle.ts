@@ -44,6 +44,6 @@ export class MongoBundle extends Bundle<IMongoBundleConfigType> {
    */
   async shutdown() {
     const databaseService = this.container.get(DatabaseService);
-    databaseService.client.close();
+    await databaseService.client.close();
   }
 }
