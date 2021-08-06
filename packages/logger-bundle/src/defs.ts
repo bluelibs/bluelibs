@@ -5,10 +5,10 @@ export interface ILoggerBundleConfig {
   console?: boolean;
 }
 
-export interface ILog {
+export interface ILog<TContext = any> {
   message: string;
   level: LogLevel;
-  context: any;
+  context: TContext;
 }
 
 export interface ILogger {

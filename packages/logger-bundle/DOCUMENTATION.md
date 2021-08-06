@@ -62,3 +62,18 @@ class AppBundle extends Bundle {
   }
 }
 ```
+
+## Custom Log Object
+
+You can customise your `Log` model if you want for example specific contexts or other stuff:
+
+```ts
+import { LoggerService, Log, LogLevel } from "@bluelibs/logger-bundle";
+
+class UserLog extends Log<{ userId: string }> {}
+
+const logger = container.get(LoggerService);
+
+// This will get dispatched, and next you can do custom compute for your log by checking instance of
+logger.send(new UserLog("message", LogLevel.INFO, { userId: "XXX" }));
+```
