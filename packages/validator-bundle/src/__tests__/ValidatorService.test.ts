@@ -73,12 +73,12 @@ describe("ValidatorService", () => {
         // Note that you can inject any dependency in the constructor, in our case, a database or api service
       }
 
-      async validate(value: string, suffix: string, yupContext: TestContext) {
+      async validate(value: string, suffix: string, context: TestContext) {
         // to ensure async
         if (value === "bomb" + (suffix ? suffix : "")) {
-          yupContext.createError({ message: "boom!" });
+          context.createError({ message: "boom!" });
         } else {
-          return "ok";
+          return true;
         }
       }
     }

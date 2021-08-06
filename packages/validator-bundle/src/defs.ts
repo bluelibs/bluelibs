@@ -21,11 +21,17 @@ export interface IValidationMethod<T = any, V = any> {
   name: string;
   message?: string;
   parent?: () => BaseSchema | Constructor<BaseSchema>;
+  /**
+   * Return "ok" if everything was ok
+   * @param value
+   * @param config
+   * @param yupContext
+   */
   validate(
     value: V,
     config: T,
     yupContext: TestContext
-  ): Promise<string | undefined>;
+  ): Promise<boolean | string | undefined>;
 }
 
 export interface IValidationTransformer<

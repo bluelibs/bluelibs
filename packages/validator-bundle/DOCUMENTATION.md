@@ -55,17 +55,20 @@ It's always a good idea to be able to customise validations, so here is our solu
 
 ```typescript
 import { Service, Inject } from "@bluelibs/core";
-import { yup, IValidationMethod, TestContext } from "@bluelibs/validator-bundle";
+import {
+  yup,
+  IValidationMethod,
+  TestContext,
+} from "@bluelibs/validator-bundle";
 
-export interface IUniqueFieldValidationConfig {
+export type UniqueFieldConfig = {
   message?: string;
   table: string;
   field: string;
-}
+};
 
 @Service()
-class UniqueFieldValidationMethod
-  implements IValidationMethod<IUniqueFieldValidationConfig> {
+class UniqueFieldValidator implements IValidationMethod<UniqueFieldConfig> {
   // What is your string like, which you want to validate?
   parent = yup.string; // optional, defaults to yup.mixed, so to all
   name = "uniqueField";
@@ -77,7 +80,7 @@ class UniqueFieldValidationMethod
   async validate(
     value: string,
     config: IUniqueFieldValidationConfig,
-    { createError, path }: TestContext
+    context: TestContext
   ) {
     // The 3d argument, the context, can be found here:
     // https://github.com/jquense/yup#mixedtestname-string-message-string--function-test-function-schema
@@ -86,9 +89,11 @@ class UniqueFieldValidationMethod
     let valueAlreadyExists; /* search to see if that field exists */
 
     if (valueAlreadyExists) {
-      createError(message || `The field already exists`);
+      // This does not actually throw so the execution will continue
+      context.createError(message || `The field already exists`);
     } else {
-      return "ok";
+      // This is yup's way of saying the validation has worked ok.
+      return true;
     }
   }
 }
