@@ -3,7 +3,12 @@ import { Relation } from "./Relation";
 import { BaseModel } from "./App";
 import * as _ from "lodash";
 import * as Inflected from "inflected";
-import { UIConfigType, UIModeType, UICollectionConfigType } from "../defs";
+import {
+  UIConfigType,
+  UIModeType,
+  UICollectionConfigType,
+  Resolvable,
+} from "../defs";
 
 export type BehaviorsConfig = {
   softdeletable?: boolean;
@@ -37,6 +42,12 @@ export class Collection extends BaseModel<Collection> {
    * Collection link and relations
    */
   relations: Relation[] = [];
+
+  /**
+   * When other collections relate to this, we need a toString() version of this collection document.
+   * This can be a field reducer or an actual field, like "fullName" for `User`, or "name" for `Project`
+   */
+  representedBy: Resolvable<Field>;
 
   /**
    * Collections which have an external package are not written, they exist only to be able to properly link with them.
@@ -83,6 +94,12 @@ export class Collection extends BaseModel<Collection> {
     // ensure an entity name
     if (!this.entityName) {
       this.entityName = _.upperFirst(Inflected.singularize(this.id));
+    }
+
+    if (this.representedBy) {
+      this.representedBy = this.resolve(this.representedBy, (id) =>
+        this.find.field(this.id, id)
+      );
     }
 
     // ensure there is a label

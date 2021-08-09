@@ -260,6 +260,8 @@ collection({
 });
 ```
 
+### TODO: Representations of Collections
+
 ### Rendering
 
 So, relations have an additional field which we call `representedBy` this basically means, if I have a `Post` and I have a post owner which is a `User` how do I show that user? Do I show his id, what fields from user do I show? And the typical answer is either a specific field that indifies it or a reducer. This helps the UI Lists to properly render data and know what to query.
@@ -421,7 +423,9 @@ All files that get overriden on next generations are marked with the comment:
 
 We advise you not to make any changes directly to those files, their whole concept was designed in a way that they can be extended from your components.
 
-## UI Customisation
+### UI Customisation
+
+The principles applied to be able to execute this blendability of UI we call `Consumer` classes the concept is described detailed inside the XUIAdmin.
 
 ### Customise Lists
 
@@ -449,4 +453,12 @@ We advise you not to make any changes directly to those files, their whole conce
 
 ## Generation Customisation
 
-This goes in depth exploring the options
+The `generateProject` functions allows certain alterations
+
+### Custom Generators
+
+### Custom Writers
+
+The writers represent the units of logic which read a model and write files, you have the ability to customise your own if you want to benefit of blueprint but have specific use-cases.
+
+In theory you could make these writers generate Vue code and everything you would need, but keep in mind that such a task can be complex and you will definitely need some external libraries to eliminate much of boilerplate code.

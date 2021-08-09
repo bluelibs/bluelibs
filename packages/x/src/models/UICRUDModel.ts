@@ -209,6 +209,12 @@ export class UICRUDModel {
       this.fillFields(result, field, mode);
     });
     this.studioCollection.relations.forEach((r) => {
+      if (this.isForm(mode)) {
+        if (!r.isDirect) {
+          // cancel execution
+          return;
+        }
+      }
       this.fillRelations(result, r, mode);
     });
 
@@ -228,6 +234,7 @@ export class UICRUDModel {
       return;
     }
 
+    // Sanity-check
     // You cannot add or modify relationships from an indirect one because the update is done on the other collection
     if (this.isForm(mode)) {
       if (!relation.isDirect) {
@@ -238,10 +245,10 @@ export class UICRUDModel {
     }
 
     store.push({
-      id: relation.field.id,
+      id: this.isForm(mode) ? relation.field.id : relation.id,
       title: relation.ui.label,
       description: relation.description,
-      required: relation.field.isRequired,
+      required: relation.field && relation.field.isRequired,
       order: relation.ui.order,
       dataIndexStr: this.isForm(mode)
         ? `[ "${relation.field.id}" ]`

@@ -388,7 +388,8 @@ export class StudioWriter {
         const relation = _relation.cleaned;
 
         const model = new Models.CollectionLinkModel();
-        model.fieldName = relation.field.id;
+        // For inversed links
+        model.fieldName = relation.field && relation.field.id;
         model.type = relation.isMany ? "manyToMany" : "manyToOne";
 
         if (relation.unique) {
@@ -684,7 +685,7 @@ export class StudioWriter {
     // NPM
     const npmPackages = {
       "aws-sdk": "^2.948.0",
-      "graphql-upload": "^11.0.0",
+      "graphql-upload": "^12.0.0",
       "@bluelibs/x-s3-bundle": "^1.0.0",
     };
 

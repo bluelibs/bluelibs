@@ -3,6 +3,7 @@ import { Collection } from "./Collection";
 import { Resolvable, UIConfigType } from "../defs";
 import { Field } from "./Field";
 import * as _ from "lodash";
+import { field as fieldFactory, collection } from "../factories";
 export class Relation extends BaseModel<Relation> {
   /**
    * This represents the id of the relation, how is it named
@@ -100,24 +101,33 @@ export class Relation extends BaseModel<Relation> {
   }
 
   clean() {
-    if (this.field) {
+    if (!this.inversedBy || this.field) {
       this.isDirect = true;
     }
+
     if (this.inversedBy) {
       this.isDirect = false;
     }
 
     if (this.isDirect) {
-      const field = this.resolve(this.field, (id) =>
-        this.find.field(this.from.id, id)
-      );
+      if (!this.field) {
+        // If no field has been specified we automatically add and infer it
+        this.field = fieldFactory({
+          id: `${this.id}Id${this.isMany ? "s" : ""}`,
+          type: fieldFactory.types.OBJECT_ID,
+          isArray: this.isMany,
+        });
+      } else {
+        this.field = this.resolve(this.field, (id) =>
+          this.find.field(this.from.id, id)
+        );
+      }
 
       // Ensure it's marked as a relational stored field
-      field.isRelationStorageField = true;
-      this.field = field;
+      this.field.isRelationStorageField = true;
 
       // Basically if the user created the field while in the relation, add it to the "from" list of fields
-      if (!this.find.field(this.from.id, field.id)) {
+      if (!this.find.field(this.from.id, this.field.id)) {
         this.from.fields.push(this.field);
       }
     }
@@ -126,12 +136,19 @@ export class Relation extends BaseModel<Relation> {
       return this.find.collection(id);
     });
 
+    if (!this.representedBy && this.cleaned.to.representedBy) {
+      // We have at Collection level a representedBy
+      this.representedBy = this.cleaned.to.representedBy;
+    }
+
     this.representedBy = this.resolve(this.representedBy, (id) => {
       return this.find.field(this.cleaned.to.id, id);
     });
 
-    // check if the field wasn't created here directly
+    // if the field was created here add it to the parent collection
     if (
+      this.isDirect &&
+      this.field &&
       !this.from.fields.find((f) => {
         return f.id === (this.field as Field).id;
       })

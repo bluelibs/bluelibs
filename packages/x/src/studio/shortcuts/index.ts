@@ -154,11 +154,13 @@ export const shortcuts = {
      * @returns
      */
     user(override: Partial<Relation> = {}) {
+      const id = override.id || "user";
+      const fieldId = `${id}Id`;
       return s.relation({
-        id: "user",
+        id,
         to: "Users",
         field: s.field({
-          id: "userId",
+          id: fieldId,
           type: s.field.types.OBJECT_ID,
         }),
         ui: {
