@@ -13,7 +13,7 @@ We regard a project as a set of microservices that interract together. For examp
 
 ## x:microservice
 
-We can create a microservice (currently only works with backend only) using the **X-Framework** recommended folder structure.
+We can create a microservice (backend or frontend) using the **X-Framework**.
 
 ## x:bundle
 

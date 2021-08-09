@@ -1,9 +1,9 @@
-import { yup, IValidationMethod } from "@bluelibs/validator-bundle";
+import { yup, IValidationMethod, TestContext } from "@bluelibs/validator-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
 import { ContainerInstance, Constructor } from "@bluelibs/core";
 import "{{ validatorClassName }}.declarations";
 
-export interface I{{ validatorClassName }}Config {
+export type {{ validatorClassName }}Config = {
   message?: string;
 }
 
@@ -14,21 +14,22 @@ implements IValidationMethod<I{{ validatorClassName }}Config> {
 
   constructor(protected readonly container: ContainerInstance) {}
 
-  async validate(
-  value: any,
-  config: I{{ validatorClassName }}Config,
-  { createError, path }
-  ) {
-  // The 3d argument, the context, is properly described here:
-  // https://github.com/jquense/yup#mixedtestname-string-message-string--function-test-function-schema
+  async validate(value: any, config: {{ validatorClassName }}Config, context: TestContext) {
+    // The 3d argument, the context, is properly described here:
+    // https://github.com/jquense/yup#mixedtestname-string-message-string--function-test-function-schema
 
-  let { message } = config;
+    let { message } = config;
 
-  // Use the value to ensure this is valid
-  // If you need other information
+    // Use the value to ensure this is valid
+    // If you need other information
+    let isValid = true;
 
-  createError(
-  message || `You haven't implemented this validation logic`
-  );
+    if (isValid) {
+      return true;
+    } else {
+      context.createError(
+        message || `You haven't implemented this validation logic`
+      );
+    }
   }
-  }
+}

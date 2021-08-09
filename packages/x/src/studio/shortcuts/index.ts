@@ -1,4 +1,5 @@
 import * as s from "../factories";
+import * as _ from "lodash";
 import { Field, Relation } from "../models";
 
 export type BlameableRelationOverrideType = {
@@ -62,30 +63,31 @@ export const shortcuts = {
     timestampable(
       overrides: TimestampableFieldsOverrideType = { created: {}, updated: {} }
     ) {
-      return [
-        s.field({
-          id: "createdAt",
-          isRequired: true,
-          description: "Represents the date when this object was created",
-          type: s.field.types.DATE,
-          ui: {
-            edit: false,
-            create: false,
-          },
-          ...overrides.created,
-        }),
-        s.field({
-          id: "updatedAt",
-          isRequired: true,
-          description: "Represents the last time when the object was updated",
-          type: s.field.types.DATE,
-          ui: {
-            edit: false,
-            create: false,
-          },
-          ...overrides.updated,
-        }),
-      ];
+      const createdOptions = {
+        id: "createdAt",
+        isRequired: true,
+        description: "Represents the date when this object was created",
+        type: s.field.types.DATE,
+        ui: {
+          edit: false,
+          create: false,
+        },
+      };
+      _.merge(createdOptions, overrides.created);
+
+      const updatedOptions = {
+        id: "updatedAt",
+        isRequired: true,
+        description: "Represents the last time when the object was updated",
+        type: s.field.types.DATE,
+        ui: {
+          edit: false,
+          create: false,
+        },
+      };
+      _.merge(updatedOptions, overrides.updated);
+
+      return [s.field(createdOptions), s.field(updatedOptions)];
     },
     /**
      * If you use blameable relation you don't need these fields, as they are automatically added
@@ -175,7 +177,7 @@ export const shortcuts = {
       });
     },
     file(id: string, override: Partial<Relation> = {}) {
-      return s.relation({
+      const options = {
         id: id,
         to: "AppFiles",
         isMany: false,
@@ -190,11 +192,13 @@ export const shortcuts = {
           listFilters: false,
           view: true,
         },
-        ...override,
-      });
+      };
+      _.merge(options, override);
+
+      return s.relation(options);
     },
     files(id: string, override: Partial<Relation> = {}) {
-      return s.relation({
+      const options = {
         id: id,
         to: "AppFiles",
         isMany: true,
@@ -210,11 +214,13 @@ export const shortcuts = {
           listFilters: false,
           view: true,
         },
-        ...override,
-      });
+      };
+      _.merge(options, override);
+
+      return s.relation(options);
     },
     fileGroup(id: string, override: Partial<Relation> = {}) {
-      return s.relation({
+      const options = {
         id: id,
         to: "AppFileGroups",
         isMany: false,
@@ -230,57 +236,61 @@ export const shortcuts = {
           view: true,
         },
         ...override,
-      });
+      };
+      _.merge(options, override);
+
+      return s.relation(options);
     },
   },
   relations: {
     blameable(
       overrides: BlameableRelationOverrideType = { created: {}, updated: {} }
     ) {
-      return [
-        s.relation({
-          id: "createdBy",
-          to: "Users",
-          description: "Represents the user who has created this object",
-          field: s.field({
-            id: "createdById",
-            type: s.field.types.OBJECT_ID,
-            description: "Represents the user's id who has created this object",
-          }),
-          ui: {
-            label: "Created By",
-            create: false,
-            edit: false,
-          },
-          representedBy: "fullName",
-          mock: {
-            useExistingDocuments: true,
-          },
-          ...overrides.created,
+      const createdOptions = {
+        id: "createdBy",
+        to: "Users",
+        description: "Represents the user who has created this object",
+        field: s.field({
+          id: "createdById",
+          type: s.field.types.OBJECT_ID,
+          description: "Represents the user's id who has created this object",
         }),
-        s.relation({
-          id: "updatedBy",
-          to: "Users",
+        ui: {
+          label: "Created By",
+          create: false,
+          edit: false,
+        },
+        representedBy: "fullName",
+        mock: {
+          useExistingDocuments: true,
+        },
+      };
+      _.merge(createdOptions, overrides.created);
+
+      const updatedOptions = {
+        id: "updatedBy",
+        to: "Users",
+        description:
+          "Represents the user who has made the latest update on this object",
+        field: s.field({
+          id: "updatedById",
+          type: s.field.types.OBJECT_ID,
           description:
-            "Represents the user who has made the latest update on this object",
-          field: s.field({
-            id: "updatedById",
-            type: s.field.types.OBJECT_ID,
-            description:
-              "Represents the user's id who has made the latest update on this object",
-          }),
-          ui: {
-            label: "Updated By",
-            create: false,
-            edit: false,
-          },
-          representedBy: "fullName",
-          mock: {
-            useExistingDocuments: true,
-          },
-          ...overrides.updated,
+            "Represents the user's id who has made the latest update on this object",
         }),
-      ];
+        ui: {
+          label: "Updated By",
+          create: false,
+          edit: false,
+        },
+        representedBy: "fullName",
+        mock: {
+          useExistingDocuments: true,
+        },
+      };
+      _.merge(updatedOptions, overrides.updated);
+
+      return [s.relation(createdOptions), s.relation(updatedOptions)];
     },
   },
 };

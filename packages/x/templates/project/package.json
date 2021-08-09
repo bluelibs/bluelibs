@@ -2,7 +2,7 @@
   "name": "{{ name }}",
   "version": "1.0.0",
   "scripts": {
-    "blueprint:generate": "ts-node blueprint.ts"
+    "blueprint:generate": "ts-node blueprint/index.ts"
   },
   "dependencies": {},
   "bluelibs": {

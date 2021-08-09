@@ -107,7 +107,7 @@ export class Field extends BaseModel<Field> {
   ui: UIConfigType;
 
   /**
-   * The collection it belongs to
+   * The collection it belongs to. This is stored automatically you don't have to specify it.
    * @cleanable
    */
   collection: Collection;
