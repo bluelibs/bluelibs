@@ -4,6 +4,7 @@ import { FieldValueKind } from "../models/FieldValueKind";
 import * as _ from "lodash";
 import { UIModeType } from "../defs";
 import { ModelUtils } from "../../utils/ModelUtils";
+import * as Inflected from "inflected";
 
 export type ToGenericModelOptions = {
   graphql?: boolean;
@@ -164,18 +165,21 @@ export class XBridge {
     } else if (studioField.subfields.length > 0) {
       // STASNDARD NEXTED STRUCTURES
       field.type = Models.GenericFieldTypeEnum.MODEL;
-      const name =
-        studioField.collection.entityName + _.upperFirst(studioField.id);
+
+      // if it's called items, the modelisation will be suffixed with Item
+      let fieldSuffix = field.isMany
+        ? Inflected.singularize(studioField.id)
+        : studioField.id;
+
+      let suffix = _.upperFirst(fieldSuffix);
+      const name = studioField.collection.entityName + suffix;
+
       field.model = {
         name,
         storage: "outside",
         local: true,
         fields: studioField.subfields.map((subfield) =>
-          XBridge.fieldToGenericField(
-            subfield,
-            isInput,
-            enumPrefix + _.upperFirst(studioField.id)
-          )
+          XBridge.fieldToGenericField(subfield, isInput, enumPrefix + suffix)
         ),
       };
       if (isInput) {
