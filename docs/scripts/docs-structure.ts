@@ -182,10 +182,6 @@ export const map: IElementMap = {
           title: "Uploads",
           package: "x-s3-bundle",
         },
-        {
-          id: "x-framework-conventions",
-          title: "Conventions",
-        },
       ],
     },
     {

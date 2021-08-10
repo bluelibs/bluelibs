@@ -66,8 +66,7 @@
                     "package-x-cli",
                     "package-x-cron-bundle",
                     "package-x-password-bundle",
-                    "package-x-s3-uploads",
-                    "x-framework-conventions"
+                    "package-x-s3-uploads"
                 ]
             },
             {

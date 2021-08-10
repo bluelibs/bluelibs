@@ -1,27 +1,47 @@
-# BlueLibs Development Playground
+# BlueLibs Repository
 
-To read the documentation visit [BlueLibs Official Documentation](https://www.bluelibs.com/docs/).
+To find more about ourselves, our mission please go to [BlueLibs Official Website](https://www.bluelibs.com/) and [BlueLibs Official Documentation](https://www.bluelibs.com/docs/).
 
-Hello there fellow developer! This GitHub package is mainly used to quickly bootstrap BlueLibs and start working on the core components or BlueLibs's official bundles.
+## Introduction
 
-It is also the place where all the stars need to be collected to show-case its popularity. So if you enjoy this work please show your support by starring this package. If not, let us know what can we do to deserve it, [our feedback form is here](https://forms.gle/DTMg5Urgqey9QqLFA)
+This monorepo is split like this:
 
-## Setup
+- ./docs a microservice which represents our main website
+- ./templates/\* things that are re-usable, like a new package template and others
+- ./scripts/\* things we use for internal development
+- ./packages/\* where all packages lie
+- ./assets/\* things needed for GitHub README page
 
-Pull all submodules locally:
+We use lerna so when you are in development phase you could use `lerna link`, and for example if your package depends on another package, for example, `logger-bundle` depends on `core`, you go to `logger-bundle` you run `lerna link`, then go to `core` and run `npm run watch`, now logger-bundle will use the updated variant of `core`.
+
+If you want to try your new changes to an external application (outside this monorepo), the solution is to use `bluelibs-package-replace` binary:
 
 ```bash
-git submodule update --init --recursive
+# From Monorepo Root
+chmod 755 /usr/local/bin/bluelibs-package-replace
+sudo ln -s /usr/local/bin/bluelibs-package-replace `pwd`/scripts/bluelibs-package-replace
 ```
 
-Be up to speed with all submodules:
+Now go to your `microservice` and simply run `bluelibs-package-replace x-ui`. This will properly update your package version to the one you have in the monorepo. Make sure you're also watching changes in `x-ui` package via `npm run watch`.
+
+## Testing
+
+Each package uses jest and ts-jest for development testing:
 
 ```bash
-git submodule update --remote --rebase
+npm run test:dev
 ```
 
-Each submodule has its own documentation and instructions please follow their `README.md` for more information.
+To run tests in C.I, we have the command `npm run test` which compiles the code and runs the final tests.
 
-When developing packages, there are two essential commands you can use `npm run watch` to start watching changes to your typescript, and `npm run test:watch` to run tests to assert everything works.
+## Documentation
 
-Our packages work together as a team, this is why sometimes we have to develop them in such a way. We use lerna to allow us to link a `@bluelibs/**` package to our local ones, to activate it, you can go to the desired package and just do `lerna link`, please note that this will happen with all `@bluelibs/**` packages.
+The documentation of each package is typically stored inside the package `DOCUMENTATION.md`. We decided for a separation between `README.md` and these files to keep README's a bit cleaner.
+
+We store the docs in `./docs`, to compile all the documentation from all packages:
+
+```bash
+npm run docs:generate
+```
+
+The structure of the documentation can be found in: `docs/scripts/docs-structure.ts` based on it we craft the sections of the sidebar.
