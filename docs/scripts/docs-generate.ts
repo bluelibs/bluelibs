@@ -23,7 +23,6 @@ function run() {
   const sidebar = [];
   for (const sidebarGroup in map) {
     const elements = map[sidebarGroup];
-    const isArray = Array.isArray(elements);
 
     // write sidebar.js
     if (Array.isArray(elements)) {
@@ -35,10 +34,12 @@ function run() {
         items,
       });
     } else {
+      writeFileAndPushToResult(elements, []);
+
       sidebar.push({
         type: "doc",
         label: sidebarGroup,
-        id: `package-${elements.package}`,
+        id: `package-${elements.id}`,
       });
     }
   }
@@ -65,13 +66,13 @@ function getSidebarElements(elements: Array<ElementOrElementGroup>): string[] {
   const result = [];
   elements.forEach((element) => {
     if (isElementSingle(element)) {
-      pushNewSingleElement(element, result);
+      writeFileAndPushToResult(element, result);
     }
     if (isElementGroup(element)) {
       const newItems = [];
 
       element.elements.forEach((element) => {
-        pushNewSingleElement(element, newItems);
+        writeFileAndPushToResult(element, newItems);
       });
 
       result.push({
@@ -85,10 +86,11 @@ function getSidebarElements(elements: Array<ElementOrElementGroup>): string[] {
   return result;
 }
 
-function pushNewSingleElement(element: IElement, result: any[]) {
+// TODO: change this messy shit, make it pure
+function writeFileAndPushToResult(element: IElement, result: any[]) {
   if (element.package) {
     const GENERATED_ID = `package-${element.id}`;
-    const GENERATED_FILE = `${GENERATED_ID}.mdx`;
+    let GENERATED_FILE = `${GENERATED_ID}.mdx`;
     const packageJsonPath = path.join(
       PACKAGE_DIR,
       element.package,
@@ -110,7 +112,11 @@ import { PackageHeader } from "@site/src/components/PackageHeader";
 <PackageHeader version="${packageJson.version}" packageName="${element.package}" ${typeDefsSection} />
 `;
 
-    const docFilePath = path.join(PACKAGE_DIR, element.package, DOC_FILE);
+    const docFilePath = path.join(
+      PACKAGE_DIR,
+      element.package,
+      element.file || DOC_FILE
+    );
     const contents = prefix + "\n" + fs.readFileSync(docFilePath);
 
     fs.writeFileSync(path.join(DOCS_DIR, GENERATED_FILE), contents);

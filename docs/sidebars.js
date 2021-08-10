@@ -80,6 +80,11 @@
             },
             "x-framework-deployment"
         ]
+    },
+    {
+        "type": "doc",
+        "label": "Blueprint",
+        "id": "package-blueprint"
     }
 ]
   }

@@ -2,6 +2,10 @@ export interface IElement {
   id: string;
   title: string;
   package?: string;
+  /**
+   * Default is `DOCUMENTATION.md` if different from it specify
+   */
+  file?: string;
   typeDocs?: boolean;
 }
 
@@ -147,7 +151,6 @@ export const map: IElementMap = {
     id: "nova",
     title: "Nova",
     package: "nova",
-    typeDocs: true,
   },
   "X-Framework": [
     {
@@ -209,4 +212,11 @@ export const map: IElementMap = {
       title: "Deployment",
     },
   ],
+
+  Blueprint: {
+    id: "blueprint",
+    title: "Blueprint",
+    package: "x",
+    file: "BLUEPRINT.md",
+  },
 };
