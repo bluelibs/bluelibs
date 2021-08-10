@@ -33,6 +33,7 @@
     ]
   },
   "devDependencies": {
-    "fs-extra": "^9.1.0"
+    "fs-extra": "^9.1.0",
+    "ts-node": "^10.2.0"
   }
 }
