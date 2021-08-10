@@ -33,7 +33,7 @@ This will generate
   - API Types
   - CRUD Admin Pages
 
-## Basics
+## Collections
 
 Let's start from scratch with a simple blueprint to walk you through the main concepts
 
@@ -76,6 +76,8 @@ collection({
 });
 ```
 
+### UI
+
 To customise UI for Collection, like enable create, but disable edit, here is the full config of UI for the collection:
 
 ```ts
@@ -93,6 +95,21 @@ collection({
   enableGraphQL: false,
 });
 ```
+
+### Representation
+
+Think of each document having a `toString()` representation of itself. For example `User` would have `fullName`, a Post would maybe have `title`. We need to specify how we represent these collections because when we perform things such as relational viewing or selecting a `User` from a select autocompleted box, to see it properly:
+
+```ts
+collection({
+  id: "Posts",
+  representedBy: "title", // the field title needs to be inside fields[]
+});
+```
+
+Now when we relate collections to each other, as you'll see a bit below, you can optionally specify a different representation, otherwise it will default to this one.
+
+Note that these fields can also be reducers (again, a concept you will learn below)
 
 ## Fields
 
@@ -260,8 +277,6 @@ collection({
 });
 ```
 
-### TODO: Representations of Collections
-
 ### Rendering
 
 So, relations have an additional field which we call `representedBy` this basically means, if I have a `Post` and I have a post owner which is a `User` how do I show that user? Do I show his id, what fields from user do I show? And the typical answer is either a specific field that indifies it or a reducer. This helps the UI Lists to properly render data and know what to query.
@@ -413,6 +428,36 @@ s.field({
 });
 ```
 
+Or create an `utils.ts` file, from which you import everything
+
+```ts file="utils.ts"
+import { Studio } from "@bluelibs/x";
+import * as faker from "faker";
+
+const {
+  generateProject,
+  app,
+  collection,
+  field,
+  relation,
+  shortcuts,
+  sharedModel,
+  GeneratorKind,
+} = Studio;
+
+export {
+  generateProject,
+  app,
+  collection,
+  field,
+  relation,
+  shortcuts,
+  sharedModel,
+  GeneratorKind,
+  faker,
+};
+```
+
 ## Blendability
 
 All files that get overriden on next generations are marked with the comment:
@@ -453,12 +498,50 @@ The principles applied to be able to execute this blendability of UI we call `Co
 
 ## Generation Customisation
 
-The `generateProject` functions allows certain alterations
+The `generateProject` functions allows certain alterations:
 
-### Custom Generators
+```ts
+generateProject({
+  // It will override, the non-overridable files, use it with caution and on a previously committed repo
+  override: true,
+  generators: [
+    // BACKEND MONGO COLLECTIONS
+    GeneratorKind.BACKEND_COLLECTIONS,
 
-### Custom Writers
+    // GRAPHQL CRUDS
+    GeneratorKind.BACKEND_CRUDS,
 
-The writers represent the units of logic which read a model and write files, you have the ability to customise your own if you want to benefit of blueprint but have specific use-cases.
+    // GRAPHQL Entities and inputs
+    GeneratorKind.BACKEND_GRAPHQL,
 
-In theory you could make these writers generate Vue code and everything you would need, but keep in mind that such a task can be complex and you will definitely need some external libraries to eliminate much of boilerplate code.
+    // BACKEND MONGO COLLECTIONS FIXTURES
+    GeneratorKind.BACKEND_FIXTURES,
+
+    // The UI Collections
+    GeneratorKind.FRONTEND_COLLECTIONS,
+
+    // The actual pages with CRUD info in them
+    GeneratorKind.FRONTEND_CRUDS,
+
+    // Authentication, development, etc, run only once when microservice is created
+    GeneratorKind.FRONTEND_BOILERPLATE_COMPONENTS,
+  ],
+  writers: {
+    // Writers receive models and a session, based on it they perform writes of the files
+    // They are self-explanatory feel free to browse the code located in:
+    // https://github.com/bluelibs/bluelibs/blob/main/packages/x/src/writers/
+    microservice: Writers.MicroserviceWriter,
+    collection: Writers.CollectionWriter,
+    graphQLCRUD: Writers.GraphQLCRUDWriter,
+    genericModel: Writers.GenericModelWriter,
+    graphQLEntity: Writers.GraphQLEntityWriter,
+    graphQLInput: Writers.GraphQLInputWriter,
+    collectionLink: Writers.CollectionLinkWriter,
+    uiCollection: UICollectionWriter,
+    uiCollectionCRUD: UICollectionCRUDWriter,
+    fixture: Writers.FixtureWriter,
+  },
+});
+```
+
+By offering this customisability, in theory, you can iteratively use less of the `blueprint` features and also customise the way you write the files. If you are ambitious enough you could create such writers that write something completely different from `X-Framework` or `Foundation` like using `Vue` instead of `React`, that's how customisable and flexible this is. However, from our experience, it's not an easy task to run such generations while taking care of all the details.
