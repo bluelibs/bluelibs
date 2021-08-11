@@ -6,7 +6,7 @@ import { Constructor } from "@bluelibs/core";
 import { IComponents } from "./react";
 import { IUISessionStore } from "./react/services/UISession.service";
 
-export interface IXUIBundleConfig {
+export type XUIBundleConfigType = {
   graphql: Partial<ApolloClientOptions<any>>;
   guardianClass: Constructor<GuardianSmart>;
   enableSubscriptions: boolean;
@@ -17,7 +17,7 @@ export interface IXUIBundleConfig {
     localStorageKey?: string;
     defaults?: IUISessionStore;
   };
-}
+};
 
 export interface IRoute<T = IRouteParams, Q = IRouteParams> extends RouteProps {
   name?: string;

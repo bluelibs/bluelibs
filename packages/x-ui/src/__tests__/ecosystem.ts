@@ -14,6 +14,9 @@ export const kernel = new Kernel({
   },
   bundles: [
     new XUIBundle({
+      graphql: {
+        uri: "http://localhost:4000/graphql",
+      },
       session: sessionsConfig,
     }),
   ],

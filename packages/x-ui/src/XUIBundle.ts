@@ -9,7 +9,7 @@ import {
 import { setDefaults } from "@bluelibs/smart";
 import { InMemoryCache } from "@apollo/client/core";
 
-import { IXUIBundleConfig } from "./defs";
+import { XUIBundleConfigType } from "./defs";
 import {
   APOLLO_CLIENT_OPTIONS_TOKEN,
   XUI_CONFIG_TOKEN,
@@ -21,8 +21,8 @@ import { ApolloClient } from "./graphql/ApolloClient";
 import { GuardianSmart } from "./react/smarts/GuardianSmart";
 import { DefaultComponents, IComponents } from "./react/components/types";
 
-export class XUIBundle extends Bundle<IXUIBundleConfig> {
-  protected defaultConfig: IXUIBundleConfig = {
+export class XUIBundle extends Bundle<XUIBundleConfigType> {
+  protected defaultConfig: XUIBundleConfigType = {
     graphql: {},
     guardianClass: GuardianSmart,
     enableSubscriptions: true,
@@ -30,9 +30,17 @@ export class XUIBundle extends Bundle<IXUIBundleConfig> {
       components: DefaultComponents,
     },
     session: {
-      localStorageKey: "BlueLibs_SESSION",
+      localStorageKey: "BLUELIBS_SESSION",
     },
   };
+
+  async validate(config: XUIBundleConfigType) {
+    if (!config.graphql?.uri) {
+      throw new Error(
+        `You have to provide a valid 'graphql.uri' for it to connect to the GraphQL API`
+      );
+    }
+  }
 
   async hook() {
     const eventManager = this.container.get(EventManager);

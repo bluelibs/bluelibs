@@ -6,7 +6,7 @@ import { Service, Inject, EventManager } from "@bluelibs/core";
 import { SubscriptionClient } from "subscriptions-transport-ws";
 import { APOLLO_CLIENT_OPTIONS_TOKEN, XUI_CONFIG_TOKEN } from "../constants";
 import { createApolloLink } from "./utils/createApolloLink";
-import { IXUIBundleConfig } from "../defs";
+import { XUIBundleConfigType } from "../defs";
 import {
   UserLoggedInEvent,
   UserLoggedOutEvent,
@@ -22,7 +22,7 @@ export class ApolloClient extends BaseApolloClient<any> {
     @Inject(APOLLO_CLIENT_OPTIONS_TOKEN)
     options: ApolloClientOptions<any>,
     @Inject(XUI_CONFIG_TOKEN)
-    xuiConfig: IXUIBundleConfig
+    xuiConfig: XUIBundleConfigType
   ) {
     const { finalLink, subscriptionClient } = createApolloLink(
       options.uri as string,
