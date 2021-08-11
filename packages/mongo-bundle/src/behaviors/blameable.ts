@@ -7,8 +7,8 @@ export default function blameable(
   options: IBlameableBehaviorOptions = {}
 ): BehaviorType {
   const fields = options.fields || {
-    createdBy: "createdBy",
-    updatedBy: "updatedBy",
+    createdBy: "createdById",
+    updatedBy: "updatedById",
   };
   const throwErrorWhenMissing = options.throwErrorWhenMissing || false;
 
