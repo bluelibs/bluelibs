@@ -2,7 +2,7 @@ import { Users } from "./collections/Users";
 import { generateProject, app } from "./utils";
 
 const application = app({
-  id: "vrex",
+  id: "{{ name }}",
   sharedModels: [
     // Configure shared models
   ],
@@ -11,5 +11,5 @@ const application = app({
 
 generateProject(application, {
   // Mark this as true when you want to override even the non-overridable files
-  override: true,
+  // override: true,
 });
