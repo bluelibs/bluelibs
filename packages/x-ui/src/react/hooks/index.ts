@@ -1,5 +1,6 @@
 import {
   ContainerInstance,
+  EventHandlerType,
   EventManager,
   IEventConstructor,
 } from "@bluelibs/core";
@@ -16,6 +17,7 @@ import {
 import { GuardianSmart } from "../smarts/GuardianSmart";
 import { useSmart } from "../smart";
 import { UISession } from "../services/UISession.service";
+import { I18NService } from "../services/I18N.service";
 
 // START OF EXPORTS
 export { useUIComponents } from "./useUIComponents";
@@ -37,12 +39,12 @@ export const useRouter = (): XRouter => {
 };
 
 export const useEventManager = (): EventManager => {
-  return use<EventManager>(EventManager);
+  return use(EventManager);
 };
 
-export const useListener = (
-  eventClass: IEventConstructor<any>,
-  listener: (e: any) => any
+export const listen = <T = any>(
+  eventClass: IEventConstructor<T>,
+  listener: EventHandlerType<T>
 ) => {
   const manager = useEventManager();
   useEffect(() => {
@@ -54,6 +56,8 @@ export const useListener = (
   }, []);
 };
 
+export const useListener = listen;
+
 export const useGuardian = (): GuardianSmart => {
   return useSmart(GuardianSmart);
 };
@@ -61,3 +65,5 @@ export const useGuardian = (): GuardianSmart => {
 export const useUISession = (): UISession => {
   return use(UISession);
 };
+
+export const useTranslate = () => use(I18NService).t;

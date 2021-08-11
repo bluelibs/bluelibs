@@ -451,10 +451,19 @@ class PostsCollection extends Collection<Post> {
 Integration with React is seamless and painless:
 
 ```tsx
-import { useData, useLiveData, useDataOne, useLiveDataOne } from "@bluelibs/x-ui";
+import {
+  useData,
+  useLiveData,
+  useDataOne,
+  useLiveDataOne,
+} from "@bluelibs/x-ui";
 
 function PostsList() {
-  const { data: posts, isLoading, error } = useData(
+  const {
+    data: posts,
+    isLoading,
+    error,
+  } = useData(
     PostsCollection,
     {
       // Query options
@@ -477,11 +486,11 @@ function PostsList() {
 If you are expecting a single post, we also have an easy find by \_id solution:
 
 ```tsx
-const { data: post, isLoading, error } = useDataOne(
-  PostsCollection,
-  new ObjectId(props.id),
-  body
-);
+const {
+  data: post,
+  isLoading,
+  error,
+} = useDataOne(PostsCollection, new ObjectId(props.id), body);
 ```
 
 ### Lists
@@ -567,7 +576,11 @@ If you want to use the smart live data, just swap `useData()` with `useLiveData(
 import { useLiveData } from "@bluelibs/x-ui";
 
 const LiveDataPage = () => {
-  const { data: posts, isLoading, error } = useLiveData(
+  const {
+    data: posts,
+    isLoading,
+    error,
+  } = useLiveData(
     PostsCollection,
     {
       filters: {},
@@ -577,11 +590,11 @@ const LiveDataPage = () => {
   );
 
   // or single element
-  const { data: post, isLoading, error } = useLiveDataOne(
-    PostsCollection,
-    new ObjectId(id),
-    requestBody
-  );
+  const {
+    data: post,
+    isLoading,
+    error,
+  } = useLiveDataOne(PostsCollection, new ObjectId(id), requestBody);
 };
 ```
 
@@ -753,15 +766,29 @@ const appGuardian = (): AppGuardianSmart => {
 You can use the classic `EventManager` to emit events, but if you want to have a component listen to events during its lifespan (until it gets unmounted), you can use the hook: `useListener`.
 
 ```tsx title="Emitting Events"
-import { useListener, useEventManager } from "@bluelibs/x-ui";
+import { useListener, listen, useEventManager } from "@bluelibs/x-ui";
+import { Event } from "@bluelibs/core";
 
-const eventManager = useEventManager();
-eventManager.emit(new XEvent());
+class MyEvent extends Event {}
 
-// The built-in hook lets you listen to events while the component is mounted
-useListener(XEvent, (e) => {
-  // lives as long as the component lives
-});
+function SomeComponent() {
+  const eventManager = useEventManager();
+  eventManager.emit(new XEvent());
+}
+
+function OtherComponent() {
+  // Use memo to avoid duplication of functions, or use an outside function
+  const handler = useMemo(() => {
+    return (e: XEvent) => {
+      // handle the event, change the state, or whatever
+    };
+  });
+
+  // The built-in hook lets you listen to events while the component is mounted
+  useListener(XEvent, handler);
+  // Analog to useListener which can be confusing is the same function that does the same thing, use what fits best to your ears
+  listen(XEvent, handler);
+}
 ```
 
 ## Sessions
@@ -921,3 +948,51 @@ declare module "@bluelibs/x-ui" {
   }
 }
 ```
+
+## I18N
+
+We are leveraging the awesome [Polyglot](https://airbnb.io/polyglot.js/) package maintained by Airbnb.
+
+```ts
+new XUIBundle({
+  i18n: {
+    defaultLocale: "fr", // default is "en",
+    // You can omit this if you want to use the default options for polyglots
+    polyglots: [
+      // ...rest represents the rest of custom options for Polyglot constructor, includign phrases
+      { locale: "en", ...rest },
+    ],
+  },
+});
+```
+
+```ts
+import { useTranslate } from "@bluelibs/x-ui";
+
+function Component() {
+  const t = useTranslate();
+
+  return <h1>{t('pages.home.header.text')</h1>;
+}
+```
+
+Changing the language of the default:
+
+```ts
+import { I18NService } from "@bluelibs/x-ui";
+
+class UIAppBundle extends Bundle {
+  async init() {
+    const i18n = this.container.get(I18NService);
+
+    // Add messages to your locale
+    i18n.extend("en", messages);
+
+    // get it from window.locale or session, or cookies, or however you find fit
+    const locale = "";
+    i18n.setLocale(locale);
+  }
+}
+```
+
+When you change your language from the app simply use the `I18NService` and run `setLocale()`.

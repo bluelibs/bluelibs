@@ -20,6 +20,7 @@ import { XRouter } from "./react/XRouter";
 import { ApolloClient } from "./graphql/ApolloClient";
 import { GuardianSmart } from "./react/smarts/GuardianSmart";
 import { DefaultComponents, IComponents } from "./react/components/types";
+import { I18NService } from "./react/services/I18N.service";
 
 export class XUIBundle extends Bundle<XUIBundleConfigType> {
   protected defaultConfig: XUIBundleConfigType = {
@@ -31,6 +32,10 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
     },
     session: {
       localStorageKey: "BLUELIBS_SESSION",
+    },
+    i18n: {
+      defaultLocale: "en",
+      polyglots: [],
     },
   };
 

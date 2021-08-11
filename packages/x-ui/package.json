@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": false,
   "description": "X-UI represents a set of standards to build scalable UI using X-Framework by BlueLibs",
   "main": "dist/index.js",
@@ -28,6 +28,7 @@
     "apollo-upload-client": "^16.0.0",
     "history": "^4.10.1",
     "json-to-graphql-query": "^2.0.0",
+    "node-polyglot": "^2.4.0",
     "query-string": "^6.13.2",
     "subscriptions-transport-ws": "^0.9.18"
   },
@@ -52,6 +53,7 @@
     "@types/jest": "^25.2.3",
     "@types/lodash": "^4.14.170",
     "@types/node": "^8.0.28",
+    "@types/node-polyglot": "^2.4.2",
     "@types/react": "^17.0.2",
     "@types/react-router-dom": "^5.1.5",
     "@typescript-eslint/eslint-plugin": "2.3.0",

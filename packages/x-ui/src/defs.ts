@@ -5,6 +5,7 @@ import { GuardianSmart } from "./react";
 import { Constructor } from "@bluelibs/core";
 import { IComponents } from "./react";
 import { IUISessionStore } from "./react/services/UISession.service";
+import * as Polyglot from "node-polyglot";
 
 export type XUIBundleConfigType = {
   graphql: Partial<ApolloClientOptions<any>>;
@@ -16,6 +17,13 @@ export type XUIBundleConfigType = {
   session: {
     localStorageKey?: string;
     defaults?: IUISessionStore;
+  };
+  i18n: {
+    defaultLocale: string;
+    /**
+     * This is used for when you want customly configured polyglots allowing you to customise the options
+     */
+    polyglots: Array<Polyglot.PolyglotOptions & { locale: string }>;
   };
 };
 

@@ -1,16 +1,17 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Kernel, ContainerInstance, Constructor } from "@bluelibs/core";
 import { XRouter } from "./XRouter";
 import { ApolloProvider } from "@apollo/client/react";
 import { ApolloClient } from "../graphql/ApolloClient";
-import { useContainer } from "./hooks";
+import { listen, useContainer } from "./hooks";
 import { use } from "./hooks";
 import { XBrowserRouter } from "./XBrowserRouter";
 import { newSmart } from "./smart";
 import { GuardianSmart } from "./smarts/GuardianSmart";
 import { XUI_CONFIG_TOKEN } from "../constants";
 import { useUIComponents } from "./hooks/useUIComponents";
+import { LocaleChangedEvent } from "./events/LocaleChangedEvent";
 
 export const ContainerContext = React.createContext<ContainerInstance>(null);
 ContainerContext.displayName = "BlueLibsContainer";
@@ -71,10 +72,24 @@ export function XUIGuardian(props: {
   return <GuardianProvider>{props.children}</GuardianProvider>;
 }
 
+/**
+ * The component that is rendered once the Kernel has been initialised
+ * @returns
+ */
 export function XUIProviderInitialised() {
   const router = use(XRouter);
   const UIComponents = useUIComponents();
   const graphqlClient = use(ApolloClient);
+
+  // We do this to trigger re-rendering
+  const [locale, setLocale] = useState<string>();
+  const handler = useMemo(
+    () => (e) => {
+      setLocale(e.data.locale);
+    },
+    []
+  );
+  listen(LocaleChangedEvent, handler);
 
   return (
     <UIComponents.ErrorBoundary>
