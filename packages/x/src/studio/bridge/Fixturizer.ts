@@ -1,6 +1,8 @@
 import { ObjectId } from "@bluelibs/ejson";
 import * as Studio from "..";
 import * as faker from "faker";
+import { FieldValueKind } from "../models/FieldValueKind";
+import { Field } from "../models/Field";
 
 export type DataSet = {
   [collection: string]: any[];
@@ -150,6 +152,63 @@ export class Fixturizer {
       result.forEach((r) => {
         r[storage] = reversedRelation.isMany ? [document._id] : document.id;
       });
+    }
+  }
+
+  static getRandomGenerator(field: Field) {
+    switch (field.type) {
+      case FieldValueKind.BOOLEAN:
+        if (field.isArray) {
+          // who in the world would have an array of bools?
+          return () => faker.random.arrayElements([true, false]);
+        } else {
+          return () => faker.random.arrayElement([true, false]);
+        }
+      case FieldValueKind.DATE:
+        return faker.date.recent;
+      case FieldValueKind.ENUM:
+        if (field.isArray) {
+          return () => {
+            return faker.random.arrayElements(field.enumValues);
+          };
+        } else {
+          return () => faker.random.arrayElement(field.enumValues);
+        }
+      case FieldValueKind.FLOAT:
+        return faker.datatype.number;
+      case FieldValueKind.INTEGER:
+        return faker.datatype.number;
+      case FieldValueKind.OBJECT_ID:
+        return () => new ObjectId();
+      case FieldValueKind.STRING:
+        // Make this smarter, maybe try to infer it from the name of the field
+        return Fixturizer.getGeneratorByNameForString(field.id);
+      case FieldValueKind.OBJECT:
+        const generateSubdocument = () => {
+          const subdocument = {};
+          field.subfields.forEach((subfield) => {
+            subdocument[subfield.id] = subfield.mock.generator();
+          });
+          return subdocument;
+        };
+
+        if (field.isArray) {
+          // TODO: maybe offer a set of 3-4
+          return () => {
+            const result = [];
+            const elementsNb = (Math.random() * 10) % 4;
+            for (let i = 0; i < elementsNb; i++) {
+              result.push(generateSubdocument());
+            }
+
+            return result;
+          };
+        } else {
+          return () => {
+            // Single one
+            return generateSubdocument();
+          };
+        }
     }
   }
 

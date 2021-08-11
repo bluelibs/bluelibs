@@ -121,7 +121,7 @@ export class Field extends BaseModel<Field> {
     this.storeUIDefaults();
 
     if (!this.mock.generator) {
-      this.mock.generator = this.getRandomGenerator();
+      this.mock.generator = Fixturizer.getRandomGenerator(this);
     }
 
     if (this.model) {
@@ -130,7 +130,7 @@ export class Field extends BaseModel<Field> {
 
     // To avoid any errors we upper case all
     if (this.enumValues && this.enumValues.length) {
-      this.enumValues = this.enumValues.map((ev) => _.upperCase(ev));
+      this.enumValues = this.enumValues.map((ev) => _.toUpper(ev));
     }
 
     this.subfields.forEach((s) => {
@@ -190,38 +190,6 @@ export class Field extends BaseModel<Field> {
     }
 
     return UI_DEFAULT_VALUES;
-  }
-
-  /**
-   * Depending on the type, it returns a custom generator.
-   * @returns
-   */
-  protected getRandomGenerator(): () => any {
-    switch (this.type) {
-      case FieldValueKind.BOOLEAN:
-        return () => faker.random.arrayElement([true, false]);
-      case FieldValueKind.DATE:
-        return faker.date.recent;
-      case FieldValueKind.ENUM:
-        return () => faker.random.arrayElement(this.enumValues);
-      case FieldValueKind.FLOAT:
-        return faker.datatype.number;
-      case FieldValueKind.INTEGER:
-        return faker.datatype.number;
-      case FieldValueKind.OBJECT_ID:
-        return () => new ObjectId();
-      case FieldValueKind.STRING:
-        // Make this smarter, maybe try to infer it from the name of the field
-        return Fixturizer.getGeneratorByNameForString(this.id);
-      case FieldValueKind.OBJECT:
-        return () => {
-          const subdocument = {};
-          this.subfields.forEach((subfield) => {
-            subdocument[subfield.id] = subfield.mock.generator();
-          });
-          return subdocument;
-        };
-    }
   }
 
   /**
