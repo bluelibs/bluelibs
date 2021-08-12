@@ -31,9 +31,9 @@ export class GenericModel {
   isBaseExtendMode: boolean = false;
 
   /**
-   * This refers to whether we are dealing with inputs. Inputs don't generate their enums nor localmodels
+   * This refers to whether we are dealing with inputs and enums, typically you don't want new enums when you're dealign with inputs which reflect an entity.
    */
-  isInputMode: boolean = false;
+  reuseEnums: boolean = false;
 
   // Where should it be written
   targetPath?: string;
@@ -69,7 +69,7 @@ export class GenericModel {
       "yupValidation",
       "targetPath",
       "isBaseExtendMode",
-      "isInputMode",
+      "reuseEnums",
     ].forEach((field) => (newModel[field] = model[field]));
 
     newModel.fields = model.fields.map((field) => {
@@ -195,7 +195,7 @@ ${field.description}
             ModelUtils.getEnumSignatureForGraphQL(
               field,
               options.enumPrefix ? options.enumPrefix : this.modelClass,
-              this.isInputMode
+              this.reuseEnums
             ) + "\n";
         } else {
           result += ModelUtils.getFieldSignatureForGraphQL(field) + "\n";
@@ -232,7 +232,7 @@ ${field.description}
             const yupDecorator = ModelUtils.getYupValidatorDecorator(
               field,
               options.enumPrefix ? options.enumPrefix : this.modelClass,
-              this.isInputMode
+              this.reuseEnums
             );
 
             if (yupDecorator) {
@@ -245,7 +245,7 @@ ${field.description}
             ModelUtils.getEnumSignatureForTS(
               field,
               options.enumPrefix ? options.enumPrefix : this.modelClass,
-              this.isInputMode
+              this.reuseEnums
             ) + "\n";
         } else {
           result += ModelUtils.getFieldSignatureForTS(field) + "\n";
@@ -366,7 +366,7 @@ ${field.description}
         result.push({
           className,
           elements: this.getEnumElements(field),
-          importFrom: this.isInputMode
+          importFrom: this.reuseEnums
             ? `../../collections`
             : `./enums/${className}.enum`,
         });

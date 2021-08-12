@@ -23,7 +23,7 @@ export class GenericModelWriter extends BlueprintWriter {
     const modelDir = path.dirname(model.targetPath);
     // Inputs reflect other models enums should already be created
     // In input mode enums are re-used, so we do not have to rewrite them
-    if (!model.isInputMode) {
+    if (!model.reuseEnums) {
       model.enums.forEach((myEnum) => {
         const enumOperator = new FSOperator(session, myEnum);
 

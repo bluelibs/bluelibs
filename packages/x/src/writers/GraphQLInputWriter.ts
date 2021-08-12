@@ -44,7 +44,7 @@ export class GraphQLInputWriter extends BlueprintWriter {
     );
 
     const tsModel = GenericModel.clone(genericModel);
-    tsModel.isInputMode = true;
+    tsModel.reuseEnums = true;
     tsModel.targetPath = path.join(
       bundlePath,
       "services",

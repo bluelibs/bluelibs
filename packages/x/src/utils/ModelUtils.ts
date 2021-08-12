@@ -59,10 +59,10 @@ export class ModelUtils {
   static getEnumSignatureForTS(
     field: IGenericField,
     modelClass?: string,
-    isInput?: boolean
+    reuseEnums?: boolean
   ) {
     let fieldName = field.name;
-    let signature = ModelUtils.getEnumClassName(field, modelClass, isInput);
+    let signature = ModelUtils.getEnumClassName(field, modelClass, reuseEnums);
 
     if (field.isMany) {
       signature += "[]";
@@ -82,10 +82,10 @@ export class ModelUtils {
   static getEnumSignatureForGraphQL(
     field: IGenericField,
     modelClass?: string,
-    isInput?: boolean
+    reuseEnums?: boolean
   ) {
     let fieldName = field.name;
-    let signature = ModelUtils.getEnumClassName(field, modelClass, isInput);
+    let signature = ModelUtils.getEnumClassName(field, modelClass, reuseEnums);
     if (field.isMany) {
       signature = `[${signature}]`;
     }
@@ -99,7 +99,7 @@ export class ModelUtils {
   static getYupValidatorDecorator(
     field: IGenericField,
     modelClass?: string,
-    isInput?: boolean
+    reuseEnums?: boolean
   ) {
     const isModel = field.type === GenericFieldTypeEnum.MODEL;
 
@@ -139,7 +139,7 @@ export class ModelUtils {
       const enumClassName = ModelUtils.getEnumClassName(
         field,
         modelClass,
-        isInput
+        reuseEnums
       );
       typeSuffix = `.oneOf(Object.values(${enumClassName}))`;
     }
@@ -167,13 +167,19 @@ export class ModelUtils {
     return `@Is(${yupType}${isRequired})`;
   }
 
+  /**
+   *
+   * @param field
+   * @param modelClass
+   * @param reuseEnums This means that the created enums will be re-used from the original ones in collection
+   * @returns
+   */
   static getEnumClassName(
     field: IGenericField,
     modelClass?: string,
-    isInput?: boolean
+    reuseEnums?: boolean
   ): string {
-    // Hackish needs rethinked from ground-up
-    if (modelClass && isInput) {
+    if (modelClass && reuseEnums) {
       modelClass = modelClass.replace("Input", "");
     }
 
