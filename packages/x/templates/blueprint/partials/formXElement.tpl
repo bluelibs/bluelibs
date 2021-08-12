@@ -74,7 +74,7 @@
     {{/ if }}
     {{# if (@root.typeIs rendererType "number") }}
       render: (props) => (
-        <Ant.Form.Item {...props}><Ant.Input /></Ant.Form.Item>
+        <Ant.Form.Item {...props}><Ant.InputNumber /></Ant.Form.Item>
       ),
     {{/ if }}
     {{# if (@root.typeIs rendererType "objectId") }}

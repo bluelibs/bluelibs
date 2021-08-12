@@ -61,6 +61,10 @@ export class XBridge {
       }
     }
 
+    if (options.isInput) {
+      model.isInputMode = true;
+    }
+
     model.sortFields();
 
     return model;

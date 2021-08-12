@@ -520,6 +520,7 @@ export class StudioWriter {
         graphqlInputModel.genericModel.race = ModelRaceEnum.GRAPHQL_INPUT;
         graphqlInputModel.genericModel.isBaseExtendMode = true;
         graphqlInputModel.genericModel.reuseEnums = true;
+        graphqlInputModel.genericModel.isInputMode = true;
 
         graphqlInputWriter.write(graphqlInputModel, session);
       }

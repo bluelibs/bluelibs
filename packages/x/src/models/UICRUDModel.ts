@@ -6,7 +6,7 @@ import { Relation } from "../studio/models/Relation";
 
 type FilesType = "file" | "files" | "fileGroup";
 
-type RendererType = "relation" | "number" | FilesType | FieldValueKind;
+type RendererType = "relation" | "number" | "tag" | FilesType | FieldValueKind;
 
 export type ViewItemModel = {
   id: string;
@@ -292,11 +292,9 @@ export class UICRUDModel {
       key: field.id,
       isMany: field.isArray,
       sorter: true,
-      rendererType: this.getRendererType(field.type),
+      rendererType: this.getRendererType(field),
       enumValues: this.getEnumValuesLabels(field.enumValues),
     };
-
-    console.log(base.id, base.rendererType);
 
     let subfields = field.model ? field.cleaned.model.fields : field.subfields;
 
@@ -319,7 +317,7 @@ export class UICRUDModel {
                   description: subfield.description,
                   order: subfield.ui && subfield.ui.order,
                   dataIndexStr: `["${field.id}", "${subfield.id}"]`,
-                  rendererType: this.getRendererType(subfield.type),
+                  rendererType: this.getRendererType(subfield),
                   enumValues: this.getEnumValuesLabels(subfield.enumValues),
                 })
               );
@@ -346,7 +344,7 @@ export class UICRUDModel {
                 order: subfield.ui && subfield.ui.order,
                 title: subfieldLabel,
                 dataIndexStr: `["${field.id}", "${subfield.id}"]`,
-                rendererType: this.getRendererType(subfield.type),
+                rendererType: this.getRendererType(subfield),
                 enumValues: this.getEnumValuesLabels(subfield.enumValues),
               });
             }),
@@ -380,12 +378,12 @@ export class UICRUDModel {
     return ["edit", "create", "listFilters"].includes(mode);
   }
 
-  protected getRendererType(type: FieldValueKind): RendererType {
-    if (["integer", "float"].includes(type)) {
+  protected getRendererType(field: Field): RendererType {
+    if (["integer", "float"].includes(field.type)) {
       return "number";
     }
 
-    return type;
+    return field.type;
   }
 
   protected getRendererTypeForRelation(_relation: Relation): RendererType {

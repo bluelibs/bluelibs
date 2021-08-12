@@ -145,12 +145,7 @@ export class ModelUtils {
     }
 
     // We do this because sometimes you want to update an id and want it nullifiable
-    if (
-      field.type === GenericFieldTypeEnum.ID &&
-      field.name !== "_id" &&
-      !field.isMany &&
-      field.isOptional
-    ) {
+    if (field.name !== "_id" && !field.isMany && field.isOptional) {
       typeSuffix += ".nullable()";
     }
 

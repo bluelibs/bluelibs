@@ -35,6 +35,11 @@ export class GenericModel {
    */
   reuseEnums: boolean = false;
 
+  /**
+   * Whether you are dealing with an input
+   */
+  isInputMode: boolean = false;
+
   // Where should it be written
   targetPath?: string;
 
@@ -70,6 +75,7 @@ export class GenericModel {
       "targetPath",
       "isBaseExtendMode",
       "reuseEnums",
+      "isInputMode",
     ].forEach((field) => (newModel[field] = model[field]));
 
     newModel.fields = model.fields.map((field) => {
