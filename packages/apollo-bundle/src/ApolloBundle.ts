@@ -43,6 +43,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   public httpServer: http.Server;
   public app: express.Application;
   public server: ApolloServer;
+  public subscriptionServer: SubscriptionServer;
   protected logger: LoggerService;
   protected currentSchema: ISchemaResult;
 
@@ -209,7 +210,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     apolloServerConfig: ApolloServerExpressConfig,
     httpServer: http.Server
   ) {
-    const subscriptionServer = SubscriptionServer.create(
+    this.subscriptionServer = SubscriptionServer.create(
       {
         // This is the `schema` we just created.
         schema: apolloServerConfig.schema,
@@ -229,12 +230,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         path: "/graphql",
       }
     );
-
-    // Shut down in the case of interrupt and termination signals
-    // We expect to handle this more cleanly in the future. See (#5074)[https://github.com/apollographql/apollo-server/issues/5074] for reference.
-    ["SIGINT", "SIGTERM"].forEach((signal) => {
-      process.on(signal, () => subscriptionServer.close());
-    });
   }
 
   /**
@@ -359,6 +354,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    * Shutdown the http server so it's no longer hanging
    */
   async shutdown() {
+    if (this.subscriptionServer) {
+      this.subscriptionServer.close();
+    }
     await this.server.stop();
     await this.httpServer.close();
   }
