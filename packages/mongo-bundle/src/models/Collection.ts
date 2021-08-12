@@ -47,6 +47,7 @@ import {
   IExpanderOptions,
   addReducers,
   addExpanders,
+  addSchema,
   addLinks,
   IAstToQueryOptions,
 } from "@bluelibs/nova";
@@ -59,6 +60,10 @@ export abstract class Collection<T = any> {
   static expanders: IExpanderOptions = {};
   static indexes: IndexSpecification[] = [];
   static behaviors: BehaviorType[] = [];
+  /**
+   * This schema can be created by using { t } from @bluelibs/nova package t.schema({})
+   */
+  static jitSchema: any;
 
   static collectionName: string;
 
@@ -527,6 +532,9 @@ export abstract class Collection<T = any> {
     addLinks(this.collection, adaptedLinks);
     addReducers(this.collection, this.getStaticVariable("reducers") || {});
     addExpanders(this.collection, this.getStaticVariable("expanders") || {});
+    if (this.getStaticVariable("jitSchema")) {
+      addSchema(this.collection, this.getStaticVariable("jitSchema"));
+    }
   }
 
   /**
@@ -581,7 +589,10 @@ export abstract class Collection<T = any> {
    * @param ast
    * @param config
    */
-  async queryOneGraphQL(ast, config?: IAstToQueryOptions<T>): Promise<Partial<T>> {
+  async queryOneGraphQL(
+    ast,
+    config?: IAstToQueryOptions<T>
+  ): Promise<Partial<T>> {
     const result = await query
       .graphql(this.collection, ast, config, {
         container: this.container,
