@@ -4,7 +4,7 @@ import { Loader } from "@bluelibs/graphql-bundle";
 import createApolloClient from "./apolloClientCreator";
 import { gql } from "apollo-boost";
 import { assert } from "chai";
-import { PubSub } from "apollo-server-express";
+import { PubSub } from "graphql-subscriptions";
 
 let currentServer;
 

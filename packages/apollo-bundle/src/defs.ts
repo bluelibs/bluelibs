@@ -3,7 +3,8 @@ import * as express from "express";
 import { ExecutionParams } from "subscriptions-transport-ws";
 import { ContainerInstance } from "@bluelibs/core";
 import { UploadOptions } from "graphql-upload";
-export interface IApolloBundleConfig {
+
+export type ApolloBundleConfigType = {
   port?: number;
   url?: string;
   apollo?: ApolloServerExpressConfig;
@@ -11,7 +12,11 @@ export interface IApolloBundleConfig {
   middlewares?: any[];
   routes?: IRouteType[];
   uploads?: false | UploadOptions;
-}
+  /**
+   * Enable JIT JSON encoding and DECODING through GraphQL
+   */
+  jit?: boolean;
+};
 
 export interface IRouteType {
   type: "post" | "get" | "put" | "all";

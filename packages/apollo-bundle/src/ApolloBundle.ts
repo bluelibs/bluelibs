@@ -5,7 +5,7 @@ import {
   Kernel,
   Exception,
 } from "@bluelibs/core";
-import { Loader, IResolverMap } from "@bluelibs/graphql-bundle";
+import { Loader, IResolverMap, ISchemaResult } from "@bluelibs/graphql-bundle";
 import * as http from "http";
 import * as express from "express";
 import * as cookieParser from "cookie-parser";
@@ -17,13 +17,16 @@ import {
   WebSocketOnConnectEvent,
   WebSocketOnDisconnectEvent,
 } from "./events";
-import { IApolloBundleConfig } from "./defs";
+import { ApolloBundleConfigType } from "./defs";
 import { IRouteType } from "./defs";
 import { LoggerService } from "@bluelibs/logger-bundle";
 import { GraphQLUpload, graphqlUploadExpress } from "graphql-upload";
-import { GraphQLError } from "graphql";
+import { GraphQLError, execute, subscribe } from "graphql";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import { SubscriptionServer } from "subscriptions-transport-ws";
+import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
 
-export class ApolloBundle extends Bundle<IApolloBundleConfig> {
+export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
     port: 4000,
     url: "http://localhost:4000",
@@ -34,12 +37,14 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
       maxFileSize: 1000000000,
       maxFiles: 10,
     },
+    jit: true,
   };
 
   public httpServer: http.Server;
   public app: express.Application;
   public server: ApolloServer;
   protected logger: LoggerService;
+  protected currentSchema: ISchemaResult;
 
   async validate(config) {
     const keys = Object.keys(config.apollo);
@@ -68,6 +73,7 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
     const manager = this.get<EventManager>(EventManager);
 
     manager.addListener(KernelAfterInitEvent, async () => {
+      this.storeSchema();
       await this.setupApolloServer();
       const logger = this.container.get(LoggerService);
       logger.info(`HTTP Server listening on port: ${this.config.port}`);
@@ -83,7 +89,11 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
   private async setupApolloServer() {
     const apolloServerConfig = this.getApolloConfig();
     await this.initialiseServer(apolloServerConfig);
-    return this.startServer();
+    await this.startServer();
+  }
+
+  protected storeSchema() {
+    this.currentSchema = this.container.get(Loader).getSchema();
   }
 
   /**
@@ -95,9 +105,9 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
 
     // server starting
     return new Promise((resolve) => {
-      httpServer.listen(this.config.port, () => {
+      httpServer.listen(this.config.port, async () => {
         resolve();
-        manager.emit(
+        await manager.emit(
           new ApolloServerAfterInitEvent({
             app,
             httpServer,
@@ -142,12 +152,11 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
       app.use("/graphql", graphqlUploadExpress(this.config.uploads));
     }
 
-    apolloServer.applyMiddleware({ app });
-
     const httpServer = http.createServer(app);
 
     if (this.config.enableSubscriptions) {
-      apolloServer.installSubscriptionHandlers(httpServer);
+      // apolloServer.
+      this.attachSubscriptionService(apolloServerConfig, httpServer);
     }
 
     this.app = app;
@@ -160,6 +169,9 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
       });
     }
 
+    await apolloServer.start();
+    apolloServer.applyMiddleware({ app });
+
     await manager.emit(
       new ApolloServerBeforeInitEvent({
         app,
@@ -167,6 +179,38 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
         server: apolloServer,
       })
     );
+  }
+
+  private attachSubscriptionService(
+    apolloServerConfig: ApolloServerExpressConfig,
+    httpServer: http.Server
+  ) {
+    const subscriptionServer = SubscriptionServer.create(
+      {
+        // This is the `schema` we just created.
+        schema: apolloServerConfig.schema,
+        // These are imported from `graphql`.
+        execute,
+        subscribe,
+        // Providing `onConnect` is the `SubscriptionServer` equivalent to the
+        // `context` function in `ApolloServer`. Please [see the docs](https://github.com/apollographql/subscriptions-transport-ws#constructoroptions-socketoptions--socketserver)
+        // for more information on this hook.
+        // ...this.createSubscriptions(apolloServerConfig.c)
+        ...this.createSubscriptions(this.currentSchema.contextReducers),
+      },
+      {
+        // This is the `httpServer` we created in a previous step.
+        server: httpServer,
+        // This `server` is the instance returned from `new ApolloServer`.
+        path: "/graphql",
+      }
+    );
+
+    // Shut down in the case of interrupt and termination signals
+    // We expect to handle this more cleanly in the future. See (#5074)[https://github.com/apollographql/apollo-server/issues/5074] for reference.
+    ["SIGINT", "SIGTERM"].forEach((signal) => {
+      process.on(signal, () => subscriptionServer.close());
+    });
   }
 
   /**
@@ -197,8 +241,10 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
       });
     }
 
-    const { typeDefs, resolvers, schemaDirectives, contextReducers } =
-      loader.getSchema();
+    const schema = makeExecutableSchema({
+      typeDefs: this.currentSchema.typeDefs,
+      resolvers: this.currentSchema.resolvers,
+    });
 
     const config: ApolloServerExpressConfig = Object.assign(
       {
@@ -227,11 +273,9 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
       },
       this.config.apollo,
       {
-        typeDefs,
-        resolvers,
-        schemaDirectives,
-        subscriptions: this.createSubscriptions(contextReducers),
-        context: this.createContext(contextReducers),
+        schema,
+        executor: this.config.jit ? jitSchemaExecutor(schema) : undefined,
+        context: this.createContext(this.currentSchema.contextReducers),
         uploads: false,
       }
     );
@@ -315,7 +359,8 @@ export class ApolloBundle extends Bundle<IApolloBundleConfig> {
    * Shutdown the http server so it's no longer hanging
    */
   async shutdown() {
-    this.httpServer.close();
+    await this.server.stop();
+    await this.httpServer.close();
   }
 
   /**
