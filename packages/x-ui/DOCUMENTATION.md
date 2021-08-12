@@ -773,21 +773,22 @@ class MyEvent extends Event {}
 
 function SomeComponent() {
   const eventManager = useEventManager();
-  eventManager.emit(new XEvent());
+  eventManager.emit(new MyEvent());
 }
 
 function OtherComponent() {
   // Use memo to avoid duplication of functions, or use an outside function
   const handler = useMemo(() => {
-    return (e: XEvent) => {
+    return (e: MyEvent) => {
       // handle the event, change the state, or whatever
     };
   });
 
   // The built-in hook lets you listen to events while the component is mounted
-  useListener(XEvent, handler);
+  useListener(MyEvent, handler);
+
   // Analog to useListener which can be confusing is the same function that does the same thing, use what fits best to your ears
-  listen(XEvent, handler);
+  listen(MyEvent, handler);
 }
 ```
 
