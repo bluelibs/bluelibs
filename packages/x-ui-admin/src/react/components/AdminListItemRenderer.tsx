@@ -36,7 +36,7 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
   let value;
 
   if (props.type === "string" || props.type === "number") {
-    value = props.value;
+    value = <span>{props.value}</span>;
   }
 
   if (props.type === "date") {

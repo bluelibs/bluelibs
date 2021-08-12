@@ -30,7 +30,6 @@ export function AdminFileUpload(props: AdminFileUploadProps) {
     name: field,
     maxCount: 1,
     async onChange({ file }) {
-      console.log("what's this on change?");
       const { status } = file;
 
       if (status === "uploading") {
