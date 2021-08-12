@@ -99,11 +99,21 @@ export const shortcuts = {
           id: "createdById",
           type: s.field.types.OBJECT_ID,
           isRequired: true,
+          ui: {
+            edit: false,
+            create: false,
+            listFilters: false,
+          },
         }),
         s.field({
           id: "updatedById",
           isRequired: true,
           type: s.field.types.OBJECT_ID,
+          ui: {
+            edit: false,
+            create: false,
+            listFilters: false,
+          },
         }),
       ];
     },

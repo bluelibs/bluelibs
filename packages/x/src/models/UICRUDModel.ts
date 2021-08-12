@@ -174,6 +174,9 @@ export class UICRUDModel {
       Studio.Field.Types.STRING,
       Studio.Field.Types.BOOLEAN,
       Studio.Field.Types.DATE,
+      Studio.Field.Types.OBJECT_ID,
+      Studio.Field.Types.INTEGER,
+      Studio.Field.Types.FLOAT,
       "number",
     ];
 
@@ -292,6 +295,8 @@ export class UICRUDModel {
       rendererType: this.getRendererType(field.type),
       enumValues: this.getEnumValuesLabels(field.enumValues),
     };
+
+    console.log(base.id, base.rendererType);
 
     let subfields = field.model ? field.cleaned.model.fields : field.subfields;
 
