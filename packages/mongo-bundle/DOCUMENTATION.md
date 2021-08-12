@@ -150,6 +150,13 @@ class PostsCollection extends Collection {
 
   // Nova expanders
   static expanders = {};
+
+  // optional for absolute performance, import { t } from "@bluelibs/nova"
+  // Documentation is here: https://deepkit.io/documentation/type
+  // This only applies to Nova query-ing
+  static jitSchema = t.schema({
+    name: t.string,
+  });
 }
 ```
 
