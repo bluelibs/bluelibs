@@ -4,7 +4,12 @@ import * as React from "react";
 import { FormListFieldData, FormListOperation } from "antd/lib/form/FormList";
 import AntInput from "antd/lib/input/Input";
 import { Consumer } from "../models/Consumer";
-import { IComponents, use, XRouter, XUI_COMPONENTS_TOKEN } from "@bluelibs/x-ui";
+import {
+  IComponents,
+  use,
+  XRouter,
+  XUI_COMPONENTS_TOKEN,
+} from "@bluelibs/x-ui";
 import { Inject, Service } from "@bluelibs/core";
 
 export type XFormElementBaseType = {
@@ -74,18 +79,13 @@ export abstract class XForm extends Consumer<XFormElementType> {
     }
 
     if (item.isList) {
-      if (!this.isLeaf(item)) {
-        const name = item.name || item.id.split(".");
-        return (
-          <Ant.Form.List name={name} key={item.id}>
-            {this.createListRenderer(item)}
-          </Ant.Form.List>
-        );
-      } else {
-        throw new Error(
-          `You cannot have a list of items (${item.id}) and not have a nest: [] option.`
-        );
-      }
+      const name = item.name || item.id.split(".");
+
+      return (
+        <Ant.Form.List name={name} key={item.id}>
+          {this.createListRenderer(item)}
+        </Ant.Form.List>
+      );
     } else {
       return this.createFormItem(item);
     }
@@ -99,7 +99,13 @@ export abstract class XForm extends Consumer<XFormElementType> {
     return true;
   }
 
-  createFormItem(item: XFormElementType) {
+  /**
+   *
+   * @param item
+   * @param propsOverride Can customise the ending props reaching the component
+   * @returns
+   */
+  createFormItem(item: XFormElementType, propsOverride = {}) {
     if (!this.isLeaf(item)) {
       if (!item.columns) {
         return this.render(item.nest);
@@ -128,7 +134,7 @@ export abstract class XForm extends Consumer<XFormElementType> {
     }
 
     const name = item.name || item.id.split(".");
-    const label = item.label || item.id;
+    const label = item.label === undefined ? item.id : item.label;
     const required = item.required || false;
     const tooltip = item.tooltip || undefined;
     const UIComponents = this.UIComponents;
@@ -142,7 +148,7 @@ export abstract class XForm extends Consumer<XFormElementType> {
 
     return (
       <UIComponents.ErrorBoundary key={item.id}>
-        {React.createElement(item.render, props)}
+        {React.createElement(item.render, { ...props, ...propsOverride })}
       </UIComponents.ErrorBoundary>
     );
   }
@@ -152,45 +158,82 @@ export abstract class XForm extends Consumer<XFormElementType> {
    * @param item
    * @returns
    */
-  createListRenderer(item: XFormElementNestType): ListChildrenFunction {
+  createListRenderer(item: XFormElementType): ListChildrenFunction {
     if (item.listRenderer) {
       return item.listRenderer();
     }
 
     const label = item.label || item.id;
-    return (fields: FormListFieldData[], { add, remove }, { errors }) => (
-      <>
-        <Ant.Form.Item label={label}>
-          {fields.map((field, index) => (
-            <Ant.Form.Item label={null} required={false} key={field.key}>
-              {this.createFormItem({
-                ...item,
-                nest: item.nest.map((subitem) => {
-                  return {
-                    ...subitem,
-                    fieldKey: [field.fieldKey, subitem.id],
-                    name: [field.name, subitem.id],
-                  };
-                }),
-              })}
-              <MinusCircleOutlined
-                className="dynamic-delete-button"
-                onClick={() => remove(field.name)}
-              />
+    const isSingleInputList = this.isLeaf(item);
+
+    if (isSingleInputList) {
+      return (fields: FormListFieldData[], { add, remove }, { errors }) => (
+        <>
+          <Ant.Form.Item label={label}>
+            {fields.map((field, index) => (
+              <>
+                {this.createFormItem(
+                  {
+                    ...item,
+                    label: null,
+                  },
+                  field
+                )}
+                <MinusCircleOutlined
+                  className="dynamic-delete-button"
+                  onClick={() => remove(field.name)}
+                />
+              </>
+            ))}
+            <Ant.Form.Item>
+              <Ant.Button
+                type="dashed"
+                onClick={() => add()}
+                icon={<PlusOutlined />}
+              >
+                Add New Item
+              </Ant.Button>
+              <Ant.Form.ErrorList errors={errors} />
             </Ant.Form.Item>
-          ))}
-          <Ant.Form.Item>
-            <Ant.Button
-              type="dashed"
-              onClick={() => add()}
-              icon={<PlusOutlined />}
-            >
-              Add New Item
-            </Ant.Button>
-            <Ant.Form.ErrorList errors={errors} />
           </Ant.Form.Item>
-        </Ant.Form.Item>
-      </>
-    );
+        </>
+      );
+    } else {
+      return (fields: FormListFieldData[], { add, remove }, { errors }) => (
+        <>
+          <Ant.Form.Item label={label}>
+            {fields.map((field, index) => (
+              <Ant.Form.Item label={null} required={false} key={field.key}>
+                {this.createFormItem({
+                  ...item,
+                  // Manipulate nesting to contain proper fieldKey and name
+                  nest: (item as XFormElementNestType).nest.map((subitem) => {
+                    return {
+                      ...subitem,
+                      fieldKey: [field.fieldKey, subitem.id],
+                      name: [field.name, subitem.id],
+                    };
+                  }),
+                })}
+                <MinusCircleOutlined
+                  className="dynamic-delete-button"
+                  onClick={() => remove(field.name)}
+                />
+              </Ant.Form.Item>
+            ))}
+            <Ant.Form.Item>
+              <Ant.Button
+                type="dashed"
+                onClick={() => add()}
+                icon={<PlusOutlined />}
+              >
+                Add New Item
+              </Ant.Button>
+              <Ant.Form.ErrorList errors={errors} />
+            </Ant.Form.Item>
+          </Ant.Form.Item>
+        </>
+      );
+    }
   }
 }

@@ -11,6 +11,7 @@ export type AdminListItemRendererProps = {
    */
   type:
     | "string"
+    | "tag"
     | "date"
     | "enum"
     | "relation"
@@ -44,6 +45,10 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
     } else {
       value = new Date(props.value as number).toLocaleDateString();
     }
+  }
+
+  if (props.type === "tag") {
+    value = <Tag>{props.value}</Tag>;
   }
 
   if (props.type === "enum") {
