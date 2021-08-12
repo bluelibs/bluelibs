@@ -156,6 +156,12 @@ export class Fixturizer {
   }
 
   static getRandomGenerator(field: Field) {
+    const endgameGenerator = (fn) => {
+      if (field.isArray) {
+        return () => [fn()];
+      }
+      return fn;
+    };
     switch (field.type) {
       case FieldValueKind.BOOLEAN:
         if (field.isArray) {
@@ -165,7 +171,7 @@ export class Fixturizer {
           return () => faker.random.arrayElement([true, false]);
         }
       case FieldValueKind.DATE:
-        return faker.date.recent;
+        return endgameGenerator(faker.date.recent);
       case FieldValueKind.ENUM:
         if (field.isArray) {
           return () => {
@@ -175,14 +181,17 @@ export class Fixturizer {
           return () => faker.random.arrayElement(field.enumValues);
         }
       case FieldValueKind.FLOAT:
-        return faker.datatype.number;
+        return endgameGenerator(faker.datatype.number);
       case FieldValueKind.INTEGER:
-        return faker.datatype.number;
+        return endgameGenerator(faker.datatype.number);
       case FieldValueKind.OBJECT_ID:
-        return () => new ObjectId();
+        // TODO: should not have such a thing? as this would be a realation
+        return endgameGenerator(() => new ObjectId());
       case FieldValueKind.STRING:
         // Make this smarter, maybe try to infer it from the name of the field
-        return Fixturizer.getGeneratorByNameForString(field.id);
+        return endgameGenerator(
+          Fixturizer.getGeneratorByNameForString(field.id)
+        );
       case FieldValueKind.OBJECT:
         const generateSubdocument = () => {
           const subdocument = {};

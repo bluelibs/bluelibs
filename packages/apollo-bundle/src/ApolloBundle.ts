@@ -93,7 +93,31 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   }
 
   protected storeSchema() {
-    this.currentSchema = this.container.get(Loader).getSchema();
+    const loader = this.container.get(Loader);
+
+    loader.load({
+      typeDefs: `
+        type Query { framework: String }
+      `,
+      resolvers: {
+        Query: {
+          framework: () => "BlueLibs",
+        },
+      },
+    });
+
+    if (this.config.uploads !== false) {
+      loader.load({
+        typeDefs: `
+          scalar Upload
+        `,
+        resolvers: {
+          Upload: GraphQLUpload,
+        },
+      });
+    }
+
+    this.currentSchema = loader.getSchema();
   }
 
   /**
@@ -217,30 +241,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    * Returns the ApolloConfiguration for ApolloServer
    */
   protected getApolloConfig(): ApolloServerExpressConfig {
-    const loader = this.get<Loader>(Loader);
-
-    loader.load({
-      typeDefs: `
-        type Query { framework: String }
-      `,
-      resolvers: {
-        Query: {
-          framework: () => "BlueLibs",
-        },
-      },
-    });
-
-    if (this.config.uploads !== false) {
-      loader.load({
-        typeDefs: `
-          scalar Upload
-        `,
-        resolvers: {
-          Upload: GraphQLUpload,
-        },
-      });
-    }
-
     const schema = makeExecutableSchema({
       typeDefs: this.currentSchema.typeDefs,
       resolvers: this.currentSchema.resolvers,
