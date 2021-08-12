@@ -56,9 +56,13 @@ export class ModelUtils {
    * @param field
    * @param modelClass Represents the context of enum: InvoiceStatus
    */
-  static getEnumSignatureForTS(field: IGenericField, modelClass?: string) {
+  static getEnumSignatureForTS(
+    field: IGenericField,
+    modelClass?: string,
+    isInput?: boolean
+  ) {
     let fieldName = field.name;
-    let signature = ModelUtils.getEnumClassName(field, modelClass);
+    let signature = ModelUtils.getEnumClassName(field, modelClass, isInput);
 
     if (field.isMany) {
       signature += "[]";
@@ -75,9 +79,13 @@ export class ModelUtils {
    * @param field
    * @param modelClass Represents the context of enum: InvoiceStatus
    */
-  static getEnumSignatureForGraphQL(field: IGenericField, modelClass?: string) {
+  static getEnumSignatureForGraphQL(
+    field: IGenericField,
+    modelClass?: string,
+    isInput?: boolean
+  ) {
     let fieldName = field.name;
-    let signature = ModelUtils.getEnumClassName(field, modelClass);
+    let signature = ModelUtils.getEnumClassName(field, modelClass, isInput);
     if (field.isMany) {
       signature = `[${signature}]`;
     }
@@ -88,7 +96,11 @@ export class ModelUtils {
     return `${fieldName}: ${signature}`;
   }
 
-  static getYupValidatorDecorator(field: IGenericField, modelClass?: string) {
+  static getYupValidatorDecorator(
+    field: IGenericField,
+    modelClass?: string,
+    isInput?: boolean
+  ) {
     const isModel = field.type === GenericFieldTypeEnum.MODEL;
 
     if (isModel) {
@@ -124,7 +136,11 @@ export class ModelUtils {
     let typeSuffix = "";
 
     if (field.type === GenericFieldTypeEnum.ENUM) {
-      const enumClassName = ModelUtils.getEnumClassName(field, modelClass);
+      const enumClassName = ModelUtils.getEnumClassName(
+        field,
+        modelClass,
+        isInput
+      );
       typeSuffix = `.oneOf(Object.values(${enumClassName}))`;
     }
 
@@ -151,7 +167,16 @@ export class ModelUtils {
     return `@Is(${yupType}${isRequired})`;
   }
 
-  static getEnumClassName(field: IGenericField, modelClass?: string): string {
+  static getEnumClassName(
+    field: IGenericField,
+    modelClass?: string,
+    isInput?: boolean
+  ): string {
+    // Hackish needs rethinked from ground-up
+    if (modelClass && isInput) {
+      modelClass = modelClass.replace("Input", "");
+    }
+
     return modelClass + _.upperFirst(field.name);
   }
 

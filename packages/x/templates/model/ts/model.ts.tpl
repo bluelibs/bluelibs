@@ -16,7 +16,7 @@
   {{/ if }}
 {{/ each }}
 {{# each enums }}
-  import { {{ className }} } from "./enums/{{ className }}.enum";
+  import { {{ className }} } from "{{ importFrom }}";
   export { {{ className }} };
 {{/ each }}
 

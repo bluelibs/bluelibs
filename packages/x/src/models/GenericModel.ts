@@ -194,7 +194,8 @@ ${field.description}
           result +=
             ModelUtils.getEnumSignatureForGraphQL(
               field,
-              options.enumPrefix ? options.enumPrefix : this.modelClass
+              options.enumPrefix ? options.enumPrefix : this.modelClass,
+              this.isInputMode
             ) + "\n";
         } else {
           result += ModelUtils.getFieldSignatureForGraphQL(field) + "\n";
@@ -230,7 +231,8 @@ ${field.description}
           if (field.yupValidation !== false) {
             const yupDecorator = ModelUtils.getYupValidatorDecorator(
               field,
-              options.enumPrefix ? options.enumPrefix : this.modelClass
+              options.enumPrefix ? options.enumPrefix : this.modelClass,
+              this.isInputMode
             );
 
             if (yupDecorator) {
@@ -242,7 +244,8 @@ ${field.description}
           result +=
             ModelUtils.getEnumSignatureForTS(
               field,
-              options.enumPrefix ? options.enumPrefix : this.modelClass
+              options.enumPrefix ? options.enumPrefix : this.modelClass,
+              this.isInputMode
             ) + "\n";
         } else {
           result += ModelUtils.getFieldSignatureForTS(field) + "\n";
@@ -345,6 +348,7 @@ ${field.description}
       field: string;
       value: string;
     }>;
+    importFrom: string;
   }> {
     // First level enums
     const result = [];
@@ -353,9 +357,18 @@ ${field.description}
         return field.type === GenericFieldTypeEnum.ENUM;
       })
       .forEach((field) => {
+        const className = ModelUtils.getEnumClassName(
+          field,
+          this.modelClass,
+          true
+        );
+
         result.push({
-          className: ModelUtils.getEnumClassName(field, this.modelClass),
+          className,
           elements: this.getEnumElements(field),
+          importFrom: this.isInputMode
+            ? `../../collections`
+            : `./enums/${className}.enum`,
         });
       });
 

@@ -22,14 +22,17 @@ export class GenericModelWriter extends BlueprintWriter {
 
     const modelDir = path.dirname(model.targetPath);
     // Inputs reflect other models enums should already be created
-    model.enums.forEach((myEnum) => {
-      const enumOperator = new FSOperator(session, myEnum);
+    // In input mode enums are re-used, so we do not have to rewrite them
+    if (!model.isInputMode) {
+      model.enums.forEach((myEnum) => {
+        const enumOperator = new FSOperator(session, myEnum);
 
-      enumOperator.sessionCopy(
-        modelTpls("ts/enum.ts.tpl"),
-        path.join(modelDir, "enums", `${myEnum.className}.enum.ts`)
-      );
-    });
+        enumOperator.sessionCopy(
+          modelTpls("ts/enum.ts.tpl"),
+          path.join(modelDir, "enums", `${myEnum.className}.enum.ts`)
+        );
+      });
+    }
 
     if (model.isBaseExtendMode) {
       const parts = model.targetPath.split(".");
