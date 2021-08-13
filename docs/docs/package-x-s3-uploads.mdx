@@ -22,12 +22,14 @@ import { XS3Bundle } from "@bluelibs/x-s3-bundle";
 
 kernel.addBundle(
   new XS3Bundle({
-    accessKeyId: process.env.AWS_S3_KEY_ID,
-    secretAccessKey: process.env.AWS_S3_SECRET,
-    region: process.env.AWS_S3_REGION,
-    bucket: process.env.AWS_S3_BUCKET,
-    // used to generate the downloadable path, example: https://s3.amazonaws.com/my-bucket
-    endpoint: process.env.AWS_S3_ENDPOINT,
+    s3: {
+      accessKeyId: process.env.AWS_S3_KEY_ID,
+      secretAccessKey: process.env.AWS_S3_SECRET,
+      region: process.env.AWS_S3_REGION,
+      bucket: process.env.AWS_S3_BUCKET,
+      // used to generate the downloadable path, example: https://s3.amazonaws.com/my-bucket
+      endpoint: process.env.AWS_S3_ENDPOINT,
+    },
   })
 );
 ```

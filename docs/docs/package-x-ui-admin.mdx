@@ -5,7 +5,7 @@ title: Administration
 
 import { PackageHeader } from "@site/src/components/PackageHeader";
 
-<PackageHeader version="1.0.2" packageName="x-ui-admin"  />
+<PackageHeader version="1.0.4" packageName="x-ui-admin"  />
 
 This is the place where you configure your enterprise level applications Administration interface. This bundle makes use of `@bluelibs/x-ui`, so it is best if you familiarise yourself with it first.
 
@@ -210,19 +210,15 @@ The components which extend the `UIComponents` from `x-ui` can be found [inside 
 
 You can easily override them, as their file name is exactly the name inside `UIComponents`.
 
-## Forms
+## XForm
 
-Since we rely on `ant` for our frontend, we also use `Form` from `ant` which is really flexible and complex. Because our goal with our libs is to move as much as possible from the visual components we structure our forms in classes:
+Since we rely on `ant` for our frontend, we also use `Form` components from `ant` which are really flexible and complex. Because our goal with our libs is to move as much as possible from the visual components we structure our forms in classes:
 
 ```tsx
 import { XForm } from "@bluelibs/x-ui-admin";
 import { Service, Inject } from "@bluelibs/core";
-import { SmileOutlined } from "@ant-design/icons";
-import { Routes } from "@bundles/UIAppBundle";
 import * as Ant from "antd";
 import {
-  Company,
-  ContactsCollection,
   UsersCollection,
   CompaniesCollection,
 } from "@bundles/UIAppBundle/collections";
@@ -265,7 +261,10 @@ In order to use this form we employ the `Consumer` pattern:
 import { use } from "@bluelibs/x-ui";
 
 function CompanyCreateForm() {
+  // Transient means a new instance every time, do not omit this
   const form = use(CompanyEditForm, { transient: true });
+  // Now you have to build it
+  form.build();
 
   // The main concept here is that this form can be rendered
   // But also customised
@@ -286,6 +285,7 @@ function CompanyCreateForm() {
   const form = use(CompanyEditForm, { transient: true });
 
   // You can update or remove certain items
+  form.build();
   form.update("title", {
     render: "...",
   });
@@ -306,6 +306,106 @@ function CompanyCreateForm() {
 }
 ```
 
-## Lists & Views
+Note: The input components under `Form.Item` need to be direct children, something like this will fail:
 
-To describe the lists and views consumer patterns for propper rendering of data in the same fashion.
+```tsx
+render() {
+  // FAILS
+  return (
+    <Ant.Form.Item>
+      <div><Ant.Input /></div>
+    </Ant.Form.Item>
+  )
+}
+```
+
+If you have a lot of changes to make to your initial form. Typically if you use Blueprint, such a form will be generated and you may want to change how you render certain fields:
+
+```tsx
+// Do not forget transient, you need a new instance every time
+@Service({ transient: true })
+class MyForm extends GeneratedForm {
+  build() {
+    super.build();
+    this.update("item", { .... })
+  }
+}
+```
+
+## XList
+
+This is designed to work easily with `Table` from `ant` and this consumer represents a list of columns (`ColumnType`). It's the same pattern and same concepts as XForm:
+
+```tsx
+@Service({ transient: true })
+export class BillHeadList extends XList<BillHead> {
+  build() {
+    const { UIComponents, router } = this;
+
+    this.add([
+      {
+        // The id always needs to be here
+        id: "invoiceNumber",
+
+        // The rest under are ColumnType elements
+        title: "Invoice Number",
+        key: "Invoice Number",
+        dataIndex: ["invoiceNumber"],
+        sorter: true,
+        render: (value, model) => {
+          const props = {
+            type: "string",
+            value,
+          };
+          return <UIComponents.AdminListItemRenderer {...props} />;
+        },
+      },
+    ]);
+  }
+}
+```
+
+## XViewer
+
+Same concepts as with Forms and Lists apply. This is designed to work very well with `Description`.
+
+```tsx
+type XViewElementType = {
+  id: string;
+  label?: string;
+  dataIndex: string[];
+  /**
+   * If it's nested a component is not needed
+   */
+  render?: (value: any) => JSX.Element;
+};
+```
+
+The typical viewer component would look like this:
+
+```tsx
+export function BillHeadsViewComponent(props: { document: Partial<BillHead> }) {
+  const document = props.document;
+
+  const viewer = use(BillHeadViewer, { transient: true });
+  // Notice that we need to set the document so it knows how to render the data
+  // In Forms and Lists we don't do this as this is being handled by Ant's underlying systems
+  viewer.setDocument(document);
+
+  viewer.build();
+
+  return (
+    <Ant.Descriptions>
+      {viewer.rest().map((item) => {
+        // Iterating and consuming "rest", this is just like walking through the elements
+        // And rendering them however you please
+        return (
+          <Ant.Descriptions.Item label={item.label}>
+            {viewer.render(item)}
+          </Ant.Descriptions.Item>
+        );
+      })}
+    </Ant.Descriptions>
+  );
+}
+```
