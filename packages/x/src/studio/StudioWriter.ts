@@ -557,6 +557,7 @@ export class StudioWriter {
       collectionModel.hasSubscriptions = true;
       collectionModel.isTimestampable = collection.behaviors.timestampable;
       collectionModel.isSoftdeletable = collection.behaviors.softdeletable;
+      collectionModel.isBlameable = collection.behaviors.blameable;
       collectionModel.isEntitySameAsModel = false;
       collectionModel.collectionName = collection.id;
       collectionModel.bundleName = "AppBundle";
