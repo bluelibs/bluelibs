@@ -1,24 +1,24 @@
 import { assert } from "chai";
-import intersectDeep from "../../core/graphql/intersectDeep";
+import intersectBody from "../../core/graphql/intersectBody";
 
 describe("intersectDeep()", () => {
   it("should work with simple fields and non-collision nested fields", () => {
     const requestBody = {
       firstName: 1,
       profile: {
-        services: 1
-      }
+        services: 1,
+      },
     };
 
     const intersectBody = {
       firstName: 1,
       lastName: 1,
       profile: {
-        score: 1
-      }
+        score: 1,
+      },
     };
 
-    const result: any = intersectDeep(requestBody, intersectBody);
+    const result: any = intersectBody(requestBody, intersectBody);
 
     assert.isDefined(result.firstName);
     assert.isUndefined(result.lastName);
@@ -29,18 +29,18 @@ describe("intersectDeep()", () => {
     const requestBody = {
       profile: {
         services: {
-          email: 1
-        }
-      }
+          email: 1,
+        },
+      },
     };
 
     const intersectBody = {
       profile: {
-        services: {}
-      }
+        services: {},
+      },
     };
 
-    const result: any = intersectDeep(requestBody, intersectBody);
+    const result: any = intersectBody(requestBody, intersectBody);
 
     assert.isObject(result.profile);
     assert.isObject(result.profile.services);
@@ -49,14 +49,14 @@ describe("intersectDeep()", () => {
 
   it("should work with fields as objects", () => {
     const requestBody = {
-      firstName: {}
+      firstName: {},
     };
 
     const intersectBody = {
-      firstName: {}
+      firstName: {},
     };
 
-    const result: any = intersectDeep(requestBody, intersectBody);
+    const result: any = intersectBody(requestBody, intersectBody);
 
     assert.isDefined(result.firstName);
   });

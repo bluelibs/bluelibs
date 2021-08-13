@@ -9,7 +9,7 @@ import { SPECIAL_PARAM_FIELD, SCHEMA_FIELD } from "../constants";
  * @param what
  * @param intersection
  */
-export default function intersectDeep(what, intersection) {
+export default function intersectBody(what, intersection) {
   const result = {};
   if (what[ArgumentStore]) {
     result[ArgumentStore] = what[ArgumentStore];
@@ -33,7 +33,7 @@ export default function intersectDeep(what, intersection) {
       return;
     }
 
-    const intersection = intersectDeep(what[fieldName], value);
+    const intersection = intersectBody(what[fieldName], value);
     if (!_.isEmpty(intersection)) {
       result[fieldName] = intersection;
     }

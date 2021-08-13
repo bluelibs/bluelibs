@@ -3,7 +3,7 @@ import * as _ from "lodash";
 import * as graphqlFields from "graphql-fields";
 import { SPECIAL_PARAM_FIELD } from "../constants";
 import Query from "../query/Query";
-import intersectDeep from "./intersectDeep";
+import intersectBody from "./intersectBody";
 import { QueryBodyType, IAstToQueryOptions, IQueryContext } from "../defs";
 import { mergeDeep } from "./mergeDeep";
 import { Collection } from "mongodb";
@@ -91,7 +91,7 @@ export default function astToQuery(
   }
 
   if (config.intersect) {
-    body = intersectDeep(body, config.intersect);
+    body = intersectBody(body, config.intersect);
   }
 
   if (config.embody) {
