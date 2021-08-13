@@ -498,7 +498,7 @@ export abstract class Collection<T = any> {
    *
    * @param variable
    */
-  protected getStaticVariable<T extends keyof typeof Collection>(variable: T) {
+  public getStaticVariable<T extends keyof typeof Collection>(variable: T) {
     return (this.constructor as typeof Collection)[variable];
   }
 
