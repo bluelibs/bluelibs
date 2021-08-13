@@ -25,21 +25,31 @@ export class XGeneratorBundle extends Bundle<IXGeneratorBundleConfig> {
       });
 
       this.displayWelcomeMessage();
+      this.checkAndDisplayNewVersion();
+    }
+  }
+
+  public async checkAndDisplayNewVersion() {
+    let showUpdateInstructions = false;
+    try {
+      const result = execSync("npm view @bluelibs/x version", {
+        timeout: 1000,
+      });
+      latestVersion = result.toString().split("\n")[0];
+
+      if (packageVersion !== latestVersion) {
+        showUpdateInstructions = true;
+      }
+    } catch (e) {}
+
+    if (showUpdateInstructions) {
+      console.log(`Newer version available (${latestVersion})`);
+      console.log("");
     }
   }
 
   public displayWelcomeMessage() {
-    console.log(chalk.yellowBright(`${X_WAY}`));
-
-    const logoLength = X_WAY.split("\n")[1].length;
-    const message =
-      GENERATOR_QUOTES[Math.floor(Math.random() * GENERATOR_QUOTES.length)];
-
-    console.log(
-      " ".repeat(logoLength / 2 - message.length / 2) +
-        chalk.green.bold(message)
-    );
-    console.log("");
+    console.log(chalk.blueBright.bold(`${X_FRAMEWORK_LOGO}`));
   }
 }
 
@@ -60,16 +70,17 @@ try {
   }
 } catch (e) {}
 
-const X_WAY = String.raw`
-___   ___      ____    __    ____  ___   ____    ____ 
-\  \ /  /      \   \  /  \  /   / /   \  \   \  /   / 
- \  V  /   _____\   \/    \/   / /  ^  \  \   \/   /  
-  >   <   |______\            / /  /_\  \  \_    _/   
- /  .  \          \    /\    / /  _____  \   |  |     
-/__/ \__\          \__/  \__/ /__/     \__\  |__|
-${
-  showUpdateInstructions
-    ? `New version available (${latestVersion})\nnpm i -g @bluelibs/x`
-    : ""
-}    
+const X_FRAMEWORK_LOGO = String.raw`
+xxxxxxx      xxxxxxx
+ x:::::x    x:::::x 
+  x:::::x  x:::::x  
+   x:::::xx:::::x   
+    x::::::::::x    
+     x::::::::x     X-Framework CLI by BlueLibs
+     x::::::::x     ${chalk.green.bold("You are in control.")}
+    x::::::::::x    
+   x:::::xx:::::x   
+  x:::::x  x:::::x  
+ x:::::x    x:::::x 
+xxxxxxx      xxxxxxx 
 `;
