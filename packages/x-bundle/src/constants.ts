@@ -1,5 +1,6 @@
 import { Token } from "@bluelibs/core";
 import { IMessenger } from "./defs";
+import * as chalk from "chalk";
 
 export const MESSENGER = new Token<IMessenger>("MESSENGER");
 export const IS_LIVE_DEBUG = new Token("IS_LIVE_DEBUG");
@@ -8,15 +9,19 @@ export const X_SETTINGS = new Token();
 export const APP_ROUTER = new Token();
 export const ROOT_ROUTER = new Token();
 
-export const X_WAY = String.raw`
-___   ___      ____    __    ____  ___   ____    ____ 
-\  \ /  /      \   \  /  \  /   / /   \  \   \  /   / 
- \  V  /   _____\   \/    \/   / /  ^  \  \   \/   /  
-  >   <   |______\            / /  /_\  \  \_    _/   
- /  .  \          \    /\    / /  _____  \   |  |    
-/__/ \__\          \__/  \__/ /__/     \__\  |__|  
-
-                  by BlueLibs
+export const X_FRAMEWORK_LOGO = String.raw`
+xxxxxxx      xxxxxxx
+ x:::::x    x:::::x 
+  x:::::x  x:::::x  
+   x:::::xx:::::x   
+    x::::::::::x    
+     x::::::::x     X-Framework Server by BlueLibs
+     x::::::::x     ${chalk.green.bold("You are in control.")}
+    x::::::::::x    
+   x:::::xx:::::x   
+  x:::::x  x:::::x  
+ x:::::x    x:::::x 
+xxxxxxx      xxxxxxx 
 `;
 
 // Look, I know they may be cheesy, but who doesn't love cheese?

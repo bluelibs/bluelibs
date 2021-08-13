@@ -10,7 +10,7 @@ import CRUDTypes from "./graphql/crud/types";
 import scalars from "./graphql/scalars";
 import {
   X_SETTINGS,
-  X_WAY,
+  X_FRAMEWORK_LOGO,
   RANDOM_GEEKIE_DEV_QUOTES,
   APP_ROUTER,
   ROOT_ROUTER,
@@ -31,7 +31,7 @@ export class XBundle extends Bundle<IXBundleConfig> {
   dependencies = [MongoBundle, LoggerBundle];
 
   defaultConfig = {
-    logo: X_WAY,
+    logo: X_FRAMEWORK_LOGO,
     appUrl: "http://localhost:3000",
     rootUrl: "http://localhost:4000",
     live: {
@@ -89,19 +89,7 @@ export class XBundle extends Bundle<IXBundleConfig> {
   }
 
   public displayWelcomeMessage() {
-    console.log(chalk.yellowBright(`${this.config.logo}`));
-
-    // Just trying to center the text here.
-    const logoLength = X_WAY.split("\n")[1].length;
-    const myMessage = RANDOM_GEEKIE_DEV_QUOTES[
-      Math.floor(Math.random() * RANDOM_GEEKIE_DEV_QUOTES.length)
-    ].replace("%name%", this.getFirstName());
-
-    console.log(
-      " ".repeat(logoLength / 2 - myMessage.length / 2),
-      chalk.bold.green(myMessage)
-    );
-    console.log("");
+    console.log(chalk.blueBright(`${this.config.logo}`));
   }
 
   /**
