@@ -15,7 +15,7 @@ import { {{ generateComponentName "view" }} } from "../components/View/{{ collec
 import { {{ generateComponentName "viewLive" }} } from "../components/View/{{ collectionName }}ViewLive";
 {{/ if }}
 
-import { SettingFilled } from "@ant-design/icons";
+import { {{ icon }} } from "@ant-design/icons";
 
 {{# if (hasFeature "list") }}
 export const {{ generateRouteName "list" }}: IRoute = {
@@ -24,7 +24,7 @@ export const {{ generateRouteName "list" }}: IRoute = {
   menu: {
     key: "{{ generateRouteName "list" }}",
     label: "{{ sheetName }}",
-    icon: SettingFilled,
+    icon: {{ icon }},
   }
 };
 {{/ if }}

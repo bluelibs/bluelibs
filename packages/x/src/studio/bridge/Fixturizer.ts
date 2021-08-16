@@ -194,10 +194,14 @@ export class Fixturizer {
         );
       case FieldValueKind.OBJECT:
         const generateSubdocument = () => {
+          const fields = field.model
+            ? field.cleaned.model.fields
+            : field.subfields;
           const subdocument = {};
-          field.subfields.forEach((subfield) => {
+          fields.forEach((subfield) => {
             subdocument[subfield.id] = subfield.mock.generator();
           });
+
           return subdocument;
         };
 

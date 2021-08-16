@@ -44,6 +44,10 @@ export type UICollectionConfigType =
       label?: string;
       order?: number;
       delete?: boolean;
+      /**
+       * This is the icon name from @ant-design/icons. This will show-up in the menu
+       */
+      icon?: string;
     } & UIModeConfigType);
 
 export type UIConfigType =

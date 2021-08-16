@@ -55,6 +55,15 @@ export class UICRUDModel {
     return this.studioCollection.ui.label;
   }
 
+  // The icon from UI Generated.
+  get icon() {
+    if (this.studioCollection.ui === false) {
+      throw new Error("Shouldn't a menu for it");
+    }
+
+    return this.studioCollection.ui.icon || "SettingFilled";
+  }
+
   get collectionName() {
     return this.studioCollection.id;
   }

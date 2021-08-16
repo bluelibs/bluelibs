@@ -424,6 +424,7 @@ export class StudioWriter {
 
         model.whereIsTheLinkStored = relation.isDirect ? "A" : "B";
         model.linkFromA = relation.id;
+        model.linkFromB = relation.inversedBy;
 
         linkWriter.write(model, session);
 
