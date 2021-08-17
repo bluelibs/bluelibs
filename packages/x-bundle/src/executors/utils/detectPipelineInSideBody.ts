@@ -1,5 +1,3 @@
-import { QueryBodyType } from "@bluelibs/nova";
-
 export function detectPipelineInSideBody(body: any) {
   if (!body) {
     return;

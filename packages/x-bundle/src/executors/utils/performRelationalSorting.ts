@@ -4,7 +4,7 @@ import { Constructor, ContainerInstance } from "@bluelibs/core";
 
 export function performRelationalSorting(
   container: ContainerInstance,
-  collectionClass: Constructor<Collection> & typeof Collection,
+  collectionClass: Constructor<Collection>,
   sort: {
     [key: string]: any;
   }
@@ -14,7 +14,7 @@ export function performRelationalSorting(
     // We detect if the sort is by a link
     const parts = key.split(".");
     const [linkName, ...restParts] = parts;
-    if (collectionClass.links[linkName]) {
+    if ((collectionClass as unknown as typeof Collection).links[linkName]) {
       const collection = container.get<Collection>(collectionClass);
 
       pipeline.push(lookup(collection.collection, linkName), {

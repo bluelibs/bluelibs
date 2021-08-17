@@ -197,6 +197,7 @@ We should be able to quickly check if a user is logged in or has certain permiss
 
 ```ts
 [
+  // Check if the user is logged in, throws if not
   X.CheckLoggedIn(),
   X.CheckPermission("ADMIN"),
   // or multiple roles
@@ -206,7 +207,7 @@ We should be able to quickly check if a user is logged in or has certain permiss
     // Returns a permission filter
     return {
       userId: ctx.userId,
-      domain: "Projets",
+      domain: "Projects",
     }
   })
 ]
@@ -218,6 +219,97 @@ interface IPermissionSearchFilter {
     domain?: string | string[];
     domainIdentifier?: string | string[];
 }
+```
+
+Security is not always simple and straight forward, but there are very common scenarios for securisation and we'll explore them below.
+
+The logic of `X.Secure()` is simple:
+
+- First we match the user to see what rules to apply
+- We run the rules and if any throws an exception we stop executing the request
+- If there's no match it throws
+- Once the first match is found the others are ignored
+
+#### Finding Data
+
+- Check if the user has any specific roles
+- Apply a set of filters to the requested data
+
+```ts
+[
+  X.Secure([
+    {
+      // This states: if the user is ADMIN, don't have additional filtering or rules
+      // Matches are resolver-like functions, you could implement your own.
+      match: X.Secure.Match.Roles("ADMIN"),
+    },
+    {
+      match: X.Secure.Match.Roles([
+        "PROJECT_MANAGER",
+        "PROJECT_DELIVERY_MANAGER",
+      ]),
+      run: [
+        // You can intersect the GRAPHQL request. Optionally provide the type <User> for autocompletion.
+        X.Secure.Intersect<User>({}),
+
+        // Optionally apply certain filters when X.ToNova() is used below X.Secure()
+        // The filters returned here also apply X.ToCollectionCount()
+        X.Secure.ApplyNovaOptions({
+          filters: {
+            isApproved: true,
+          },
+        }),
+        // Note: you can also use the filters as a resolver function if you want full customisation of filters based on userId or others
+      ],
+    },
+  ]),
+];
+```
+
+#### Mutating Data:
+
+- Check if the user has any specific roles
+- Check if the user is an owner to this document or has the propper roles
+
+```ts
+[
+  X.Secure([
+    {
+      // This states: if the user is ADMIN, don't have additional filtering or rules
+      match: X.Secure.Match.Roles("ADMIN"),
+    },
+    {
+      match: X.Secure.Match.Roles([
+        "PROJECT_MANAGER",
+        "PROJECT_DELIVERY_MANAGER",
+      ]),
+      // Let's apply some rules when we're doing update or remove
+      run: [
+        // Checks if the current user owns the Post by equality matching ownerId
+        // The _id represents the key of the _id extracted from arguments
+        X.Secure.IsUser(PostsCollection, "ownerId", "_id"),
+        // Note: this works when you also have ownersIds as the equality is done through $in via MongoDB
+      ],
+    },
+  ]),
+];
+```
+
+You can also have fallback rules that contain no `match`:
+
+```ts
+[
+  X.Secure([
+    {
+      match,
+      run: [],
+    },
+    {
+      // An anonymous user for example
+      run: [],
+    },
+  ]),
+];
 ```
 
 ### Services

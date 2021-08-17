@@ -1,61 +1,19 @@
 import { Collection, DocumentNotFoundException } from "@bluelibs/mongo-bundle";
-import { getResult } from "@bluelibs/graphql-bundle";
-import { IAstToQueryOptions } from "@bluelibs/nova";
-import { Constructor, ContainerInstance } from "@bluelibs/core";
+import { getResult, IGraphQLContext } from "@bluelibs/graphql-bundle";
+import { Constructor } from "@bluelibs/core";
 import { FilterQuery, UpdateQuery } from "mongodb";
-import { detectPipelineInSideBody } from "./utils/detectPipelineInSideBody";
-import { performRelationalSorting } from "./utils/performRelatinalSorting";
+import { prepareForExecution } from "./utils/prepareForExecution";
+import { GraphQLToNovaOptionsResolverType } from "./utils/GraphQLToNovaOptionsResolverType";
+import { NOVA_AST_TO_QUERY_OPTIONS } from "./security";
 
-type GraphQLToNovaOptionsResolverType<T> = (
-  _,
-  args,
-  ctx,
-  ast
-) => IAstToQueryOptions<T> | Promise<IAstToQueryOptions<T>>;
-
-const prepareForExecution = (
-  collectionClass,
-  astToQueryOptions: IAstToQueryOptions,
-  container: ContainerInstance
-): void => {
-  let { sideBody, ...cleanedOptions } = astToQueryOptions.options || {};
-  if (!sideBody) {
-    sideBody = {};
-    astToQueryOptions.sideBody = sideBody;
-  } else {
-    // This ensures we don't have any pipeline
-    detectPipelineInSideBody(sideBody);
-  }
-
-  if (!sideBody.$) {
-    sideBody.$ = {};
-  }
-
-  // The sort from options takes owning
-  const sort = cleanedOptions?.sort || sideBody.$.options?.sort;
-
-  if (sort && Object.keys(sort).length > 0) {
-    const pipeline = performRelationalSorting(container, collectionClass, sort);
-    if (pipeline.length) {
-      if (sideBody.$.pipeline) {
-        sideBody.$.pipeline.push(...pipeline);
-      } else {
-        sideBody.$.pipeline = pipeline;
-      }
-    }
-  }
-};
-
-const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<any> = async (
-  _,
-  args
-) => {
-  const { query } = args;
-  return {
-    filters: query?.filters || {},
-    options: query?.options || {},
+const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<any> =
+  async (_, args) => {
+    const { query } = args;
+    return {
+      filters: query?.filters || {},
+      options: query?.options || {},
+    };
   };
-};
 
 /**
  * If your input is of "QueryInput" it will automatically apply the filters and options
@@ -71,8 +29,8 @@ export function ToNova<T>(
   }
 
   return async function (_, args, ctx, ast) {
-    const options = await optionsResolver(_, args, ctx, ast);
-    prepareForExecution(collectionClass, options, ctx.container);
+    let options = await optionsResolver(_, args, ctx, ast);
+    options = prepareForExecution(ctx, collectionClass, options);
 
     const collection = ctx.container.get(collectionClass);
 
@@ -89,8 +47,8 @@ export function ToNovaOne<T>(
   }
 
   return async function (_, args, ctx, ast) {
-    const options = await optionsResolver(_, args, ctx, ast);
-    prepareForExecution(collectionClass, options, ctx.container);
+    let options = await optionsResolver(_, args, ctx, ast);
+    options = prepareForExecution(ctx, collectionClass, options);
 
     const collection = ctx.container.get(collectionClass);
 
@@ -115,9 +73,8 @@ export function ToNovaByResultID<T>(
   }
   return async function (_, args, ctx, ast) {
     const collection = ctx.container.get(collectionClass);
-    const options = await optionsResolver(_, args, ctx, ast);
-
-    prepareForExecution(collectionClass, options, ctx.container);
+    let options = await optionsResolver(_, args, ctx, ast);
+    options = prepareForExecution(ctx, collectionClass, options);
 
     return collection.queryOneGraphQL(ast, options);
   };
@@ -144,6 +101,9 @@ export function ToCollectionCount<T>(
 
   return async function (_, args, ctx, ast) {
     const filters = await filterResolver(_, args, ctx, ast);
+    if (ctx[NOVA_AST_TO_QUERY_OPTIONS]?.filters) {
+      Object.assign(filters, ctx[NOVA_AST_TO_QUERY_OPTIONS]?.filters);
+    }
     const collection = ctx.container.get(collectionClass);
 
     return collection.find(filters).count();
@@ -177,12 +137,25 @@ export function CheckDocumentExists(
   };
 }
 
+/**
+ * Inserts the document in the required collection.
+ * @param collectionClass
+ * @param field The field from GRAPHQL arguments
+ * @param extend Possibly extend the document, such as adding additional fields like a userId or whatever you wish.
+ * @returns
+ */
 export function ToDocumentInsert(
   collectionClass: Constructor<Collection<any>>,
-  field = "document"
+  field = "document",
+  extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
 ) {
   return async function (_, args, ctx, ast) {
     const collection: Collection = ctx.container.get(collectionClass);
+    const document = args[field];
+    if (extend) {
+      await extend(document, ctx);
+    }
+
     const result = await collection.insertOne(args[field], {
       context: {
         userId: ctx.userId,
