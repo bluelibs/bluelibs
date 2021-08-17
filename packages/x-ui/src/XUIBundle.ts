@@ -20,7 +20,7 @@ import { XRouter } from "./react/XRouter";
 import { ApolloClient } from "./graphql/ApolloClient";
 import { GuardianSmart } from "./react/smarts/GuardianSmart";
 import { DefaultComponents, IComponents } from "./react/components/types";
-import { I18NService } from "./react/services/I18N.service";
+import { I18NConfig, I18NService } from "./react/services/I18N.service";
 
 export class XUIBundle extends Bundle<XUIBundleConfigType> {
   protected defaultConfig: XUIBundleConfigType = {
@@ -110,5 +110,13 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
    */
   updateComponents(components: Partial<IComponents>) {
     Object.assign(this.config.react.components, components);
+  }
+
+  /**
+   * Store one or multiple i18n configurations
+   * @param i18n
+   */
+  storeI18N(i18n: I18NConfig | I18NConfig[]) {
+    this.container.get(I18NService).store(i18n);
   }
 }

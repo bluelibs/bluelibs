@@ -4,6 +4,12 @@ import { XUI_CONFIG_TOKEN } from "../../constants";
 import { XUIBundleConfigType } from "../../defs";
 import { LocaleChangedEvent } from "../events/LocaleChangedEvent";
 
+export type I18NConfig = Record<string, I18NMessages>;
+
+export type I18NMessages = {
+  [key: string]: string | I18NMessages;
+};
+
 @Service()
 export class I18NService {
   // locale, polyglot
@@ -34,6 +40,25 @@ export class I18NService {
    */
   extend(locale: string, messages: any, prefix?: string) {
     this.getPolyglot(locale).extend(messages, prefix);
+  }
+
+  /**
+   * Used to set multiple languages in the form of { "language": { messages } }
+   * Runs extend() automatically behind the scenes
+   *
+   * @param configs
+   * @returns
+   */
+  store(configs: I18NConfig | I18NConfig[]) {
+    if (!Array.isArray(configs)) {
+      return this.store([configs]);
+    }
+
+    configs.forEach((config) => {
+      for (const locale in config) {
+        this.extend(locale, config[locale]);
+      }
+    });
   }
 
   /**
