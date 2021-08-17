@@ -5,6 +5,7 @@ import { FormListFieldData, FormListOperation } from "antd/lib/form/FormList";
 import AntInput from "antd/lib/input/Input";
 import { Consumer } from "../models/Consumer";
 import {
+  I18NService,
   IComponents,
   use,
   XRouter,
@@ -52,6 +53,9 @@ export type ListChildrenFunction = (
 export abstract class XForm extends Consumer<XFormElementType> {
   @Inject(XUI_COMPONENTS_TOKEN)
   UIComponents: IComponents;
+
+  @Inject(() => I18NService)
+  i18n: I18NService;
 
   @Inject(() => XRouter)
   router: XRouter;

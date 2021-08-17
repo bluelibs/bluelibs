@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   Collection,
+  I18NService,
   IComponents,
   ListSmart,
   QueryBodyType,
@@ -20,6 +21,9 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
 
   @Inject(XUI_COMPONENTS_TOKEN)
   UIComponents: IComponents;
+
+  @Inject(() => I18NService)
+  i18n: I18NService;
 
   abstract collectionClass: Constructor<Collection<T>>;
 

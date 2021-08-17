@@ -1,4 +1,9 @@
-import { IComponents, XRouter, XUI_COMPONENTS_TOKEN } from "@bluelibs/x-ui";
+import {
+  I18NService,
+  IComponents,
+  XRouter,
+  XUI_COMPONENTS_TOKEN,
+} from "@bluelibs/x-ui";
 import { Inject, Service } from "@bluelibs/core";
 import { ColumnType } from "antd/lib/table";
 import { Consumer } from "../models";
@@ -10,6 +15,9 @@ export abstract class XList<T = any> extends Consumer<
   constructor() {
     super();
   }
+
+  @Inject(() => I18NService)
+  i18n: I18NService;
 
   @Inject(XUI_COMPONENTS_TOKEN)
   UIComponents: IComponents;

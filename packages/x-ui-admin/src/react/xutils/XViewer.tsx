@@ -1,6 +1,12 @@
 import * as React from "react";
 import { Consumer } from "../models/Consumer";
-import { IComponents, use, XRouter, XUI_COMPONENTS_TOKEN } from "@bluelibs/x-ui";
+import {
+  I18NService,
+  IComponents,
+  use,
+  XRouter,
+  XUI_COMPONENTS_TOKEN,
+} from "@bluelibs/x-ui";
 import { Inject, Service } from "@bluelibs/core";
 
 export type XViewElementType = {
@@ -16,6 +22,9 @@ export type XViewElementType = {
 export abstract class XViewer extends Consumer<XViewElementType> {
   @Inject(XUI_COMPONENTS_TOKEN)
   UIComponents: IComponents;
+
+  @Inject(() => I18NService)
+  i18n: I18NService;
 
   @Inject(() => XRouter)
   router: XRouter;
