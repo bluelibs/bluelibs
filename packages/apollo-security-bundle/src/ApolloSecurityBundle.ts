@@ -76,6 +76,10 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
         const token = this.identifyToken(req, connection);
         let userId = null;
 
+        if (token === null || token === "" || token === undefined) {
+          return context;
+        }
+
         if (token) {
           const securityService: SecurityService = container.get(
             SecurityService
