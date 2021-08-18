@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/mongo-bundle",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Easy MongoDB solution designed for BlueLibs Framework.",
   "main": "dist/index.js",
   "repository": {
@@ -48,6 +48,7 @@
     "@typescript-eslint/parser": "2.3.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
+    "class-transformer": "^0.4.0",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "6.3.0",
     "eslint-plugin-prettier": "3.1.1",

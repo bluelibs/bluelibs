@@ -37,8 +37,8 @@ describe("Behaviors", () => {
       },
       createdAt: 1,
       updatedAt: 1,
-      createdBy: 1,
-      updatedBy: 1,
+      createdById: 1,
+      updatedById: 1,
     };
 
     let b1Object = await behaviors.queryOne(queryBody);
@@ -49,8 +49,8 @@ describe("Behaviors", () => {
       b1Object.createdAt.getTime() === b1Object.updatedAt.getTime()
     );
 
-    assert.equal(b1Object.createdBy, userIdToCreate);
-    assert.equal(b1Object.updatedBy, userIdToCreate);
+    assert.equal(b1Object.createdById, userIdToCreate);
+    assert.equal(b1Object.updatedById, userIdToCreate);
 
     await behaviors.updateOne(
       {
@@ -72,8 +72,8 @@ describe("Behaviors", () => {
 
     assert.isTrue(b1Object.updatedAt > b1Object.createdAt);
 
-    assert.equal(b1Object.createdBy, userIdToCreate);
-    assert.equal(b1Object.updatedBy, userIdToUpdate);
+    assert.equal(b1Object.createdById, userIdToCreate);
+    assert.equal(b1Object.updatedById, userIdToUpdate);
 
     teardown();
   });
@@ -114,8 +114,8 @@ describe("Behaviors", () => {
     const queryBody = {
       createdAt: 1,
       updatedAt: 1,
-      createdBy: 1,
-      updatedBy: 1,
+      createdById: 1,
+      updatedById: 1,
     };
 
     let b1s = await behaviors.query(queryBody);
@@ -126,8 +126,8 @@ describe("Behaviors", () => {
       assert.instanceOf(b1s.updatedAt, Date);
       assert.isTrue(b1s.createdAt.getTime() === b1s.updatedAt.getTime());
 
-      assert.equal(b1s.createdBy, userIdToCreate);
-      assert.equal(b1s.updatedBy, userIdToCreate);
+      assert.equal(b1s.createdById, userIdToCreate);
+      assert.equal(b1s.updatedById, userIdToCreate);
     });
 
     await behaviors.updateMany(
@@ -149,8 +149,8 @@ describe("Behaviors", () => {
     b1s.forEach((b1s) => {
       assert.isTrue(b1s.updatedAt > b1s.createdAt);
 
-      assert.equal(b1s.createdBy, userIdToCreate);
-      assert.equal(b1s.updatedBy, userIdToUpdate);
+      assert.equal(b1s.createdById, userIdToCreate);
+      assert.equal(b1s.updatedById, userIdToUpdate);
     });
 
     teardown();

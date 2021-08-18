@@ -1,4 +1,4 @@
-import { Collection, Type } from "../../..";
+import { Collection } from "../../..";
 import { ObjectID } from "mongodb";
 import { User, Users } from "./users";
 import { Post, Posts } from "./posts";

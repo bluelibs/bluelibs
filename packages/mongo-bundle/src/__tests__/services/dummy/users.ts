@@ -1,4 +1,5 @@
-import { Collection, Type } from "../../..";
+import { Collection } from "../../..";
+import { Type } from "class-transformer";
 import { ObjectID } from "mongodb";
 import { Comment, Comments } from "./comments";
 import { Posts, Post } from "./posts";
