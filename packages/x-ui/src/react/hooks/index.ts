@@ -66,4 +66,11 @@ export const useUISession = (): UISession => {
   return use(UISession);
 };
 
-export const useTranslate = () => use(I18NService).t;
+export const useTranslate = (prefix?: string) => {
+  const t = use(I18NService).t;
+  if (!prefix) {
+    return t;
+  } else {
+    return (s) => t(prefix + "." + s);
+  }
+};
