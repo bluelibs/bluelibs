@@ -39,6 +39,8 @@ export const DASHBOARD = {
   component: Dashboard,
   // optionally require certain roles that you can define in a Roles enum
   roles: [Roles.ADMIN],
+
+  // You have the ability to create menu items from the route directly
   menu: {
     icon: RightOutlined, // Use any from: https://ant.design/components/icon/
     key: "DASHBOARD", // a unique name
@@ -61,6 +63,29 @@ export class UIAppBundle extends Bundle {
     router.add(Routes);
   }
 }
+```
+
+If you want to nest menu items you have to specify `inject` property:
+
+```tsx
+export const DASHBOARD = {
+  path: "/dashboard",
+  component: Dashboard,
+  // You have the ability to create menu items from the route directly
+  menu: {
+    key: "DASHBOARD", // a unique name
+    label: "Dashboard",
+  },
+};
+
+export const DASHBOARD_SPECIFICS = {
+  path: "/dashboard",
+  component: Dashboard,
+  menu: {
+    key: "SPECIFICS", // a unique name
+    inject: "DASHBOARD", // You can also inject another one under "DASHBOARD.SPECIFICS"
+  },
+};
 ```
 
 ## Consumers
@@ -229,6 +254,7 @@ export class CompanyEditForm extends XForm {
         id: "name",
         label: "Name",
         name: ["name"],
+        rules: [], // Ant Form Rules: https://ant.design/components/form/#Rule
         render: (props) => (
           <Ant.Form.Item {...props}>
             <Ant.Input />

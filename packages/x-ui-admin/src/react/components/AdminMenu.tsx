@@ -4,6 +4,7 @@ import {
   use,
   useGuardian,
   useRouter,
+  useTranslate,
   useUIComponents,
   XRouter,
 } from "@bluelibs/x-ui";
@@ -12,10 +13,13 @@ import { IMenuItemConfig } from "../../defs";
 
 const AntdSubMenu = AntdMenu.SubMenu;
 
+type Translator = (key: string) => string;
+
 export function AdminMenu() {
   const menuService = use(MenuService);
   const guardian = useGuardian();
   const router = useRouter();
+  const t = useTranslate();
   const Components = useUIComponents();
 
   if (!guardian.state.initialised) {
@@ -44,7 +48,7 @@ export function AdminMenu() {
     >
       {/* Make sure that subitems are right under Menu or it will fail */}
       {items.map((item) => {
-        return renderItem(item, router);
+        return renderItem(item, router, t);
       })}
     </AntdMenu>
   );
@@ -52,13 +56,14 @@ export function AdminMenu() {
 
 export function renderItem(
   item: IMenuItemConfig,
-  router: XRouter
+  router: XRouter,
+  t: Translator
 ): React.ReactElement {
   if (item.subitems && item.subitems.length) {
     return (
       <AntdSubMenu
         key={item.key}
-        title={<ItemRender item={item} />}
+        title={<ItemRender item={item} t={t} />}
         icon={item.icon ? React.createElement(item.icon) : undefined}
         onTitleClick={(e) => {
           if (item.path) {
@@ -67,7 +72,7 @@ export function renderItem(
         }}
       >
         {item.subitems.map((subitem) => {
-          return renderItem(subitem, router);
+          return renderItem(subitem, router, t);
         })}
       </AntdSubMenu>
     );
@@ -83,21 +88,22 @@ export function renderItem(
       }}
       icon={item.icon ? React.createElement(item.icon) : undefined}
     >
-      <ItemRender item={item} />
+      <ItemRender item={item} t={t} />
     </AntdMenu.Item>
   );
 }
 
 type ItemRenderProps = {
   item: IMenuItemConfig;
+  t: Translator;
   children?: any;
 };
 
 function ItemRender(props: ItemRenderProps) {
-  const { item } = props;
+  const { item, t } = props;
 
   if (typeof item.label === "string") {
-    return <span>{item.label}</span>;
+    return <span>{t(item.label)}</span>;
   }
 
   return React.createElement(item.label);

@@ -6,9 +6,6 @@ import * as startCase from "lodash.startcase";
 
 export type AdminListItemRendererProps = {
   value: any;
-  /**
-   * These should match the Excel Generator
-   */
   type:
     | "string"
     | "tag"

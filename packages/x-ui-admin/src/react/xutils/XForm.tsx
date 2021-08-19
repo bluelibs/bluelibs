@@ -12,6 +12,7 @@ import {
   XUI_COMPONENTS_TOKEN,
 } from "@bluelibs/x-ui";
 import { Inject, Service } from "@bluelibs/core";
+import { Rule } from "antd/lib/form";
 
 export type XFormElementBaseType = {
   id: string;
@@ -22,6 +23,7 @@ export type XFormElementBaseType = {
   fieldKey?: (string | number)[];
   label?: string;
   isList?: boolean;
+  rules?: Rule[];
   listRenderer?: () => ListChildrenFunction;
 };
 
@@ -141,12 +143,14 @@ export abstract class XForm extends Consumer<XFormElementType> {
     const label = item.label === undefined ? item.id : item.label;
     const required = item.required || false;
     const tooltip = item.tooltip || undefined;
+    const rules = item.rules || undefined;
     const UIComponents = this.UIComponents;
     const props: Ant.FormItemProps = {
       name,
       label,
       required,
       tooltip,
+      rules,
       fieldKey: item.fieldKey,
     };
 
