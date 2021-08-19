@@ -2,22 +2,26 @@ import { SecurityService } from "@bluelibs/security-bundle";
 import { PasswordService } from "../../services/PasswordService";
 import { createEcosystem } from "../ecosystem";
 import { assert } from "chai";
+import { ContainerInstance } from "@bluelibs/core";
+import { UsernameAlreadyExistsException } from "../../exceptions";
 
 describe("PasswordService", () => {
-  it("Should allow to create a user with a password and authenticate him", async () => {
+  it("Should allow to create a user with a password and check password validity", async () => {
     const { container } = await createEcosystem();
 
     const securityService = container.get(SecurityService);
     const passwordService = container.get(PasswordService);
 
     const userId = await securityService.createUser();
-    passwordService.attach(userId, {
+    await passwordService.attach(userId, {
       password: "123456",
-      username: "john@john.com",
+      username: "john@johnny.com",
     });
 
     assert.isTrue(await passwordService.isPasswordValid(userId, "123456"));
     assert.isFalse(await passwordService.isPasswordValid(userId, "1x23456"));
+
+    await securityService.deleteUser(userId);
   });
 
   it("Should allow setting new passwords", async () => {
@@ -27,13 +31,15 @@ describe("PasswordService", () => {
     const passwordService = container.get(PasswordService);
 
     const userId = await securityService.createUser();
-    passwordService.attach(userId, {
+    await passwordService.attach(userId, {
       password: "123456",
       username: "john@john.com",
     });
 
     await passwordService.setPassword(userId, "123");
     assert.isTrue(await passwordService.isPasswordValid(userId, "123"));
+
+    await securityService.deleteUser(userId);
   });
 
   it("Should allow resetting passwords with a token", async () => {
@@ -63,6 +69,8 @@ describe("PasswordService", () => {
     await expect(
       passwordService.resetPassword(userId, token, "123")
     ).rejects.toBeInstanceOf(Error);
+
+    await securityService.deleteUser(userId);
   });
 
   it("Password reset requests should have a cooldown period and should expire after a while", async () => {
@@ -86,9 +94,8 @@ describe("PasswordService", () => {
     // So, if I do one request now, the next one I can do after cooldown.
 
     // Should be ok
-    const passwordRequestToken = await passwordService.createTokenForPasswordReset(
-      userId
-    );
+    const passwordRequestToken =
+      await passwordService.createTokenForPasswordReset(userId);
 
     // Now this next one, the cooldown is 1m so we should expect an error, we already requested it few ms ago
     await expect(
@@ -118,6 +125,8 @@ describe("PasswordService", () => {
     await expect(
       passwordService.resetPassword(userId, lastToken, "somepw")
     ).rejects.toBeInstanceOf(Error);
+
+    await securityService.deleteUser(userId);
   });
 
   it("Should allow changing username, emails", async () => {
@@ -142,11 +151,13 @@ describe("PasswordService", () => {
 
     foundUserId = await passwordService.findUserIdByUsername("123456");
     assert.isUndefined(foundUserId);
+
+    await securityService.deleteUser(userId);
   });
 
-  it("Should properly dispatch the events of invalid password, locking user attempts ", () => {
-    // TODO: maybe this should be done in another bundle
-  });
+  // it("Should properly dispatch the events of invalid password, locking user attempts ", () => {
+  //   // TODO: maybe this should be done in another bundle
+  // });
 
   it("It should limit and lock the user after certain invalid attempts, but unlock after some time", async () => {
     const { container } = await createEcosystem({
@@ -189,6 +200,46 @@ describe("PasswordService", () => {
     await expect(
       passwordService.isPasswordValid(userId, "123")
     ).rejects.toBeInstanceOf(Error);
+
+    await securityService.deleteUser(userId);
   });
-  // it(" ", () => {});
+
+  it("Should check whether the username already exists and disallow creation", async () => {
+    const { container } = await createEcosystem();
+
+    const securityService = container.get(SecurityService);
+    const passwordService = container.get(PasswordService);
+
+    const userId = await securityService.createUser();
+    await passwordService.attach(userId, {
+      password: "123456",
+      username: "john@john.com",
+    });
+
+    const userId2 = await securityService.createUser();
+    expect(
+      passwordService.attach(userId2, {
+        password: "123456",
+        username: "john@john.com",
+      })
+    ).rejects.toBeInstanceOf(UsernameAlreadyExistsException);
+
+    await passwordService.setUsername(userId, "johnny@johnny.com");
+
+    const userIdFound = await passwordService.findUserIdByUsername(
+      "johnny@johnny.com"
+    );
+    expect(userIdFound).toEqual(userId);
+    await passwordService.attach(userId2, {
+      password: "123456",
+      username: "john@john.com",
+    });
+
+    expect(
+      passwordService.setUsername(userId, "john@john.com")
+    ).rejects.toBeInstanceOf(UsernameAlreadyExistsException);
+
+    await securityService.deleteUser(userId);
+    await securityService.deleteUser(userId2);
+  });
 });

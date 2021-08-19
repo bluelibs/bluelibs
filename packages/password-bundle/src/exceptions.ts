@@ -1,5 +1,14 @@
 import { Exception } from "@bluelibs/core";
 
+export class UsernameAlreadyExistsException extends Exception<{
+  username: string;
+}> {
+  getMessage() {
+    const { username } = this.data;
+
+    return `Username "${username}" already exists`;
+  }
+}
 export class CooldownException extends Exception<{
   context: "login" | "reset-password";
 }> {

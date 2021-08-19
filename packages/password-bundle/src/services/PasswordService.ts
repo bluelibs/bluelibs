@@ -24,6 +24,7 @@ import {
   CooldownException,
   PasswordResetExpiredException,
   ResetPasswordInvalidTokenException,
+  UsernameAlreadyExistsException,
 } from "../exceptions";
 
 @Service()
@@ -48,16 +49,15 @@ export class PasswordService implements IPasswordService {
   async findUserIdByUsername(
     username: string,
     fields?: IFieldMap
-  ): Promise<any> {
-    const result = await this.securityService.findThroughAuthenticationStrategy<
-      IPasswordAuthenticationStrategy
-    >(
-      this.method,
-      {
-        username,
-      },
-      fields
-    );
+  ): Promise<UserId> {
+    const result =
+      await this.securityService.findThroughAuthenticationStrategy<IPasswordAuthenticationStrategy>(
+        this.method,
+        {
+          username,
+        },
+        fields
+      );
 
     return result?.userId;
   }
@@ -66,6 +66,11 @@ export class PasswordService implements IPasswordService {
     userId: UserId,
     options: IPasswordAuthenticationStrategyCreationOptions
   ): Promise<void> {
+    const usernameExists = await this.usernameExists(options.username);
+    if (usernameExists) {
+      throw new UsernameAlreadyExistsException({ username: options.username });
+    }
+
     const salt = this.hasherService.generateSalt();
     const passwordHash = this.hasherService.getHashedPassword(
       options.password,
@@ -294,7 +299,7 @@ export class PasswordService implements IPasswordService {
    * @param username
    */
   async setUsername(userId: UserId, username: string): Promise<void> {
-    this.updateData(userId, {
+    await this.updateData(userId, {
       username,
     });
   }
@@ -308,9 +313,52 @@ export class PasswordService implements IPasswordService {
     userId,
     fields?: IFieldMap
   ): Promise<Partial<IPasswordAuthenticationStrategy>> {
-    return this.securityService.getAuthenticationStrategyData<
-      IPasswordAuthenticationStrategy
-    >(userId, this.method, fields);
+    return this.securityService.getAuthenticationStrategyData<IPasswordAuthenticationStrategy>(
+      userId,
+      this.method,
+      fields
+    );
+  }
+
+  /**
+   * Checks if there is already an username attached with this information
+   *
+   * @param username
+   * @param exceptUserId You can also except certain users, like for example when you are updating certain user data
+   * @returns
+   */
+  async usernameExists(
+    username: string,
+    exceptUserId?: UserId
+  ): Promise<boolean> {
+    if (exceptUserId) {
+      const result =
+        await this.securityService.findThroughAuthenticationStrategy(
+          this.method,
+          {
+            username,
+          }
+        );
+
+      if (!result) {
+        return false;
+      }
+      if (result.userId.toString() === exceptUserId.toString()) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      const result =
+        await this.securityService.findThroughAuthenticationStrategy(
+          this.method,
+          {
+            username,
+          }
+        );
+
+      return Boolean(result);
+    }
   }
 
   /**
@@ -322,9 +370,18 @@ export class PasswordService implements IPasswordService {
     userId,
     data: Partial<IPasswordAuthenticationStrategy>
   ): Promise<void> {
-    return this.securityService.updateAuthenticationStrategyData<
-      IPasswordAuthenticationStrategy
-    >(userId, this.method, data);
+    if (data.username) {
+      const alreadyExists = await this.usernameExists(data.username, userId);
+      if (alreadyExists) {
+        throw new UsernameAlreadyExistsException({ username: data.username });
+      }
+    }
+
+    await this.securityService.updateAuthenticationStrategyData<IPasswordAuthenticationStrategy>(
+      userId,
+      this.method,
+      data
+    );
   }
 
   /**
