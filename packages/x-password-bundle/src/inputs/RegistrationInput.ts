@@ -8,7 +8,7 @@ export class RegistrationInput {
   @Is(a.string().required())
   lastName?: string;
 
-  @Is(a.string().required())
+  @Is(a.string().email().required())
   email: string;
 
   @Is(a.string().required())
