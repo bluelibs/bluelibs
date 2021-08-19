@@ -1,4 +1,9 @@
-import { Service, Inject, ContainerInstance, Constructor } from "@bluelibs/core";
+import {
+  Service,
+  Inject,
+  ContainerInstance,
+  Constructor,
+} from "@bluelibs/core";
 import { jsonToGraphQLQuery, VariableType } from "json-to-graphql-query";
 import { ApolloClient } from "./ApolloClient";
 import { gql, DocumentNode, FetchPolicy } from "@apollo/client/core";
@@ -350,7 +355,8 @@ export abstract class Collection<T = any> {
       .then((result) => {
         const data = JSON.parse(JSON.stringify(result.data[operationName]));
         try {
-          cleanTypename(data);
+          // We do this so we can easily use documents without stripping typename every time
+          cleanTypename(data, body);
           this.transform(data);
         } catch (err) {
           console.error(err);

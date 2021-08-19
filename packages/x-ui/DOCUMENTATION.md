@@ -16,7 +16,7 @@ We begin by defining our kernel, and our initial bundle
 ```tsx title="kernel.ts"
 import { Kernel } from "@bluelibs/core";
 import { XUIBundle } from "@bluelibs/x-ui";
-import { UIAppBundle } from "{...}/UIAppBundle";
+import { UIAppBundle } from "@bundles/UIAppBundle";
 
 // All UI bundles need to be prefixed with UI
 // All X-Framework bundles have the first prefix X
