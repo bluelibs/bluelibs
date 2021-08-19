@@ -2,6 +2,7 @@ import { Constructor } from "@bluelibs/core";
 import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
 import * as graphqlFields from "graphql-fields";
+import * as dot from "dot-object";
 import { intersectGraphQLBodies } from "./utils/intersectGraphQLBodies";
 import {
   IPermissionSearchFilter,
@@ -127,6 +128,7 @@ Secure.IsUser = function (
     const userId = (ctx as any).userId;
 
     if (!userId) {
+      // Maybe we should have a different error here?
       throw new UserNotAuthorizedException();
     }
 
@@ -168,8 +170,12 @@ Secure.Match = {
    */
   Roles: function (roles: string | string[]): SecureGraphQLResolver<boolean> {
     return async function (_, args, ctx, ast) {
-      const permissionsService = ctx.container.get(PermissionService);
       const userId = (ctx as any).userId;
+      if (!userId) {
+        return false;
+      }
+
+      const permissionsService = ctx.container.get(PermissionService);
 
       return permissionsService.has({
         userId: userId,
