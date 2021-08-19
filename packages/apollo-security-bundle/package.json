@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/apollo-security-bundle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Get access to currently logged in users through GraphQL context",
   "main": "dist/index.js",
   "repository": {

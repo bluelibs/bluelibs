@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "private": false,
   "description": "X-UI represents a set of standards to build scalable UI using X-Framework by BlueLibs",
   "main": "dist/index.js",

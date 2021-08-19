@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/email-bundle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Provides easy strategy to send emails using server-side rendered React templates",
   "main": "dist/index.js",
   "repository": {
@@ -37,7 +37,7 @@
     "@types/chai": "^4.2.3",
     "@types/chai-as-promised": "^7.1.2",
     "@types/graphql": "^0.11.3",
-    "@types/jest": "^25.2.3",
+    "@types/jest": "^26.0.0",
     "@types/node": "^8.0.28",
     "@types/nodemailer": "^6.4.0",
     "@types/react": "^17.0.0",
