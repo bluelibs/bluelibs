@@ -71,10 +71,13 @@ export class UICollectionCRUDWriter extends BlueprintWriter {
           }
         );
 
-        function copy(configPath, targetPath) {
+        function copy(configPath, targetPath, ignoreIfExists: boolean = false) {
           fsOperator.sessionCopy(
             tpl("ui/crud2/config/" + configPath),
-            path.join(crudDir, "config", targetPath)
+            path.join(crudDir, "config", targetPath),
+            {
+              ignoreIfExists,
+            }
           );
         }
 
@@ -83,18 +86,23 @@ export class UICollectionCRUDWriter extends BlueprintWriter {
             `create.config.base.tsx.tpl`,
             `${model.entityName}CreateForm.base.tsx`
           );
-          copy(`create.config.tsx.tpl`, `${model.entityName}CreateForm.tsx`);
+          copy(
+            `create.config.tsx.tpl`,
+            `${model.entityName}CreateForm.tsx`,
+            true
+          );
         }
         if (feature === "list") {
           copy(`list.config.base.tsx.tpl`, `${model.entityName}List.base.tsx`);
-          copy(`list.config.tsx.tpl`, `${model.entityName}List.tsx`);
+          copy(`list.config.tsx.tpl`, `${model.entityName}List.tsx`, true);
           copy(
             `listFiltersForm.base.tsx.tpl`,
             `${model.entityName}ListFiltersForm.base.tsx`
           );
           copy(
             `listFiltersForm.tsx.tpl`,
-            `${model.entityName}ListFiltersForm.tsx`
+            `${model.entityName}ListFiltersForm.tsx`,
+            true
           );
         }
         if (feature === "edit") {
@@ -102,14 +110,14 @@ export class UICollectionCRUDWriter extends BlueprintWriter {
             `edit.config.base.tsx.tpl`,
             `${model.entityName}EditForm.base.tsx`
           );
-          copy(`edit.config.tsx.tpl`, `${model.entityName}EditForm.tsx`);
+          copy(`edit.config.tsx.tpl`, `${model.entityName}EditForm.tsx`, true);
         }
         if (feature === "view") {
           copy(
             `view.config.base.tsx.tpl`,
             `${model.entityName}Viewer.base.tsx`
           );
-          copy(`view.config.tsx.tpl`, `${model.entityName}Viewer.tsx`);
+          copy(`view.config.tsx.tpl`, `${model.entityName}Viewer.tsx`, true);
         }
       }
     });
