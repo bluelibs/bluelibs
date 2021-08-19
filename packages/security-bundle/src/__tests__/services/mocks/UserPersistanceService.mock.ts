@@ -80,7 +80,7 @@ export class UserPersistanceService implements IUserPersistance {
 
     return {
       userId: user._id,
-      strategy: user[methodName],
+      strategy: user.services[methodName],
     };
   }
 
