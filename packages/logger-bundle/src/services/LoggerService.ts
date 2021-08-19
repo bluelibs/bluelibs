@@ -19,7 +19,7 @@ export class LoggerService implements ILogger {
   /**
    * Log a critical message. Critical logs are used for security breaches or things that have high business impact
    */
-  async critical(message: string, context: any): Promise<void> {
+  async critical(message: string, context?: any): Promise<void> {
     const log = new Log(message, LogLevel.CRITICAL, context);
 
     await this.send(log);

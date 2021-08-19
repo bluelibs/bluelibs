@@ -16,5 +16,8 @@ test("Initialises and works", async () => {
     inEvent = true;
   });
   await logger.info("hello");
+  await logger.error("hello");
+  await logger.warning("hello");
+  await logger.critical("hello");
   expect(inEvent).toBe(true);
 });
