@@ -5,7 +5,7 @@ title: Core
 
 import { PackageHeader } from "@site/src/components/PackageHeader";
 
-<PackageHeader version="1.1.1" packageName="x-ui"  />
+<PackageHeader version="1.1.4" packageName="x-ui"  />
 
 This bundle is a set of tools allowing you to do beautiful frontends. Using the X-Framework.
 
@@ -25,7 +25,7 @@ We begin by defining our kernel, and our initial bundle
 ```tsx title="kernel.ts"
 import { Kernel } from "@bluelibs/core";
 import { XUIBundle } from "@bluelibs/x-ui";
-import { UIAppBundle } from "{...}/UIAppBundle";
+import { UIAppBundle } from "@bundles/UIAppBundle";
 
 // All UI bundles need to be prefixed with UI
 // All X-Framework bundles have the first prefix X
