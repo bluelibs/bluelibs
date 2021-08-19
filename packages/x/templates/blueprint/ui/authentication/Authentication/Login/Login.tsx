@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useGuardian, useRouter } from "@bluelibs/x-ui";
+import { useGuardian, useRouter, useTranslate } from "@bluelibs/x-ui";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { Routes } from "@bundles/UIAppBundle";
+import { ApolloError } from "@apollo/client";
 import {
   Layout,
   Form,
@@ -25,8 +26,9 @@ type FormInput = {
 export function Login() {
   const guardian = useGuardian();
 
+  const tl = useTranslate("authentication.login");
   const router = useRouter();
-  const [loginError, setLoginError] = useState(null);
+  const [loginError, setLoginError] = useState<ApolloError>(null);
   // const { register, handleSubmit, errors } = useForm<FormInput>();
   const onSubmit = (data: FormInput) => {
     const { username, password } = data;
@@ -39,38 +41,30 @@ export function Login() {
         router.go(Routes.DASHBOARD);
       })
       .catch((err) => {
-        setLoginError(err.toString());
+        setLoginError(err);
       });
   };
 
   const style = { minHeight: "100vh" };
   return (
-    <Row justify="center" align="middle" style={style}>
+    <Row justify="center" align="middle" style={style} className="login-page">
       <Col sm={24} md={12} lg={6}>
-        <Card title="Application Login">
+        <Card title={tl("header")}>
           <Form
             className="authentication-form"
             onFinish={(data) => onSubmit(data)}
           >
-            <Form.Item
-              name="username"
-              rules={[{ required: true, message: "Please input your Email!" }]}
-            >
+            <Form.Item name="username" rules={[{ required: true }]}>
               <Input
                 prefix={<UserOutlined className="site-form-item-icon" />}
-                placeholder="Email"
+                placeholder={tl("fields.username")}
               />
             </Form.Item>
-            <Form.Item
-              name="password"
-              rules={[
-                { required: true, message: "Please input your Password!" },
-              ]}
-            >
+            <Form.Item name="password" rules={[{ required: true }]}>
               <Input
                 prefix={<LockOutlined className="site-form-item-icon" />}
                 type="password"
-                placeholder="Password"
+                placeholder={tl("fields.password")}
               />
             </Form.Item>
             <Form.Item>
@@ -78,7 +72,7 @@ export function Login() {
                 className="authentication-form-forgot"
                 to={router.path(Routes.FORGOT_PASSWORD)}
               >
-                Forgot password
+                {tl("forgotPassword_btn")}
               </Link>
             </Form.Item>
 
@@ -88,11 +82,23 @@ export function Login() {
                 htmlType="submit"
                 className="authentication-form-button"
               >
-                Log in
+                {tl("login")}
               </Button>
-              Or <Link to={router.path(Routes.REGISTER)}>register now!</Link>
+              {tl("or")}{" "}
+              <Link to={router.path(Routes.REGISTER)}>
+                {tl("register_action")}
+              </Link>
             </Form.Item>
-            {loginError && <Alert message="Invalid credentials" type="error" />}
+            {loginError && (
+              <Alert
+                message={
+                  loginError.networkError
+                    ? loginError.toString()
+                    : tl("invalid_credentials")
+                }
+                type="error"
+              />
+            )}
           </Form>
         </Card>
       </Col>

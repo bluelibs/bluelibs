@@ -1,66 +1,21 @@
-/** @overridable */
-import { notification } from "antd";
-import { SmileOutlined } from '@ant-design/icons';
-import { XFormElementType, XList, XForm } from "@bluelibs/x-ui-admin";
-import { Routes } from "@bundles/{{ bundleName }}";
 import { Service } from "@bluelibs/core";
-import { IComponents, XRouter, use, QueryBodyType } from "@bluelibs/x-ui";
-import * as Ant from "antd";
+import { QueryBodyType } from '@bluelibs/x-ui';
 import {
-  {{ entityName }},
-  {{# each collectionClassNamesOfInterest }}
-    {{ this }},
-  {{/ each }}
+  {{ entityName }}
 } from "@bundles/{{ bundleName }}/collections";
+import { {{ entityName }}List as Base{{ entityName }}List } from "./{{ entityName }}List.base";
 
 @Service({ transient: true })
-export class {{ entityName }}List extends XList<{{ entityName }}> {
+export class {{ entityName }}List extends Base{{ entityName }}List {
   build() {
-    const { UIComponents, router } = this;
+    super.build();
+    // Perform additional modifications such as updating how a list item renders or add additional ones
 
-    this.add([
-      {{# each (antColumns "list") }}
-        {
-          id: "{{ id }}",
-          {{# if order }}
-            order: {{ order }},
-          {{/ if }}
-          title: "{{ title }}",
-          key: "{{ title }}",
-          dataIndex: {{ dataIndexStr }},
-          sorter: true,
-          render: (value, model) => {
-            {{> listItemRendition }}
-          },
-        },
-      {{/ each }}
-    ]);
-  }
-
-  static getSortMap() {
-    return {
-      {{# each (antColumns "list") }}
-        {{# if relational }}
-          "{{ id }}": "{{ id }}.{{ remoteField }}",
-        {{/ if }}
-      {{/ each }}
-    }
   }
 
   static getRequestBody(): QueryBodyType<{{ entityName }}> {
-    return {{ generateRequestBodyAsString "list" }}
-  }
-}
+    // You have the ability to modify the request by adding certain fields or relations
 
-@Service({ transient: true })
-export class {{ entityName }}ListFiltersForm extends XForm {
-  build() {
-    const { UIComponents } = this;
-
-    this.add([
-      {{# each (antColumns "listFilters") }}
-        {{> formXElementForFiltering }}
-      {{/ each }}
-    ])
+    return super.getRequestBody();
   }
 }

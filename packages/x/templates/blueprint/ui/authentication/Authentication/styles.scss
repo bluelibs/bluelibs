@@ -1,3 +1,10 @@
+@import "./ChangePassword/ChangePassword.scss";
+@import "./ForgotPassword/ForgotPassword.scss";
+@import "./Login/Login.scss";
+@import "./Register/Register.scss";
+@import "./ResetPassword/ResetPassword.scss";
+@import "./VerifyEmail/VerifyEmail.scss";
+
 .authentication-form {
   // max-width: 400px;
   .authentication-form-forgot {

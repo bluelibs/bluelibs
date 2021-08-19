@@ -13,7 +13,7 @@ import { QueryBodyType } from "@bluelibs/x-ui";
 import { Service } from "@bluelibs/core";
 import * as Ant from "antd";
 import { features } from "../../config/features";
-import { {{ entityName }}List } from "../../config/{{ collectionName }}.list.config";
+import { {{ entityName }}List } from "../../config/{{ entityName }}List";
 
 export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityName }}> {
   collectionClass = {{ collectionClass }};
@@ -34,13 +34,13 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
 
   getActionsColumn(): ColumnType<{{ entityName }}> {
     return {
-      title: "Actions",
+      title: this.i18n.t('generics.list_actions'),
       key: "actions",
       fixed: "right",
       width: 180,
       render: (_, model) => {
         return this.generateActions(model, {
-          label: "Actions",
+          label: this.i18n.t('generics.list_actions'),
           icon: <DownOutlined />,
           items: this.getActionItems(),
         });
@@ -57,7 +57,7 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
 
     if (features.view) {
       actions.push({
-        label: "View",
+        label: this.i18n.t('generics.view'),
         icon: <EyeOutlined />,
         action: (model) => {
           this.router.go(Routes.{{ generateRouteName "view" }}, {
@@ -69,7 +69,7 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
     
     if (features.edit) {
       actions.push({
-        label: "Edit",
+        label: this.i18n.t('generics.edit'),
         icon: <EditOutlined />,
         action: (model) => {
           this.router.go(Routes.{{ generateRouteName "edit" }}, {
@@ -81,9 +81,9 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
 
     if (features.delete) {
       actions.push({
-        label: "Remove",
+        label: this.i18n.t('generics.delete'),
         icon: <DeleteOutlined />,
-        confirm: "Are you sure you want to delete?",
+        confirm: this.i18n.t('generics.ask_confirmation'),
         action: (model) => {
           this.collection.deleteOne(model._id).then(() => {
             this.load();

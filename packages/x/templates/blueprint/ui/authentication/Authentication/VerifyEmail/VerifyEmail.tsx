@@ -1,4 +1,4 @@
-import { useGuardian, useRouter } from "@bluelibs/x-ui";
+import { useGuardian, useRouter, useTranslate } from "@bluelibs/x-ui";
 import React, { useEffect, useState } from "react";
 import { Routes } from "@bundles/UIAppBundle";
 import {
@@ -20,6 +20,7 @@ export function VerifyEmail(props: { token: string }) {
   const { token } = props;
   const guardian = useGuardian();
   const router = useRouter();
+  const tl = useTranslate("authentication.verifyEmail");
 
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isVerifyingEmail, setIsVerifyingEmail] = useState(true);
@@ -44,21 +45,18 @@ export function VerifyEmail(props: { token: string }) {
   }, []);
   const style = { minHeight: "100vh" };
   return (
-    <Row justify="center" align="middle" style={style}>
+    <Row
+      justify="center"
+      align="middle"
+      style={style}
+      className="verify-email-page"
+    >
       <Col sm={24} md={12} lg={6}>
-        <Card title="Verification Step">
-          {isVerifyingEmail && <Alert message="Verifying your email..." />}
-          {isEmailVerified && (
-            <Alert
-              type="success"
-              message="Your email has been verified. Redirecting ..."
-            />
-          )}
+        <Card title={tl("header")}>
+          {isVerifyingEmail && <Alert message={tl("verifying")} />}
+          {isEmailVerified && <Alert type="success" message={tl("success")} />}
           {emailVerificationError && (
-            <Alert
-              type="error"
-              message="We could not verify your email. Maybe it was already verified."
-            />
+            <Alert type="error" message={tl("errored")} />
           )}
         </Card>
       </Col>

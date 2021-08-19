@@ -119,6 +119,7 @@ export class Field extends BaseModel<Field> {
 
   clean() {
     this.storeUIDefaults();
+    // this.subfields = this.instanceify(this.subfields, Field);
 
     if (!this.mock.generator) {
       this.mock.generator = Fixturizer.getRandomGenerator(this);
@@ -206,5 +207,72 @@ export class Field extends BaseModel<Field> {
         return subfield.ui !== false;
       }
     });
+  }
+
+  /**
+   * Depending on whether this field is a model or has subfields it will return the list of subfields it's got
+   */
+  getSelfAndAllNestedFields(): Field[] {
+    const fields: Field[] = [this];
+
+    if (this.model) {
+      this.cleaned.model.fields.forEach((field) => {
+        fields.push(...field.getSelfAndAllNestedFields());
+      });
+    } else if (this.subfields.length) {
+      this.subfields.forEach((field) => {
+        fields.push(...field.getSelfAndAllNestedFields());
+      });
+    }
+
+    return fields;
+  }
+
+  /**
+   * Gets the i18n signature (key, label) based on what the information about it should be
+   *
+   * @returns
+   */
+  getI18NSignature(): { key: string; label: string; description?: string } {
+    const parents: Field[] = [];
+    let current: Field = this;
+
+    while (current.parent) {
+      parents.push(current.parent);
+      if (!current.parent) {
+        break;
+      } else {
+        current = current.parent;
+      }
+    }
+
+    const label = this.ui ? this.ui.label : this.id;
+    if (parents.length === 0) {
+      return { key: this.id, label, description: this.description };
+    }
+
+    let keySignature = "";
+    let labelSignature = "";
+    parents.reverse().forEach((field) => {
+      keySignature = keySignature + field.id + ".";
+      labelSignature = labelSignature + field.getLabel() + " — ";
+    });
+
+    return {
+      key: keySignature + this.id,
+      label: labelSignature + label,
+      description: this.description,
+    };
+  }
+
+  /**
+   * @returns a label for the field whether it has ui or not.
+   */
+  getLabel(): string {
+    if (this.ui) {
+      return this.ui.label || this.id;
+    }
+
+    return this.id;
   }
 }

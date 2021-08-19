@@ -91,6 +91,9 @@ export class Collection extends BaseModel<Collection> {
   };
 
   clean() {
+    // this.fields = this.instanceify(this.fields, Field);
+    // this.relations = this.instanceify(this.relations, Relation);
+
     // ensure an entity name
     if (!this.entityName) {
       this.entityName = _.upperFirst(Inflected.singularize(this.id));
@@ -159,6 +162,19 @@ export class Collection extends BaseModel<Collection> {
    */
   public isExternal(): boolean {
     return Boolean(this.externalPackage);
+  }
+
+  /**
+   * Gets all fields and subfields in a flatten fashion
+   * @returns
+   */
+  public getFlattenedFields(): Field[] {
+    const fields = [];
+    this.fields.forEach((field) => {
+      fields.push(...field.getSelfAndAllNestedFields());
+    });
+
+    return fields;
   }
 
   /**

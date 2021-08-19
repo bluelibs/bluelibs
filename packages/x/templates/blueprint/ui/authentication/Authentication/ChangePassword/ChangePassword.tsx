@@ -1,4 +1,9 @@
-import { useGuardian, useUIComponents, useRouter } from "@bluelibs/x-ui";
+import {
+  useGuardian,
+  useUIComponents,
+  useRouter,
+  useTranslate,
+} from "@bluelibs/x-ui";
 import { useState } from "react";
 import { LockOutlined } from "@ant-design/icons";
 import {
@@ -21,6 +26,8 @@ type FormInput = {
 export function ChangePassword() {
   const guardian = useGuardian();
   const router = useRouter();
+  const tl = useTranslate("authentication.changePassword");
+
   const UIComponents = useUIComponents();
   const [submitError, setSubmitError] = useState(null);
   const [isCompleted, setIsComplete] = useState(false);
@@ -39,11 +46,9 @@ export function ChangePassword() {
   const style = { width: 400, border: 0 };
   return (
     <UIComponents.AdminLayout>
-      <PageHeader title="Change your password" />
-      <Card style={style}>
-        {isCompleted && (
-          <Alert type="success" message="Your password has been changed." />
-        )}
+      <PageHeader title={tl("header")} />
+      <Card style={style} className="change-password-page">
+        {isCompleted && <Alert type="success" message={tl("successMessage")} />}
         {!isCompleted && (
           <Form
             onFinish={(data) => onSubmit(data)}
@@ -52,23 +57,22 @@ export function ChangePassword() {
             <Form.Item
               name="oldPassword"
               rules={[
-                { required: true, message: "Current Password is required" },
+                {
+                  required: true,
+                },
               ]}
             >
               <Input
                 prefix={<LockOutlined className="site-form-item-icon" />}
                 type="password"
-                placeholder="Current Password"
+                placeholder={tl("fields.current")}
               />
             </Form.Item>
-            <Form.Item
-              name="newPassword"
-              rules={[{ required: true, message: "New Password is required" }]}
-            >
+            <Form.Item name="newPassword" rules={[{ required: true }]}>
               <Input
                 prefix={<LockOutlined className="site-form-item-icon" />}
                 type="password"
-                placeholder="New Password"
+                placeholder={tl("fields.newPassword")}
               />
             </Form.Item>
 
@@ -78,7 +82,7 @@ export function ChangePassword() {
                 htmlType="submit"
                 className="authentication-form-button"
               >
-                Change Password
+                {tl("submit")}
               </Button>
             </Form.Item>
             {submitError && <Alert message={`${submitError}`} type="error" />}

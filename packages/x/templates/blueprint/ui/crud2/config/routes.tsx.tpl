@@ -1,6 +1,6 @@
 /** @overridable */
 import { IRoute } from "@bluelibs/x-ui";
-
+import * as React from "react";
 {{# if (hasFeature "list") }}
 import { {{ generateComponentName "list" }} } from "../components/List/{{ collectionName }}List";
 {{/ if }}
@@ -12,45 +12,54 @@ import { {{ generateComponentName "edit" }} } from "../components/Edit/{{ collec
 {{/ if }}
 {{# if (hasFeature "view") }}
 import { {{ generateComponentName "view" }} } from "../components/View/{{ collectionName }}View";
-import { {{ generateComponentName "viewLive" }} } from "../components/View/{{ collectionName }}ViewLive";
 {{/ if }}
 
 import { {{ icon }} } from "@ant-design/icons";
 
-{{# if (hasFeature "list") }}
+{{#*inline "nullComponent"}}
+component: () => {
+  console.error("This route is not available.");
+  return null;
+}
+{{/inline}}
+
 export const {{ generateRouteName "list" }}: IRoute = {
   path: "/admin/{{ collectionRoutePath }}",
-  component: {{ generateComponentName "list" }},
-  menu: {
-    key: "{{ generateRouteName "list" }}",
-    label: "{{ sheetName }}",
-    icon: {{ icon }},
-  }
+  {{# if (hasFeature "list") }}
+    component: {{ generateComponentName "list" }},
+    menu: {
+      key: "{{ generateRouteName "list" }}",
+      label: "management.{{ generateI18NName }}.menu.title",
+      icon: {{ icon }},
+    }
+  {{ else }}
+    {{> nullComponent }}
+  {{/ if }}
 };
-{{/ if }}
 
-{{# if (hasFeature "create") }}
 export const {{ generateRouteName "create" }}: IRoute = {
   path: "/admin/{{ collectionRoutePath }}/create",
+  {{# if (hasFeature "create") }}
   component: {{ generateComponentName "create" }},
+  {{ else }}
+    {{> nullComponent }}
+  {{/ if }}
 };
-{{/ if }}
 
-{{# if (hasFeature "edit") }}
 export const {{ generateRouteName "edit" }}: IRoute<{ id: string }> = {
   path: "/admin/{{ collectionRoutePath }}/:id/edit",
+  {{# if (hasFeature "edit") }}
   component: {{ generateComponentName "edit" }},
+  {{ else }}
+    {{> nullComponent }}
+  {{/ if }}
 };
-{{/ if }}
 
-{{# if (hasFeature "view") }}
 export const {{ generateRouteName "view" }}: IRoute<{ id: string }> = {
   path: "/admin/{{ collectionRoutePath }}/:id/view",
+  {{# if (hasFeature "view") }}
   component: {{ generateComponentName "view" }},
+  {{ else }}
+    {{> nullComponent }}
+  {{/ if }}
 };
-
-export const {{ generateRouteName "viewLive" }}: IRoute<{ id: string }> = {
-  path: "/admin/{{ collectionRoutePath }}/:id/view/live",
-  component: {{ generateComponentName "viewLive" }},
-};
-{{/ if }}

@@ -9,10 +9,10 @@ The differences between standard formXElements are:
  --}}
 {
   id: "{{ id }}",
-  label: "{{ title }}",
+  label: t("{{ title }}"),
   name: {{ dataIndexStr }},
   {{# if description }}
-    tooltip: "{{ description }}",
+    tooltip: t("{{ description }}"),
   {{/ if }}
   {{!-- OBJECT HANDLING --}}
   {{# if (@root.typeIs rendererType "object") }}

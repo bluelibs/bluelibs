@@ -1,4 +1,4 @@
-import { useGuardian, useRouter } from "@bluelibs/x-ui";
+import { useGuardian, useRouter, useTranslate } from "@bluelibs/x-ui";
 import React, { useState } from "react";
 import { Routes } from "@bundles/UIAppBundle";
 import {
@@ -26,6 +26,7 @@ type FormInput = {
 export function Register() {
   const guardian = useGuardian();
   const router = useRouter();
+  const tl = useTranslate("authentication.register");
   const [submitError, setSubmitError] = useState(null);
 
   const onSubmit = (data: FormInput) => {
@@ -39,9 +40,8 @@ export function Register() {
       })
       .then((token) => {
         notification.success({
-          message: "Registered!",
-          description:
-            "You have successfully created your account. We've sent you an email to verify your account.",
+          message: tl("success.header"),
+          description: tl("success.description"),
         });
 
         setSubmitError(null);
@@ -54,42 +54,29 @@ export function Register() {
 
   const style = { minHeight: "100vh" };
   return (
-    <Row justify="center" align="middle" style={style}>
+    <Row
+      justify="center"
+      align="middle"
+      style={style}
+      className="register-page"
+    >
       <Col sm={24} md={12} lg={6}>
-        <Card title="Registration">
+        <Card title={tl("header")}>
           <Form
             onFinish={(data) => onSubmit(data)}
             className="authentication-form"
           >
-            <Form.Item
-              name="firstName"
-              rules={[
-                { required: true, message: "Please input your First Name" },
-              ]}
-            >
-              <Input placeholder="First Name" />
+            <Form.Item name="firstName" rules={[{ required: true }]}>
+              <Input placeholder={tl("fields.firstName")} />
             </Form.Item>
-            <Form.Item
-              name="lastName"
-              rules={[
-                { required: true, message: "Please input your Last Name" },
-              ]}
-            >
-              <Input placeholder="Last Name" />
+            <Form.Item name="lastName" rules={[{ required: true }]}>
+              <Input placeholder={tl("fields.lastName")} />
             </Form.Item>
-            <Form.Item
-              name="email"
-              rules={[{ required: true, message: "Please input your Email" }]}
-            >
-              <Input placeholder="Email" />
+            <Form.Item name="email" rules={[{ required: true }]}>
+              <Input placeholder={tl("fields.email")} />
             </Form.Item>
-            <Form.Item
-              name="password"
-              rules={[
-                { required: true, message: "Please input your Password" },
-              ]}
-            >
-              <Input.Password placeholder="Password" />
+            <Form.Item name="password" rules={[{ required: true }]}>
+              <Input.Password placeholder={tl("fields.password")} />
             </Form.Item>
 
             <Form.Item>
@@ -98,12 +85,10 @@ export function Register() {
                 htmlType="submit"
                 className="authentication-form-button"
               >
-                Register
+                {tl("submit")}
               </Button>
             </Form.Item>
-            {submitError && (
-              <Alert message="Invalid credentials" type="error" />
-            )}
+            {submitError && <Alert message={submitError} type="error" />}
           </Form>
         </Card>
       </Col>

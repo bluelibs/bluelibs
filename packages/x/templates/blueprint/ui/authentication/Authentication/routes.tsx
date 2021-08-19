@@ -1,10 +1,15 @@
+import { i18n } from "@bundles/UIAppBundle/i18n";
+import AuthenticationMessages from "./Authentication.i18n.json";
+
 import { IRoute } from "@bluelibs/x-ui";
-import { Login } from "./Login";
-import { Register } from "./Register";
-import { VerifyEmail } from "./VerifyEmail";
-import { ForgotPassword } from "./ForgotPassword";
-import { ResetPassword } from "./ResetPassword";
-import { ChangePassword } from "./ChangePassword";
+import { Login } from "./Login/Login";
+import { Register } from "./Register/Register";
+import { VerifyEmail } from "./VerifyEmail/VerifyEmail";
+import { ForgotPassword } from "./ForgotPassword/ForgotPassword";
+import { ResetPassword } from "./ResetPassword/ResetPassword";
+import { ChangePassword } from "./ChangePassword/ChangePassword";
+
+i18n.push(AuthenticationMessages);
 
 export const LOGIN: IRoute = {
   path: "/login",

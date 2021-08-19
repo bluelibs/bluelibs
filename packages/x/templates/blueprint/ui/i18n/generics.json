@@ -1,0 +1,22 @@
+{
+  "en": {
+    "generics": {
+      "submit": "Submit",
+      "view": "View",
+      "email": "Email",
+      "edit": "Edit",
+      "success": "Success",
+      "delete": "Delete",
+      "ask_confirmation": "Are you sure?",
+      "remove": "Remove",
+      "error": "Error",
+      "error_message": "An error occured.",
+      "list_filters": "Filters",
+      "list_filters_reset": "Reset",
+      "list_search": "Search",
+      "list_actions": "Actions",
+      "live_data_view": "Live Data",
+      "or": "Or",
+    }
+  }
+}

@@ -6,8 +6,8 @@ import {
 import * as Ant from "antd";
 import * as React from "react";
 import * as debounce from "lodash.debounce";
-import { use } from "@bluelibs/x-ui";
-import { {{ entityName }}ListFiltersForm } from "../../config/{{ collectionName }}.list.config";
+import { use, useTranslate } from "@bluelibs/x-ui";
+import { {{ entityName }}ListFiltersForm } from "../../config/{{ entityName }}ListFiltersForm";
 
 type {{ generateComponentName "listFilters" }}Props = {
   onUpdate: (filters: any) => void;
@@ -17,6 +17,7 @@ export const {{ generateComponentName "listFilters" }} = React.memo({{ generateC
 
 export function {{ generateComponentName "listFilters" }}Base(props: {{ generateComponentName "listFilters" }}Props) {
   const [form] = Ant.Form.useForm();
+  const t = useTranslate();
 
   const debouncedFilterUpdates = React.useMemo(() => {
     const setFilters = (_, filters) => {
@@ -46,7 +47,7 @@ export function {{ generateComponentName "listFilters" }}Base(props: {{ generate
           form.resetFields()
           props.onUpdate({})
         }}>
-          Reset
+          {t('generics.list_filters_reset')}
         </Ant.Button>
       </Ant.Form.Item>
     </Ant.Form>

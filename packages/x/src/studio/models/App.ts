@@ -57,8 +57,32 @@ export class BaseModel<T = null> {
   clean() {}
 
   get cleaned(): Resolved<T> {
-    return (this as unknown) as Resolved<T>;
+    return this as unknown as Resolved<T>;
   }
+
+  // This triggers the following error at Field:
+  // TypeError: Class extends value undefined is not a constructor or null
+
+  // /**
+  //  * This is done to allow using data as JSON or objects not necessarily through factories.
+  //  *
+  //  * @param array
+  //  * @param constructor
+  //  * @returns
+  //  */
+  // protected instanceify<T extends BaseModel<any> = any>(
+  //   array: T[],
+  //   constructor: { new (...args: any[]): T }
+  // ): any[] {
+  //   return array.map((element) => {
+  //     if (element instanceof constructor) {
+  //       return element;
+  //     }
+  //     // Most likely it's an object
+  //     const newElement = new constructor();
+  //     newElement.blend(element);
+  //   });
+  // }
 }
 
 export type UICRUDConfigType = {
@@ -87,6 +111,8 @@ export class App extends BaseModel<App> {
 
   clean() {
     this.app = this;
+    // this.collections = this.instanceify(this.collections, Collection);
+    // this.sharedModels = this.instanceify(this.sharedModels, SharedModel);
 
     if (!this.find.collection("AppFiles")) {
       this.addFileCollections();

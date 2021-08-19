@@ -33,6 +33,19 @@ export class UICollectionCRUDWriter extends BlueprintWriter {
     );
 
     fsOperator.sessionCopy(
+      tpl("ui/crud2/config/i18n.json.tpl"),
+      path.join(crudDir, "config", `${model.collectionName}.i18n.json`)
+    );
+
+    fsOperator.sessionCopy(
+      tpl("ui/crud2/i18n.ts.tpl"),
+      path.join(crudDir, "i18n.ts"),
+      {
+        ignoreIfExists: true,
+      }
+    );
+
+    fsOperator.sessionCopy(
       tpl("ui/crud2/config/routes.tsx.tpl"),
       path.join(crudDir, "config", "routes.tsx")
     );
@@ -58,12 +71,46 @@ export class UICollectionCRUDWriter extends BlueprintWriter {
           }
         );
 
-        const featureConfigId = `${model.collectionName}.${feature}.config.tsx`;
+        function copy(configPath, targetPath) {
+          fsOperator.sessionCopy(
+            tpl("ui/crud2/config/" + configPath),
+            path.join(crudDir, "config", targetPath)
+          );
+        }
 
-        fsOperator.sessionCopy(
-          tpl("ui/crud2/config/" + `${feature}.config.tsx.tpl`),
-          path.join(crudDir, "config", featureConfigId)
-        );
+        if (feature === "create") {
+          copy(
+            `create.config.base.tsx.tpl`,
+            `${model.entityName}CreateForm.base.tsx`
+          );
+          copy(`create.config.tsx.tpl`, `${model.entityName}CreateForm.tsx`);
+        }
+        if (feature === "list") {
+          copy(`list.config.base.tsx.tpl`, `${model.entityName}List.base.tsx`);
+          copy(`list.config.tsx.tpl`, `${model.entityName}List.tsx`);
+          copy(
+            `listFiltersForm.base.tsx.tpl`,
+            `${model.entityName}ListFiltersForm.base.tsx`
+          );
+          copy(
+            `listFiltersForm.tsx.tpl`,
+            `${model.entityName}ListFiltersForm.tsx`
+          );
+        }
+        if (feature === "edit") {
+          copy(
+            `edit.config.base.tsx.tpl`,
+            `${model.entityName}EditForm.base.tsx`
+          );
+          copy(`edit.config.tsx.tpl`, `${model.entityName}EditForm.tsx`);
+        }
+        if (feature === "view") {
+          copy(
+            `view.config.base.tsx.tpl`,
+            `${model.entityName}Viewer.base.tsx`
+          );
+          copy(`view.config.tsx.tpl`, `${model.entityName}Viewer.tsx`);
+        }
       }
     });
 

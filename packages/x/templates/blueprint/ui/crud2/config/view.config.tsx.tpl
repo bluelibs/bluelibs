@@ -1,31 +1,21 @@
-/** @overridable */
-import { {{ entityName }} } from '@root/api.types';
 import { Service } from "@bluelibs/core";
-import { QueryBodyType, XRouter, IComponents } from '@bluelibs/x-ui';
-import { XViewElementType, XViewer } from '@bluelibs/x-ui-admin';
-import * as Ant from "antd";
-import { Routes } from "@bundles/{{ bundleName }}";
+import { QueryBodyType } from '@bluelibs/x-ui';
+import {
+  {{ entityName }}
+} from "@bundles/{{ bundleName }}/collections";
+import { {{ entityName }}Viewer as Base{{ entityName }}Viewer } from "./{{ entityName }}Viewer.base";
 
 @Service({ transient: true })
-export class {{ entityName }}Viewer extends XViewer {
+export class {{ entityName }}Viewer extends Base{{ entityName }}Viewer {
   build() {
-    const { UIComponents, router } = this;
+    super.build();
 
-    this.add([
-      {{# each (antColumns "view") }}
-        {
-          id: "{{ id }}",
-          label: "{{ title }}",
-          dataIndex: {{ dataIndexStr }},
-          render: (value) => {
-            {{> listItemRendition }}
-          },
-        },
-      {{/ each }}
-    ]);
+    // Perform additional modifications such as updating rendering functions, labels, description
   }
 
   static getRequestBody(): QueryBodyType<{{ entityName }}> {
-    return {{ generateRequestBodyAsString "view" }};
+    // You have the ability to modify the request by adding certain fields or relations
+    
+    return super.getRequestBody();
   }
 }

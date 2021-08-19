@@ -1,7 +1,7 @@
 import { Routes } from "@bundles/{{ bundleName }}";
-import { useUIComponents, useRouter, use } from "@bluelibs/x-ui";
+import { useUIComponents, useRouter, use, useTranslate } from "@bluelibs/x-ui";
 import * as Ant from "antd";
-import { {{ entityName}}CreateForm } from "../../config/{{ collectionName }}.create.config";
+import { {{ entityName}}CreateForm } from "../../config/{{ entityName }}CreateForm";
 import {
   {{ entityName }},
   {{ collectionClass }},
@@ -18,13 +18,14 @@ const formTailLayout = {
 
 export function {{ generateComponentName "create" }}() {
   const UIComponents = useUIComponents();
+  const t = useTranslate();
   const form = use({{ entityName}}CreateForm, { transient: true });
   form.build();
 
   return (
     <UIComponents.AdminLayout>
       <Ant.PageHeader
-        title="Create {{ entityName }}"
+        title={t('management.{{ generateI18NName }}.create.header')}
         onBack={() => window.history.back()}
       />
       <Ant.Card>
@@ -36,7 +37,7 @@ export function {{ generateComponentName "create" }}() {
           {form.render()}
           <Ant.Form.Item {...formTailLayout}>
             <Ant.Button type="primary" htmlType="submit">
-              Submit
+              {t('generics.submit')}
             </Ant.Button>
           </Ant.Form.Item>
         </Ant.Form>

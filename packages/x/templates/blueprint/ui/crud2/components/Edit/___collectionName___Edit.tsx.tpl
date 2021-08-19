@@ -3,8 +3,8 @@ import * as Ant from "antd";
 import { ObjectId } from "@bluelibs/ejson";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Routes } from "@bundles/{{ bundleName }}";
-import { useUIComponents, useRouter, use, useDataOne } from "@bluelibs/x-ui";
-import { {{ entityName}}EditForm } from "../../config/{{ collectionName }}.edit.config";
+import { useUIComponents, useRouter, use, useDataOne, useTranslate } from "@bluelibs/x-ui";
+import { {{ entityName}}EditForm } from "../../config/{{ entityName }}EditForm";
 import { features } from "../../config/features";
 import {
   {{ entityName }},
@@ -22,6 +22,7 @@ const formTailLayout = {
 
 export function {{ generateComponentName "edit" }}(props: { id: string }) {
   const UIComponents = useUIComponents();
+  const t = useTranslate();
   const form = use({{ entityName}}EditForm, { transient: true });
   const router = useRouter();
   const collection = use({{ collectionClass }});
@@ -33,14 +34,14 @@ export function {{ generateComponentName "edit" }}(props: { id: string }) {
   return (
     <UIComponents.AdminLayout>
       <Ant.PageHeader
-        title="Edit {{ entityName }}"
+        title={t('management.{{ generateI18NName }}.edit.header')}
         onBack={() => window.history.back()}
         extra={features.view ? [
           <Link key="view" to={router.path(Routes.{{ generateRouteName "view" }}, {
             params: { id: props.id },
           })}>
             <Ant.Button>
-              View
+              {t('generics.view')}
             </Ant.Button>
           </Link>
           ,
@@ -49,7 +50,7 @@ export function {{ generateComponentName "edit" }}(props: { id: string }) {
       <Ant.Card>
         {isLoading && <Ant.Space align="center"><Ant.Spin size="large" /></Ant.Space>}
         {!isLoading && (error || !document) && 
-          <Ant.Alert message={error || "An error occured. The {{ entityName }} may not exist."} type="error" />
+          <Ant.Alert message={error || t('generics.error_message')} type="error" />
         }
         {!isLoading && !error && (
           <Ant.Form 
@@ -61,7 +62,7 @@ export function {{ generateComponentName "edit" }}(props: { id: string }) {
             {form.render()}
             <Ant.Form.Item {...formTailLayout}>
               <Ant.Button type="primary" htmlType="submit">
-                Submit
+                {t('generics.submit')}
               </Ant.Button>
             </Ant.Form.Item>
           </Ant.Form>

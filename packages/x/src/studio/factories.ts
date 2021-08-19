@@ -1,4 +1,4 @@
-import { FactoryFunction } from "./defs";
+import { FactoryFunction, DeepPartial } from "./defs";
 import { Collection, Field, SharedModel, Relation } from "./models";
 import { App, BaseModel } from "./models/App";
 import { FieldValueKind } from "./models/FieldValueKind";
@@ -23,12 +23,24 @@ export const collection: FactoryFunction<Collection, ["id"]> = (config) => {
   return model;
 };
 
+export type FieldFactoryShortcut = (
+  id: string,
+  config: DeepPartial<Field>
+) => Field;
 export type FieldFactoryFunction<T, RT extends (keyof T)[]> = FactoryFunction<
   T,
   RT
 > & {
   types: typeof FieldValueKind;
+  string: FieldFactoryShortcut;
+  enum: FieldFactoryShortcut;
+  integer: FieldFactoryShortcut;
+  float: FieldFactoryShortcut;
+  date: FieldFactoryShortcut;
+  boolean: FieldFactoryShortcut;
+  object: FieldFactoryShortcut;
 };
+
 export const field: FieldFactoryFunction<Field, ["id", "type"]> = (config) => {
   const model = new Field();
   model.blend(config);
@@ -53,3 +65,22 @@ export const sharedModel: FactoryFunction<SharedModel, ["id", "fields"]> = (
 
   return model;
 };
+
+// FIELD SHORTCUTS
+const fieldShortcutFactory = (type) => {
+  return (id, config) => {
+    return field({
+      id,
+      type,
+      ...config,
+    });
+  };
+};
+
+field.string = fieldShortcutFactory(FieldValueKind.STRING);
+field.enum = fieldShortcutFactory(FieldValueKind.ENUM);
+field.integer = fieldShortcutFactory(FieldValueKind.INTEGER);
+field.float = fieldShortcutFactory(FieldValueKind.FLOAT);
+field.date = fieldShortcutFactory(FieldValueKind.DATE);
+field.boolean = fieldShortcutFactory(FieldValueKind.BOOLEAN);
+field.object = fieldShortcutFactory(FieldValueKind.OBJECT);

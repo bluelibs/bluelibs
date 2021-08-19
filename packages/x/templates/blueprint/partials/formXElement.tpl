@@ -1,7 +1,7 @@
 
 {
   id: "{{ id }}",
-  label: "{{ title }}",
+  label: t("{{ title }}"),
   name: {{ dataIndexStr }},
   {{# if required }}
     required: true,
@@ -10,7 +10,7 @@
     order: {{ order }},
   {{/ if }}
   {{# if description }}
-    tooltip: "{{ description }}",
+    tooltip: t("{{ description }}"),
   {{/ if }}
   {{!-- OBJECT HANDLING --}}
   {{# if (@root.typeIs rendererType "object") }}

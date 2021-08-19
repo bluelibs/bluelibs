@@ -1,4 +1,4 @@
-import { useGuardian, useRouter } from "@bluelibs/x-ui";
+import { useGuardian, useRouter, useTranslate } from "@bluelibs/x-ui";
 import React, { useState } from "react";
 import {
   Layout,
@@ -21,6 +21,8 @@ type FormInput = {
 export function ForgotPassword() {
   const guardian = useGuardian();
   const router = useRouter();
+  const t = useTranslate();
+  const tl = useTranslate("authentication.forgotPassword");
   const [submitError, setSubmitError] = useState(null);
   const [isCompleted, setIsComplete] = useState(false);
 
@@ -37,26 +39,22 @@ export function ForgotPassword() {
 
   const style = { minHeight: "100vh" };
   return (
-    <Row justify="center" align="middle" style={style}>
+    <Row
+      justify="center"
+      align="middle"
+      style={style}
+      className="forgot-password-page"
+    >
       <Col sm={24} md={12} lg={6}>
-        <Card title="Forgot Password">
-          {isCompleted && (
-            <Alert
-              type="success"
-              message="If the email exists in our database, you will receive an email with
-        instructions."
-            />
-          )}
+        <Card title={tl("header")}>
+          {isCompleted && <Alert type="success" message={tl("success")} />}
           {!isCompleted && (
             <Form
               onFinish={(data) => onSubmit(data)}
               className="authentication-form"
             >
-              <Form.Item
-                name="email"
-                rules={[{ required: true, message: "Please input your Email" }]}
-              >
-                <Input placeholder="Email" />
+              <Form.Item name="email" rules={[{ required: true }]}>
+                <Input placeholder={tl("fields.email")} />
               </Form.Item>
 
               <Form.Item>
@@ -65,14 +63,11 @@ export function ForgotPassword() {
                   htmlType="submit"
                   className="authentication-form-button"
                 >
-                  Recover Password
+                  {tl("submit")}
                 </Button>
               </Form.Item>
               {submitError && (
-                <Alert
-                  message="There was an error with your request"
-                  type="error"
-                />
+                <Alert message={t("generics.error")} type="error" />
               )}
             </Form>
           )}

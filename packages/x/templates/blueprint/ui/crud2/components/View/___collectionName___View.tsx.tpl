@@ -1,16 +1,19 @@
 import { Link } from "react-router-dom";
 import * as Ant from "antd";
 import { Routes } from "@bundles/UIAppBundle";
-import { useUIComponents, useRouter, useDataOne, use, XRouter } from "@bluelibs/x-ui";
+import { useUIComponents, useRouter, useDataOne, use, XRouter, useTranslate } from "@bluelibs/x-ui";
 import { ObjectId } from "@bluelibs/ejson";
 import { {{ entityName }}, {{ collectionClass }} } from "@bundles/{{ bundleName }}/collections";
-import { {{ entityName }}Viewer } from "../../config/{{ collectionName }}.view.config";
+import { {{ entityName }}Viewer } from "../../config/{{ entityName }}Viewer";
 import { features } from "../../config/features";
 
 export function {{ generateComponentName "view" }}(props: { id: string }) {
   const UIComponents = useUIComponents();
   const router = useRouter();
+  const t = useTranslate();
   const collection = use({{ collectionClass }});
+
+  // If you want to benefit of live data features use useLiveData()
   const {data: document, isLoading, error} = useDataOne({{ collectionClass }}, new ObjectId(props.id), {{ entityName }}Viewer.getRequestBody());
 
   let content;
@@ -18,7 +21,7 @@ export function {{ generateComponentName "view" }}(props: { id: string }) {
     content = <Ant.Space align="center"><Ant.Spin size="large" /></Ant.Space>
   } else {
     if (error || document === null) {
-      content = <Ant.Alert message={error || "An error occured. The {{ entityName }} may not exist."} type="error" />
+      content = <Ant.Alert message={error || t('generics.error_message')} type="error" />
     } else {
       content = <{{ generateComponentName "viewComponent" }} document={document} />
     }
@@ -27,7 +30,7 @@ export function {{ generateComponentName "view" }}(props: { id: string }) {
   return (
     <UIComponents.AdminLayout>
       <Ant.PageHeader
-        title="{{ entityName }}"
+        title={t('management.{{ generateI18NName }}.view.header')}
         onBack={() => window.history.back()}
         extra={getHeaderActions(collection, router, props.id)}
       />
@@ -47,7 +50,7 @@ export function {{ generateComponentName "viewComponent" }}(props: { document: P
     <Ant.Descriptions>
       {viewer.rest().map(item => {
         return (
-          <Ant.Descriptions.Item label={item.label}>
+          <Ant.Descriptions.Item label={item.label} key={item.id}>
             {viewer.render(item)}
           </Ant.Descriptions.Item>
         )
@@ -56,8 +59,9 @@ export function {{ generateComponentName "viewComponent" }}(props: { document: P
   )
 }
 
-function getHeaderActions(collection: {{ collectionClass }}, router: XRouter, id: string) {
+export function getHeaderActions(collection: {{ collectionClass }}, router: XRouter, id: string) {
   const actions = [];
+  const t = useTranslate();
 
   if (features.edit) {
     actions.push(
@@ -65,7 +69,7 @@ function getHeaderActions(collection: {{ collectionClass }}, router: XRouter, id
         params: { id },
       })}>
         <Ant.Button>
-          Edit
+          {t('generics.edit')}
         </Ant.Button>
       </Link>
     )
@@ -88,21 +92,15 @@ function getHeaderActions(collection: {{ collectionClass }}, router: XRouter, id
       <Ant.Button
         danger
       >
-        Delete
+        {t('generics.delete')}
       </Ant.Button>
     </Ant.Popconfirm>
     )
   }
 
-  actions.push(
-    <Link key="live" to={router.path(Routes.{{ generateRouteName "viewLive" }}, {
-      params: { id },
-    })}>
-      <Ant.Button>
-        Live Data
-      </Ant.Button>
-    </Link>
-  )
+  const viewRoutePath = router.path(Routes.{{ generateRouteName "view" }}, {
+    params: { id },
+  });
 
   return actions;
 }

@@ -7,7 +7,6 @@ import * as Studio from ".";
 import { Models, Writers } from "..";
 import * as fs from "fs";
 import * as path from "path";
-import { EJSON } from "@bluelibs/ejson";
 import { UICollectionWriter } from "../writers/UICollectionWriter";
 import { UICollectionModel } from "../models/UICollectionModel";
 import { UICRUDModel } from "../models/UICRUDModel";
@@ -136,7 +135,10 @@ export class StudioWriter {
     );
 
     session.setMicroservicePath(frontendMicroservicePath);
-    if (!fs.existsSync(frontendMicroservicePath)) {
+    const hasExistingFrontendMicroservice = !fs.existsSync(
+      frontendMicroservicePath
+    );
+    if (hasExistingFrontendMicroservice) {
       await this.createFrontendMicroservice(studioApp, session, commit);
     } else {
       console.log(`➤ Frontend microservice already exists. Skipping.`);
@@ -150,7 +152,10 @@ export class StudioWriter {
     if (this.hasGenerator(GeneratorKind.FRONTEND_CRUDS)) {
       await this.createUICRUDs(studioApp, session, commit);
     }
-    if (this.hasGenerator(GeneratorKind.FRONTEND_BOILERPLATE_COMPONENTS)) {
+    if (
+      !hasExistingFrontendMicroservice &&
+      this.hasGenerator(GeneratorKind.FRONTEND_BOILERPLATE_COMPONENTS)
+    ) {
       await this.createBoilerplateUIComponents(studioApp, session, commit);
     }
   }
@@ -172,11 +177,19 @@ export class StudioWriter {
     const pagesDir = path.join(bundleDir, "pages");
 
     // CUSTOM HOME
+    // TODO: Change the way we perform this extension
     operator.sessionCopy(
       tpl("ui/components/Home.tsx"),
       path.join(pagesDir, "Home", "Home.tsx"),
       {
         ignoreIfContains: "This is your application",
+      }
+    );
+    operator.sessionCopy(
+      tpl("ui/components/routes.tsx"),
+      path.join(pagesDir, "Home", "routes.tsx"),
+      {
+        ignoreIfExists: true,
       }
     );
 
@@ -196,6 +209,23 @@ export class StudioWriter {
         );
         this.success(`Added override for ${componentName}`);
       }
+    );
+
+    // I18N
+    operator.sessionCopy(
+      tpl("ui/i18n/generics.json"),
+      path.join(bundleDir, "i18n", "generics.json"),
+      {
+        ignoreIfExists: true,
+      }
+    );
+    operator.sessionPrependFile(
+      path.join(bundleDir, "i18n", "store.ts"),
+      `import generics from "./generics.json";`
+    );
+    operator.sessionAppendFile(
+      path.join(bundleDir, "i18n", "store.ts"),
+      `i18n.push(generics);`
     );
 
     // DASHBOARD & AUTH
@@ -220,10 +250,16 @@ export class StudioWriter {
 
     operator.sessionAppendFile(
       path.join(pagesDir, "routes.tsx"),
-      `
-      export * from "./Dashboard/routes";
-      export * from "./Authentication/routes";
-      `
+      `export * from "./Dashboard/routes";`
+    );
+
+    operator.sessionAppendFile(
+      path.join(pagesDir, "routes.tsx"),
+      `export * from "./Home/routes";`
+    );
+    operator.sessionAppendFile(
+      path.join(pagesDir, "routes.tsx"),
+      `export * from "./Authentication/routes";`
     );
 
     operator.sessionCopy(

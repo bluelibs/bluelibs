@@ -2,7 +2,8 @@
   "name": "{{ name }}",
   "sideEffects": [
     "**/*.css",
-    "**/*.scss"
+    "**/*.scss",
+    "**/*i18n.*"
   ],
   "version": "1.0.0",
   "description": "",

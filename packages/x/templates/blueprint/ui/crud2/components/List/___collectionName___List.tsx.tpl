@@ -2,6 +2,7 @@ import {
   newSmart,
   useRouter,
   useUIComponents,
+  useTranslate,
 } from "@bluelibs/x-ui";
 import { useEffect, useState, useMemo } from "react";
 import { {{ collectionName }}AntTableSmart } from "./{{ collectionName }}TableSmart";
@@ -14,6 +15,7 @@ import { {{ generateComponentName "listFilters "}} } from "./{{ generateComponen
 export function {{ generateComponentName "list" }}() {
   const UIComponents = useUIComponents();
   const router = useRouter();
+  const t = useTranslate();
   const [api, Provider] = newSmart({{ collectionName }}AntTableSmart);
   const [filtersOpened, setFiltersOpened] = useState(false);
   const onFiltersUpdate = useMemo(() => {
@@ -25,20 +27,20 @@ export function {{ generateComponentName "list" }}() {
   return (
     <UIComponents.AdminLayout>
       <Ant.PageHeader
-        title="{{ collectionName }} List"
+        title={t('management.{{ generateI18NName }}.list.header')}
         extra={[
           features.create ?
             <Ant.Button key="1" onClick={() => router.go(Routes.{{ generateRouteName "create" }})} 
               icon={<PlusOutlined />}>
-              New {{ entityName }} 
+              {t('management.{{ generateI18NName }}.list.create_btn')}
           </Ant.Button> : null,
           <Ant.Button key="2" onClick={() => setFiltersOpened(!filtersOpened)} icon={<FilterOutlined />}>
-            Filters
+            {t('generics.list_filters')}
           </Ant.Button>,
         ]}
       />
 
-      {api.state.isError && <Ant.Alert type="error" message="There was an error while fetching data." />}
+      {api.state.isError && <Ant.Alert type="error" message={t('generics.error_message')} />}
 
       <Ant.Layout.Content>
         <Provider>
@@ -48,7 +50,7 @@ export function {{ generateComponentName "list" }}() {
             }
             <Ant.Input.Search
               name="Search"
-              placeholder="Search"
+              placeholder={t('generics.list_search')}
               className="search"
               onKeyUp={(e) => {
                 const value = (e.target as HTMLInputElement).value;

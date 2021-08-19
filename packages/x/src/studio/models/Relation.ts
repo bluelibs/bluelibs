@@ -167,6 +167,14 @@ export class Relation extends BaseModel<Relation> {
     return ["AppFiles", "AppFileGroups"].includes(this.cleaned.to.id);
   }
 
+  public getI18NSignature() {
+    return {
+      key: this.id,
+      label: this.ui ? this.ui.label : this.id,
+      description: this.description,
+    };
+  }
+
   protected storeUIDefaults() {
     const $this = this.cleaned;
 

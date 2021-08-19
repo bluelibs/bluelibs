@@ -1,0 +1,64 @@
+{
+  "en": {
+    "authentication": {
+      "changePassword": {
+        "header": "Change Your Password",
+        "fields": {
+          "current": "Current Password",
+          "newPassword": "New Password"
+        },
+        "submit": "Change Password",
+        "successMessage": "Your password has been changed."
+      },
+      "forgotPassword": {
+        "header": "Forgot Password",
+        "fields": {
+          "email": "Email"
+        },
+        "success": "If the email exists in our database, you will receive an email with instructions.",
+        "submit": "Recover Password"
+      },
+      "login": {
+        "header": "Login",
+        "fields": {
+          "username": "Your Email",
+          "password": "Password"
+        },
+        "forgotPassword_btn": "Forgot Password?",
+        "login": "Login",
+        "or": "Or",
+        "register_action": "Register Now!",
+        "invalid_credentials": "Invalid credentials"
+      },
+      "register": {
+        "header": "Register",
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "email": "Email",
+          "password": "Password"
+        },
+        "submit": "Register",
+        "success": {
+          "header": "Registered!",
+          "description": "You have successfully created your account. We've sent you an email to verify your account."
+        }
+      },
+      "resetPassword": {
+        "header": "Reset Password",
+        "success_msg": "Your password has been reset. Redirecting ...",
+        "fields": {
+          "email": "Email",
+          "password": "Password"
+        },
+        "submit": "Reset Password"
+      },
+      "verifyEmail": {
+        "header": "Verification Step",
+        "verifying": "Verifying your email...",
+        "success": "Your email has been verified. Redirecting ...",
+        "errored": "We could not verify your email. Maybe it was already verified."
+      }
+    }
+  }
+}

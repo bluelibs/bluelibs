@@ -153,6 +153,34 @@ export class UICRUDModel {
     return _.toUpper(_.snakeCase(collectionName) + "_" + name);
   }
 
+  generateI18NName() {
+    return _.toLower(_.snakeCase(this.collectionName));
+  }
+
+  /**
+   * The list for i18n fields for forms, lists, and everything
+   */
+  generateI18NFieldsAsJSON(): string {
+    const i18nSignatures = [
+      ...this.studioCollection
+        .getFlattenedFields()
+        .map((field) => field.getI18NSignature()),
+      ...this.studioCollection.relations.map((relation) =>
+        relation.getI18NSignature()
+      ),
+    ];
+
+    const obj = {};
+    i18nSignatures.forEach((i18nSignature) => {
+      obj[i18nSignature.key] = i18nSignature.label;
+      if (i18nSignature.description) {
+        obj[i18nSignature.key + "_description"] = i18nSignature.description;
+      }
+    });
+
+    return JSON.stringify(obj);
+  }
+
   collectionHasMode(mode: UIModeType) {
     return this.studioCollection.ui && this.studioCollection.ui[mode];
   }
@@ -258,8 +286,8 @@ export class UICRUDModel {
 
     store.push({
       id: this.isForm(mode) ? relation.field.id : relation.id,
-      title: relation.ui.label,
-      description: relation.description,
+      title: this.getI18NKey(_relation),
+      description: this.getI18NKey(_relation, true),
       required: relation.field && relation.field.isRequired,
       order: relation.ui.order,
       dataIndexStr: this.isForm(mode)
@@ -294,10 +322,10 @@ export class UICRUDModel {
     const base: ViewItemModel = {
       id: `${field.id}`,
       dataIndexStr,
-      description: field.description,
       required: field.isRequired,
       order: field.ui && field.ui.order,
-      title: field.ui && field.ui.label,
+      title: this.getI18NKey(field),
+      description: this.getI18NKey(field, true),
       key: field.id,
       isMany: field.isArray,
       sorter: true,
@@ -321,9 +349,9 @@ export class UICRUDModel {
                 Object.assign({}, base, {
                   id: `${field.id}.${subfield.id}`,
                   isMany: subfield.isArray,
-                  title: `${field.ui && field.ui.label} ${subfield.ui.label}`,
+                  title: this.getI18NKey(subfield),
+                  description: this.getI18NKey(subfield, true),
                   required: subfield.isRequired,
-                  description: subfield.description,
                   order: subfield.ui && subfield.ui.order,
                   dataIndexStr: `["${field.id}", "${subfield.id}"]`,
                   rendererType: this.getRendererType(subfield),
@@ -338,20 +366,13 @@ export class UICRUDModel {
         store.push(
           Object.assign({}, base, {
             subfields: subfields.map((subfield: Field) => {
-              let subfieldLabel = subfield.ui && subfield.ui.label;
-              if (!field.isArray) {
-                subfieldLabel = `${
-                  field.ui && field.ui.label
-                } — ${subfieldLabel}`;
-              }
-
               return Object.assign({}, base, {
                 id: subfield.id,
                 isMany: subfield.isArray,
                 required: subfield.isRequired,
-                description: subfield.description,
                 order: subfield.ui && subfield.ui.order,
-                title: subfieldLabel,
+                title: this.getI18NKey(subfield),
+                description: this.getI18NKey(subfield, true),
                 dataIndexStr: `["${field.id}", "${subfield.id}"]`,
                 rendererType: this.getRendererType(subfield),
                 enumValues: this.getEnumValuesLabels(subfield.enumValues),
@@ -372,6 +393,20 @@ export class UICRUDModel {
 
       store.push(base);
     }
+  }
+
+  getI18NKey(element: Field | Relation, isDescription = false): string | null {
+    let label = `management.${this.generateI18NName()}.fields.`;
+    label += element.getI18NSignature().key;
+
+    if (!element.description && isDescription) {
+      return null;
+    }
+    if (isDescription) {
+      return (label += "_description");
+    }
+
+    return label;
   }
 
   protected getEnumValuesLabels(values: string[]) {
