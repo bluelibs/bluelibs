@@ -1,3 +1,4 @@
+import { IRoute } from "@bluelibs/x-ui";
 import "./i18n";
 
 import {
@@ -7,18 +8,18 @@ import {
   {{ generateRouteName "view" }} as BASE_{{ generateRouteName "view" }},
 } from "./config/routes";
 
-export const {{ generateRouteName "list" }} = {
+export const {{ generateRouteName "list" }}: IRoute = {
   ...BASE_{{ generateRouteName "list" }}
 }
 
-export const {{ generateRouteName "create" }} = {
+export const {{ generateRouteName "create" }}: IRoute = {
   ...BASE_{{ generateRouteName "create" }}
 }
 
-export const {{ generateRouteName "edit" }} = {
+export const {{ generateRouteName "edit" }}: IRoute = {
   ...BASE_{{ generateRouteName "edit" }}
 }
 
-export const {{ generateRouteName "view" }} = {
+export const {{ generateRouteName "view" }}: IRoute = {
   ...BASE_{{ generateRouteName "view" }}
 }
