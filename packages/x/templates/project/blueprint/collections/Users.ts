@@ -12,6 +12,7 @@ import {
 
 export const Users = collection({
   id: "Users",
+  representedBy: "fullName",
   behaviors: {
     softdeletable: true,
   },

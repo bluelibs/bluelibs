@@ -68,7 +68,7 @@ export const sharedModel: FactoryFunction<SharedModel, ["id", "fields"]> = (
 
 // FIELD SHORTCUTS
 const fieldShortcutFactory = (type) => {
-  return (id, config) => {
+  return (id, config = {}) => {
     return field({
       id,
       type,

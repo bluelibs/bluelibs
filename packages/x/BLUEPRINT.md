@@ -22,16 +22,24 @@ You will notice a `blueprint/index.ts` file which only has `Users` collection se
 npm run blueprint:generate
 ```
 
-This will generate
+This will generate:
 
 - Server-side:
   - Collections
   - Models
+  - GraphQL Types
   - GraphQL CRUDs
+    - Queries and Mutations for CRUDs
+    - Custom GraphQL Inputs
+    - Subscription & Live Data Ready
 - Client-side:
   - UI Collections
-  - API Types
+    - For Isomorphic Interaction with MongoDB
   - CRUD Admin Pages
+    - Lists with Search, Pagination and Complex Filters
+    - Edit Forms
+    - Create Forms
+    - Easy Deletion
 
 ## Collections
 
@@ -76,6 +84,24 @@ collection({
 });
 ```
 
+### Behaviors
+
+This refers to the capability to add [Collection Behaviors from MongoBundle](https://www.bluelibs.com/docs/package-mongo#behaviors)
+
+Be careful with behaviors as they are generated only once, if you want to add a specific behavior after you generated, you either delete the collection file, either add it yourself manually to the collection.
+
+```tsx
+collection({
+  id: "Users",
+  behaviors: {
+    timestampable: true,
+    softdeletable: true,
+  },
+});
+```
+
+Typically these behaviors also have shortcuts so you can easily configure things like `blameable` relations or `timestampable` fields.
+
 ### UI
 
 To customise UI for Collection, like enable create, but disable edit, here is the full config of UI for the collection:
@@ -86,6 +112,7 @@ collection({
   ui: {
     label: "Posts",
     order: 1, // optional if you want to have a specific order for elements
+    icon: "BankOutlined", // from: https://ant.design/components/icon/
     list: true,
     edit: true,
     create: true,
@@ -155,6 +182,24 @@ export enum FieldValueKind {
 }
 ```
 
+### Shortcuts
+
+```tsx
+// Making it super straight forward to avoid { id, type }
+field.string("firstName");
+// Add additional options to it
+field.string("lastName", { isRequired: true });
+
+// And the rest of the crowd
+field.objectId("id");
+field.enum("id");
+field.integer("id");
+field.float("id");
+field.date("id");
+field.boolean("id");
+field.object("id");
+```
+
 ### Nested Fields
 
 You can benefit of nested fields which act as sub models, don't worry, the form will properly generate your code so you don't have to think about it.
@@ -192,6 +237,23 @@ field({
 
 Assuming we add this field in `Tasks` collection it will create a proper TS enum: `TaskStatus` and inside the forms it will be a select dropdown option. You can also make it an array.
 
+Enums can also be configured better, especially if you want to add them a comment or modify their database-store value:
+
+```ts
+field({
+  id: "status",
+  type: field.types.ENUM,
+  enumValues: [
+    {
+      id: "IN_PROGRESS",
+      value: "IP", // this gets saved in db
+      label: "In Progress", // this is how it shows on the UI and creates the propper lables
+      description: "This means the the task is in progress", // gets a comment in TS model and GraphQL API
+    },
+  ],
+});
+```
+
 ### Reducers
 
 Reducers are Nova's way of computing values based on certain dependencies:
@@ -221,19 +283,13 @@ app({
   collections: [
     collection({
       id: "Comments",
-      fields: [
-        // rest of fields
-        field({
-          id: "postId",
-          type: field.types.OBJECT_ID,
-        }),
-      ],
+      fields: [],
       relations: [
+        // By default it will create the field `postId` of type ObjectID
+        // If you add `isMany: true` to the config, it will create `postIds` of type Array<ObjectID>`
         relation({
           id: "post",
           to: "Posts",
-          field: "postId",
-          isMany: false,
         }),
       ],
     }),
@@ -251,13 +307,13 @@ app({
 });
 ```
 
-If you understand how nova works, it should be straight forward to understand how these links are described.
+If you understand how Nova works, it should be straight forward to understand how these links are described.
 
 Keep in mind, once a link is generated, it won't be able to properly update it. We do not override the `.links.ts` file. So if, let's say you want to change `post` link from `Comments` to `isMany: true`, this change won't be present in the generated code, you'll have to manually do it, or delete the file.
 
 There are many reasons for this, one is the fact that Nova offers a lot of complex additional features to linking data such as Filtered Links and as with reducers we don't want to gobble up the blueprint, we believe this is a reasonable limitation. If you add additional links they will be ofcourse added.
 
-For shorthand reasons, you can also add the field directly inside the relation:
+You can customise the fields for storing such data if you wish:
 
 ```ts
 collection({
@@ -268,10 +324,10 @@ collection({
       id: "post",
       to: "Posts",
       field: field({
-        id: "postId",
+        id: "myCustomPostId",
         type: field.types.OBJECT_ID,
       }),
-      isMany: false,
+      // or add it inside fields: [] and just specify a string here field: "myCustomPostId"
     }),
   ],
 });
@@ -416,49 +472,9 @@ const shortcutField = field({ ... });
 const shortcutField = () => field({ ... })
 ```
 
-## Scaling File Structure
-
-You will soon realise, right after you've added your 3rd collection that it's too much to handle everything in one file, feel free to split these collections in their own files and use them like that.
-
-```ts file="collection.ts"
-import { Studio as s } from "@bluelibs/x";
-
-s.field({
-  // ... etc ///
-});
-```
-
-Or create an `utils.ts` file, from which you import everything
-
-```ts file="utils.ts"
-import { Studio } from "@bluelibs/x";
-import * as faker from "faker";
-
-const {
-  generateProject,
-  app,
-  collection,
-  field,
-  relation,
-  shortcuts,
-  sharedModel,
-  GeneratorKind,
-} = Studio;
-
-export {
-  generateProject,
-  app,
-  collection,
-  field,
-  relation,
-  shortcuts,
-  sharedModel,
-  GeneratorKind,
-  faker,
-};
-```
-
 ## Blendability
+
+By "blendability" we mean that we can perform our own modifications to the code, while supporting subsequent blueprint generations that enhance and extend our app without removing our changes.
 
 All files that get overriden on next generations are marked with the comment:
 
@@ -466,35 +482,142 @@ All files that get overriden on next generations are marked with the comment:
 /** @overridable */
 ```
 
+Exception to this rule is the `.json` file for translations that is stored in `{Collection}Management/config/{Collection}.i18n.json`
+
 We advise you not to make any changes directly to those files, their whole concept was designed in a way that they can be extended from your components.
 
-### UI Customisation
+Let's explore the types of customisations we can easily do:
 
-The principles applied to be able to execute this blendability of UI we call `Consumer` classes the concept is described detailed inside the XUIAdmin.
+### Forms, Lists, Views
 
-### Customise Lists
+Our Form Schema resides in `{Collection}Management/config/{Entity}CreateForm.base.tsx`. We do our modifications inside `{Collection}Management/config/{Entity}CreateForm.tsx`.
 
-- TBD
+```tsx title="{Entity}CreateForm.tsx"
+build() {
+  super.build();
 
-### Customise Forms
+  // For example you want the description to become a TextArea instead of an input
+  this.update("description", {
+    render() {
+      return <Ant.Form.Item><TextArea /></Ant.Form.Item>
+    },
+    // Any other value as accepted by the Consumer
 
-- TBD
+    // You can also configure the order they are presented in
+    order: 1,
+  })
+}
+```
 
-### Customise Views
+This exact same concept is applied to all forms and all views.
 
-- TBD
+If you want to request new fields from the API or remove certain fields, you have two options:
 
-### Change Order of Fields
+1. Remove them from blueprint's ui
+2. Remove them from the consumer and from the requestBody
 
-- TBD
+Edit forms, lists, views do requests. This request is done via `static getRequestBody()` which is a Nova Request Body.
 
-### Change Icons of Items
+To customise this request to fit your needs:
 
-- TBD
+```ts
+class SampleForm {
+  static getRequestBody(): QueryBodyType<ProjectsAsset> {
+    // You have the ability to modify the request by adding certain fields or relations
+    const requestBody = super.getRequestBody();
+    Object.assign(requestBody, {
+      newField: 1,
+    });
 
-### Change Roles For Specific Lists
+    return requestBody;
+  }
+}
+```
 
-- TBD
+### Routes
+
+Sometimes you might want to apply some security logic to your routes:
+
+```tsx title="{CollectionManagement}/routes.tsx"
+import { UserRoles } from "@root/api.types";
+
+export const PROJECTS_ASSETS_CREATE = {
+  ...BASE_PROJECTS_ASSETS_CREATE,
+  roles: [UserRoles.ADMIN],
+};
+```
+
+### Menus
+
+You have the ability to configure the icon from [@ant-design/icons](https://ant.design/components/icon/) easily via `collection.ui.icon`, but if you want a custom icon to the menu:
+
+If you want to customise the label either you do it via `blueprint`, or by configuring the translation of it inside `${Collection}Management/i18n.ts` for `management.projects_assets.menu.title`
+
+```tsx title="{CollectionManagement}/routes.tsx"
+import { MyIconSvg } from "...";
+
+export const PROJECTS_ASSETS_LIST = {
+  ...BASE_PROJECTS_ASSETS_LIST,
+  menu: {
+    ...BASE_PROJECTS_ASSETS_CREATE.menu,
+    icon: MyIconSvg,
+  },
+};
+```
+
+If you want to add the menu as a submenu, we use the `inject` functionality:
+
+```tsx
+import { MyIconSvg } from "...";
+
+export const PROJECTS_LABELS_LIST = {
+  ...BASE_PROJECTS_LABELS_LIST,
+  menu: {
+    ...BASE_PROJECTS_LABELS_LIST.menu,
+    inject: "PROJECTS_ASSETS_LIST", // This would appear as a submenu under the "Project Assets"
+  },
+};
+```
+
+### I18N
+
+The translations inside `{Collection}Management/config/{Collection}.i18n.json` will get overriden everytime. If you want to add your own translations the place to do so is inside `${Collection}Management/i18n.ts`
+
+```tsx
+import { i18n } from "@bundles/UIAppBundle/i18n";
+import phrases from "./config/ProjectsAssets.i18n.json";
+
+phrases.management.projects_assets.menu.title = "My Custom Menu";
+
+i18n.push(phrases);
+
+// You can override additional messages here by using i18n.push();
+```
+
+### Server Inputs & Models
+
+For `create` and `edit` operations we call `{Collection}InsertOne` and respectively `{Collection}UpdateOne` mutations. The inputs used are `{Entity}InsertInput` and `{Entity}UpdateInput`.
+
+These inputs are stored in `api` under `bundles/AppBundle/services/inputs`. As you already know, the `.base` files get overriden but you can customise your validation logic and what not inside the regular ones:
+
+```tsx
+import { Schema, Is, a, an } from "@bluelibs/validator-bundle";
+import { ContactUpdateInput as BaseContactUpdateInput } from "./ContactUpdate.input.base";
+
+@Schema()
+export class ContactUpdateInput extends BaseContactUpdateInput {
+  @Is(a.string().min(2))
+  firstName: string;
+}
+```
+
+By default `Blueprint` doesn't allow such customisations from the get-go it only adds things such as `nullability` and type, but it's easy to just go in the file and add them yourself.
+
+The exact same concept applies to Collection models, you can extend them with ease, adding custom validations and maybe some custom methods that would ease development.
+
+## Live Data
+
+If you want to view data in a live manner it's sufficient to change `useData` with `useLiveData` everything should work as you expect it to. Read more on the `Live Data` section in the X-UI Core principles.
 
 ## Generation Customisation
 
