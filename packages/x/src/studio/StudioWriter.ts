@@ -135,10 +135,10 @@ export class StudioWriter {
     );
 
     session.setMicroservicePath(frontendMicroservicePath);
-    const hasExistingFrontendMicroservice = !fs.existsSync(
+    const hasExistingFrontendMicroservice = fs.existsSync(
       frontendMicroservicePath
     );
-    if (hasExistingFrontendMicroservice) {
+    if (!hasExistingFrontendMicroservice) {
       await this.createFrontendMicroservice(studioApp, session, commit);
     } else {
       console.log(`➤ Frontend microservice already exists. Skipping.`);
