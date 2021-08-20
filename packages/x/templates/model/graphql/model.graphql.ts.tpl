@@ -17,8 +17,13 @@ export default /* GraphQL */ `
 
   {{# each enums }}
     enum {{ className }} {
+      {{# if description }}
+        """
+        {{ description }}
+        """
+      {{/ if }}
       {{# each elements }}
-        {{ field }}
+        {{ id }}
       {{/ each }}
     }
   {{/ each }}

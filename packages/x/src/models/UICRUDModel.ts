@@ -3,6 +3,7 @@ import * as Studio from "../studio";
 import { Field, UIModeType } from "../studio";
 import { FieldValueKind } from "../studio/models/FieldValueKind";
 import { Relation } from "../studio/models/Relation";
+import { EnumConfigType } from "./defs";
 
 type FilesType = "file" | "files" | "fileGroup";
 
@@ -330,7 +331,9 @@ export class UICRUDModel {
       isMany: field.isArray,
       sorter: true,
       rendererType: this.getRendererType(field),
-      enumValues: this.getEnumValuesLabels(field.enumValues),
+      enumValues: this.getEnumValuesLabels(
+        field.enumValues as EnumConfigType[]
+      ),
     };
 
     let subfields = field.model ? field.cleaned.model.fields : field.subfields;
@@ -355,7 +358,9 @@ export class UICRUDModel {
                   order: subfield.ui && subfield.ui.order,
                   dataIndexStr: `["${field.id}", "${subfield.id}"]`,
                   rendererType: this.getRendererType(subfield),
-                  enumValues: this.getEnumValuesLabels(subfield.enumValues),
+                  enumValues: this.getEnumValuesLabels(
+                    subfield.enumValues as EnumConfigType[]
+                  ),
                 })
               );
             }
@@ -375,7 +380,9 @@ export class UICRUDModel {
                 description: this.getI18NKey(subfield, true),
                 dataIndexStr: `["${field.id}", "${subfield.id}"]`,
                 rendererType: this.getRendererType(subfield),
-                enumValues: this.getEnumValuesLabels(subfield.enumValues),
+                enumValues: this.getEnumValuesLabels(
+                  subfield.enumValues as EnumConfigType[]
+                ),
               });
             }),
           })
@@ -409,11 +416,11 @@ export class UICRUDModel {
     return label;
   }
 
-  protected getEnumValuesLabels(values: string[]) {
-    return values.map((v) => {
+  protected getEnumValuesLabels(values: EnumConfigType[]) {
+    return values.map((enumElement) => {
       return {
-        value: v,
-        label: _.startCase(_.lowerCase(v)),
+        label: enumElement.label,
+        value: enumElement.value,
       };
     });
   }

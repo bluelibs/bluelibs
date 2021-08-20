@@ -9,7 +9,7 @@ export default {
     {{# each enums }}
       {{ className }}: {
         {{# each elements }}
-          {{ field }}: "{{ value }}",
+          {{ id }}: "{{ value }}",
         {{/ each }}
       },
     {{/ each }}

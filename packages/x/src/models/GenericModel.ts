@@ -371,7 +371,7 @@ ${field.description}
 
         result.push({
           className,
-          elements: this.getEnumElements(field),
+          elements: field.enumValues,
           importFrom: this.reuseEnums
             ? `../../collections`
             : `./enums/${className}.enum`,
@@ -388,7 +388,7 @@ ${field.description}
                 childField,
                 this.modelClass + _.upperFirst(field.name)
               ),
-              elements: this.getEnumElements(childField),
+              elements: childField.enumValues,
             });
           }
         });
@@ -396,17 +396,6 @@ ${field.description}
     });
 
     return result;
-  }
-
-  getEnumElements(field: IGenericField) {
-    return field.enumCSVValues.split(",").map((label) => {
-      label = label.trim();
-      return {
-        label,
-        field: _.toUpper(_.snakeCase(label)),
-        value: _.toUpper(_.snakeCase(label)),
-      };
-    });
   }
 
   /**

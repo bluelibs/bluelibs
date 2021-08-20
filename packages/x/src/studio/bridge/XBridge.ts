@@ -5,6 +5,7 @@ import * as _ from "lodash";
 import { UIModeType } from "../defs";
 import { ModelUtils } from "../../utils/ModelUtils";
 import * as Inflected from "inflected";
+import { EnumConfigType } from "../../models/defs";
 
 export type ToGenericModelOptions = {
   graphql?: boolean;
@@ -127,9 +128,7 @@ export class XBridge {
       isMany: studioField.isArray,
       description: studioField.description,
       isOptional: !studioField.isRequired,
-      enumCSVValues: studioField.enumValues
-        ? studioField.enumValues.join(",")
-        : null,
+      enumValues: studioField.enumValues as EnumConfigType[],
     };
 
     // Reducers can't be validated as they are sort of virtual fields

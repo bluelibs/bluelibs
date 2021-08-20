@@ -175,10 +175,13 @@ export class Fixturizer {
       case FieldValueKind.ENUM:
         if (field.isArray) {
           return () => {
-            return faker.random.arrayElements(field.enumValues);
+            return faker.random.arrayElements(
+              field.enumValues.map((e) => e.id)
+            );
           };
         } else {
-          return () => faker.random.arrayElement(field.enumValues);
+          return () =>
+            faker.random.arrayElement(field.enumValues.map((e) => e.id));
         }
       case FieldValueKind.FLOAT:
         return endgameGenerator(faker.datatype.number);

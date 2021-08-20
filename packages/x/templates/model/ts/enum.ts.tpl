@@ -1,11 +1,16 @@
 export enum {{ className }} {
   {{# each elements }}
-    {{ field }} = "{{ value }}",
+    {{# if description }}
+      /**
+       * {{ description }}
+       */
+    {{/ if }}
+    {{ id }} = "{{ value }}",
   {{/ each }}
 }
 
 export enum {{ className }}Labels {
   {{# each elements }}
-    "{{ value }}" = "{{ label }}",
+    "{{ id }}" = "{{ label }}",
   {{/ each }}
 }

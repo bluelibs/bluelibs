@@ -8,6 +8,7 @@ import { Cleanable, Resolvable, UIConfigType, UIModeConfigType } from "../defs";
 import * as _ from "lodash";
 import { Fixturizer } from "../bridge/Fixturizer";
 import { SharedModel } from "./SharedModel";
+import { EnumConfigType } from "../../models/defs";
 
 const UI_DEFAULT_VALUES = {
   label: "",
@@ -47,8 +48,9 @@ export class Field extends BaseModel<Field> {
 
   /**
    * This only applies to fields which have `FieldValueType.ENUM`
+   * @cleaned is only EnumConfigType
    */
-  enumValues: string[] = [];
+  enumValues: string[] | EnumConfigType[] = [];
 
   /**
    * This says that this field is virtual and most likely depends on other fields to be ran
@@ -130,9 +132,7 @@ export class Field extends BaseModel<Field> {
     }
 
     // To avoid any errors we upper case all
-    if (this.enumValues && this.enumValues.length) {
-      this.enumValues = this.enumValues.map((ev) => _.toUpper(ev));
-    }
+    this.cleanEnums();
 
     this.subfields.forEach((s) => {
       s.app = this.app;
@@ -140,6 +140,32 @@ export class Field extends BaseModel<Field> {
       s.parent = this;
       s.clean();
     });
+  }
+
+  /**
+   * Processes the enums and cleans them
+   */
+  protected cleanEnums() {
+    if (this.enumValues && this.enumValues.length) {
+      if (typeof this.enumValues[0] === "string") {
+        this.enumValues = this.enumValues.map((enumElement) => {
+          return {
+            id: enumElement,
+            value: enumElement,
+            label: _.startCase(_.toLower(enumElement.id)),
+          };
+        });
+      } else {
+        (this.enumValues as EnumConfigType[]).forEach((enumElement) => {
+          if (!enumElement.value) {
+            enumElement.value = enumElement.id;
+          }
+          if (!enumElement.label) {
+            enumElement.label = _.startCase(_.toLower(enumElement.id));
+          }
+        });
+      }
+    }
   }
 
   protected storeUIDefaults() {

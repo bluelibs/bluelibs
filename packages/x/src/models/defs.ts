@@ -63,6 +63,25 @@ export interface IGenericFieldSubModel {
   isInterface?: boolean;
 }
 
+export type EnumConfigType = {
+  /**
+   * The id which identifies it in the code, prefer capitalisation: IN_PROGRESS
+   */
+  id: string;
+  /**
+   * The value, if left empty it will default to the id
+   */
+  value?: string;
+  /**
+   * How is this presented to the client, sometimes the label can be different from id and value. If missing it will default to the value.
+   */
+  label?: string;
+  /**
+   * Describe the comment of the enum
+   */
+  description?: string;
+};
+
 export interface IGenericField extends IFieldBaseSignature {
   name: string;
   /**
@@ -74,11 +93,7 @@ export interface IGenericField extends IFieldBaseSignature {
    */
   ignoreTypeScript?: boolean;
   ignoreGraphQL?: boolean;
-  /**
-   * When the type is enum we need to also specify the csv values of it
-   * @example In Progress,Open,Done
-   */
-  enumCSVValues?: string;
+  enumValues?: EnumConfigType[];
   /**
    * When type is unknown or model, we generate the model.
    */

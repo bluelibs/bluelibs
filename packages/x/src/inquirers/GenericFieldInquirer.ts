@@ -12,11 +12,15 @@ import {
   GenericFieldTypeEnum,
   IFieldBaseSignature,
 } from "../models/defs";
+import * as _ from "lodash";
 
-export class GenericFieldInquirer extends Inquirer<IGenericField> {
+interface IGenericFieldEnhanced extends IGenericField {
+  enumCSVValues?: string;
+}
+export class GenericFieldInquirer extends Inquirer<IGenericFieldEnhanced> {
   allOptions = this.getFieldAutocompleteOptions();
 
-  model: IGenericField = {
+  model: IGenericFieldEnhanced = {
     name: "",
     type: GenericFieldTypeEnum.STRING,
     isOptional: true,
@@ -64,7 +68,16 @@ export class GenericFieldInquirer extends Inquirer<IGenericField> {
         "enumCSVValues",
         Shortcuts.input("Enter the labels of your enum, comma separated:")
       );
-      // TODO: allow him to configure ENUM states
+
+      this.model.enumValues = this.model.enumCSVValues
+        .split(",")
+        .map((label) => {
+          label = label.trim();
+          return {
+            id: _.toUpper(_.snakeCase(label)),
+            value: _.toUpper(_.snakeCase(label)),
+          };
+        });
     }
   }
 
