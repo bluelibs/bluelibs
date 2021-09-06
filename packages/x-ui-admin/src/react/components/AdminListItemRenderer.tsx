@@ -1,7 +1,8 @@
 import { IRoute } from "@bluelibs/x-ui";
-import { Tag } from "antd";
+import { Button, Tag, Tooltip } from "antd";
 import * as React from "react";
 import { Link } from "react-router-dom";
+import { DownloadOutlined } from "@ant-design/icons";
 import * as startCase from "lodash.startcase";
 
 export type AdminListItemRendererProps = {
@@ -12,6 +13,8 @@ export type AdminListItemRendererProps = {
     | "date"
     | "enum"
     | "relation"
+    | "file"
+    | "fileGroup"
     | "number"
     | "boolean"
     | "object"
@@ -25,6 +28,14 @@ export type AdminListItemRendererProps = {
    */
   labelify?: boolean;
 };
+
+export function DownloadButton({ name, downloadUrl }) {
+  return (
+    <Button href={downloadUrl} target="_blank" icon={<DownloadOutlined />}>
+      {name}
+    </Button>
+  );
+}
 
 /**
  * @param props
@@ -45,15 +56,49 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
   }
 
   if (props.type === "tag") {
-    value = <Tag>{props.value}</Tag>;
+    value = <Tag color="cyan">{props.value}</Tag>;
   }
 
   if (props.type === "enum") {
-    value = <Tag>{props.labelify ? startCase(props.value) : props.value}</Tag>;
+    value = (
+      <Tag color="cyan">
+        {props.labelify ? startCase(props.value) : props.value}
+      </Tag>
+    );
   }
 
   if (props.type === "boolean") {
-    value = <Tag>{props.value ? "Yes" : "No"}</Tag>;
+    value = <Tag color="blue">{props.value ? "Yes" : "No"}</Tag>;
+  }
+
+  if (props.type === "file") {
+    if (Array.isArray(props.value)) {
+      value = (
+        <>
+          {props.value.map((file, idx) => (
+            <DownloadButton {...file} key={idx} />
+          ))}
+        </>
+      );
+    } else {
+      if (props.value) {
+        value = <DownloadButton {...props.value} name={null} />;
+      }
+    }
+  }
+
+  if (props.type === "fileGroup") {
+    if (!props.value) {
+      value = "N/A";
+    } else {
+      value = (
+        <>
+          {props.value.files.map((file, idx) => (
+            <DownloadButton {...file} key={idx} />
+          ))}
+        </>
+      );
+    }
   }
 
   if (props.type === "relation") {
@@ -72,8 +117,8 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
     value = <pre>{JSON.stringify(props.value, null, 4)}</pre>;
   }
 
-  if (value === undefined) {
-    return props.value;
+  if (value === undefined || value === null) {
+    return `N/A`;
   }
 
   return value;
