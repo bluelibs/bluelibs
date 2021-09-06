@@ -96,6 +96,22 @@ export class UICRUDModel {
       if (r.isDirect) {
         body[r.cleaned.field.id] = 1;
       }
+
+      if (r.isFileSimpleRelated()) {
+        Object.assign(body[r.id], {
+          downloadUrl: 1,
+          name: 1,
+        });
+      }
+      if (r.isFileGroupRelated()) {
+        Object.assign(body[r.id], {
+          name: 1,
+          files: {
+            downloadUrl: 1,
+            name: 1,
+          },
+        });
+      }
     });
 
     return JSON.stringify(body, null, 2);

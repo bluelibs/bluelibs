@@ -167,6 +167,17 @@ export class Relation extends BaseModel<Relation> {
     return ["AppFiles", "AppFileGroups"].includes(this.cleaned.to.id);
   }
 
+  public isFileGroupRelated() {
+    return this.cleaned.to.id === "AppFileGroups";
+  }
+
+  /**
+   * Can be one or many to AppFiles
+   */
+  public isFileSimpleRelated() {
+    return this.cleaned.to.id === "AppFiles";
+  }
+
   public getI18NSignature() {
     return {
       key: this.id,
