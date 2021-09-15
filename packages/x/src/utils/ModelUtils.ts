@@ -49,7 +49,9 @@ export class ModelUtils {
       fieldName = fieldName + "?";
     }
 
-    return `${fieldName}: ${signature};`;
+    let defaultValue = ModelUtils.getDefaultValueSuffix(field);
+
+    return `${fieldName}: ${signature}${defaultValue};`;
   }
 
   /**
@@ -72,7 +74,12 @@ export class ModelUtils {
       fieldName += "?";
     }
 
-    return `${fieldName}: ${signature}`;
+    let defaultValue;
+    if (field.defaultValue) {
+      defaultValue = `= ${signature}.${field.defaultValue}`;
+    }
+
+    return `${fieldName}: ${signature}${defaultValue}`;
   }
 
   /**
@@ -186,6 +193,33 @@ export class ModelUtils {
       field.type === GenericFieldTypeEnum.MODEL ||
       !PRIMITIVES.includes(field.type as GenericFieldTypeEnum)
     );
+  }
+
+  /**
+   * Based on the default value it returns the `= VALUE`.
+   * Note: it does not take into account enums
+   * @param field
+   * @returns
+   */
+  static getDefaultValueSuffix(field: IGenericField) {
+    let defaultValue;
+    if (field.defaultValue === undefined) {
+      if (field.isMany) {
+        defaultValue = "[]";
+      }
+    } else {
+      if (typeof field.defaultValue === "string") {
+        defaultValue = `"${field.defaultValue}"`;
+      } else if (field.defaultValue instanceof Date) {
+        defaultValue = `new Date()`;
+      } else {
+        defaultValue = JSON.stringify(field.defaultValue);
+      }
+    }
+    if (defaultValue !== undefined) {
+      defaultValue = " = " + defaultValue;
+    }
+    return defaultValue;
   }
 }
 

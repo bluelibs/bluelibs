@@ -20,6 +20,9 @@ export enum GenericFieldTypeEnum {
 export interface IFieldBaseSignature {
   type: GenericFieldTypeEnum | string;
   isOptional?: boolean;
+  /**
+   * This states whether the field is an array or not
+   */
   isMany?: boolean;
 }
 
@@ -88,6 +91,10 @@ export interface IGenericField extends IFieldBaseSignature {
    * Information about what this field does
    */
   description?: string;
+  /**
+   * The default value of this field. This should be JSON-compatible. If it relates an `enum` it should be the `enum` identifier.
+   */
+  defaultValue?: any;
   /**
    * Whether to render in typescript/graphql
    */

@@ -4,7 +4,13 @@ import { Collection } from "./Collection";
 import { ObjectId } from "@bluelibs/ejson";
 import * as faker from "faker";
 import { IGenericFieldSubModel } from "../../models";
-import { Cleanable, Resolvable, UIConfigType, UIModeConfigType } from "../defs";
+import {
+  Cleanable,
+  Resolvable,
+  UIConfigType,
+  UIFieldConfigType,
+  UIModeConfigType,
+} from "../defs";
 import * as _ from "lodash";
 import { Fixturizer } from "../bridge/Fixturizer";
 import { SharedModel } from "./SharedModel";
@@ -106,7 +112,7 @@ export class Field extends BaseModel<Field> {
   /**
    * Whether to show this field in the UI List, Create and Edit Forms
    */
-  ui: UIConfigType;
+  ui: UIFieldConfigType;
 
   /**
    * The collection it belongs to. This is stored automatically you don't have to specify it.
@@ -118,6 +124,11 @@ export class Field extends BaseModel<Field> {
    * Parent field in case it's a subfield
    */
   parent?: Field;
+
+  /**
+   * Store a default value for this field. If you want to eval the thing use `eval: new Date()`. If you are using it from an enum just pick it up.
+   */
+  defaultValue: any;
 
   clean() {
     this.storeUIDefaults();
