@@ -59,7 +59,7 @@ export interface IGenericFieldSubModel {
    * this can break validation, because for external models we don't do this.
    * By specifying this as true, we say: It's an external model, but perform enum-like validation on it.
    */
-  validateAsEnum?: boolean;
+  isEnumAlias?: boolean;
   /**
    * This refers to when you have a specific type of model that is an interface
    */

@@ -1,6 +1,7 @@
 import * as Studio from "../../studio";
 import { FieldValueKind } from "../../studio";
 import { COLLECTION_UI_MODES_REQUIRES_FIELDS } from "../defs";
+import { EnumConfigType } from "../../models/defs";
 
 export class SanityChecker {
   constructor(protected readonly app: Studio.App) {}
@@ -42,6 +43,16 @@ export class SanityChecker {
         throw new Error(
           `You cannot have an enum for field: ${field.id} with no values. "enumValues" option has to be provided`
         );
+      }
+      if (field.defaultValue) {
+        const foundId = (field.enumValues as EnumConfigType[]).find(
+          (value) => value.id === field.defaultValue
+        );
+        if (!foundId) {
+          throw new Error(
+            `You are using a default value: "${field.defaultValue}" that is not identifiable in the specified enum values, please use the "id" not the "value" of the enum for defaultValue setting.`
+          );
+        }
       }
     }
   }

@@ -74,7 +74,7 @@ export class ModelUtils {
       fieldName += "?";
     }
 
-    let defaultValue;
+    let defaultValue = "";
     if (field.defaultValue) {
       defaultValue = `= ${signature}.${field.defaultValue}`;
     }
@@ -111,7 +111,7 @@ export class ModelUtils {
     const isModel = field.type === GenericFieldTypeEnum.MODEL;
 
     if (isModel) {
-      if (field.model.validateAsEnum) {
+      if (field.model.isEnumAlias) {
         return this.getYupValidatorDecorator(
           {
             name: field.model.name,
@@ -202,13 +202,17 @@ export class ModelUtils {
    * @returns
    */
   static getDefaultValueSuffix(field: IGenericField) {
-    let defaultValue;
+    let defaultValue = undefined;
+
     if (field.defaultValue === undefined) {
       if (field.isMany) {
         defaultValue = "[]";
       }
     } else {
-      if (typeof field.defaultValue === "string") {
+      // This is because when in input mode, enums are outside, and we have engine of hooking it via model
+      if (field.model && field.model.isEnumAlias) {
+        defaultValue = `${field.model.name}.${field.defaultValue}`;
+      } else if (typeof field.defaultValue === "string") {
         defaultValue = `"${field.defaultValue}"`;
       } else if (field.defaultValue instanceof Date) {
         defaultValue = `new Date()`;
@@ -217,9 +221,10 @@ export class ModelUtils {
       }
     }
     if (defaultValue !== undefined) {
-      defaultValue = " = " + defaultValue;
+      return " = " + defaultValue;
     }
-    return defaultValue;
+
+    return "";
   }
 }
 
