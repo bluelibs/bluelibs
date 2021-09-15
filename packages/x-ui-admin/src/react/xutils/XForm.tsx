@@ -17,18 +17,45 @@ import { Rule } from "antd/lib/form";
 export type XFormElementBaseType = {
   id: string;
   name: (string | number)[];
+  isList?: boolean;
+  /**
+   * Show a tooltip representing what the form does
+   */
   tooltip?: string;
-  order?: number;
   required?: boolean;
+  order?: number;
   fieldKey?: (string | number)[];
   label?: string;
-  isList?: boolean;
   rules?: Rule[];
+  /**
+   * The initial value for the form
+   */
+  initialValue?: any;
+  /**
+   * This represents an Ant component especially useful when you want a custom renderer.
+   */
+  component?: {
+    name: string;
+    props?: any;
+  };
   listRenderer?: () => ListChildrenFunction;
 };
 
+export type XFormRenderFormItemOptions = {
+  props: any;
+  isFromList: boolean;
+};
+
+const XFormRenderFormItemOptionsDefaults: XFormRenderFormItemOptions = {
+  props: {},
+  isFromList: false,
+};
+
 export type XFormElementLeafType = XFormElementBaseType & {
-  render: React.ComponentType<Ant.FormItemProps>;
+  /**
+   * If you have supplied component
+   */
+  render?: React.ComponentType<Ant.FormItemProps>;
 };
 
 export type XFormElementNestType = XFormElementBaseType & {
@@ -93,7 +120,7 @@ export abstract class XForm extends Consumer<XFormElementType> {
         </Ant.Form.List>
       );
     } else {
-      return this.createFormItem(item);
+      return this.renderFormItem(item);
     }
   }
 
@@ -111,7 +138,12 @@ export abstract class XForm extends Consumer<XFormElementType> {
    * @param propsOverride Can customise the ending props reaching the component
    * @returns
    */
-  createFormItem(item: XFormElementType, propsOverride = {}) {
+  renderFormItem(
+    item: XFormElementType,
+    options: Partial<XFormRenderFormItemOptions> = XFormRenderFormItemOptionsDefaults
+  ) {
+    const { t } = this.i18n;
+
     if (!this.isLeaf(item)) {
       if (!item.columns) {
         return this.render(item.nest);
@@ -143,21 +175,61 @@ export abstract class XForm extends Consumer<XFormElementType> {
     const label = item.label === undefined ? item.id : item.label;
     const required = item.required || false;
     const tooltip = item.tooltip || undefined;
-    const rules = item.rules || undefined;
+    const rules = item.rules || [];
     const UIComponents = this.UIComponents;
+    let initialValue = item.initialValue || undefined;
+
+    if (options.isFromList) {
+      // List elements should have initial value stored at the top as per ant docs
+      initialValue = undefined;
+    }
+
     const props: Ant.FormItemProps = {
       name,
       label,
       required,
       tooltip,
       rules,
+      initialValue,
       fieldKey: item.fieldKey,
+      ...options.props,
     };
+
+    if (props.rules.length === 0 && props.required) {
+      props.rules.push({
+        required: true,
+        message: t("generics.forms.field_required", { field: label }),
+      });
+    }
+
+    // Create a "render" from the component instructions
+    if (!item.render) {
+      this.createRenderFunctionFromComponentDefinitions(item);
+    }
 
     return (
       <UIComponents.ErrorBoundary key={item.id}>
-        {React.createElement(item.render, { ...props, ...propsOverride })}
+        {React.createElement(item.render, props)}
       </UIComponents.ErrorBoundary>
+    );
+  }
+
+  private createRenderFunctionFromComponentDefinitions(
+    item: XFormElementLeafType
+  ) {
+    if (!item.component) {
+      throw new Error(
+        `You have to supply component details if you want to avoid rendering.`
+      );
+    }
+
+    item.render = (props) => (
+      <Ant.Form.Item {...props}>
+        {React.createElement(
+          Ant[item.component.name],
+          item.component.props || {}
+        )}
+      </Ant.Form.Item>
     );
   }
 
@@ -177,15 +249,15 @@ export abstract class XForm extends Consumer<XFormElementType> {
     if (isSingleInputList) {
       return (fields: FormListFieldData[], { add, remove }, { errors }) => (
         <>
-          <Ant.Form.Item label={label}>
+          <Ant.Form.Item label={label} initialValue={item.initialValue}>
             {fields.map((field, index) => (
               <>
-                {this.createFormItem(
+                {this.renderFormItem(
                   {
                     ...item,
                     label: null,
                   },
-                  field
+                  { props: field, isFromList: true }
                 )}
                 <MinusCircleOutlined
                   className="dynamic-delete-button"
@@ -212,7 +284,7 @@ export abstract class XForm extends Consumer<XFormElementType> {
           <Ant.Form.Item label={label}>
             {fields.map((field, index) => (
               <Ant.Form.Item label={null} required={false} key={field.key}>
-                {this.createFormItem({
+                {this.renderFormItem({
                   ...item,
                   // Manipulate nesting to contain proper fieldKey and name
                   nest: (item as XFormElementNestType).nest.map((subitem) => {
