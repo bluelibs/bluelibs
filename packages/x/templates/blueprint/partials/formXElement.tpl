@@ -23,6 +23,16 @@
       {{/ each }}
     ],
   {{/ if }}
+  {{# if form }}
+    component: {
+      name: "{{ form.component }}",
+      {{!-- This one is rendered as JSON.stringify() --}}
+      props: {{ form.props }}
+    },
+  {{/ if }}
+  {{# unless (@root.isUndefined defaultValue) }}
+    initialValue: {{ defaultValue }},
+  {{/ unless }}
   {{!-- RELATION HANDLING --}}
   {{# if (@root.typeIs rendererType "relation") }}
     render: (props) => (

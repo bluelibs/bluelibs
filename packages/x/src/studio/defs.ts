@@ -62,11 +62,11 @@ export type UIFieldConfigType =
         /**
          * The component from Ant
          */
-        component?: string;
+        component: string;
         /**
          * The props passed to configuring the Ant component
          */
-        props: any;
+        props?: any;
       };
     } & UIModeConfigType);
 

@@ -49,9 +49,13 @@ export class ModelUtils {
       fieldName = fieldName + "?";
     }
 
-    let defaultValue = ModelUtils.getDefaultValueSuffix(field);
+    const defaultValue = ModelUtils.getDefaultValue(field);
 
-    return `${fieldName}: ${signature}${defaultValue};`;
+    if (defaultValue === undefined) {
+      return `${fieldName}: ${signature};`;
+    } else {
+      return `${fieldName}: ${signature} = ${defaultValue};`;
+    }
   }
 
   /**
@@ -201,7 +205,7 @@ export class ModelUtils {
    * @param field
    * @returns
    */
-  static getDefaultValueSuffix(field: IGenericField) {
+  static getDefaultValue(field: IGenericField) {
     let defaultValue = undefined;
 
     if (field.defaultValue === undefined) {
@@ -221,10 +225,10 @@ export class ModelUtils {
       }
     }
     if (defaultValue !== undefined) {
-      return " = " + defaultValue;
+      return defaultValue;
     }
 
-    return "";
+    return undefined;
   }
 }
 

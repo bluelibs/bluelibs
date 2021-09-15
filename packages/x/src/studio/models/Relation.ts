@@ -89,6 +89,11 @@ export class Relation extends BaseModel<Relation> {
   description: string;
 
   /**
+   * Whether this relation must be present and is present
+   */
+  isRequired: boolean = true;
+
+  /**
    * Returns the opposite relation object (if it exists, if it's direct it might not)
    */
   get reversedRelation(): Relation {
@@ -158,6 +163,10 @@ export class Relation extends BaseModel<Relation> {
 
     if (!this.representedBy) {
       this.representedBy = this.find.field(this.to.id, "_id");
+    }
+
+    if (this.isDirect) {
+      this.cleaned.field.isRequired = this.isRequired;
     }
 
     this.storeUIDefaults();

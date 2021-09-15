@@ -200,6 +200,19 @@ field.boolean("id");
 field.object("id");
 ```
 
+### Default Values
+
+Default values end-up in your models, your inputs and your forms. They are easy and straight forward to work with. We currently support any `JSON` compatible object and `Date`.
+
+```ts
+field.string("firstName", {
+  defaultValue: "John", /// 123, true,
+});
+field.date("createOn", {
+  defaultValue: new Date(),
+});
+```
+
 ### Nested Fields
 
 You can benefit of nested fields which act as sub models, don't worry, the form will properly generate your code so you don't have to think about it.

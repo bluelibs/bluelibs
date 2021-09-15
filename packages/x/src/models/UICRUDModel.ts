@@ -1,8 +1,10 @@
 import * as _ from "lodash";
 import * as Studio from "../studio";
 import { Field, UIModeType } from "../studio";
+import { XBridge } from "../studio/bridge/XBridge";
 import { FieldValueKind } from "../studio/models/FieldValueKind";
 import { Relation } from "../studio/models/Relation";
+import { ModelUtils } from "../utils";
 import { EnumConfigType } from "./defs";
 
 type FilesType = "file" | "files" | "fileGroup";
@@ -32,6 +34,16 @@ export type ViewItemModel = {
   routeName?: string;
 
   subfields?: ViewItemModel[];
+
+  /**
+   * The default value the form will initially have in (create) mode only
+   */
+  defaultValue?: any;
+
+  form?: {
+    component: string;
+    props?: string;
+  };
 };
 
 export type CRUDFeatureType = "create" | "edit" | "view" | "list" | "delete";
@@ -223,6 +235,14 @@ export class UICRUDModel {
     return type === othertype;
   }
 
+  /**
+   * @param value
+   * @returns
+   */
+  isUndefined(value) {
+    return value === undefined;
+  }
+
   typeIsFormPrimitive(type: RendererType) {
     const primitives = [
       Studio.Field.Types.STRING,
@@ -336,6 +356,10 @@ export class UICRUDModel {
       return;
     }
 
+    if (field.ui === false) {
+      return;
+    }
+
     const base: ViewItemModel = {
       id: `${field.id}`,
       dataIndexStr,
@@ -350,7 +374,17 @@ export class UICRUDModel {
       enumValues: this.getEnumValuesLabels(
         field.enumValues as EnumConfigType[]
       ),
+      defaultValue: ModelUtils.getDefaultValue(
+        XBridge.fieldToGenericField(field)
+      ),
     };
+
+    if (field.ui.form) {
+      base.form = {
+        component: field.ui.form.component,
+        props: JSON.stringify(field.ui.form.props),
+      };
+    }
 
     let subfields = field.model ? field.cleaned.model.fields : field.subfields;
 

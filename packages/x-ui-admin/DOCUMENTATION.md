@@ -255,6 +255,7 @@ export class CompanyEditForm extends XForm {
         label: "Name",
         name: ["name"],
         rules: [], // Ant Form Rules: https://ant.design/components/form/#Rule
+        initialValue: "John Smith",
         render: (props) => (
           <Ant.Form.Item {...props}>
             <Ant.Input />
