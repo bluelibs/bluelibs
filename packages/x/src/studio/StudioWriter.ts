@@ -383,24 +383,24 @@ export class StudioWriter {
 
       // TODO: maybe allow-opt-in somehow?
       model.hasCustomInputs = true;
-      model.insertInputModelDefinition = XBridge.collectionToGenericModel(
-        collection,
-        {
+
+      // Shorthand function to eliminate code-repetition below
+      function createModel(ui: "edit" | "create") {
+        return XBridge.collectionToGenericModel(collection, {
           graphql: true,
           // skipRelations: true,
-          ui: "create",
+          ui,
           isInput: true,
-        }
-      );
-      model.updateInputModelDefinition = XBridge.collectionToGenericModel(
-        collection,
-        {
-          graphql: true,
-          // skipRelations: true,
-          ui: "edit",
-          isInput: true,
-        }
-      );
+        });
+      }
+
+      model.insertInputModelDefinition = createModel("create");
+      model.updateInputModelDefinition = createModel("edit");
+
+      // Make all fields optional for the update. We want to enable atomic-size updates from day 0.
+      model.updateInputModelDefinition.fields.forEach((field) => {
+        field.isOptional = true;
+      });
 
       crudWriter.write(model, session);
       await commit();

@@ -38,9 +38,9 @@ export class Field extends BaseModel<Field> {
   id: string;
 
   /**
-   * This is a mandatory field that must exist
+   * This represents whether a field value is mandatory to exit.
    */
-  isRequired: boolean = false;
+  isRequired: boolean = true;
 
   /**
    * Whether the element is alone or an array

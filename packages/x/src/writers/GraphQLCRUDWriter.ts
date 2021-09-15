@@ -66,7 +66,7 @@ export class GraphQLCRUDWriter extends BlueprintWriter {
     const writer = this.getWriter(GraphQLInputWriter);
     const inputModel = new GraphQLInputModel();
     inputModel.bundleName = model.bundleName;
-    inputModel.nest = [model.collectionElement.identityNameRaw];
+    // inputModel.nest = [model.collectionElement.identityNameRaw];
     inputModel.genericModel = GenericModel.clone(
       isInsert
         ? model.insertInputModelDefinition
