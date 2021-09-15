@@ -34,10 +34,8 @@ export type XFormElementBaseType = {
   /**
    * This represents an Ant component especially useful when you want a custom renderer.
    */
-  component?: {
-    name: string;
-    props?: any;
-  };
+  component?: React.ComponentType;
+  componentProps?: any;
   listRenderer?: () => ListChildrenFunction;
 };
 
@@ -79,7 +77,7 @@ export type ListChildrenFunction = (
 ) => React.ReactNode;
 
 @Service({ transient: true })
-export abstract class XForm extends Consumer<XFormElementType> {
+export abstract class XForm<T = null> extends Consumer<XFormElementType> {
   @Inject(XUI_COMPONENTS_TOKEN)
   UIComponents: IComponents;
 
@@ -138,7 +136,7 @@ export abstract class XForm extends Consumer<XFormElementType> {
    * @param propsOverride Can customise the ending props reaching the component
    * @returns
    */
-  renderFormItem(
+  protected renderFormItem(
     item: XFormElementType,
     options: Partial<XFormRenderFormItemOptions> = XFormRenderFormItemOptionsDefaults
   ) {
@@ -203,7 +201,7 @@ export abstract class XForm extends Consumer<XFormElementType> {
     }
 
     // Create a "render" from the component instructions
-    if (!item.render) {
+    if (item.component) {
       this.createRenderFunctionFromComponentDefinitions(item);
     }
 
@@ -214,21 +212,12 @@ export abstract class XForm extends Consumer<XFormElementType> {
     );
   }
 
-  private createRenderFunctionFromComponentDefinitions(
+  protected createRenderFunctionFromComponentDefinitions(
     item: XFormElementLeafType
   ) {
-    if (!item.component) {
-      throw new Error(
-        `You have to supply component details if you want to avoid rendering.`
-      );
-    }
-
     item.render = (props) => (
       <Ant.Form.Item {...props}>
-        {React.createElement(
-          Ant[item.component.name],
-          item.component.props || {}
-        )}
+        {React.createElement(item.component, item.componentProps || {})}
       </Ant.Form.Item>
     );
   }
@@ -238,7 +227,7 @@ export abstract class XForm extends Consumer<XFormElementType> {
    * @param item
    * @returns
    */
-  createListRenderer(item: XFormElementType): ListChildrenFunction {
+  protected createListRenderer(item: XFormElementType): ListChildrenFunction {
     if (item.listRenderer) {
       return item.listRenderer();
     }
