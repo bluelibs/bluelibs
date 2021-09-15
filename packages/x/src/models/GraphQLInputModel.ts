@@ -7,4 +7,8 @@ export class GraphQLInputModel {
     "MyInput",
     ModelRaceEnum.GRAPHQL_INPUT
   );
+  /**
+   * Whether to nest it properly under `services/inputs/...nest..../file.input.ts`
+   */
+  nest?: string[] = [];
 }
