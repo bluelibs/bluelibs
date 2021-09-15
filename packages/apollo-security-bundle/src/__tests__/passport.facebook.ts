@@ -11,7 +11,7 @@ export class FacebookAuthenticator extends PassportAuthenticator {
       async (err, user, req, res, next) => {
         // create the token using the user._id
         const token = await this.getToken(user._id);
-        res.cookie("bluelibs-login-token", token);
+        res.cookie("bluelibs-token", token);
         res.json({ hello: "goodbye ", token });
       }
     );

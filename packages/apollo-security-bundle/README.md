@@ -40,7 +40,7 @@ export interface IApolloSecurityBundleConfig {
     cookies?: boolean,
     websocket?: boolean,
   };
-  // bluelibs-login-token is the default for all
+  // bluelibs-token is the default for all
   identifiers: {
     headers?: string,
     cookies?: string,
