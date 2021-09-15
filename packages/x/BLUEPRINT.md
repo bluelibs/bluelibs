@@ -150,9 +150,9 @@ field({
   type: field.types.STRING,
 
   // Optionals
-  description: "What is this field for?", // This would be stored as a comment for both models and graphql entities and will be shown as helper text inside the forms
+  description: "What is this field for?", // This would be stored as a comment for both models and 'GraphQL' entities and will be shown as helper text inside the forms
   isArray: false, // (default: false) whether it's an array of elements
-  isRequired: true, // (default: false)
+  isRequired: true, // (default: true)
   enableGraphQL: true, // (default: true) would this field be present in the API? For example if you store a password hash, then most likely not.
   // Disable all UI by saying ui: false
   ui: {
@@ -162,7 +162,11 @@ field({
     listFilters: true, // Whether you can filter by it
     view: true, // Whether it's present in the view
     edit: true, // Whether it's present in the edit form
-    create: true, // Wheter it's present in the create form
+    create: true, // Wheter it's present in the create form,
+    form: {
+      component: "Input.Textarea", // This supports every data entry from Ant
+      props: {}, // Additional props to pass the component like sizes or etc.
+    },
   },
 });
 ```
@@ -198,6 +202,19 @@ field.float("id");
 field.date("id");
 field.boolean("id");
 field.object("id");
+```
+
+### Default Values
+
+Default values end-up in your models, your inputs and your forms. They are easy and straight forward to work with. We currently support any `JSON` compatible object and `Date`.
+
+```ts
+field.string("firstName", {
+  defaultValue: "John", /// 123, true,
+});
+field.date("createOn", {
+  defaultValue: new Date(),
+});
 ```
 
 ### Nested Fields
@@ -323,6 +340,8 @@ collection({
     relation({
       id: "post",
       to: "Posts",
+      // By default it is required and it will infer this requiredness to the field if it's a direct relation
+      isRequired: true,
       field: field({
         id: "myCustomPostId",
         type: field.types.OBJECT_ID,

@@ -129,6 +129,7 @@ export class XBridge {
       description: studioField.description,
       isOptional: !studioField.isRequired,
       enumValues: studioField.enumValues as EnumConfigType[],
+      defaultValue: studioField.defaultValue,
     };
 
     // Reducers can't be validated as they are sort of virtual fields
@@ -144,7 +145,7 @@ export class XBridge {
         storage: "outside",
         local: false,
         absoluteImport: pathsInfo.fromInputToAll,
-        validateAsEnum: true,
+        isEnumAlias: true,
       };
     }
 

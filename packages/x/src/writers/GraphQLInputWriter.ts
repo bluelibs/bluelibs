@@ -49,6 +49,7 @@ export class GraphQLInputWriter extends BlueprintWriter {
       bundlePath,
       "services",
       "inputs",
+      ...model.nest,
       genericModel.modelName + ".input.ts"
     );
     this.getWriter(GenericModelWriter).write(tsModel, session);
@@ -62,9 +63,11 @@ export class GraphQLInputWriter extends BlueprintWriter {
     //   )
     // );
 
+    const nestPath = model.nest.length === 0 ? "" : "/" + model.nest.join("/");
+
     fsOperator.sessionAppendFile(
       path.join(bundlePath, "services", "inputs", "index.ts"),
-      `export * from "./${genericModel.modelName + ".input"}";`
+      `export * from ".${nestPath}/${genericModel.modelName + ".input"}";`
     );
   }
 }

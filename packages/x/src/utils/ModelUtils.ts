@@ -49,7 +49,13 @@ export class ModelUtils {
       fieldName = fieldName + "?";
     }
 
-    return `${fieldName}: ${signature};`;
+    const defaultValue = ModelUtils.getDefaultValue(field);
+
+    if (defaultValue === undefined) {
+      return `${fieldName}: ${signature};`;
+    } else {
+      return `${fieldName}: ${signature} = ${defaultValue};`;
+    }
   }
 
   /**
@@ -72,7 +78,12 @@ export class ModelUtils {
       fieldName += "?";
     }
 
-    return `${fieldName}: ${signature}`;
+    let defaultValue = "";
+    if (field.defaultValue) {
+      defaultValue = `= ${signature}.${field.defaultValue}`;
+    }
+
+    return `${fieldName}: ${signature}${defaultValue}`;
   }
 
   /**
@@ -104,7 +115,7 @@ export class ModelUtils {
     const isModel = field.type === GenericFieldTypeEnum.MODEL;
 
     if (isModel) {
-      if (field.model.validateAsEnum) {
+      if (field.model.isEnumAlias) {
         return this.getYupValidatorDecorator(
           {
             name: field.model.name,
@@ -186,6 +197,38 @@ export class ModelUtils {
       field.type === GenericFieldTypeEnum.MODEL ||
       !PRIMITIVES.includes(field.type as GenericFieldTypeEnum)
     );
+  }
+
+  /**
+   * Based on the default value it returns the `= VALUE`.
+   * Note: it does not take into account enums
+   * @param field
+   * @returns
+   */
+  static getDefaultValue(field: IGenericField) {
+    let defaultValue = undefined;
+
+    if (field.defaultValue === undefined) {
+      if (field.isMany) {
+        defaultValue = "[]";
+      }
+    } else {
+      // This is because when in input mode, enums are outside, and we have engine of hooking it via model
+      if (field.model && field.model.isEnumAlias) {
+        defaultValue = `${field.model.name}.${field.defaultValue}`;
+      } else if (typeof field.defaultValue === "string") {
+        defaultValue = `"${field.defaultValue}"`;
+      } else if (field.defaultValue instanceof Date) {
+        defaultValue = `new Date()`;
+      } else {
+        defaultValue = JSON.stringify(field.defaultValue);
+      }
+    }
+    if (defaultValue !== undefined) {
+      return defaultValue;
+    }
+
+    return undefined;
   }
 }
 

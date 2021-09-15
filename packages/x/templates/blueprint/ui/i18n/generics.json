@@ -17,6 +17,9 @@
       "list_actions": "Actions",
       "live_data_view": "Live Data",
       "or": "Or",
+      "forms": {
+        "field_required": "%{field} is required."
+      }
     }
   }
 }

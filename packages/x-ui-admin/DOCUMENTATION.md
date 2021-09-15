@@ -255,11 +255,19 @@ export class CompanyEditForm extends XForm {
         label: "Name",
         name: ["name"],
         rules: [], // Ant Form Rules: https://ant.design/components/form/#Rule
+        initialValue: "John Smith",
+
+        // You can either use render or specify component. Please be careful, you always have to have input right under Form.Item
         render: (props) => (
           <Ant.Form.Item {...props}>
             <Ant.Input />
           </Ant.Form.Item>
         ),
+
+        // Equivalent to the above is:
+        component: Ant.Input,
+        // Add additional props to the input component
+        componentProps: {},
       },
       // The rest of form items
     ]);

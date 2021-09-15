@@ -17,6 +17,7 @@ export type ToContentOptions = {
 const ToContentDefaults = {
   enumPrefix: "",
 };
+
 export class GenericModel {
   // Note: When you add additional fields don't forget to look at .clone() function
 

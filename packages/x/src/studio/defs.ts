@@ -50,6 +50,26 @@ export type UICollectionConfigType =
       icon?: string;
     } & UIModeConfigType);
 
+export type UIFieldConfigType =
+  | false
+  | ({
+      label?: string;
+      order?: number;
+      /**
+       * Works with Ant Form
+       */
+      form?: {
+        /**
+         * The component from Ant
+         */
+        component: string;
+        /**
+         * The props passed to configuring the Ant component
+         */
+        props?: any;
+      };
+    } & UIModeConfigType);
+
 export type UIConfigType =
   | false
   | ({

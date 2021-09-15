@@ -158,6 +158,37 @@ export class StudioWriter {
     ) {
       await this.createBoilerplateUIComponents(studioApp, session, commit);
     }
+
+    await this.setupI18NGenerics(studioApp, session, commit);
+  }
+
+  async setupI18NGenerics(
+    model: Studio.App,
+    session: XSession,
+    commit: () => Promise<void>
+  ) {
+    const operator = new FSOperator(session, {});
+    const tpl = operator.getTemplatePathCreator("blueprint");
+
+    const bundleDir = FSUtils.bundlePath(
+      session.getMicroservicePath(),
+      "UIAppBundle"
+    );
+    // I18N
+    operator.sessionCopy(
+      tpl("ui/i18n/generics.json"),
+      path.join(bundleDir, "i18n", "generics.json")
+    );
+    operator.sessionPrependFile(
+      path.join(bundleDir, "i18n", "store.ts"),
+      `import generics from "./generics.json";`
+    );
+    operator.sessionAppendFile(
+      path.join(bundleDir, "i18n", "store.ts"),
+      `i18n.push(generics);`
+    );
+
+    await commit();
   }
 
   async createBoilerplateUIComponents(
@@ -209,23 +240,6 @@ export class StudioWriter {
         );
         this.success(`Added override for ${componentName}`);
       }
-    );
-
-    // I18N
-    operator.sessionCopy(
-      tpl("ui/i18n/generics.json"),
-      path.join(bundleDir, "i18n", "generics.json"),
-      {
-        ignoreIfExists: true,
-      }
-    );
-    operator.sessionPrependFile(
-      path.join(bundleDir, "i18n", "store.ts"),
-      `import generics from "./generics.json";`
-    );
-    operator.sessionAppendFile(
-      path.join(bundleDir, "i18n", "store.ts"),
-      `i18n.push(generics);`
     );
 
     // DASHBOARD & AUTH
@@ -383,24 +397,25 @@ export class StudioWriter {
 
       // TODO: maybe allow-opt-in somehow?
       model.hasCustomInputs = true;
-      model.insertInputModelDefinition = XBridge.collectionToGenericModel(
-        collection,
-        {
+
+      // Shorthand function to eliminate code-repetition below
+      function createModel(ui: "edit" | "create") {
+        return XBridge.collectionToGenericModel(collection, {
           graphql: true,
           // skipRelations: true,
-          ui: "create",
+          ui,
           isInput: true,
-        }
-      );
-      model.updateInputModelDefinition = XBridge.collectionToGenericModel(
-        collection,
-        {
-          graphql: true,
-          // skipRelations: true,
-          ui: "edit",
-          isInput: true,
-        }
-      );
+        });
+      }
+
+      model.insertInputModelDefinition = createModel("create");
+      model.updateInputModelDefinition = createModel("edit");
+
+      // Make all fields optional for the update. We want to enable atomic-size updates from day 0.
+      model.updateInputModelDefinition.fields.forEach((field) => {
+        field.isOptional = true;
+        field.defaultValue = undefined;
+      });
 
       crudWriter.write(model, session);
       await commit();

@@ -185,6 +185,7 @@ export const shortcuts = {
         mock: {
           useExistingDocuments: true,
         },
+        isRequired: true,
         ...override,
       });
     },
@@ -204,13 +205,14 @@ export const shortcuts = {
           listFilters: false,
           view: true,
         },
+        isRequired: false,
       };
       _.merge(options, override);
 
       return s.relation(options);
     },
     files(id: string, override: Partial<Relation> = {}) {
-      const options = {
+      const options: Partial<Relation> = {
         id: id,
         to: "AppFiles",
         isMany: true,
@@ -226,10 +228,11 @@ export const shortcuts = {
           listFilters: false,
           view: true,
         },
+        isRequired: false,
       };
       _.merge(options, override);
 
-      return s.relation(options);
+      return s.relation(options as Relation);
     },
     fileGroup(id: string, override: Partial<Relation> = {}) {
       const options = {
@@ -247,6 +250,7 @@ export const shortcuts = {
           listFilters: false,
           view: true,
         },
+        isRequired: false,
         ...override,
       };
       _.merge(options, override);
