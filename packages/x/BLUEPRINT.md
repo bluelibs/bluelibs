@@ -339,14 +339,18 @@ collection({
   relations: [
     relation({
       id: "post",
+
+      // To which collection are we linking? Specificy the id
       to: "Posts",
+
       // By default it is required and it will infer this requiredness to the field if it's a direct relation
       isRequired: true,
+
+      // You can either use a string (of a field already added), omit it (it will generate a default one by suffixing the relation id with 'Id' or 'Ids')
       field: field({
         id: "myCustomPostId",
         type: field.types.OBJECT_ID,
       }),
-      // or add it inside fields: [] and just specify a string here field: "myCustomPostId"
     }),
   ],
 });
