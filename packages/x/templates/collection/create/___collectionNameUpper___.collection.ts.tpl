@@ -14,7 +14,7 @@ import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectio
 {{ else }}
   export class {{ collectionClass }} extends Collection<{{ collectionModelClass }}> {
 {{/ if }}
-  static collectionName = "{{ collectionName }}"
+  static collectionName = "{{ collectionNameMongo }}"
   static model = {{ collectionModelClass }}
 
   static links = links;

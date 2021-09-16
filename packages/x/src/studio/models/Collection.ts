@@ -78,7 +78,7 @@ export class Collection extends BaseModel<Collection> {
   };
 
   /**
-   * Whether this collection is something users can see
+   * Whether this collection is something users can see and we expose it as a Type
    */
   enableGraphQL: boolean = true;
 

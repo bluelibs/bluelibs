@@ -41,6 +41,10 @@ export class CollectionModel {
     );
   }
 
+  get collectionNameMongo() {
+    return _.snakeCase(this.collectionName);
+  }
+
   get collectionNameUpper() {
     return _.upperFirst(this.collectionName);
   }
