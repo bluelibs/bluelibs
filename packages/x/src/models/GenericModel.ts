@@ -6,6 +6,7 @@ import {
   GenericFieldTypeEnum,
   IGenericFieldSubModel,
 } from "./defs";
+import * as path from "path";
 
 // This model can be inquired for asking:
 // GraphQL Types, Inputs, Model Classes
@@ -57,13 +58,11 @@ export class GenericModel {
   }
 
   get localBaseName() {
-    return this.targetPath
-      .split("/")
-      .pop()
-      .split(".")
-      .slice(0, -1)
-      .concat("base")
-      .join(".");
+    const basenameParts = path.basename(this.targetPath).split(".");
+    basenameParts.pop();
+    basenameParts.push("base");
+
+    return basenameParts.join(".");
   }
 
   // Most likely we clone it because we want to change the race
