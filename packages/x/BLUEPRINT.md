@@ -461,6 +461,8 @@ collection({
     shortcuts.field.softdeletable(),
     shortcuts.user.password(), // This stores the `IPasswordAuthenticationStrategy` from PasswordBundle
 
+    shortcuts.field.timezone("timezone"), // A simple field enum to easily benefit of timezone configurations
+
     // This adds createdAt and updatedAt (note the ... and "fields")
     ...shortcuts.fields.timestampable(),
     // This adds createdById and updatedById

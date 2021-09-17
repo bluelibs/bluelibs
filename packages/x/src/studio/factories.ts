@@ -25,7 +25,7 @@ export const collection: FactoryFunction<Collection, ["id"]> = (config) => {
 
 export type FieldFactoryShortcut = (
   id: string,
-  config: DeepPartial<Field>
+  config?: DeepPartial<Field>
 ) => Field;
 export type FieldFactoryFunction<T, RT extends (keyof T)[]> = FactoryFunction<
   T,
@@ -67,12 +67,14 @@ export const sharedModel: FactoryFunction<SharedModel, ["id", "fields"]> = (
 };
 
 // FIELD SHORTCUTS
-const fieldShortcutFactory = (type) => {
+type FieldShortcutFactoryFunction = (id, config?: Partial<Field>) => Field;
+
+const fieldShortcutFactory = (type): FieldShortcutFactoryFunction => {
   return (id, config = {}) => {
     return field({
       id,
       type,
-      ...config,
+      ...(config || {}),
     });
   };
 };

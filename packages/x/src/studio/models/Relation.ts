@@ -167,6 +167,11 @@ export class Relation extends BaseModel<Relation> {
 
     if (this.isDirect) {
       this.cleaned.field.isRequired = this.isRequired;
+
+      // If it's required we'll assume to have a link with it with existing docs
+      if (this.isRequired && !this.mock) {
+        this.mock = { useExistingDocuments: true };
+      }
     }
 
     this.storeUIDefaults();

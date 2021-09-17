@@ -1,6 +1,7 @@
 import * as s from "../factories";
 import * as _ from "lodash";
 import { Field, Relation } from "../models";
+import timezones from "./timezones";
 
 export type BlameableRelationOverrideType = {
   created: Partial<Relation>;
@@ -23,6 +24,13 @@ export const shortcuts = {
           create: false,
           edit: false,
         },
+      });
+    },
+    timezone(fieldId: string = "timezone", override: Partial<Field> = {}) {
+      return s.field({
+        id: fieldId,
+        type: s.field.types.ENUM,
+        enumValues: timezones,
       });
     },
     softdeletable() {

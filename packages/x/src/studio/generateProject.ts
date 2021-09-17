@@ -32,7 +32,7 @@ export async function generateProject(
     await writer.write();
     await writer.session.commit();
 
-    console.log("Successfully generated the project");
+    writer.success("Successfully generated the project");
   } catch (e) {
     console.error(`Something went wrong with the generation:`);
     console.error(e);

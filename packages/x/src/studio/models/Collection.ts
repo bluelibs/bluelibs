@@ -201,4 +201,8 @@ export class Collection extends BaseModel<Collection> {
       }
     }
   }
+
+  getMongoCollectionName() {
+    return _.camelCase(this.id);
+  }
 }

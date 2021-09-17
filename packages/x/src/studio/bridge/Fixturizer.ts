@@ -41,9 +41,12 @@ export class Fixturizer {
           maxCount = maxCount === undefined ? 1 : maxCount;
         }
 
-        for (const document of this.dataSet[collection.id]) {
+        for (const document of this.dataSet[
+          collection.getMongoCollectionName()
+        ]) {
           if (useExistingDocuments) {
-            const relatedCollectionName = relation.cleaned.to.id;
+            const relatedCollectionName =
+              relation.cleaned.to.getMongoCollectionName();
             const relatedDataSet = this.dataSet[relatedCollectionName];
             const relationalElements = faker.random.arrayElements(
               relatedDataSet,
@@ -78,13 +81,14 @@ export class Fixturizer {
    * @returns
    */
   generateDocumentForCollection(collection: Studio.Collection): object {
-    this.dataSet[collection.id] = this.dataSet[collection.id] || [];
+    this.dataSet[collection.getMongoCollectionName()] =
+      this.dataSet[collection.getMongoCollectionName()] || [];
 
     let document: any = {
       _id: new ObjectId(),
     };
 
-    this.dataSet[collection.id].push(document);
+    this.dataSet[collection.getMongoCollectionName()].push(document);
 
     collection.fields
       .filter(

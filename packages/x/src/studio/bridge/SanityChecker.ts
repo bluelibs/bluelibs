@@ -54,6 +54,21 @@ export class SanityChecker {
           );
         }
       }
+
+      const ids = (field.cleaned.enumValues as EnumConfigType[]).map(
+        (e) => e.id
+      );
+
+      function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+      }
+
+      const uniqued = ids.filter(onlyUnique);
+      if (uniqued.length !== ids.length) {
+        throw new Error(
+          `You have duplicate id for the enum: "${field.id}" in collection: "${field.collection.id}"`
+        );
+      }
     }
   }
 }

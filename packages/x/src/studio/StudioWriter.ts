@@ -16,6 +16,7 @@ import { Fixturizer } from "./bridge/Fixturizer";
 import { XElementClassSuffix } from "../utils/XElements";
 import { CollectionReducerWriter } from "../writers/CollectionReducerWriter";
 import { CollectionReducerModel } from "../models/CollectionReducerModel";
+import { chalk } from "@bluelibs/terminal-bundle";
 import {
   ALL_GENERATORS,
   GenerateProjectOptionsType,
@@ -24,6 +25,7 @@ import {
 } from "./defs";
 import { ContainerInstance } from "@bluelibs/core";
 import { ModelRaceEnum } from "../models";
+import { execSync } from "child_process";
 
 const ADMIN_FOLDER = "admin";
 const API_FOLDER = "api";
@@ -97,6 +99,7 @@ export class StudioWriter {
     }
 
     const projectPath = process.cwd();
+    let firstTimeGeneration = false;
     session.setProjectPath(projectPath);
 
     // BACKEND
@@ -108,9 +111,10 @@ export class StudioWriter {
 
     session.setMicroservicePath(backendMicroservicePath);
     if (!fs.existsSync(backendMicroservicePath)) {
+      firstTimeGeneration = true;
       await this.createBackendMicroservice(studioApp, session, commit);
     } else {
-      console.log(`➤ Backend microservice already exists. Skipping.`);
+      this.skipping(`Backend microservice already exists.`);
     }
 
     if (this.hasGenerator(GeneratorKind.BACKEND_COLLECTIONS)) {
@@ -141,7 +145,7 @@ export class StudioWriter {
     if (!hasExistingFrontendMicroservice) {
       await this.createFrontendMicroservice(studioApp, session, commit);
     } else {
-      console.log(`➤ Frontend microservice already exists. Skipping.`);
+      this.skipping(`Frontend microservice already exists.`);
     }
 
     session.setMicroservicePath(frontendMicroservicePath);
@@ -160,6 +164,31 @@ export class StudioWriter {
     }
 
     await this.setupI18NGenerics(studioApp, session, commit);
+
+    this.ensureNpmDependencies(firstTimeGeneration);
+  }
+
+  /**
+   * Install all dependencies necessary
+   */
+  protected ensureNpmDependencies(firstTimeGeneration: boolean) {
+    console.log("");
+    this.loading("Installing npm dependencies");
+
+    execSync("cd microservices/api; npm install");
+    execSync("cd microservices/admin; npm install");
+
+    this.success("Done. Now you can use:");
+    console.log("");
+    console.log("$ npm run start:api");
+    console.log("$ npm run start:admin");
+    if (firstTimeGeneration) {
+      console.log(
+        "Note: wait for the `api` to start before running the `admin` microservice to ensure GraphQL types are in-sync."
+      );
+    }
+
+    console.log("");
   }
 
   async setupI18NGenerics(
@@ -323,22 +352,24 @@ export class StudioWriter {
   ) {
     const writer = this.writers.uiCollection;
 
-    studioApp.collections.forEach((collection) => {
-      if (collection.isExternal()) {
-        return;
-      }
+    studioApp.collections
+      .filter((c) => c.enableGraphQL === true)
+      .forEach((collection) => {
+        if (collection.isExternal()) {
+          return;
+        }
 
-      const model = new UICollectionModel();
-      model.bundleName = "UIAppBundle";
-      model.hasCustomInputs = true;
-      model.studioCollection = collection;
-      model.collectionName = collection.id;
-      model.collectionEndpoint = collection.id;
-      model.entityName = collection.entityName;
+        const model = new UICollectionModel();
+        model.bundleName = "UIAppBundle";
+        model.hasCustomInputs = true;
+        model.studioCollection = collection;
+        model.collectionName = collection.id;
+        model.collectionEndpoint = collection.id;
+        model.entityName = collection.entityName;
 
-      writer.write(model, session);
-      this.success(`(UI) Created client-side collection: "${collection.id}"`);
-    });
+        writer.write(model, session);
+        this.success(`(UI) Created client-side collection: "${collection.id}"`);
+      });
 
     await commit();
   }
@@ -755,7 +786,15 @@ export class StudioWriter {
     );
   }
 
-  protected success(message) {
-    console.log(`✅ ${message}`);
+  public skipping(message) {
+    console.log(`${chalk.magentaBright("➤")} ${message} (skipping)`);
+  }
+
+  public success(message) {
+    console.log(`${chalk.greenBright("✓")} ${message}`);
+  }
+
+  public loading(message) {
+    console.log(`${chalk.redBright("♦")} ${message}...`);
   }
 }

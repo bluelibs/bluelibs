@@ -42,7 +42,7 @@ export class CollectionModel {
   }
 
   get collectionNameMongo() {
-    return _.snakeCase(this.collectionName);
+    return _.camelCase(this.collectionName);
   }
 
   get collectionNameUpper() {

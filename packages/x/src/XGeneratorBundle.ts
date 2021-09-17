@@ -5,7 +5,7 @@ import {
 } from "@bluelibs/terminal-bundle";
 import { Bundle } from "@bluelibs/core";
 import commands from "./commands";
-import { execSync } from "child_process";
+import { execSync, exec } from "child_process";
 import { GENERATOR_QUOTES } from "./constants";
 import { IXGeneratorBundleConfig } from "./defs";
 
@@ -25,7 +25,11 @@ export class XGeneratorBundle extends Bundle<IXGeneratorBundleConfig> {
       });
 
       this.displayWelcomeMessage();
-      this.checkAndDisplayNewVersion();
+
+      return new Promise<void>((resolve) => {
+        resolve();
+        this.checkAndDisplayNewVersion();
+      });
     }
   }
 
@@ -33,7 +37,7 @@ export class XGeneratorBundle extends Bundle<IXGeneratorBundleConfig> {
     let showUpdateInstructions = false;
     try {
       const result = execSync("npm view @bluelibs/x version", {
-        timeout: 1000,
+        timeout: 2000,
       });
       latestVersion = result.toString().split("\n")[0];
 
@@ -44,6 +48,7 @@ export class XGeneratorBundle extends Bundle<IXGeneratorBundleConfig> {
 
     if (showUpdateInstructions) {
       console.log(`Newer version available (${latestVersion})`);
+      console.log(`npm i -g @bluelibs/x`);
       console.log("");
     }
   }
@@ -76,7 +81,7 @@ xxxxxxx      xxxxxxx
   x:::::x  x:::::x  
    x:::::xx:::::x   
     x::::::::::x    
-     x::::::::x     X-Framework CLI by BlueLibs
+     x::::::::x     X-Framework CLI by BlueLibs (v${packageVersion})
      x::::::::x     ${chalk.green.bold("You are in control.")}
     x::::::::::x    
    x:::::xx:::::x   
