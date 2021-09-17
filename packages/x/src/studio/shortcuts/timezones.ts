@@ -1,3 +1,5 @@
+import * as _ from "lodash";
+
 const timezones = {
   "Pacific/Niue": "(GMT-11:00) Niue",
   "Pacific/Pago_Pago": "(GMT-11:00) Pago Pago",
@@ -254,7 +256,7 @@ const timezones = {
 
 export default Object.keys(timezones).map((key) => {
   return {
-    id: key.replace(/\//g, "_").replace(/-/g, "_"),
+    id: _.toUpper(key.replace(/\//g, "_").replace(/-/g, "_")),
     value: timezones[key],
     label: key,
   };

@@ -168,8 +168,9 @@ export class Relation extends BaseModel<Relation> {
     if (this.isDirect) {
       this.cleaned.field.isRequired = this.isRequired;
 
+      const isMockDataUnconfigured = Object.keys(this.mock).length === 0;
       // If it's required we'll assume to have a link with it with existing docs
-      if (this.isRequired && !this.mock) {
+      if (this.isRequired && isMockDataUnconfigured) {
         this.mock = { useExistingDocuments: true };
       }
     }

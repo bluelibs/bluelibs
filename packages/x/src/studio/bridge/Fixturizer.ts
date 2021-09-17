@@ -180,12 +180,12 @@ export class Fixturizer {
         if (field.isArray) {
           return () => {
             return faker.random.arrayElements(
-              field.enumValues.map((e) => e.id)
+              field.enumValues.map((e) => e.value)
             );
           };
         } else {
           return () =>
-            faker.random.arrayElement(field.enumValues.map((e) => e.id));
+            faker.random.arrayElement(field.enumValues.map((e) => e.value));
         }
       case FieldValueKind.FLOAT:
         return endgameGenerator(faker.datatype.number);

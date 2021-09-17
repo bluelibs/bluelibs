@@ -43,7 +43,7 @@ export class {{ fixtureClass }} {
       console.log(`Added fixtures for ${collectionName}`);
     }
 
-    if (dataMap["Users"]) {
+    if (dataMap["users"]) {
       await this.handleUsers();
     }
   }
@@ -59,7 +59,7 @@ export class {{ fixtureClass }} {
   }
 
   async handleUsers() {
-    const usersCollection = this.databaseService.getMongoCollection("Users");
+    const usersCollection = this.databaseService.getMongoCollection("users");
     const users = await usersCollection.find({}).toArray();
 
     for (let i = 0; i < users.length; i++) {

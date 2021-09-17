@@ -302,6 +302,7 @@ export const shortcuts = {
           description:
             "Represents the user's id who has made the latest update on this object",
         }),
+        isRequired: false,
         ui: {
           label: "Updated By",
           create: false,
