@@ -71,10 +71,11 @@ Before diving in each section, ensure you have your knowledge dependency graph, 
 
 ### Foundation
 
-Foundation is composed of modules that are used by `X-Framework` such as `MongoBundle`, `ApolloBundle`, etc. We categorise as a foundation bundle a bundle that is either independent, either depends on other modules from `Foundation`.
+Foundation is composed of modules that are used by `X-Framework` such as `MongoBundle`, `ApolloBundle`, etc.
 
 - [JavaScript Basics](https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/JavaScript_basics)
 - [TypeScript Basics](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
+- [TypeScript Clean Code Principles](https://github.com/labs42io/clean-code-typescript)
 - Knowledge: [Object Oriented Programming](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes), [Promises](https://www.freecodecamp.org/news/javascript-es6-promises-for-beginners-resolve-reject-and-chaining-explained/), [Dependency Injection](https://www.infoworld.com/article/2974298/exploring-the-dependency-injection-principle.html), [Observer Pattern](https://webdevstudios.com/2019/02/19/observable-pattern-in-javascript)
 - [Prettier Code-Formatting Tool](https://prettier.io/)
 
