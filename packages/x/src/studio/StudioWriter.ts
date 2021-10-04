@@ -25,7 +25,7 @@ import {
 } from "./defs";
 import { ContainerInstance } from "@bluelibs/core";
 import { ModelRaceEnum } from "../models";
-import { execSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
 
 const ADMIN_FOLDER = "admin";
 const API_FOLDER = "api";
@@ -173,11 +173,14 @@ export class StudioWriter {
    */
   protected ensureNpmDependencies(firstTimeGeneration: boolean) {
     console.log("");
-    this.loading("Installing npm dependencies");
 
-    execSync("cd microservices/api; npm install");
-    execSync("cd microservices/admin; npm install");
+    this.loading("Installing npm dependencies for api");
+    execSync("npm install", { cwd: "microservices/api", stdio: "inherit" });
 
+    this.loading("Installing npm dependencies for admin");
+    execSync("npm install", { cwd: "microservices/admin", stdio: "inherit" });
+
+    console.log("");
     this.success("Done. Now you can use:");
     console.log("");
     console.log("$ npm run start:api");

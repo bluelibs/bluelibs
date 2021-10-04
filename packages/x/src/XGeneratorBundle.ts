@@ -81,7 +81,7 @@ xxxxxxx      xxxxxxx
   x:::::x  x:::::x  
    x:::::xx:::::x   
     x::::::::::x    
-     x::::::::x     X-Framework CLI by BlueLibs (v${packageVersion})
+     x::::::::x     Powered by BlueLibs (v${packageVersion})
      x::::::::x     ${chalk.green.bold("You are in control.")}
     x::::::::::x    
    x:::::xx:::::x   
