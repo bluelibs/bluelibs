@@ -8,7 +8,7 @@ import {
 import { Collection, Behaviors } from "@bluelibs/mongo-bundle";
 
 export class UsersCollection<T extends IUser>
-  extends Collection<IUser>
+  extends Collection<T>
   implements IUserPersistance
 {
   static collectionName = "users";
