@@ -6,9 +6,10 @@ import {
   UserId,
 } from "@bluelibs/security-bundle";
 import { Collection, Behaviors } from "@bluelibs/mongo-bundle";
+import { FilterQuery } from "mongodb";
 
-export class UsersCollection<T extends IUser>
-  extends Collection<T>
+export class UsersCollection<K extends IUser>
+  extends Collection<K>
   implements IUserPersistance
 {
   static collectionName = "users";
@@ -25,7 +26,7 @@ export class UsersCollection<T extends IUser>
     await this.updateOne(
       {
         _id: userId,
-      },
+      } as FilterQuery<K>,
       {
         $set: data,
       }
@@ -33,7 +34,7 @@ export class UsersCollection<T extends IUser>
   }
 
   async deleteUser(userId: UserId): Promise<void> {
-    await this.deleteOne({ _id: userId });
+    await this.deleteOne({ _id: userId } as FilterQuery<K>);
   }
 
   async findUser(filters: any, projection?: IFieldMap): Promise<IUser> {
@@ -54,7 +55,7 @@ export class UsersCollection<T extends IUser>
       }
     }
 
-    return this.findOne({ _id: userId }, options);
+    return this.findOne({ _id: userId } as FilterQuery<K>, options);
   }
 
   async updateAuthenticationStrategyData<T = any>(
@@ -72,11 +73,14 @@ export class UsersCollection<T extends IUser>
 
     Object.assign(current, data);
 
-    await this.updateOne({ _id: userId }, {
-      $set: {
-        [methodName]: current,
-      },
-    } as any);
+    await this.updateOne(
+      { _id: userId } as any,
+      {
+        $set: {
+          [methodName]: current,
+        },
+      } as any
+    );
   }
 
   async findThroughAuthenticationStrategy<T = any>(
@@ -107,14 +111,11 @@ export class UsersCollection<T extends IUser>
     strategyName: string
   ): Promise<T> {
     // TODO: implement projection
-    const user = await this.findOne(
-      { _id: userId },
-      {
-        projection: {
-          [strategyName]: 1,
-        },
-      }
-    );
+    const user = await this.findOne({ _id: userId } as FilterQuery<K>, {
+      projection: {
+        [strategyName]: 1,
+      },
+    });
 
     return user ? user[strategyName] : null;
   }
@@ -123,10 +124,13 @@ export class UsersCollection<T extends IUser>
     userId: UserId,
     methodName: string
   ): Promise<void> {
-    await this.updateOne({ _id: userId }, {
-      $unset: {
-        [methodName]: 1,
-      },
-    } as any);
+    await this.updateOne(
+      { _id: userId } as FilterQuery<K>,
+      {
+        $unset: {
+          [methodName]: 1,
+        },
+      } as any
+    );
   }
 }
