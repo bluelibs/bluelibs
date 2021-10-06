@@ -1,4 +1,4 @@
-A powerful and lightweight module composition strategy responsible for orchestrating your logic, enabling you to easily respect SOLID principles within your infinitely scalable app.
+This is the "glue" that sticks all of our modules together. It relies on certain patterns to achieve these goals, which we shall explore step by step in this documentation.
 
 ## Install
 
@@ -6,162 +6,248 @@ A powerful and lightweight module composition strategy responsible for orchestra
 npm install --save @bluelibs/core
 ```
 
-## Basic Setup
+## Purpose
 
-When dealing with a small or large scale applications, you usually have groups of logic that need to be separated in order for them to be re-usable. For example you have a module for handling api requests, one for communicating with the database, one for sending emails, you get the idea.
+We needed a way to run our modules in such a way that they can work together (inter-operate). To achieve this in Node & TypeScript, we had to write an Aynchronous Event Processor to give us the flexibility of blocking certain events emissions, giving us ability to have a very scalable infrastructure for composition.
 
-These modules need to be able to have an initialisation phase and provide a way for other modules to depend on them and even extend them.
+When working on multiple bits of logic, it's important that you can "tune-in" in certain functions and override them. To achieve this goal we used `Dependency Injection` paradigms transformed into a modern solution that works both on the server and on the client (isomorphic).
 
-All modules are grouped inside the `Kernel` and we call them `bundles`. A bundle is a group of logic that is re-usable.
+These elements paved the way to constructing the `Kernel` which is a set of modules (we will call them **bundles** from now on). The `Kernel` looks something like this:
 
-```typescript
-import { Kernel } from "@bluelibs/core";
-const kernel = new Kernel();
-
-kernel.init().then(() => {
-  console.log("Kernel has been initialised.");
-});
-```
-
-The Kernel is nothing without bundles. Bundles contain the logic.
-
-```typescript
-import { Bundle } from "@bluelibs/core";
-
-class AppBundle extends Bundle {
-  async init() {
-    // This is invoked when kernel is initialised
-    console.log("I have been initialised");
-  }
-}
-```
-
-You can add the bundle to the `kernel` in the constructor or later on:
-
-```typescript
+```ts
 const kernel = new Kernel({
-  bundles: [new AppBundle()],
+  bundles: [
+    // Toolkit that maybe opens an express server and makes it easy for the user to create routes
+    new APIBundle(),
+
+    // Integrates with a database giving you access to use it
+    new DatabaseBundle({
+      uri: "acmesql://127.0.0.2/shop",
+    }),
+
+    // Here we work with our available modules to create an application
+    new ApplicationBundle(),
+  ],
 });
 
-// Add bundles outside constructor
-kernel.addBundle(new OtherBundle());
-
 kernel.init().then(() => {
-  // At this stage all the bundles `init()` function have been called.
+  console.log("I am alive.");
 });
 ```
 
-Initialisation process prepares and initialiases all the bundles registered inside it. You can regard your `Bundles` as groups of independent logic or strongly separated concerns.
+As you can notice, we have the kernel and its bundles. Bundles can communicate with each other through `Dependency Injection` and `Asynchronous Event Manager`, which we are going to explore before diving deeper.
 
 ## Dependency Injection
 
 This design pattern solves the problem with modifying or extending logic of other bundles.
 
-As `kernel` contains a group `bundles`. A `container` contains references to instances, strings (passwords, api keys), etc.
+An oversimplification of D.I. is that you don't depend on "real" implementations, you depend on references (strings, classes, objects). For example, let's say you have a container that contains everything you need in your app, connection to the database, credentials, anything.
 
-An oversimplification of D.I. is that you don't depend on "real" implementations, you depend on references (strings, classes, tokens). For example, let's say you have a container that contains everything you need in your app, connection to the database, credentials, anything. And let's say you want to access the database service to do an insert, so instead of getting the service directly (by `new Service()`-ing it, or accessing the singleton `Service.doSomething()`), you use the container:
+And let's say you want to insert something in the database and you store this logic somewhere, instead of getting the logic handler directly (by `new DatabaseService()`-ing it, or accessing the singleton `DatabaseService.doSomething()`), you use the container:
 
 ```ts
-import { Service } from "@bluelibs/core";
+import { ContainerInstance } from "@bluelibs/core";
 
-@Service()
-class MyDatabaseService {
-  insertUser() {
+class DatabaseService {
+  insert(collection: string, value: any) {
     // Do something
   }
 }
 
-// You can get the container from `kernel.container`
-container.set({
-  id: "database_service",
-  type: MyDatabaseService,
-});
+const container = new ContainerInstance();
 
-// Note that it will instantiate the class you have set
-const databaseService = container.get("database_service");
-databaseService.insertUser({
-  name: "Elon Musk",
-});
+// Service identifiable by a "string"
+container.set({ id: "database_service", type: DatabaseService });
+// This will be the singleton instance of DatabaseService
+const databaseService = container.get<DatabaseService>("database_service");
+
+// Defining services through tokens:
+const DATABASE_SERVICE_TOKEN = new Token<DatabaseService>("DATABASE_SERVICE");
+container.set({ id: DATABASE_SERVICE_TOKEN, type: DatabaseService });
+
+// Using tokens you gain type automatically infered and no-string-collisions in the future
+const databaseService = container.get(DATABASE_SERVICE_TOKEN);
+
+// Another handy alternative is to use the actual class as the identifier
+// This might seem a bit weird, but most of the times our classes are singletons, and we can still override them
+container.set({ id: DatabaseService, type: DatabaseService });
+const databaseService = container.get(DatabaseService);
+
+// Even if you did not set it in the container,
+// It automatically registers it as a singleton if it doesn't exist and it's a class
+container.get(DatabaseService);
 ```
 
 Now let's say the `databaseService` needs some credentials and a host to connect to. So instead of using a string directly or reading directly from env, it reads it from container:
 
 ```ts
-import { Service } from "@bluelibs/core";
+import { ContainerInstance, Inject } from "@bluelibs/core";
 
-@Service()
-class MyDatabaseService {
+class DatabaseService {
+  databaseUri: string;
+  client: RawDatabaseClient;
+
   constructor(@Inject("database_uri") databaseUri) {
     // Just a sample for illustration
-    this.client = mongodb.connect(databaseUri);
+    this.databaseUri = databaseUri;
+    this.client = acmesql.connect(databaseUri);
   }
 }
+
+const container = new ContainerInstance();
+
+// Note it's value not type, types get instantiated as they refer to classes
+container.set({ id: "database_uri", value: "acmesql://127.0.0.2/app" });
+
+const databaseService = container.get(DatabaseService);
+databaseService.databaseUri; // acmesql://127.0.0.2/app
 ```
 
-Now when we `.get()` MyDatabaseService from the `container`, it will automatically inject the dependencies.
-
-In conclusion, we never instantiate via `new` we only fetch instances of our services through the container, and there's only one container which is provided by the `Kernel` (accessible via `kernel.container` or `this.container` inside `Bundle` methods). Above we showed how to use references as strings (`database_uri`, `database_service`) but references can be classes or tokens.
-
-We recommend that you use tokens or classes and avoid strings, they have been shown here to illustrate the idea.
+In conclusion, we never instantiate via `new` we only fetch instances of our services through the container, and there's only one container which is provided by the `Kernel` (accessible via `kernel.container` or `this.container` inside `Bundle` methods).
 
 ### Services
 
-We regard as a `Service` a class that executes logic.
+If your application was an army, the services are your soldiers. They do: data manipulation, internal comms with the database, crunching massive amounts of data, heating up the CPUs. Their supperiors are the "Controllers" which decide which services to get called and when.
+
+Let's regard them as units of logic stored in classes which can depend on things from the container.
 
 ```typescript
-import { Service } from "@bluelibs/core";
+import { Service, ContainerInstance } from "@bluelibs/core";
 
-const container = kernel.container;
+const container = new ContainerInstance();
 
+@Service()
+class A {
+  init() {
+    return true;
+  }
+}
+
+// You don't need to set it from the container
+// It's automagically created on demand.
+
+const a = container.get(A);
+a.init(); // true
+
+// Services are by default singletons:
+const a = container.get(A);
+a === container.get(A); // true
+
+// You can use @Service({ transient: true }) if you want a new instance everytime
+// Be careful.
+```
+
+Services, just like soldiers, depend on one another:
+
+```ts
+@Service()
+class DatabaseService {}
+
+@Service()
+class PaymentService {
+  // If you want to expose databaseService you can also make it public,
+  // but it's best to avoid treating a service as a "proxy" to access another service
+  // The way we design dependencies is important.
+  protected databaseService: DatabaseService;
+
+  constructor(
+    // This is what we call "constructor" injection
+    @Inject(() => DatabaseService)
+    databaseService
+  ) {
+    this.databaseService = databaseService;
+  }
+
+  charge(id: string, amount: number) {
+    // Just an example to illustrate the idea
+    this.databaseService.insert("charges", { id, amount });
+  }
+}
+
+// Now everything will be automatically injected
+// Even if DatabaseService hasn't been initialised, yet, you don't have to worry.
+const paymentService = container.get(PaymentService);
+```
+
+We saw `constructor injection`, but there's another way, which seems simpler, but comes with a price:
+
+```ts
 @Service()
 class B {}
 
 @Service()
 class A {
-  // Automatic injection, you don't need to specify @Inject()
-  constructor(b: B) {
-    this.b = b;
+  // Note the function
+  @Inject(() => B)
+  b: B;
+
+  // You avoid a lot of code and cleans your constructor() function.
+}
+```
+
+The problem here is the following, if by any chance you have a constructor, that needs a service defined:
+
+```ts
+class A {
+  @Inject(() => B)
+  b: B;
+
+  constructor() {
+    this.b; // undefined!
   }
 }
 ```
 
-Now let's use them:
+This happens because property injection happens right after the instantiation of the class. You can merge the approaches.
 
-```typescript
-const a = container.get(A); // note, A is the className, a is the instance
-(instanceof a.b) === B; // true, a.b is an instance of B
-```
+:::note
+There can be situations where you would want to inject the container. This is done by using `@Inject(ContainerInstance)`. We advise injecting container only as a last resort, because we want to compute dependencies before the service can take requests, otherwise it may lead in a runtime error. At the same time, we understand that sometimes you do need the `container`, we just wanted to raise awareness.
+:::
 
-Services are singletons, meaning it instantiates only once:
+### Transience
 
-```typescript
-const a = container.get(A);
-a === container.get(A); // true
+There's another trait to services called "transience", meaning you can have services which are instantiated everytime:
+
+```ts
+@Service({
+  transient: true,
+})
+class A {
+  constructor() {
+    console.log("every time");
+  }
+}
+
+const a1 = container.get(A); // will print "every time"
+const a2 = container.get(A); // will print "every time"
+
+a1 !== a2; // true, they are different instances
 ```
 
 ### Tokens
 
-If you want to avoid having strings collide, you should use tokens as references:
+It's never good to rely on strings as identifiers, because sometimes they can collide, and they don't infer types. `Token` comming to the rescue! It ensures no collisions can happen and also helps us with infering the type without as having to specify it.
 
 ```ts
-import { Inject, Token } from "@bluelibs/core";
+import { Service, Inject, Token } from "@bluelibs/core";
 
-class B {}
+@Service()
+class Emptyness {}
 
 // We specify the type of the token to offer us autocompletion
-const MY_SERVICE_TOKEN = new Token<B>();
+const MY_SERVICE_TOKEN = new Token<Emptyness>();
 
-container.set(MY_SERVICE_TOKEN, B); // A simple B class
-container.get(MY_SERVICE_TOKEN); // this is a singleton B instance
+container.set({ id: MY_SERVICE_TOKEN, type: Emptyness });
+container.get(MY_SERVICE_TOKEN); // a singleton `Emptyness` instance
 
+// You have the two ways of injecting things in a class:
 class A {
-  // Note: property injection will be set after constructor
+  // You no longer need a function where classes were identifiers
   @Inject(MY_SERVICE_TOKEN)
-  b: B;
+  emptyness: Emptyness;
 
-  // OR
-
-  constructor(@Inject(MY_SERVICE_TOKEN) b: B) {
+  constructor(@Inject(MY_SERVICE_TOKEN) emptyness: Emptyness) {
+    this.emptyness = emptyness;
     // Both solutions work well (property injection/constructor injection)
     // Just do what you feel is easier
   }
@@ -170,7 +256,19 @@ class A {
 
 ## Async Event Management
 
-This technique allows us to have typesafety for Event Management, and event handlers can be async and can be blocking for the event propagation.
+Translating this into simple terms: it's letting everyone know what you did, or what you're about to do, and giving them a chance to share their input and/or perform certain specific actions.
+
+Let's say your boss comes in, slams the door, and says: "We just closed a good deal, this friday will be a paid day-off for everybody.". Everyone cheerful, they decide to go out to a pub.
+
+The story above illustrated the event-driven approach of life. People emit vocal frequencies into the world, emitting information to others, enabling others to act upon that information. You can imagine the `EventManager` is bringing life into your application.
+
+### Events Definition
+
+Let's explore how we define a type-safe event. Note that we can also have events without a type because there are situations where you don't need them, but most events carry additional data with them so they can be properly processed by the listeners.
+
+[Access the code from here](https://stackblitz.com/edit/typescript-jg9osn?file=index.ts)
+
+Let's code a simple one:
 
 ```typescript
 import { EventManager, Event } from "@bluelibs/core";
@@ -181,30 +279,61 @@ class UserCreatedEvent extends Event<{
   userId: string;
 }> {}
 
+// The EventManager is the service that handles everything regarding events
 const manager = container.get(EventManager);
 
-manager.addListener(UserCreatedEvent, e => {
+// Note we use the same class
+manager.addListener(UserCreatedEvent, event => {
+  // `event` type automatically infered + autocompletion
+
   // The data provided in event's constructor is found in event.data property
-  console.log(e.data.userId);
+  console.log(event.data.userId);
 });
 
-manager.emit(
-  new UserCreatedEvent({
-    userId: "XXX",
-  })
-);
+manager
+  .emit(
+    // Each Event is a class instance.
+    new UserCreatedEvent({
+      userId: "XXX",
+    })
+  )
+  .then(() => {
+    // This will wait for all async listeners to run
+    console.log("All async listeners have returned back home.");
+  });
+
+const handler = () => Infinity;
+manager.addListener(UserCreatedEvent, handler);
+manager.removeListener(UserCreatedEvent, handler);
+
+// You can listen to absolutely all events that get dispatched and see their data
+// Imagine this as a proxy, can be used for logging all events into a database
+manager.addGlobalListener(handler);
+manager.removeGlobalListener(handler);
 ```
 
-Note that you also have `removeListener`, `addGlobalListener` and `removeGlobalListener`, also you can set the order in which the handlers are executed:
+Adding listeners has some extra goodies, one would be specifying the `order` in which the events are executed. Sometimes you have, let's say, 2 listeners for the `UserCreatedEvent`, one sends an welcoming email, the other creates a monthly subscription. You want to add a third one, but you want it to be done before everything else, because you maybe check some info for the `User` and you might want to be able to "cancel" the event execution:
 
 ```typescript
 manager.addListener(
   UserCreatedEvent,
   async e => {
-    // Do something before any other handler executes
+    if (notOk(e.data.userId)) {
+      throw new Exception("This will cancel all other listener's execution");
+    }
   },
   {
     order: -1000, // the lowest get executed first, by default order = 0
+
+    /**
+     * Order can be any number you wish (even: Infinity).
+     * We advise sticking to -1000 <> 1000 as it feels suffice for many cases. (less is more)
+     *
+     * As your application scales, if maintaining the order of events becomes a hassle,
+     * try merging events and have business-logic rule of execution done by a specialised service.
+     *
+     * We recommend sticking to services in the beginning, and you have an easy way to scale later.
+     */
   }
 );
 ```
@@ -231,7 +360,9 @@ This is just a shorthand function so it allows your handler to focus on the task
 
 ### Listeners
 
-In order to listen to events we have to register them somehow. This is why we introduce the concept of "warmup" for listeners.
+What are events without someone to listen to? They would get lost in the void.
+
+We can add listeners via `addListener` from the `EventManager` which we get from the `container`, but we also have a more elegant way.
 
 ```typescript
 import { Listener, On } from "@bluelibs/core";
@@ -247,23 +378,81 @@ class NotificationListener extends Listener {
 }
 ```
 
-All listeners must be warmed up for them to work.
+:::note
+All listeners must be warmed up in the bundles for them to work. This is explained in more detail in the [bundles chapter](#bundles).
+:::
 
-## Warming Up
+Are listeners services? No. Well yes. They are services, from the `container` perspective, the listener is just another singleton, however from our perspective we regard `listeners` as `controllers`. Meaning they delegate the job to another service.
 
-Warming up instantiates the specific Service, and if the `init()` function exists it will be called.
-For example, you might use this for a DatabaseConnection, you want to immediately connect and you implement this in the service's `init()` function.
+In the case above inside `onUserAdded`, we would do something like:
 
-```typescript
-class AppBundle extends Bundle {
-  async init() {
-    await this.warmup([NotificationListener]);
+```ts
+class NotificationListener extends Listener {
+  @Inject(() => NotificationService)
+  notificationService: NotificationService;
+
+  @On(UserAddedEvent, {
+    // You can add aditional options, like you can do inside `addListener`
+    /* order, filter */
+  })
+  onUserAdded(e: UserAddedEvent) {
+    this.notificationService.send({
+      userId: e.data.userId,
+      text: "Welcome to the application!",
+    });
   }
 }
 ```
 
+In conclusion, keep your listeners clean, treat them as controllers, let the services do the work.
+
+### Naming Conventions
+
+The naming convention is simple `{ConcernTopDown}{Happening}Event`, exampels of concern can be: `User`, `Order`, `OrderPayment`, top-down means that you should define the events started with your main concern to form an alphabetical grouping useful when reading the folder as well:
+
+```yaml
+- OrderProcessedEvent
+- OrderPreparedForDeliveryEvent
+```
+
+The happening can be of two types:
+
+1. Before something happens: `BeforeCreate`, `BeforeRequest`, `BeforePayment`.
+2. After something happens: `Created`, `Requested`, `Paid`.
+
+Together they can form examples such as: `UserBeforeCreateEvent`, `OrderPaymentPaid`, etc.
+
 ## Bundles
 
+The `Kernel` is nothing without its precious bundles. Bundles contain the logic.
+
+```typescript
+import { Bundle } from "@bluelibs/core";
+
+class AppBundle extends Bundle {
+  async init() {
+    // This is invoked when kernel is initialised
+    console.log("I am alive.");
+  }
+}
+```
+
+You can add the bundle to the `kernel` in the constructor or later on:
+
+```typescript
+const kernel = new Kernel({
+  bundles: [new AppBundle()],
+});
+
+// Add bundles outside constructor
+kernel.addBundle(new OtherBundle());
+
+kernel.init().then(() => {
+  // At this stage all the bundles `init()` function have been called.
+});
+```
+
+Initialisation process prepares and initialiases all the bundles registered inside it. You can regard your `Bundles` as groups of independent logic or strongly separated concerns.
 Ok, now that you've learned the basics of containers and async event management, it's time to understand where all logic lies (inside the bundles and their services)
 
 ### Configuration
@@ -426,6 +615,26 @@ class MailBundle extends Bundle<IMailBundleConfig> {
 }
 ```
 
+### Warming-up Services
+
+Warming up instantiates the specific Service, and if the `init()` function exists it will be called.
+For example, you might use this for a DatabaseConnection, you want to immediately connect and you implement this in the service's `init()` function.
+
+```typescript
+@Service()
+class DatabaseService {
+  async init() {
+    // Do something
+  }
+}
+
+class AppBundle extends Bundle {
+  async init() {
+    await this.warmup([DatabaseService]);
+  }
+}
+```
+
 ## Exceptions
 
 It's nice to never rely on string matching to see which exception was thrown, and it's nice to have typesafety as well. We recommend you always use this instead of the standard `Error`. The reason we changed the name to `Exception` instead of Error was to avoid confusion that these class would somehow extend the `Error` class.
@@ -465,9 +674,9 @@ try {
 }
 ```
 
-## Kernel Parameters
+## Global Parameters
 
-You can also specify a list of parameters to the kernel. When the bundles within your app need the same information, you should use this instead of passing it as a config to each bundle.
+Kernels may store global data which is accessible through the container. This can be information which describes whether we're running in a specific environment (development, testing, production), it can be anything you see fit. We do not see many use-cases for this as we push for having configuration passed down at the `Bundle` level, but when you need it, these are our "global parameters".
 
 ```js
 new Kernel({
@@ -500,7 +709,7 @@ class A {
 }
 ```
 
-To benefit of autocompletion for your kernel parameters:
+To benefit of autocompletion for your kernel parameters, extend the `IKernelParameters` interface:
 
 ```ts title="defs.ts"
 import "@bluelibs/core";
@@ -530,11 +739,11 @@ export enum KernelContext {
 
 ## Advanced Bundles
 
-Keep your bundle easily modifiable by allowing injection of customised services. The strategy is to use an `abstract class` as a placeholder, but there are other solutions as well.
-
 :::note When would you like to do this?
 This would be suited when you expose a bundle in which you allow a certain service to be overriden.
 :::
+
+Keep your bundle easily modifiable by allowing injection of customised services. The strategy is to use an `abstract class` as a placeholder, but there are other solutions as well.
 
 Let's think of a bundle that does some security thingies and they want to allow you to inject a custom hash function.
 
@@ -549,7 +758,7 @@ abstract class HashService {
 class DefaultHashService extends HashService {}
 
 class SecurityBundle extends Bundle<{ hasher: HashService }> {
-  static defaultConfig = {
+  defaultConfig = {
     hasher: DefaultHashService,
   };
 
@@ -572,24 +781,12 @@ This strategy is to explicitly state which hasher you want in the constructor, b
 
 ```typescript
 class SecurityExtensionBundle extends Bundle {
-  async hook() {
-    const manager = this.container.get(EventManager);
-
-    // Before SecurityBundle is prepared, I can either modify the config
-    manager.addListener(
-      BundleBeforePrepareEvent,
-      e => {
-        const { bundle } = e.data;
-
-        // We use the `updateConfig` command
-        bundle.updateConfig({
-          hasher: MyExtendedHasher,
-        });
-      },
-      {
-        filter: e => e.data.bundle instanceof SecurityBundle,
-      }
-    );
+  async prepare() {
+    // We use the `updateConfig` command
+    const bundle = this.container.get(SecurityBundle);
+    bundle.updateConfig({
+      hasher: MyExtendedHasher,
+    });
   }
 }
 ```
@@ -598,6 +795,7 @@ This strategy may feel a bit obscure as you allow any bundle to modify the confi
 
 ```typescript
 class SecurityBundle extends Bundle {
+  // You can override this method to ensure the changes you allow to your modules are more verbose.
   updateConfig() {
     throw new Error(
       `Please use the exposed methods of this bundle to override config.`
@@ -655,7 +853,7 @@ const kernel = new Kernel({
 
 When testing the full kernel you need to have an ecosystem creation function. We recommend having a separate `kernel.test.ts` file where you instantiate the kernel.
 
-```ts title="ecosystem.ts"
+```ts title="__tests__/ecosystem.ts"
 import { kernel } from "../startup/kernel.test";
 
 const container = kernel.container;
@@ -690,6 +888,80 @@ describe("PostService", () => {
 });
 ```
 
-## Conclusion
+We typically store out tests inside `src/__tests__/*.test.ts`, and we try to maintain a similar pattern to what we have in our `services` folder, example: `src/__tests__/services/payments/PaymentCheckService.test.ts`.
 
-These set of tools: the `kernel`, the `container`, the `bundles` (extendable & hackable), the async event management, the type-safe exceptions allow us to construct high-quality applications which respect the SOLID principles and can be nicely re-used. A good example of how this is put to good use is inside the `X-Framework`.
+## Environment Variables
+
+Our solution to this is to use `dotenv` npm package and craft our own `env.ts` file which exports a type-safe constant.
+
+```bash title=".env.development"
+APP_URL="http://localhost:3000"
+ROOT_URL="http://localhost:4000"
+ROOT_PORT=4000
+MONGO_URL="mongodb://localhost:27017/bluelibs"
+
+AWS_ACCESS_KEY_ID=XXX
+AWS_SECRET_ACCESS_KEY=XXX
+AWS_BUCKET=testing.cultofcoders.com
+AWS_REGION=eu-central-1
+AWS_ENDPOINT=https://s3-eu-central-1.amazonaws.com/testing.cultofcoders.com
+```
+
+```ts
+import { config } from "dotenv";
+import * as fs from "fs";
+
+const path = ".env.development"; // it's up to you to manipulate this variable
+
+// Silently fail when there's no path existence (variables)
+// Sometimes the container in which you are deploying has its own ENV mechanisms so no .env file required
+if (fs.existsSync(path)) {
+  const result = config({
+    path,
+  });
+
+  if (result.error) {
+    console.error(result.error);
+    process.exit(0);
+  }
+} else {
+  console.warn(`There is no "${path}" enviornment variable file.`);
+}
+
+// Export the values to their correct type
+export default {
+  APP_URL: process.env.APP_URL,
+  ROOT_URL: process.env.ROOT_URL,
+
+  // Sometimes "PORT" is a standard env variable when deploying node apps
+  ROOT_PORT: parseInt(process.env.PORT || process.env.ROOT_PORT),
+  MONGO_URL: process.env.MONGO_URL,
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY,
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+  AWS_BUCKET: process.env.AWS_BUCKET,
+  AWS_REGION: process.env.AWS_REGION,
+  AWS_ENDPOINT: process.env.AWS_ENDPOINT,
+};
+```
+
+## Meta
+
+### Summary
+
+These set of tools: the `kernel`, the `container`, the `bundles` (extendable & hackable), the async event management, the type-safe exceptions allow us to construct high-quality applications which respect the SOLID principles and can be nicely re-used. A good example of how this is put to good use is inside the [X-Framework](x-framework-introduction) where we have a cohesive full-stack solution for delivering apps fast and properly decoupled
+
+### Boilerplates
+
+- [The Kernel and a Bundle](https://stackblitz.com/edit/typescript-mhek88?file=index.ts)
+- [Event Management Starter](https://stackblitz.com/edit/typescript-jg9osn?file=index.ts)
+
+### Challenges
+
+- What is a Service? (1p)
+- What are the main stages of the Bundle's lifecycle? (1p)
+- Why do we use Dependency Injection? (1p)
+- What is the difference between `prepare()` and `init()` in a bundle? (3p)
+- When do we create a new bundle for our application? (5p)
+- What are the advantages of async event processing vs sync ones? (2p)
+- What does it mean to warm up a service and when would we use it? (1p)
+- Can I specify the order in which event listeners are executed? (3p)

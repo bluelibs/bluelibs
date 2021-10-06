@@ -109,5 +109,3 @@ We recommend you use VSCode with the following extensions:
 ## Conclusion
 
 We hope that you will enjoy our work and join us in our goal to `Enhance Humanity through Software`!
-
-## [CLICK TO BEGIN...](package-core)
