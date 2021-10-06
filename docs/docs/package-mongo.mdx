@@ -7,24 +7,34 @@ import { PackageHeader } from "@site/src/components/PackageHeader";
 
 <PackageHeader version="1.1.2" packageName="mongo-bundle" containsTypeDefs />
 
-The MongoBundle offers integration with MongoDB database by allowing you to hook into events, giving ability to work with model classes and add behaviors (such as timestampable, blameable). As well it is integrated with `@bluelibs/nova` package which allows extremely rapid queries for relational data.
+## Install
 
 ```bash
 npm install --save @bluelibs/mongo-bundle @bluelibs/nova
 ```
 
+## Purpose
+
+At BlueLibs, we love MongoDB. So easy to develop on it, their query language makes a lot of sense, and it is close to us, JS developers, we can even write JS code that gets executed even at database-level. We like it for a lot of things, however, the database on itself doesn't have a reliable relationship fetching mechanism ([`$lookup`](https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/) is very slow), forcing developers to denormalize data and putting them to face other issue with this.
+
+The problem with relational data has been solved by [Nova](package-nova), and we have [achieved speeds faster than RAW SQL](https://docs.google.com/spreadsheets/d/1cA2c6e9YvE-fA8LEaDwukgrvYNOIo8RmNjy8cPWby1g/edit#gid=0), test [code can be found here](https://github.com/bluelibs/bluelibs/tree/main/packages/nova/benchmarks/sql).
+
+`Nova` will not make everything perfect, but it makes fetching relational data a breeze. This bundle offers beautiful integration with Nova so we can use it in our collections.
+
 ## Basic Setup
 
-```js
+```ts
 import { MongoBundle } from "@bluelibs/mongo-bundle";
 
-new MongoBundle({
-  uri: "mongodb://localhost:27017/test",
+kernel.addBundle(
+  new MongoBundle({
+    uri: "mongodb://localhost:27017/test",
 
-  // Optional if you have other options in mind
-  // https://mongodb.github.io/node-mongodb-native/3.6/api/MongoClient.html#.connect
-  options: MONGO_CONNECTION_OPTIONS,
-});
+    // Optional if you have other options in mind
+    // https://mongodb.github.io/node-mongodb-native/3.6/api/MongoClient.html#.connect
+    options: MONGO_CONNECTION_OPTIONS,
+  })
+);
 ```
 
 ## Collections
@@ -52,6 +62,8 @@ class UsersCollection extends Collection<User> {
   ];
 }
 ```
+
+We've opted for `static` definition instead of the `abstract` approach of methods because static variables can be manipulated with ease, so for example if you have a collection from a bundle, and you would simply want to rename the collection name, or add another index, relation, or behavior, doing this is trivial. We understand that the abstract methods can hold certain advantages however because of the freedom these static variables offer we chose them.
 
 As with everything in BlueLibs's world, you get the instance via the container, for that you'd have to work within your application bundle.
 
@@ -181,7 +193,11 @@ postsCollection.query({
 });
 ```
 
-Keep in mind that links are attached on `.collection` under the `Collection` class from `@bluelibs/mongo-bundle`, so if you want to use the methods of `query()` or `lookup()` from Nova:
+:::note
+Keep in mind that links are attached on `.collection` under the `Collection` class from `@bluelibs/mongo-bundle`, so if you want to use the methods of `query()` or `lookup()` from Nova.
+:::
+
+Using bare-bones `Nova`:
 
 ```ts
 import { lookup, query } from "@bluelibs/nova";
@@ -206,7 +222,7 @@ const results = query(
 
 ### GraphQL
 
-If you are looking to write a [Nova Query](https://www.bluelibs.com/docs/package-nova#graphql-integration) in your GraphQL resolvers you can do:
+If you are looking to write a [Nova Query](package-nova#graphql-integration), in your GraphQL resolvers you can do:
 
 ```ts
 const resolvers = {
@@ -294,6 +310,10 @@ class UsersCollection extends Collection {
 }
 ```
 
+:::note
+When the document is created for the first time, we also store `updatedAt` to the exact date of `createdAt`.
+:::
+
 ### Blameable
 
 The blameable behavior stores who created or updated the document by reading `userId` from the context passed. `context` is a special option we allow in all mutations (insert/update/delete) that is designed to work well with behaviors or other event listeners.
@@ -329,6 +349,10 @@ await usersCollection.insertOne(
   }
 );
 ```
+
+:::note
+When the document is created for the first time, we also store `updatedBy` to the same user as `createdBy`.
+:::
 
 ### Validate
 
@@ -454,7 +478,7 @@ user instanceof User;
 user.fullName; // will automatically map it to User model class
 ```
 
-Now, if you want to query only for fullName, because that's what you care about, you'll have to use expanders. Expanders are a way to say "I want to compute this value, not Nova, so when I request this field, I need you to actually fetch me these other fields"
+Now, if you want to query only for fullName, because that's what you care about, you'll have to use expanders. Expanders are a way to say "I want to compute this value, not Nova, so when I request this field, I need you to actually fetch me these other fields and I'll take care of the rest."
 
 ```typescript
 class UsersCollection extends Collection<User> {
@@ -471,7 +495,8 @@ class UsersCollection extends Collection<User> {
 ```
 
 ```typescript
-const user = usersCollection.queryOne({
+const user = await usersCollection.queryOne({
+  // fullName is an "expander"
   fullName: 1,
 });
 
@@ -479,7 +504,7 @@ user instanceof User;
 
 user.firstName; // will exist
 user.lastName; // will exist
-user.fullName; // will automatically map it
+user.fullName; // will not exist.
 ```
 
 However, you can also leverage Nova to do this computing via `reducers` for you like this:
@@ -584,3 +609,18 @@ export interface IMigrationStatus {
   };
 }
 ```
+
+## Meta
+
+### Summary
+
+The `MongoBundle` helps us a ton, from having type safety, to event-driven approach for working with documents, behaviors, integration with Nova, easy-to-use transactions and migrations. It provides a foundation for scalable code and is ofcourse used by the infamous [X-Framework](x-framework-introduction).
+
+### Challenges
+
+- How do you link two collections, what variables do you use inside the Collection? (1p)
+- If you have a collection "tags" and another collection "posts" and posts have many tags and 2 posts can have the same tag, how do you link them together? (1p)
+- How and when do I pass the `userId` if I want to benefit of blameable behavior? (1p)
+- If you want to ensure absolute data-consistency at database-level what behavior would you use? (2p)
+- Management calls. They must change the field in the database from "price" to "smallestPrice". What do you use to make that change? (2p)
+- What is a reducer and what is the difference between reducer and links? (1p)
