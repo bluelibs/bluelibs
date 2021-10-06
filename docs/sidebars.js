@@ -17,6 +17,7 @@
                 "type": "category",
                 "label": "Database",
                 "items": [
+                    "database-introduction",
                     "package-mongo",
                     "package-sql"
                 ]

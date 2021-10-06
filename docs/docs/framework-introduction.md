@@ -1,6 +1,6 @@
 ---
 id: framework-introduction
-title: Introduction
+title: Introduction to BlueLibs
 slug: /
 ---
 

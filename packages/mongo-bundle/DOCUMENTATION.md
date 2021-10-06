@@ -1,5 +1,7 @@
 The MongoBundle offers integration with MongoDB database by allowing you to hook into events, giving ability to work with model classes and add behaviors (such as timestampable, blameable). As well it is integrated with `@bluelibs/nova` package which allows extremely rapid queries for relational data.
 
+## Install
+
 ```bash
 npm install --save @bluelibs/mongo-bundle @bluelibs/nova
 ```

@@ -31,7 +31,7 @@ export const map: IElementMap = {
   Meta: [
     {
       id: "framework-introduction",
-      title: "Introduction",
+      title: "Introduction to BlueLibs",
     },
   ],
   Foundation: [
@@ -44,6 +44,10 @@ export const map: IElementMap = {
     {
       groupLabel: "Database",
       elements: [
+        {
+          id: "database-introduction",
+          title: "Introduction to Databases",
+        },
         {
           id: "mongo",
           title: "MongoDB",

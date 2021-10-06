@@ -1,4 +1,4 @@
-.docPage {
+.doc-page {
   > div {
     // This is the navbar
     // background: pink;
@@ -8,12 +8,17 @@
       }
     }
   }
-  .docPage--main {
+  article {
+    a {
+      color: blue;
+    }
     h1 {
       font-size: 1.8em;
       font-weight: 300;
       color: $contrastColor;
-      border: 1px dashed $contrastColor;
+      border-radius: 16px;
+      background: #eee;
+      font-weight: bold;
       text-align: center;
       padding: 9px;
       // border-radius: $radius;
