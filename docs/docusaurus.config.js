@@ -59,7 +59,7 @@ module.exports = {
           items: [
             {
               label: "Introduction to BlueLibs",
-              to: "docs/introduction-to-bluelibs",
+              to: "docs/",
             },
             {
               label: "X-Framework",

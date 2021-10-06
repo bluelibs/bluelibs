@@ -607,6 +607,10 @@ export interface IMigrationStatus {
 
 The `MongoBundle` helps us a ton, from having type safety, to event-driven approach for working with documents, behaviors, integration with Nova, easy-to-use transactions and migrations. It provides a foundation for scalable code and is ofcourse used by the infamous [X-Framework](x-framework-introduction).
 
+### Boilerplates
+
+Create a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free instance of a database and you can use. Boilerplate comming soon.
+
 ### Challenges
 
 - How do you link two collections, what variables do you use inside the Collection? (1p)
