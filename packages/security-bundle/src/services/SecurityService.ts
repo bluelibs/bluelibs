@@ -47,12 +47,11 @@ export class SecurityService implements ISecurityService {
   ) {}
 
   /**
-   * Creates the user and persists it to the database
+   * Creates the user and persists it to the database. Returns the newly created userId.
    *
    * @param data
-   * @returns The newly created userId
    */
-  async createUser(data: Partial<IUser> = {}): Promise<any> {
+  async createUser(data: Partial<IUser> = {}): Promise<UserId> {
     const user = Object.assign(
       {},
       {

@@ -15,11 +15,11 @@ export function permissionServiceCreator(): PermissionService {
     permissionPersistanceLayer,
     permission,
     eventManager,
-    ({
+    {
       getRoles() {
         return [Permissions.USER];
       },
-    } as unknown) as SecurityService
+    } as unknown as SecurityService
   );
 }
 
@@ -218,6 +218,25 @@ export const permissionServiceTestDefinitions = [
         userId: "U1",
         permission: Permissions.ADMIN,
         domain: PERMISSION_DEFAULT_DOMAIN,
+      });
+
+      expect(await service.hasRole("U1", Permissions.USER)).toBe(true);
+    },
+  },
+  {
+    message: "Should work with domains over domainIdentifiers",
+    async test(service: PermissionService) {
+      await service.add({
+        userId: "U1",
+        permission: Permissions.ADMIN,
+        domain: PERMISSION_DEFAULT_DOMAIN,
+      });
+
+      const hasRole = await service.has({
+        userId: "U1",
+        permission: Permissions.ADMIN,
+        domain: PERMISSION_DEFAULT_DOMAIN,
+        domainIdentifier: "xxx",
       });
 
       expect(await service.hasRole("U1", Permissions.USER)).toBe(true);

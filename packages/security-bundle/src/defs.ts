@@ -94,8 +94,10 @@ export interface ISession {
   token: string;
   userId: UserId;
   expiresAt: Date;
-  data?: any;
+  data?: ISessionData;
 }
+
+export interface ISessionData {}
 
 export interface ISessionPersistance {
   /**
@@ -122,7 +124,7 @@ export interface IPermissionPersistance {
 }
 
 export interface IPermissionSearchFilter {
-  userId?: any | any[];
+  userId?: UserId | UserId[];
   permission?: string | string[];
   domain?: string | string[];
   domainIdentifier?: string | string[];

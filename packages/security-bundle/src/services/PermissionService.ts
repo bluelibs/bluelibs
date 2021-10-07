@@ -14,6 +14,7 @@ import {
   IPermission,
   IPermissionSearchFilter,
   IPermissionSearchFilters,
+  UserId,
 } from "../defs";
 import {
   PERMISSION_DEFAULT_DOMAIN,
@@ -33,7 +34,9 @@ export class PermissionService implements IPermissionService {
 
   async has(filter: IPermissionSearchFilter): Promise<boolean> {
     if (filter.userId === null || filter.userId === undefined) {
-      throw new Error(`Permission search filters: userId is missing.`);
+      throw new Error(
+        `You are required to provide an 'userId' to be able to verify permissions.`
+      );
     }
 
     const filters = this.transformToFilters(filter);
@@ -74,7 +77,7 @@ export class PermissionService implements IPermissionService {
    * @param roles
    * @returns
    */
-  async hasRole(userId: unknown, roles: string | string[]): Promise<boolean> {
+  async hasRole(userId: UserId, roles: string | string[]): Promise<boolean> {
     return this.has({
       userId,
       domain: PERMISSION_DEFAULT_DOMAIN,

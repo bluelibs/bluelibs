@@ -2,6 +2,13 @@ import { SecurityService } from "../..";
 import { UserPersistanceService } from "./mocks/UserPersistanceService.mock";
 import { EventManager } from "@bluelibs/core";
 import { SessionPersistanceService } from "./mocks/SessionPersistanceService.mock";
+import { ISessionData } from "../../defs";
+
+declare module "../../defs" {
+  interface ISessionData {
+    a: any;
+  }
+}
 
 export const securityTestDefinitions = [
   {

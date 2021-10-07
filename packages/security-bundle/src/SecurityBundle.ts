@@ -70,8 +70,17 @@ export class SecurityBundle extends Bundle<ISecurityBundleConfig> {
   /**
    * Must be run before preparation event
    * @param userPersistance
+   * @deprecated Please use the one with setUserPersistance (has a) for consistency along everwhere
    */
   setUserPersistence(userPersistance: Constructor<IUserPersistance>) {
+    this.setUserPersistance(userPersistance);
+  }
+
+  /**
+   * Must be run before preparation event
+   * @param userPersistance
+   */
+  setUserPersistance(userPersistance: Constructor<IUserPersistance>) {
     this.config.userPersistance = userPersistance;
   }
 
