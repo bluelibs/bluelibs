@@ -16,8 +16,9 @@ export function permissionServiceCreator(): PermissionService {
     permission,
     eventManager,
     {
+      // Attention! This is our security service. We do not deal with roles at User level, we test permissions, so we bypass it.
       getRoles() {
-        return [Permissions.USER];
+        return [];
       },
     } as unknown as SecurityService
   );
@@ -211,8 +212,9 @@ export const permissionServiceTestDefinitions = [
   {
     message: "Should work with roles",
     async test(service: PermissionService) {
-      expect(await service.hasRole("U1", Permissions.USER)).toBe(true);
+      expect(await service.hasRole("U1", Permissions.USER)).toBe(false);
       expect(await service.hasRole("U1", Permissions.ADMIN)).toBe(false);
+      // expect(await service.hasRole("U1", Permissions.ADMIN)).toBe(false);
 
       await service.add({
         userId: "U1",
@@ -220,7 +222,7 @@ export const permissionServiceTestDefinitions = [
         domain: PERMISSION_DEFAULT_DOMAIN,
       });
 
-      expect(await service.hasRole("U1", Permissions.USER)).toBe(true);
+      expect(await service.hasRole("U1", Permissions.ADMIN)).toBe(true);
     },
   },
   {
@@ -239,7 +241,7 @@ export const permissionServiceTestDefinitions = [
         domainIdentifier: "xxx",
       });
 
-      expect(await service.hasRole("U1", Permissions.USER)).toBe(true);
+      expect(await service.hasRole("U1", Permissions.ADMIN)).toBe(true);
     },
   },
 ];

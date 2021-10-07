@@ -20,7 +20,11 @@ import {
   SessionRetrievedEvent,
   SessionBeforeCreateEvent,
 } from "../events";
-import { UserDisabledException, SessionExpiredException } from "../exceptions";
+import {
+  UserDisabledException,
+  SessionExpiredException,
+  UserNotFoundException,
+} from "../exceptions";
 import { UserDisabledEvent, UserEnabledEvent } from "../events";
 import {
   SessionAfterCreateEvent,
@@ -384,19 +388,21 @@ export class SecurityService implements ISecurityService {
   }
 
   /**
-   * Retrieves the roles stored under `user.roles`
+   * Retrieves the roles stored under `user.roles`. Returns empty array for not-found users.
    *
    * @param userId
    * @returns
    */
-  async getRoles(userId): Promise<string[]> {
-    return (
-      (
-        await this.findUserById(userId, {
-          roles: 1,
-        })
-      ).roles || []
-    );
+  async getRoles(userId: UserId): Promise<string[]> {
+    const user = await this.findUserById(userId, {
+      roles: 1,
+    });
+
+    if (!user) {
+      return [];
+    }
+
+    return [] || user?.roles;
   }
 
   /**

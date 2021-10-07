@@ -1,7 +1,7 @@
 import { IPermissionTree } from "../../../defs";
 
 export const Permissions: any = {
-  USER: "USER", // User is applied to all logged in users. Regardless. It's a special permission that all users have.
+  USER: "USER",
   ADMIN: "ADMIN",
   INVOICE_MANAGEMENT: "INVOICE_MANAGEMENT",
   INVOICE_READ: "INVOICE_READ",

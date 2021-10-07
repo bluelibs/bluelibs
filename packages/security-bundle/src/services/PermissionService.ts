@@ -53,11 +53,21 @@ export class PermissionService implements IPermissionService {
     /**
      * We treat roles as "app" level roles that are very simple to use.
      */
-    if (filter.domain === PERMISSION_DEFAULT_DOMAIN) {
-      const roles = await this.securityService.getRoles(filter.userId);
-      if (roles) {
-        if (permissions.some((permission) => roles.includes(permission))) {
-          return true;
+    if (filter.domain === PERMISSION_DEFAULT_DOMAIN && filter.userId) {
+      if (Array.isArray(filter.userId)) {
+        /**
+         * The idea here is that it makes absolutely no sense to "merge" the user roles in any way for a permission check
+         * Such customisations can be done by directly accessing the permission layer.
+         */
+      } else {
+        const roles = await this.securityService.getRoles(
+          filter.userId as UserId
+        );
+
+        if (roles.length) {
+          if (permissions.some((permission) => roles.includes(permission))) {
+            return true;
+          }
         }
       }
     }
