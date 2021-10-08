@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-bundle",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "X-Framework is a feature-rich solution with fast prototyping in mind for BlueLibs",
   "main": "dist/index.js",
   "repository": {
