@@ -82,44 +82,121 @@ You have access to directly perform the more popular mutation operations:
 
 ## Events
 
-What's nice about this is that you can listen to all events for the operations you do strictly on the collection. If you do `usersCollection.collection.insertMany` the events won't be dispatched, but if you do `usersCollection.insertMany` it will.
+Our `Collection` services have a neat integration with the `EventManager`. We dispatch events before and after important things happen: "insert", "update", "remove". These events can be imported from this package:
 
-Available events that can be imported from the package:
+### Types
 
+```yaml
 - BeforeInsertEvent
+  - document
+  - context
 - AfterInsertEvent
+  - document
+  - _id
 - BeforeUpdateEvent
+  - filter (filters for update)
+  - update (the modifier)
+  - fields (the fields affected by the update)
+  - isMany
 - AfterUpdateEvent
-- BeforeRemoveEvent
-- AfterRemoveEvent
-
-They are very explicit and typed with what they contain, a sample usage would be:
-
-```typescript
-import { AfterInsertEvent } from "@bluelibs/mongo-bundle";
-
-eventManager.addListener(AfterInsertEvent, async (e) => {
-  if (e.collection instanceof PostsCollection) {
-    // Do something with the newly inserted Post
-    const postBody = e.data.document;
-    const postId = e.data.result.insertedId;
-  }
-});
-
-// or simply do it on postsCollection.localEventManager
+  - filter (filters for update)
+  - update (the modifier)
+  - fields (the fields affected by the update)
+  - isMany
+  - result: UpdateWriteOpResult | FindAndModifyWriteOpResultObject
+- BeforeDeleteEvent
+  - filter (what gets deleted)
+  - isMany (if it's a removeMany());
+- AfterDeleteEvent
+  - filter
+  - isMany
+  - result: DeleteWriteOpResultObject | FindAndModifyWriteOpResultObject<any>;
 ```
 
-Events should be attached in the `prepare()` phase of your bundle. The common strategy is by warming up a Listener, as described in the core.
+Events accepts an optional generic representing the document, example: `AfterUpdateEvent<User>` so you can get better autocompletion when performing the changes.
 
-Events also receive a `context` variable. Another difference from classic MongoDB node collection operations is that we allow a `context` variable inside it that can be anything. That variable reaches the event listeners. It will be useful if we want to pass things such as an `userId` if we want some blameable behavior. You will understand more in the **Behaviors** section.
+:::note
+If you want to bypass all events, the current solution is to use the native MongoDB Node collection, accessible via: `postsCollection.collection`, where `postsCollection` is retrieved from the container.
+:::
 
-If you want to perform certain actions for elements once they have been updated or removed (events: `AfterUpdateEvent` and `AfterRemoveEvent`) the solution is to get the filter and extract the `_id` from there.
+### Listening
+
+Inside every collection there is a `localEventManager` which is an instance of `EventManager` completely separated. When we emit events we emit them both to `localEventManager` and the global one. The reasoning for this is to have collection-specific events without having to be filtered:
+
+```ts
+postsCollection.on(BeforeInsertEvent, (event: BeforeInsertEvent<Post>) => {
+  // Handle it.
+});
+```
+
+And if you like to use the global EventManager:
+
+```ts
+eventManager.addListener(BeforeInsertEvent, (e) => {
+  // Using collection hook events, avoid polusion of listeners of global event manager
+  // But the events are still dispatched and recognizable.
+  if (e.collection instanceof PostsCollection) {
+    // ok, do your thang
+  }
+});
+```
+
+If you want to perform certain actions for elements once they have been updated or removed (events: `AfterUpdateEvent` and `AfterDeleteEvent`) the solution is to get the filter and extract the `_id` from there.
+
+If you want to use the [Listener](package-core/#listeners) pattern it will look something like:
+
+```ts
+import { PostsCollection, Post } from "./posts.collection";
+import { Listener, On } from "@bluelibs/core":
+import { BeforeInsertEvent } from "@bluelibs/mongo-bundle";
+
+@Service()
+class DatabaseListener extends Listener {
+  @On(BeforeInsertEvent, {
+    filter: e => e.data.collection instanceof PostsCollection
+  })
+  onPostInserted(e: BeforeInsertEvent<Post>) {
+    // Do your thing, you can use property inject to get other services
+  }
+}
+
+// And ofcourse don't forget to `warmup()` the listeners.
+```
+
+### Context
+
+Events also receive a `context` variable this is `IExecutionContext` and can be extended via:
+
+```ts title="declarations.ts"
+import "@bluelibs/mongo-bundle";
+
+declare module "@bluelibs/mongo-bundle" {
+  export interface IExecutionContext {
+    // Now the context can receive an optional `companyId`
+    companyId?: ObjectId;
+  }
+}
+```
+
+Each `CollectionEvent` has the `context` inside its dataset (`event.data.context`). Which gives you power to act accordingly. For example, inside the `Blameable` behavior, we pass `userId`.
+
+```ts
+// Doing this, the `context
+postsCollection.insertOne(document, {
+  context: {
+    companyId,
+  },
+});
+// This is the `options` argument available for all mutations.
+```
 
 ## Integration with Nova
 
-### Basics
+We need a way to link collections and fetch data with blazing fast speeds. For this purpose, [Nova](package-nova) comes to the rescue and we strongly recommend you read through it first to get all the concepts clarified.
 
-For fetching we use [Nova](https://www.bluelibs.com/docs/package-nova). And the concept is simple:
+Nova is extremely fast and gives us the freedom to think relational in NoSQL, enhancing our developer experience.
+
+### Basics
 
 ```typescript
 // Fetch it from the container
@@ -162,13 +239,6 @@ class PostsCollection extends Collection {
 
   // Nova expanders
   static expanders = {};
-
-  // optional for absolute performance, import { t } from "@bluelibs/nova"
-  // Documentation is here: https://deepkit.io/documentation/type
-  // This only applies to Nova query-ing
-  static jitSchema = t.schema({
-    name: t.string,
-  });
 }
 ```
 
@@ -209,6 +279,23 @@ const results = query(
     container,
   }
 );
+```
+
+If you want to benefit of JIT bson-decoding for your data you can add. This speeds up the data fetching speeds by ~30% (the more data you fetch, the faster it gets).
+
+:::warning
+Keep in mind that if you forget to update the `jitSchema` you won't be able to receive the data not defined in schema from MongoDB, making you wonder what is going on, we advise using this only when you actually need it. Prematurue optimisation is not healthy.
+:::
+
+```ts
+class PostsCollection extends Collection {
+  // optional for absolute performance, import { t } from "@bluelibs/nova"
+  // Documentation is here: https://deepkit.io/documentation/type
+  // This only applies to Nova query-ing
+  static jitSchema = t.schema({
+    name: t.string,
+  });
+}
 ```
 
 ### GraphQL
@@ -342,7 +429,7 @@ await usersCollection.insertOne(
 ```
 
 :::note
-When the document is created for the first time, we also store `updatedBy` to the same user as `createdBy`.
+When the document is created for the first time, we also store `updatedBy` to the same user as `createdBy`. Because in theory `creation` is also an `update`, we understand there can be mixed feelings about this. If you want to identify whether this document has had any changes, we recommend creating an `isTouched` boolean variable and update it after the `BeforeUpdateEvent` from `@bluelibs/mongo-bundle`. And inside the event you can do this for all collections or filter for the ones you need.
 :::
 
 ### Validate
@@ -609,7 +696,7 @@ The `MongoBundle` helps us a ton, from having type safety, to event-driven appro
 
 ### Boilerplates
 
-Create a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free instance of a database and you can use. Boilerplate comming soon.
+Create a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free instance of a database and you can use. Boilerplates comming soon.
 
 ### Challenges
 
