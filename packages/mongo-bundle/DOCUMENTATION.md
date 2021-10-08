@@ -4,6 +4,10 @@
 npm install --save @bluelibs/mongo-bundle @bluelibs/nova
 ```
 
+- [Install MongoDB](https://docs.mongodb.com/manual/administration/install-community/)
+- [Official MongoDB Documentation](https://www.mongodb.com/basics)
+- [Neat 10-min tutorial](https://medium.com/nerd-for-tech/all-basics-of-mongodb-in-10-minutes-baddaf6b6625)
+
 ## Purpose
 
 At BlueLibs, we love MongoDB. So easy to develop on it, their query language makes a lot of sense, and it is close to us, JS developers, we can even write JS code that gets executed even at database-level. We like it for a lot of things, however, the database on itself doesn't have a reliable relationship fetching mechanism ([`$lookup`](https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/) is very slow), forcing developers to denormalize data and putting them to face other issue with this.
@@ -30,7 +34,7 @@ kernel.addBundle(
 
 ## Collections
 
-A collection is in fact a service. Thus making it accessible via the `container`. We define our collections as extensions of `Collection` in which we can customise things such as: `collectionName`, `indexes`, `links`, `reducers`, `behaviors`.
+A collection is in fact a service. Thus making it accessible via the `container`. We define our collections as extensions of `Collection` in which we can customise things such as: `collectionName`, `indexes`, `model`.
 
 ```typescript
 import { Collection } from "@bluelibs/mongo-bundle";
@@ -54,7 +58,9 @@ class UsersCollection extends Collection<User> {
 }
 ```
 
-We've opted for `static` definition instead of the `abstract` approach of methods because static variables can be manipulated with ease, so for example if you have a collection from a bundle, and you would simply want to rename the collection name, or add another index, relation, or behavior, doing this is trivial. We understand that the abstract methods can hold certain advantages however because of the freedom these static variables offer we chose them.
+:::note
+We've opted for `static` definition instead of the `abstract` approach of methods (`getCollectionName()`) because static variables can be manipulated with ease, so for example if you have a collection from a bundle, and you would simply want to rename the collection name, or add another index, relation, or behavior, doing this is trivial. We understand that the abstract methods can hold certain advantages however because of the freedom these static variables offer, we stuck to it.
+:::
 
 As with everything in BlueLibs's world, you get the instance via the container, for that you'd have to work within your application bundle.
 
@@ -86,7 +92,7 @@ Our `Collection` services have a neat integration with the `EventManager`. We di
 
 ### Types
 
-```yaml
+```ts
 - BeforeInsertEvent
   - document
   - context
@@ -106,7 +112,7 @@ Our `Collection` services have a neat integration with the `EventManager`. We di
   - result: UpdateWriteOpResult | FindAndModifyWriteOpResultObject
 - BeforeDeleteEvent
   - filter (what gets deleted)
-  - isMany (if it's a removeMany());
+  - isMany (if it is a removeMany());
 - AfterDeleteEvent
   - filter
   - isMany
@@ -190,11 +196,13 @@ postsCollection.insertOne(document, {
 // This is the `options` argument available for all mutations.
 ```
 
-## Integration with Nova
+## Nova Integration
 
 We need a way to link collections and fetch data with blazing fast speeds. For this purpose, [Nova](package-nova) comes to the rescue and we strongly recommend you read through it first to get all the concepts clarified.
 
 Nova is extremely fast and gives us the freedom to think relational in NoSQL, enhancing our developer experience.
+
+We also offer type-safety when making queries which enables us to work in a very scalable fashion.
 
 ### Basics
 
@@ -205,39 +213,70 @@ const usersCollection = container.get(UsersCollection);
 usersCollection.query({
   $: {
     filters: {
+      // mongo filters
       _id: someUserId
     }
+    options: {
+      // limit, skip, sort
+    }
   }
-  // Specify the fields you need
+  // Specify the fields you need, autocompleted if the Collection has as model passed as Generic.
   firstName: 1,
   lastName: 1,
 });
 
-// use .queryOne() if you are expecting a single result based on filters
+// use .queryOne() if you are expecting a single result based on filters and/or options
 ```
 
-To integrate with Nova, you can do it via the following static variables
+The way we define links for `Nova` is through the static variables: `links`, `reducers`, `expanders`:
 
 ```typescript
 class UsersCollection extends Collection {
   static collectionName = "users";
 }
 
-class PostsCollection extends Collection {
+class Human {
+  firstName: string;
+  lastName: string;
+
+  /**
+   * We mark with @reducer the fields which are computed on demand.
+   * @reducer
+   */
+  fullName: string;
+}
+
+class HumansCollection extends Collection<Human> {
   static collectionName = "posts";
 
   static links = {
     user: {
       collection: () => UsersCollection,
+      // Or if you want to benefit of dynamic linking:
+      // collection: (container) => container.get(USERS_COLLECTION_TOKEN);
       field: "userId",
     },
   };
 
-  // Nova reducers
+  // Nova reducers are a sort of virtually computed variables.
   // Note: reducers include "container" in the context property of their params.
-  static reducers = {};
+  static reducers = {
+    fullName: {
+      // Here you specify what you depend on from the `Human` model to be able to compute it
+      // Being this specific,  inimises the amount of data fetched.
+      dependency: {
+        firstName: 1,
+        lastName: 1,
+      },
+      // Reducers accept a context that is from the Query (more details in Nova documentation)
+      reduce(user: User, { context }}) {
+        // Get access to container if reducing this is to be delegated to a service
+        const container = context.container;
+      }
+    }
+  };
 
-  // Nova expanders
+  // Nova expanders. Rarely to be used.
   static expanders = {};
 }
 ```
@@ -245,17 +284,19 @@ class PostsCollection extends Collection {
 Now you can query freely:
 
 ```typescript
-postsCollection.query({
-  title: 1,
+const humansCollection = container.get(HumansCollection);
+
+humansCollection.query({
+  // You can query any field including reducers and expanders
+  fullName: 1,
   user: {
-    firstName: 1,
-    lastName: 1,
+    _id: 1,
   },
 });
 ```
 
 :::note
-Keep in mind that links are attached on `.collection` under the `Collection` class from `@bluelibs/mongo-bundle`, so if you want to use the methods of `query()` or `lookup()` from Nova.
+Keep in mind that links are attached on `.collection` (the raw MongoDB Node collection) under the `Collection` class from `@bluelibs/mongo-bundle`, so if you want to use the methods of `query()` or `lookup()` from Nova, ensure that you use the proper collection otherwise you will get errors.
 :::
 
 Using bare-bones `Nova`:
@@ -265,6 +306,7 @@ import { lookup, query } from "@bluelibs/nova";
 
 const postsCollection = container.get(PostsCollection);
 const results = query(
+  // NOTE! The .collection is the raw one, where the links are actually attached.
   postsCollection.collection,
   {
     $: {
@@ -274,6 +316,7 @@ const results = query(
       ],
     },
   },
+  // This is the context to pass to reducers.
   {
     // And if you have container aware reducers you have to pass the context here:
     container,
@@ -281,11 +324,13 @@ const results = query(
 );
 ```
 
-If you want to benefit of JIT bson-decoding for your data you can add. This speeds up the data fetching speeds by ~30% (the more data you fetch, the faster it gets).
+If you want to benefit of JIT bson-decoding for your data you can add it through `jitSchema` static variable. This speeds up the data fetching speeds by ~50% (the more data you fetch, the faster it gets).
 
 :::warning
 Keep in mind that if you forget to update the `jitSchema` you won't be able to receive the data not defined in schema from MongoDB, making you wonder what is going on, we advise using this only when you actually need it. Prematurue optimisation is not healthy.
 :::
+
+Example for a collection that contains only `name: string`:
 
 ```ts
 class PostsCollection extends Collection {
@@ -300,7 +345,11 @@ class PostsCollection extends Collection {
 
 ### GraphQL
 
-If you are looking to write a [Nova Query](package-nova#graphql-integration), in your GraphQL resolvers you can do:
+[Nova Query](package-nova#graphql-integration) has an intuitive GraphQL transformation, which allows you to transform the `AbstractSourceTree`, which is the "query" transformed in a OOP-model, to a `Nova` query body so you can return only what is requested + collection-linked. This is the magical part.
+
+:::note
+This part is related to [GraphQL Bundle](package-graphql). Ensure that you are comfortable with it first.
+:::
 
 ```ts
 const resolvers = {
@@ -314,16 +363,48 @@ const resolvers = {
           isApproved: true,
         },
       });
+
+      // for single element finds, use: postsCollection.queryOneGraphQL()
     },
   },
 };
 ```
 
-If you want the query to return a single element, a short-hand function is `postsCollection.queryOneGraphQL()`.
+The query you can make from your client would be similar to a GraphQL Query:
+
+```graphql
+## This is how you would define it in GraphQL Server
+type Query {
+  posts: Post[]
+}
+
+type User {
+  name: String!
+}
+
+type Post {
+  title: String!
+  user: User!
+}
+
+# Now the query from frontend would look like:
+query {
+  posts {
+    title
+    user {
+      name
+    }
+  }
+}
+```
+
+Behind the scenes, Nova will transform the request into its own "request-fetching language", and if you keep the same name in GraphQL API for the defined `links` in the `Collection` classes, then it will work as magic.
+
+Ofcourse, you would need to secure this and restrict these behaviors, to do so take a look at `intersect` option inside [Nova's documentation for GraphQL](package-nova#graphql-integration).
 
 ## Behaviors
 
-The nature of the behavior is simple, it is a `function` that receives the `collection` object when the collection initialises. And you can listen to events on the collection and make it **behave**.
+The nature of the behavior is simple, it is a `function` that receives the `collection` object when the collection initialises. And you can listen to events on the collection and [make it behave](https://www.youtube.com/watch?v=F1lJFlB-89Q).
 
 Let's create a behavior that logs the insertions of a document:
 
@@ -692,7 +773,7 @@ export interface IMigrationStatus {
 
 ### Summary
 
-The `MongoBundle` helps us a ton, from having type safety, to event-driven approach for working with documents, behaviors, integration with Nova, easy-to-use transactions and migrations. It provides a foundation for scalable code and is ofcourse used by the infamous [X-Framework](x-framework-introduction).
+The `MongoBundle` helps by offering having type-safety everywhere, to event-driven approach for working with documents, behaviors, integration with Nova, easy-to-use transactions and migrations. It provides a foundation for scalable code and is ofcourse used by the infamous [X-Framework](x-framework-introduction).
 
 ### Boilerplates
 

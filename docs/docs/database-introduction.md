@@ -75,10 +75,12 @@ abstract class LinguaCollection<T = any> {
   protected lingua: LinguaService;
 
   async set(key: string, value: T) {
+    key = this.getCollectionName() + ":" + key; // 'users:1' if key is '1'
     await this.lingua.set(key, value);
   }
 
   async get(key: string): Promise<T> {
+    key = this.getCollectionName() + ":" + key; // 'users:1' if key is '1'
     return this.lingua.get(key);
   }
 
