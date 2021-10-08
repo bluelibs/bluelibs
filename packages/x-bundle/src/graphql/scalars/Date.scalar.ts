@@ -8,6 +8,10 @@ export default {
       name: "Date",
       description: "Date Custom scalar type",
       parseValue(value) {
+        if (value === null || value === undefined) {
+          return null;
+        }
+
         return new Date(value); // value from the client
       },
       serialize(value) {
