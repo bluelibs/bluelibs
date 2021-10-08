@@ -39,7 +39,8 @@ export class GenericModelWriter extends BlueprintWriter {
       const basePath = parts.slice(0, -1).concat("base", "ts").join(".");
       modelOperator.sessionCopy(
         modelTpls("ts/model.extending.ts.tpl"),
-        model.targetPath
+        model.targetPath,
+        { ignoreIfExists: true }
       );
       modelOperator.sessionCopy(modelTpls("ts/model.ts.tpl"), basePath);
     } else {
