@@ -15,12 +15,15 @@ declare module "@bluelibs/nova" {
   }
 }
 
+/**
+ * This represents the mutation execution context, where we can store valuable info.
+ * "context" is passed inside the "options" arguments of every mutation.
+ */
 export interface IExecutionContext {
   /**
    * This userId is needed for blamable behaviors. You can omit it if it's done by the system
    */
   userId?: any;
-  [key: string]: any;
 }
 
 export interface IContextAware {

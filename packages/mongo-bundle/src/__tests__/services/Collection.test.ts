@@ -3,6 +3,7 @@ import { Comments, Comment } from "./dummy/comments";
 import { Posts, Post } from "./dummy/posts";
 import { Users, User } from "./dummy/users";
 import { assert, expect } from "chai";
+import { AfterDeleteEvent } from "../../events";
 import {
   BeforeInsertEvent,
   AfterInsertEvent,
@@ -23,8 +24,8 @@ describe("Collection", () => {
       afterInsert: false,
       beforeUpdate: false,
       afterUpdate: false,
-      beforeRemove: false,
-      afterRemove: false,
+      beforeDelete: false,
+      afterDelete: false,
     };
 
     comments.on(BeforeInsertEvent, (e: BeforeInsertEvent) => {
@@ -43,12 +44,12 @@ describe("Collection", () => {
       lifecycle.afterUpdate = true;
     });
 
-    comments.on(BeforeRemoveEvent, (e: BeforeRemoveEvent) => {
-      lifecycle.beforeRemove = true;
+    comments.on(AfterDeleteEvent, (e: AfterDeleteEvent) => {
+      lifecycle.beforeDelete = true;
     });
 
-    comments.on(AfterRemoveEvent, (e: AfterRemoveEvent) => {
-      lifecycle.afterRemove = true;
+    comments.on(AfterDeleteEvent, (e: AfterDeleteEvent) => {
+      lifecycle.afterDelete = true;
     });
 
     const c1 = await comments.insertOne({ title: "Lifecycle test" });
@@ -68,8 +69,8 @@ describe("Collection", () => {
     assert.isTrue(lifecycle.afterInsert);
     assert.isTrue(lifecycle.beforeUpdate);
     assert.isTrue(lifecycle.afterUpdate);
-    assert.isTrue(lifecycle.beforeRemove);
-    assert.isTrue(lifecycle.afterRemove);
+    assert.isTrue(lifecycle.beforeDelete);
+    assert.isTrue(lifecycle.afterDelete);
 
     await teardown();
   });

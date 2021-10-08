@@ -5,13 +5,13 @@ import {
   UpdateWriteOpResult,
   DeleteWriteOpResultObject,
 } from "mongodb";
-import { IGetFieldsResponse } from "./defs";
+import { IExecutionContext, IGetFieldsResponse } from "./defs";
 import { Collection } from "./models/Collection";
 import { FindAndModifyWriteOpResultObject } from "mongodb";
 
-export abstract class CollectionEvent<T extends { context: any }> extends Event<
-  T
-> {
+export abstract class CollectionEvent<
+  T extends { context: IExecutionContext } = any
+> extends Event<T> {
   protected _collection: Collection<any>;
 
   get collection(): Collection<any> {
@@ -26,43 +26,52 @@ export abstract class CollectionEvent<T extends { context: any }> extends Event<
   }
 }
 
-export class BeforeInsertEvent extends CollectionEvent<{
-  document: any;
-  context: any;
+export class BeforeInsertEvent<T = any> extends CollectionEvent<{
+  document: T;
+  context: IExecutionContext;
 }> {}
 
-export class AfterInsertEvent extends CollectionEvent<{
-  document: any;
+export class AfterInsertEvent<T = any> extends CollectionEvent<{
+  document: T;
   _id: any;
-  context: any;
+  context: IExecutionContext;
 }> {}
 
-export class BeforeUpdateEvent extends CollectionEvent<{
-  filter: FilterQuery<any>;
-  update: UpdateQuery<any>;
+export class BeforeUpdateEvent<T = any> extends CollectionEvent<{
+  filter: FilterQuery<T>;
+  update: UpdateQuery<T>;
   fields: IGetFieldsResponse;
   isMany: boolean;
-  context: any;
+  context: IExecutionContext;
 }> {}
 
-export class AfterUpdateEvent extends CollectionEvent<{
-  filter: FilterQuery<any>;
-  update: UpdateQuery<any>;
+export class AfterUpdateEvent<T = any> extends CollectionEvent<{
+  filter: FilterQuery<T>;
+  update: UpdateQuery<T>;
   fields: IGetFieldsResponse;
   isMany: boolean;
-  context: any;
+  context: IExecutionContext;
   result: UpdateWriteOpResult | FindAndModifyWriteOpResultObject<any>;
 }> {}
 
-export class BeforeRemoveEvent extends CollectionEvent<{
-  filter: FilterQuery<any>;
+export class BeforeDeleteEvent<T = any> extends CollectionEvent<{
+  filter: FilterQuery<T>;
   isMany: boolean;
-  context: any;
+  context: IExecutionContext;
 }> {}
 
-export class AfterRemoveEvent extends CollectionEvent<{
-  filter: FilterQuery<any>;
+export class AfterDeleteEvent<T = any> extends CollectionEvent<{
+  filter: FilterQuery<T>;
   isMany: boolean;
   context: any;
   result: DeleteWriteOpResultObject | FindAndModifyWriteOpResultObject<any>;
 }> {}
+
+/**
+ * @deprecated Please use BeforeDeleteEvent
+ */
+export const BeforeRemoveEvent = BeforeDeleteEvent;
+/**
+ * @deprecated Please use AfterDeleteEvent
+ */
+export const AfterRemoveEvent = AfterDeleteEvent;

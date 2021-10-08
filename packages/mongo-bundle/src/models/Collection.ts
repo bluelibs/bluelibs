@@ -26,6 +26,8 @@ import {
   ContainerInstance,
   Service,
   IEventConstructor,
+  Constructor,
+  EventHandlerType,
 } from "@bluelibs/core";
 import { DatabaseService } from "../services/DatabaseService";
 import {
@@ -180,12 +182,12 @@ export abstract class Collection<T = any> {
       context: options.context,
     };
 
-    const event = new BeforeInsertEvent(eventData);
+    const event = new BeforeInsertEvent<any>(eventData);
     await this.emit(event);
 
     // We will insert what is left in the event
     const result = await this.collection.insertOne(
-      event.data.document,
+      event.data.document as any,
       options
     );
 
@@ -543,7 +545,7 @@ export abstract class Collection<T = any> {
    * @param collectionEvent This is the class of the event
    * @param handler This is the function that is executed
    */
-  on(collectionEvent: IEventConstructor<any>, handler: any) {
+  on<K>(collectionEvent: IEventConstructor<K>, handler: EventHandlerType<K>) {
     this.localEventManager.addListener(collectionEvent, handler);
   }
 
