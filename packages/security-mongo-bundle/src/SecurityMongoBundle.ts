@@ -44,17 +44,14 @@ export class SecurityMongoBundle extends Bundle<ISecurityMongoBundleConfig> {
       (e: BundleBeforePrepareEvent) => {
         const { bundle } = e.data;
         if (bundle instanceof SecurityBundle) {
-          const {
-            permissionsCollection,
-            usersCollection,
-            sessionsCollection,
-          } = this.config;
+          const { permissionsCollection, usersCollection, sessionsCollection } =
+            this.config;
 
           // There is the possibility that they have been nullified
           // For example, the developer may want to replace a certain interface with something else
           permissionsCollection &&
             bundle.setPermissionPersistance(permissionsCollection);
-          usersCollection && bundle.setUserPersistence(usersCollection);
+          usersCollection && bundle.setUserPersistance(usersCollection);
           sessionsCollection &&
             bundle.setSessionPersistance(sessionsCollection);
         }
@@ -70,18 +67,26 @@ export class SecurityMongoBundle extends Bundle<ISecurityMongoBundleConfig> {
     });
   }
 
-  async prepare() {
-    this.container.set({
-      id: USERS_COLLECTION_TOKEN,
-      type: this.config.usersCollection,
-    });
-    this.container.set({
-      id: PERMISSIONS_COLLECTION_TOKEN,
-      type: this.config.permissionsCollection,
-    });
-    this.container.set({
-      id: SESSIONS_COLLECTION_TOKEN,
-      type: this.config.sessionsCollection,
-    });
+  async init() {
+    if (this.config.usersCollection) {
+      this.container.set({
+        id: USERS_COLLECTION_TOKEN,
+        value: this.container.get(this.config.usersCollection),
+      });
+    }
+
+    if (this.config.sessionsCollection) {
+      this.container.set({
+        id: PERMISSIONS_COLLECTION_TOKEN,
+        value: this.container.get(this.config.permissionsCollection),
+      });
+    }
+
+    if (this.config.sessionsCollection) {
+      this.container.set({
+        id: SESSIONS_COLLECTION_TOKEN,
+        value: this.container.get(this.config.sessionsCollection),
+      });
+    }
   }
 }
