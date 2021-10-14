@@ -78,8 +78,10 @@ export class {{ fixtureClass }} {
     }
   }
 
-  // Runs if all data maps are empty
+  // Runs if all data maps are empty or we're in a test environment
   async shouldRun() {
+    if (process.env.NODE_ENV === 'test') return false
+
     for (const collectionName in dataMap) {
       const collection = this.databaseService.getMongoCollection(
         collectionName
