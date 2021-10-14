@@ -5,21 +5,15 @@ import {
   IGenericField,
   GenericFieldTypeEnum,
   IGenericFieldSubModel,
+  EnumConfigExtractResult,
 } from "./defs";
 import * as path from "path";
-import { EnumConfigType } from ".";
 
 // This model can be inquired for asking:
 // GraphQL Types, Inputs, Model Classes
 
 export type ToContentOptions = {
   enumPrefix?: string;
-};
-
-type EnumConfigExtractResult = {
-  className: string;
-  elements: EnumConfigType[];
-  importFrom: string;
 };
 
 const ToContentDefaults = {
