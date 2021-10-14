@@ -3,7 +3,7 @@ import { IReducerOption } from "@bluelibs/nova";
 import { S3UploadService } from "../../services/S3UploadService";
 
 // Export link names as constants with type of: BundleLinkCollectionOption, sample:
-// export const company: IReducerOption = { ... }
+// export const myCustomLink: IReducerOption = { ... }
 export const downloadUrl: IReducerOption = {
   dependency: {
     path: 1,
