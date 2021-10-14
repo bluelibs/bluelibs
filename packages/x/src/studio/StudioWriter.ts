@@ -594,9 +594,18 @@ export class StudioWriter {
       );
 
       if (model.enableGraphQL) {
+        const inputGenericModel = new Models.GenericModel(model.id);
+        inputGenericModel.name = model.id;
+        inputGenericModel.yupValidation = true;
+
+        model.fields.forEach((field) => {
+          inputGenericModel.addField(XBridge.fieldToGenericField(field, true));
+        });
+
         const graphqlTypeModel = new Models.GraphQLInputModel();
         graphqlTypeModel.bundleName = "AppBundle";
-        graphqlTypeModel.genericModel = Models.GenericModel.clone(genericModel);
+        graphqlTypeModel.genericModel =
+          Models.GenericModel.clone(inputGenericModel);
         graphqlTypeModel.genericModel.race = ModelRaceEnum.GRAPHQL_TYPE;
 
         graphqlEntityWriter.write(graphqlTypeModel, session);
@@ -604,7 +613,7 @@ export class StudioWriter {
         const graphqlInputModel = new Models.GraphQLInputModel();
         graphqlInputModel.bundleName = "AppBundle";
         graphqlInputModel.genericModel =
-          Models.GenericModel.clone(genericModel);
+          Models.GenericModel.clone(inputGenericModel);
         graphqlInputModel.genericModel.race = ModelRaceEnum.GRAPHQL_INPUT;
         graphqlInputModel.genericModel.isBaseExtendMode = true;
         graphqlInputModel.genericModel.reuseEnums = true;
