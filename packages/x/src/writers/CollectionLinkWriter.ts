@@ -75,8 +75,14 @@ export class CollectionLinkWriter extends BlueprintWriter {
   }
 
   alreadyExportsLink(filePath, name): boolean {
-    return (
-      fs.readFileSync(filePath).toString().indexOf(`export const ${name}`) > -1
-    );
+    const fileContent = fs.readFileSync(filePath).toString();
+
+    const exportLineIndex = fileContent.indexOf(`export const ${name}`);
+
+    if (exportLineIndex < 0) return false;
+
+    const isComment = fileContent.indexOf(`// export const ${name}`) > -1;
+
+    return !isComment;
   }
 }

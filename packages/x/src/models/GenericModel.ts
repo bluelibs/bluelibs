@@ -7,12 +7,19 @@ import {
   IGenericFieldSubModel,
 } from "./defs";
 import * as path from "path";
+import { EnumConfigType } from ".";
 
 // This model can be inquired for asking:
 // GraphQL Types, Inputs, Model Classes
 
 export type ToContentOptions = {
   enumPrefix?: string;
+};
+
+type EnumConfigExtractResult = {
+  className: string;
+  elements: EnumConfigType[];
+  importFrom: string;
 };
 
 const ToContentDefaults = {
@@ -347,26 +354,18 @@ ${field.description}
     return ModelUtils.isFieldModel(field);
   }
 
-  get enums(): Array<{
-    className: string;
-    elements: Array<{
-      label: string;
-      field: string;
-      value: string;
-    }>;
-    importFrom: string;
-  }> {
-    // First level enums
-    const result = [];
-    this.fields
-      .filter((field) => {
-        return field.type === GenericFieldTypeEnum.ENUM;
-      })
+  private extractAndAddEnumConfigToResult(
+    fields: IGenericField[],
+    result: EnumConfigExtractResult[],
+    parentFieldName: string = ""
+  ) {
+    fields
+      .filter((field) => field.type === GenericFieldTypeEnum.ENUM)
       .forEach((field) => {
         const className = ModelUtils.getEnumClassName(
           field,
-          this.modelClass,
-          true
+          this.modelClass + parentFieldName,
+          Boolean(parentFieldName)
         );
 
         result.push({
@@ -377,21 +376,22 @@ ${field.description}
             : `./enums/${className}.enum`,
         });
       });
+  }
+
+  get enums() {
+    const result = [] as EnumConfigExtractResult[];
+
+    // First level enums
+    this.extractAndAddEnumConfigToResult(this.fields, result);
 
     // Second level enums
     this.fields.forEach((field) => {
       if (field.model && field.model.fields) {
-        field.model.fields.forEach((childField) => {
-          if (childField.type === GenericFieldTypeEnum.ENUM) {
-            result.push({
-              className: ModelUtils.getEnumClassName(
-                childField,
-                this.modelClass + _.upperFirst(field.name)
-              ),
-              elements: childField.enumValues,
-            });
-          }
-        });
+        this.extractAndAddEnumConfigToResult(
+          field.model.fields,
+          result,
+          _.upperFirst(field.name)
+        );
       }
     });
 
