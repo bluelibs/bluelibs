@@ -469,7 +469,7 @@ export class StudioWriter {
     const linkWriter = this.writers.collectionLink;
 
     for (const collection of studioApp.collections) {
-      collection.relations.forEach((_relation) => {
+      for (const _relation of collection.relations) {
         const relation = _relation.cleaned;
 
         const model = new Models.CollectionLinkModel();
@@ -516,7 +516,9 @@ export class StudioWriter {
         this.success(
           `Linked collection: "${collection.id}:${relation.id}" to -> "${relation.to.id}"`
         );
-      });
+
+        await commit();
+      }
     }
 
     await commit();
