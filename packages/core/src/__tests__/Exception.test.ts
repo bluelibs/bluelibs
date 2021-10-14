@@ -7,11 +7,18 @@ import { Exception } from "../models/Exception";
 
 describe("Exception", () => {
   it("Should work", () => {
+    const context = {
+      worksFine: true,
+    };
     class MyException extends Exception {
       static code = "BS1040";
 
       getMessage() {
         return "ok";
+      }
+
+      getContext() {
+        return context;
       }
     }
 
@@ -24,6 +31,7 @@ describe("Exception", () => {
         assert.equal(e.getCode(), "BS1040");
         assert.equal(e.getMessage(), "ok");
         assert.equal(e.message, "(BS1040) ok");
+        assert.strictEqual(e.getContext(), context);
       }
     }
   });
