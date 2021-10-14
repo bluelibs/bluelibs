@@ -1,25 +1,30 @@
-The GraphQL Bundle is an abstract way to load your Type Definitions, Resolvers, Scalars, Context Transformers/Reducers in a unified place. We made this design choice to be able to hook it with any kind of GraphQL server without making any change to your code. For example, if there's another bundle that instantiates a GraphQL server, you can later swap it for let's say a `serverless` bundle without making any changes to your code.
-
-Besides this loading strategy this bundle comes with:
-
-- Mechanism to automatically load GraphQL files based on file system conventions
-- A composition strategy for your resolvers to re-use code
-
-It does automatic type and resolver merging and you can also load context manipulators and schema directives.
-
 ## Install
 
 ```
 npm install --save @bluelibs/graphql-bundle
 ```
 
-Register it easily:
-
 ```ts
-kernel.addBundle(new GraphQLBundle());
+import { GraphQLBundle } from "@bluelibs/graphql-bundle";
+
+const kernel = new Kernel({
+  bundles: [new GraphQLBundle()],
+});
 ```
 
+## Purpose
+
+The GraphQL Bundle is an abstract way to load your Type Definitions, Resolvers, Scalars, Context Transformers in a unified place. We made this design choice to be able to hook it with any kind of GraphQL server without making any change to your code. For example, if there's another bundle that instantiates a GraphQL server, you can later swap it for let's say a `serverless` bundle without making any changes to your code.
+
+Besides this loading strategy this bundle comes with:
+
+- Mechanism to automatically load GraphQL files based on file system conventions
+- A composition strategy for your resolvers to re-use code (we call them executors)
+- Automatic type and resolver merging
+
 ## Usage
+
+We load our type definitions from all the bundles via the `Loader` service:
 
 ```typescript
 import { Loader } from "@bluelibs/graphql-bundle";
@@ -62,17 +67,13 @@ class AppBundle extends Bundle {
 }
 ```
 
-## Getting it all together
+We regard as a `GraphQL Module` an object which contains one of `typeDefs`, `resolvers`, `schemaDirectives`, `contextReducers`.
 
-This would happen when you want to instantiate your server:
+When you instantiate the server (eg: ApolloServer) and you need to pass everything, you get it from the `loader`:
 
 ```typescript
-const {
-  typeDefs,
-  resolvers,
-  schemaDirectives,
-  contextReducers,
-} = loader.getSchema();
+const { typeDefs, resolvers, schemaDirectives, contextReducers } =
+  loader.getSchema();
 ```
 
 ## Auto Loading
@@ -86,7 +87,7 @@ import { extract } from "@bluelibs/graphql-bundle";
 export default extract(__dirname);
 ```
 
-## Types
+## Resolver Maps
 
 ```typescript title="graphql/User.graphql.ts"
 export default /* GraphQL */ `
@@ -124,14 +125,14 @@ export default {
   resolvers: {
     Query: {
       saySomething: () => "Hi!",
-    } as IResolverMap,
-  },
+    },
+  } as IResolverMap,
 };
 ```
 
 ## Resolvers
 
-A resolver's job is usually:
+Resolvers are controllers. A resolver's job is usually:
 
 - Check if inputs are fine (Validation)
 - Check security and permission rights (Authorisation)
@@ -191,11 +192,11 @@ load({
 });
 ```
 
-## Plugins
+## Executors
 
-A plugin, is a function that returns a resolver function.
+We regard as an `executor` a function that runs in a resolver chain. It's just that simple. It's a function, but we had to identify it in a specific way and give it a name so it clearly refers to a "resolver function".
 
-Writing the `CheckLoggedIn` plugin:
+Writing the `CheckLoggedIn` executor:
 
 ```typescript
 interface ICheckLoggedInConfig {
@@ -221,6 +222,7 @@ const CheckLoggedIn = async function (options: ICheckLoggedInConfig) {
 export default {
   Query: {
     PostAdd: [
+      // This returns a function
       CheckLoggedIn({ errorMessage: "Not allowed to add post" }),
       async (_, args, ctx) => {
         // Add the post as no exception was thrown
@@ -276,7 +278,7 @@ load({
   typeDefs,
   resolvers: {
     Query: [
-      // BEFORE PLUGINS
+      // BEFORE EXECUTORS
       [CheckLoggedIn()],
 
       // EXECUTION MAP
@@ -301,7 +303,7 @@ load({
 });
 ```
 
-## TypeScript
+## Context
 
 When we are dealing with a GraphQL resolver, there are 2 things we need types for usually: arguments and context. While context is the same from resolver to resolver, arguments change.
 
@@ -331,3 +333,14 @@ function register(_, args: InputType<RegisterInput>, context: IGraphQLContext) {
   // Type safety on input, as it is RegisterInput
 }
 ```
+
+## Meta
+
+### Summary
+
+This is a fully decoupled GraphQL loading strategy which is scalable, type-safe and works with any GraphQL Server.
+
+### Challenges
+
+- Can you have two files that define `type User`? What will happen when you load both? (1p)
+- Write a project in which all queries are logged and their responses and their time to execute. (3p)

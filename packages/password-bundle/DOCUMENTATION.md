@@ -1,4 +1,20 @@
-This is an authentication strategy implemented for the `SecurityBundle`. It does not expose any routes/infrastructure end points and it doesn't care about your persistance layer (it works with any type of database)
+## Install
+
+```bash
+npm i -S @bluelibs/security-bundle @bluelibs/password-bundle
+```
+
+```ts
+import { SecurityBundle } from "@bluelibs/security-bundle";
+import { PasswordBundle } from "@bluelibs/password-bundle";
+const kernel = new Kernel({
+  bundles: [new SecurityBundle(), new PasswordBundle()],
+});
+```
+
+## Purpose
+
+This is an authentication strategy implemented for the `SecurityBundle`. It does not expose any routes, nor does it send any emails and it doesn't care about your persistance layer (database-agnostic). It just focuses on the `raw` handling of passwords for a user.
 
 ```typescript
 import { PasswordBundle } from "@bluelibs/password-bundle";
@@ -29,9 +45,9 @@ const userId = await this.securityService.createUser();
 
 // Now that we have the user we attach options to it
 await passwordService.attach(userId, {
-  username: "USERNAME",
-  password: "PASSWORD",
+  username: "USERNAME", // in most situation the username is the email, in fact.
   email: "USERNAME@MAIL.COM";
+  password: "PASSWORD",
   isEmailVerified: false;
 });
 ```
@@ -110,7 +126,7 @@ This events can be imported from the package. So you can listen to them.
 - ResetPasswordInvalidTokenException
   - Someone tried to reset password with an invalid token
 
-## Data
+## Data Model
 
 The data we store to manage everything in the strategy looks like this:
 
@@ -151,3 +167,19 @@ await passwordService.updateData(userId, {
 
 const data = await passwordService.getData(userId);
 ```
+
+## Meta
+
+### Summary
+
+This is the raw functionality of handling passwords. A complete integration for this is done inside [XPasswordBundle](package-x-password) that is X-Framework compatible.
+
+## Boilerplates
+
+COMMING SOON
+
+### Challenges
+
+- What does `cooldown` inside `resetPasword` represent? (1p)
+- Can I use this bundle in such a way that I prevent a password brute-force attack? How? (2p)
+- Write an app, in which a user has had too many invalid authentication attempts is sent a warning email and suspend the user? (2p)

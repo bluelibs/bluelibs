@@ -13,6 +13,8 @@ import { PackageHeader } from "@site/src/components/PackageHeader";
 npm install --save @bluelibs/mongo-bundle @bluelibs/nova
 ```
 
+## Prepare
+
 - [Install MongoDB](https://docs.mongodb.com/manual/administration/install-community/)
 - [Official MongoDB Documentation](https://www.mongodb.com/basics)
 - [Neat 10-min tutorial](https://medium.com/nerd-for-tech/all-basics-of-mongodb-in-10-minutes-baddaf6b6625)
@@ -40,6 +42,8 @@ kernel.addBundle(
   })
 );
 ```
+
+Get started with our [MongoBundle Essential Boilerplate](https://stackblitz.com/edit/node-ebpceh?file=src%2Fsimple-collection-setup%2Findex.ts);
 
 ## Collections
 
@@ -786,7 +790,9 @@ The `MongoBundle` helps by offering having type-safety everywhere, to event-driv
 
 ### Boilerplates
 
-Create a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free instance of a database and you can use. Boilerplates comming soon.
+Create a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free instance of a database and you can use, make it open to all IPs and create a solid username and password and get the `Mongo URI`. You will most likely add it inside `src/constants.ts` file in the boilerplates.
+
+- [MongoBundle Essential](https://stackblitz.com/edit/node-ebpceh?file=src%2Fsimple-collection-setup%2Findex.ts)
 
 ### Challenges
 

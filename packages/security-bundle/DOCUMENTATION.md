@@ -587,7 +587,7 @@ There we have it. A powerful security module with lots of goodies, flexible to t
 
 ### Boilerplates
 
-COMMING SOON.
+- [Standard Security Boilerplate](https://stackblitz.com/edit/node-3yzakh?file=src%2Findex.ts)
 
 ### Challenges
 
