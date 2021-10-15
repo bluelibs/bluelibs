@@ -10,6 +10,7 @@ export abstract class Exception<T = null> extends Error {
       this.data = args[0];
     }
     this.name = this.constructor.name;
+
     const code = (this.constructor as typeof Exception).code;
     const prefix = code ? `(${code}) ` : "";
     super.message = prefix + this.getMessage();
@@ -21,5 +22,9 @@ export abstract class Exception<T = null> extends Error {
 
   getMessage(): string {
     return STANDARD_ERROR_MESSAGE;
+  }
+
+  getContext(): Record<string, any> | null {
+    return null;
   }
 }

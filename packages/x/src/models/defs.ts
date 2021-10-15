@@ -111,3 +111,9 @@ export interface IGenericField extends IFieldBaseSignature {
    */
   yupValidation?: boolean;
 }
+
+export type EnumConfigExtractResult = {
+  className: string;
+  elements: EnumConfigType[];
+  importFrom: string;
+};

@@ -1,4 +1,4 @@
-import { Service, Inject, ContainerInstance } from "@bluelibs/core";
+import { Service, Inject, ContainerInstance, Kernel } from "@bluelibs/core";
 import { DatabaseService } from "@bluelibs/mongo-bundle";
 import { EJSON } from "@bluelibs/ejson";
 import { PasswordService } from "@bluelibs/password-bundle";
@@ -16,6 +16,9 @@ export class {{ fixtureClass }} {
 
   @Inject()
   databaseService: DatabaseService;
+
+  @Inject()
+  kernel: Kernel;
 
 
   async init() {
@@ -78,8 +81,10 @@ export class {{ fixtureClass }} {
     }
   }
 
-  // Runs if all data maps are empty
+  // Runs if all data maps are empty or we're in a test environment
   async shouldRun() {
+    if (this.kernel.isTesting()) return false
+
     for (const collectionName in dataMap) {
       const collection = this.databaseService.getMongoCollection(
         collectionName

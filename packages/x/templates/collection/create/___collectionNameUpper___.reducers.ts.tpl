@@ -1,4 +1,4 @@
 import { IReducerOption } from "@bluelibs/nova";
 
 // Export link names as constants with type of: IReducerOption, sample:
-// export const company: IReducerOption = { ... }
+// export const myCustomLink: IReducerOption = { ... }

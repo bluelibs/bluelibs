@@ -63,7 +63,9 @@ export class GraphQLQueryModel {
       case QueryDelegateType.CUSTOM:
         return `(_, args, ctx, info) => { /* code goes here */ },`;
       case QueryDelegateType.SERVICE:
-        return `X.ToService(${this.serviceElement.identityName}, "${this.serviceMethodName}"),`;
+        return `X.ToService(${this.serviceElement.identityName}, "${
+          this.serviceMethodName
+        }"${!this.hasInput && ", (_, ctx) => [ctx.userId]"}),`;
       case QueryDelegateType.NOVA:
         if (this.returnTypeIsArray) {
           return `ToNova()`;

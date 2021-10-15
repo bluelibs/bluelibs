@@ -251,6 +251,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
             return {
               message: e.getMessage(),
               code: e.getCode(),
+              context: e.getContext(),
             };
           }
 
@@ -260,7 +261,10 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
           };
 
           if (e.originalError instanceof Exception) {
-            Object.assign(response, { code: e.originalError.getCode() });
+            Object.assign(response, {
+              code: e.originalError.getCode(),
+              context: e.originalError.getContext(),
+            });
           }
 
           return response;

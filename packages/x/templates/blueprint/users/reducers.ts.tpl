@@ -2,7 +2,7 @@ import { IReducerOption } from "@bluelibs/nova";
 import { PermissionService, PERMISSION_DEFAULT_DOMAIN } from "@bluelibs/security-bundle";
 
 // Export link names as constants with type of: BundleLinkCollectionOption, sample:
-// export const company: IReducerOption = { ... }
+// export const myCustomLink: IReducerOption = { ... }
 export const email: IReducerOption = {
   dependency: {
     password: {
