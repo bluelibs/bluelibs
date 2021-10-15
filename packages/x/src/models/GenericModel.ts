@@ -120,6 +120,7 @@ export class GenericModel {
           name: "_id",
           type: GenericFieldTypeEnum.ID,
           isMany: false,
+          isOptional: true,
         },
         true
       );

@@ -19,6 +19,7 @@ export const shortcuts = {
       return s.field({
         id: "_id",
         type: s.field.types.OBJECT_ID,
+        isRequired: false,
         ui: {
           label: "ID",
           create: false,
@@ -40,6 +41,7 @@ export const shortcuts = {
           "This field is used to identify if this object has been soft-deleted",
         type: s.field.types.BOOLEAN,
         enableGraphQL: false,
+        isRequired: false,
         ui: false,
         mock: {
           generator: () => false,
