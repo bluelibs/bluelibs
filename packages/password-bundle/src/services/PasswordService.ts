@@ -288,7 +288,7 @@ export class PasswordService implements IPasswordService {
       user.salt
     );
 
-    this.updateData(userId, {
+    await this.updateData(userId, {
       passwordHash,
     });
   }
