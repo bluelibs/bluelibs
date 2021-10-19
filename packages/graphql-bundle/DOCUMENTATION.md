@@ -1,7 +1,7 @@
 ## Install
 
 ```
-npm install --save @bluelibs/graphql-bundle
+npm install --save @bluelibs/graphql-bundle graphql
 ```
 
 ```ts
@@ -87,49 +87,6 @@ import { extract } from "@bluelibs/graphql-bundle";
 export default extract(__dirname);
 ```
 
-## Resolver Maps
-
-```typescript title="graphql/User.graphql.ts"
-export default /* GraphQL */ `
-  type User {
-    firstName: String!
-    lastName: String!
-    fullName: String!
-  }
-`;
-```
-
-```typescript title="graphql/User.resolvers.ts"
-import { IResolverMap } from "@bluelibs/graphql-bundle";
-
-export default {
-  User: {
-    fullName(user) {
-      return user.firstName + " " + user.lastName;
-    },
-  },
-} as IResolverMap; // We are using this so we benefit of autocompletion
-```
-
-You also have the ability to store both resolvers and types or things such as context reducers and schema directives. You should use the `*.graphql-module.ts` files:
-
-```typescript title="graphql/User.graphql-module.ts"
-import { IResolverMap } from "@bluelibs/graphql-bundle";
-
-export default {
-  typeDefs: /* GraphQL */ `
-    type Query {
-      saySomething: String
-    }
-  `,
-  resolvers: {
-    Query: {
-      saySomething: () => "Hi!",
-    },
-  } as IResolverMap,
-};
-```
-
 ## Resolvers
 
 Resolvers are controllers. A resolver's job is usually:
@@ -192,7 +149,50 @@ load({
 });
 ```
 
-## Executors
+### Resolver Maps
+
+```typescript title="graphql/User.graphql.ts"
+export default /* GraphQL */ `
+  type User {
+    firstName: String!
+    lastName: String!
+    fullName: String!
+  }
+`;
+```
+
+```typescript title="graphql/User.resolvers.ts"
+import { IResolverMap } from "@bluelibs/graphql-bundle";
+
+export default {
+  User: {
+    fullName(user) {
+      return user.firstName + " " + user.lastName;
+    },
+  },
+} as IResolverMap; // We are using this so we benefit of autocompletion
+```
+
+You also have the ability to store both resolvers and types or things such as context reducers and schema directives. You should use the `*.graphql-module.ts` files:
+
+```typescript title="graphql/User.graphql-module.ts"
+import { IResolverMap } from "@bluelibs/graphql-bundle";
+
+export default {
+  typeDefs: /* GraphQL */ `
+    type Query {
+      saySomething: String
+    }
+  `,
+  resolvers: {
+    Query: {
+      saySomething: () => "Hi!",
+    },
+  } as IResolverMap,
+};
+```
+
+### Executors
 
 We regard as an `executor` a function that runs in a resolver chain. It's just that simple. It's a function, but we had to identify it in a specific way and give it a name so it clearly refers to a "resolver function".
 
@@ -232,7 +232,7 @@ export default {
 };
 ```
 
-## Response Manipulators
+### Response Manipulators
 
 You can also write response manipulators, for example your function returns undefined/false, but you want to return a success response:
 
@@ -269,7 +269,7 @@ const ManipulateEndResponse = () => {
 };
 ```
 
-## Groups
+### Executor Groups
 
 When you're creating logic you're most likely want to reuse it, this is why we introduce bundling plugins:
 
@@ -339,6 +339,10 @@ function register(_, args: InputType<RegisterInput>, context: IGraphQLContext) {
 ### Summary
 
 This is a fully decoupled GraphQL loading strategy which is scalable, type-safe and works with any GraphQL Server.
+
+### Boilerplates
+
+- [GraphQL Basics](https://stackblitz.com/edit/node-yn9vqc?file=src%2Fgraphql-basics%2Findex.ts)
 
 ### Challenges
 

@@ -51,6 +51,9 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
     loader.load({
       typeDefs: `
         type Mutation {
+          """
+          This mutation is used to create a new token based on the existing one. Your previous token will no longer be usable.
+          """
           reissueToken(token: String!): String!
         }
       `,

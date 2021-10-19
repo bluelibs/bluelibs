@@ -7,36 +7,44 @@ import { PackageHeader } from "@site/src/components/PackageHeader";
 
 <PackageHeader version="1.0.1" packageName="apollo-security-bundle" containsTypeDefs />
 
-This is used to detect the userId based on the authentication token and inject it inside the GraphQL's context. On top of that it offers a seamless integration with `Passport` for easy integration with different auth providers
-
 ## Install
 
 ```bash
 npm i -S @bluelibs/apollo-bundle @bluelibs/apollo-security-bundle passport
 ```
 
-```typescript
+```ts
 import { ApolloSecurityBundle } from "@bluelibs/apollo-security-bundle";
 
-kernel.addBundle(new ApolloSecurityBundle());
+const kernel = new Kernel({
+  bundles: [new ApolloSecurityBundle()],
+});
 ```
 
-Options:
+## Purpose
 
-```js
+This is used to detect the `userId` based on the authentication token (`bluelibs-token`) and inject it inside the GraphQL's context so you have access to it in your resolvers giving you the ability to perform authorization. On top of that it offers a seamless integration with `Passport` which gives you the ability to benefit of over 500+ authentication strategies.
+
+This package features:
+
+- Support for websocket authentication
+- Customisable token names
+- Extends `IGraphQLContext` to autocomplete `userId`
+
+```ts
 export interface IApolloSecurityBundleConfig {
   // All true by default
   support: {
-    headers?: boolean,
-    cookies?: boolean,
-    websocket?: boolean,
+    headers?: boolean;
+    cookies?: boolean;
+    websocket?: boolean;
   };
   // bluelibs-token is the default for all
   identifiers: {
-    headers?: string, // Has priority over cookies
-    cookies?: string, // If no header is present it will read from here
+    headers?: string; // Has priority over cookies
+    cookies?: string; // If no header is present it will read from here
     // For websocket you have to send the connection params in order to work
-    websocket?: string,
+    websocket?: string;
   };
 }
 ```
@@ -159,6 +167,10 @@ class AppBundle extends Bundle {
 ```
 
 ### Token Security
+
+You have two ways to store the token, in `localStorage` or as a HTTP-server only cookie. The most secure alternative is the `cookie` because your JS code won't have access to it, and subsequently you cannot be subject to XSS or other bogus plugins that your browser may have to expose your token.
+
+However, we currently do not have a way to make that work with websockets, thus, our approach is to use `localStorage` to offer the seamless approach. If you do not need websockets and want benefit of `HTTP-server Cookie`, just return the cookie in your response.
 
 By using `getToken()` we create an actual token for authentication for the user. The problem is that when we pass that to the `ui` microservice, the url can be sniffed, leading to a security whole in the system.
 
