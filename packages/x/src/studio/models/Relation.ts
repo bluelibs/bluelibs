@@ -39,7 +39,7 @@ export class Relation extends BaseModel<Relation> {
   /**
    * If it's an indirect link, specifying unique lets Nova know that when we fetch this link, it should return one result
    */
-  unique: string;
+  unique: boolean;
 
   /**
    * If it's direct in which field are we actually storing the relational data
