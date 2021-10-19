@@ -164,7 +164,7 @@ field({
     edit: true, // Whether it's present in the edit form
     create: true, // Wheter it's present in the create form,
     form: {
-      component: "Input.Textarea", // This supports every data entry from Ant
+      component: "Input.TextArea", // This supports every data entry from Ant
       props: {}, // Additional props to pass the component like sizes or etc.
     },
   },
