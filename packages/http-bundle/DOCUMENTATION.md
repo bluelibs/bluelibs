@@ -16,6 +16,10 @@ const kernel = new Kernel({
 });
 ```
 
+## Purpose
+
+The idea is to bring `express`'simplicity into your application and link it with your container. It also gives you ability to chain handlers so you can perform different re-usable sets of logic and is `async` built from ground-up.
+
 HTTPBundle starts the `listen()` in the `KernelAfterInit` hook. So the application starts listening before `kernel.init()` promise resolves. If there's an error with starting the server like the port is already in use, the `kernel.init()` will fail.
 
 ## Usage
@@ -75,7 +79,7 @@ export const routes: RouteType[] = [
     path: "/users",
     handler: [
       CheckLoggedIn(),
-      (container, req, res, next) => {
+      async (container, req, res, next) => {
         // something else
       },
     ],
@@ -87,6 +91,28 @@ Now you can better add them without poluting bundle code:
 
 ```ts
 httpBundle.addRoutes(routes);
+```
+
+## Middlewares
+
+Adding express middlewares should be done in `prepare()` phase of your bundle. By default the middlewares we add are:
+
+- cookieParser
+- json
+- urlencoded({ extended: true })
+- express router (stored in .router)
+
+Currently you cannot opt-out of them, feel free to fork the `HTTPBundle` and add it to your repo if you want full customisations.
+
+```ts
+class AppBundle extends Bundle {
+  async prepare() {
+    const httpBundle = this.container.get(HTTPBundle);
+    const { app } = httpBundle;
+
+    app.use(/* your middleware */);
+  }
+}
 ```
 
 ## Events
@@ -114,3 +140,18 @@ const app = container.get(HTTPBundle).app;
 // Routes are added on the default router, which you can change
 const router = container.get(HTTPBundle).router;
 ```
+
+## Meta
+
+### Summary
+
+Here we have it, a pure HTTP solution inside the BlueLibs ecosystem.
+
+### Challenges
+
+- Create a JWT authentication middleware with HTTPBundle (3p)
+- Create a route which takes `city` and `country` as query params and returns the weather for today `/weather?city=New York&country=USA` via a dedicated `WeatherService` (2p)
+
+### Boilerplates
+
+- [HTTP Server](https://stackblitz.com/edit/node-nbieti?file=src%2Fhttp%2FAppBundle.ts)

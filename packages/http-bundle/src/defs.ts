@@ -13,7 +13,7 @@ export type RouteHandlerType = (
   req: express.Request,
   res: express.Response,
   next: any
-) => Promise<any>;
+) => any;
 
 export type RouteType = {
   type: "post" | "get" | "put" | "patch" | "delete" | "all";
