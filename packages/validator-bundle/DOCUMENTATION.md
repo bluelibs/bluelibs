@@ -1,8 +1,22 @@
-This package contains a neat, TypeScript-oriented solution to validating models, creating custom validation constraints that are container-aware. It leverages the awesome [yup validation package](https://github.com/jquense/yup).
+## Install
 
 ```bash
 npm i -S yup @bluelibs/validator-bundle
 ```
+
+```ts
+const kernel = new Kernel({
+  bundles: [new ValidatorBundle()],
+});
+```
+
+## Purpose
+
+This package blends [yup validation package](https://github.com/jquense/yup) with class decorators inside TypeScript inside the ecosystem, opening the path of having asynchronous container-aware validation logic, as well as a means of describing the model in an OOP-fashion.
+
+## Usage
+
+Let's create an input for registration in which we ask `email` and `age` but at the same time we link with another schema.
 
 ```typescript
 import { a, an, Is, Schema } from "@bluelibs/validator-bundle";
@@ -31,7 +45,15 @@ export class ProfileRegistrationInput {
 }
 ```
 
+:::note
+What `Schema()` does essentially it states that it will construct an `yup.object()` instance with the details defined for each field. Allowing you to have additional fields that don't get validated, or other helper methods giving you full control.
+:::
+
+To perform validation, we make use of the `ValidatorService`:
+
 ```typescript
+import { ValidatorService } from "@bluelibs/validator-bundle";
+
 const validatorService = container.get(ValidatorService);
 
 validatorService.validate(dataSet, {
@@ -40,18 +62,9 @@ validatorService.validate(dataSet, {
 });
 ```
 
-Or simply validate the instance by using the `class-transformer` npm package:
+## Custom Validation
 
-```typescript
-const instance = plainToClass(UserRegistrationInput, dataSet);
-
-// If you use the instance, it'll know the constructor and you will not have to provide the schema model
-await validatorService.validate(instance);
-```
-
-## Custom Validations
-
-It's always a good idea to be able to customise validations, so here is our solution:
+We are about to introduce customly designed validations that know about the `container` and can use it. For illustration purposes we're going to design something that checks whether a field is unique or not in the database.
 
 ```typescript
 import { Service, Inject } from "@bluelibs/core";
@@ -63,6 +76,7 @@ import {
 
 export type UniqueFieldConfig = {
   message?: string;
+  // We ask for "table" and "field"
   table: string;
   field: string;
 };
@@ -99,7 +113,7 @@ class UniqueFieldValidator implements IValidationMethod<UniqueFieldConfig> {
 }
 ```
 
-And ensure TypeScript knows about this:
+Now we have to tell `TypeScript` about this so it can provide us with propper type-safety when using `@Is(a.string().uniqueField({ table: "users", field: "email" }))`
 
 ```typescript
 // declarations.ts
@@ -119,12 +133,16 @@ declare module "yup" {
 }
 ```
 
-You now have to register the method, you add this in the prepare() phase of your bundle:
+The next step is to let the `ValidatorService` know about this custom method, it should be added in the `prepare()` phase of your bundle:
 
 ```typescript
-const validatorService = container.get(ValidatorService);
+class AppBundle extends Bundle {
+  async prepare() {
+    const validatorService = this.container.get(ValidatorService);
 
-validatorService.addMethod(UniqueFieldValidationMethod);
+    validatorService.addMethod(UniqueFieldValidationMethod);
+  }
+}
 ```
 
 Now you could safely use it like this:
@@ -142,16 +160,18 @@ class UserRegistrationInput {
 }
 ```
 
-## Transformer
+## Transformers
 
-Now let's say you receive from inputs a date, but not an object date, a string, "2018-12-04" you want to make it a date, so you would want to typecast it. That's done via transformers
+Let's say you receive from inputs a date, but not an object `Date`, a string, "2018-12-04" you want to make it a `Date` instance, so you would want to "cast" it. That's done via transformers:
 
 ```typescript
+import { Service } from "@bluelibs/core";
 import * as moment from "moment";
 import { yup, IValidationTransformer } from "@bluelibs/validator-bundle";
 
 type IDateTransformerConfig = string;
 
+@Service()
 class DateTransformer implements IValidationTransformer<IDateTransformerConfig, Date> {
   // What is your string like, which you want to validate?
   parent = yup.date, // optional, defaults to yup.mixed, so to all
@@ -171,11 +191,15 @@ class DateTransformer implements IValidationTransformer<IDateTransformerConfig, 
 }
 ```
 
-You can add it to TypeScript declarations in the same manner as we've seen for the Validator above.
+You can add it to TypeScript declarations in the same manner as we've seen for the Validator above:
 
 ```typescript
-const validatorService = container.get(ValidatorService);
-validatorService.addTransformer(DateTransformer);
+class AppBundle extends Bundle {
+  async prepare() {
+    const validatorService = this.container.get(ValidatorService);
+    validatorService.addTransformer(DateTransformer);
+  }
+}
 ```
 
 Now you could safely use it like this:
@@ -198,3 +222,18 @@ const object = validatorService.validate(input, {
 // Casting has been doen automatically, if you want just casting: validatorService.cast(input)
 object.publishAt; // instanceof Date now
 ```
+
+## Meta
+
+### Summary
+
+`Yup` is already well-established as an excellent validation library with a lot of great features and customisability, we bring that sheer power into BlueLibs and integrate it seamlessly so you can use it at its full capacity.
+
+### Boilerplates
+
+- COMMING SOON
+
+### Challenges
+
+- Using `yup` create an input with `newPassword` and `confirmPassword` as fields and ensure they are at least 8 characters in length and they are both equal. (1p)
+- Create an asynchronous validator, which says whether input is a valid country. (1p) `@Is(a.string().country())`
