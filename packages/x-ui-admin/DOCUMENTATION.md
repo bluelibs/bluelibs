@@ -268,6 +268,9 @@ export class CompanyEditForm extends XForm {
         component: Ant.Input,
         // Add additional props to the input component
         componentProps: {},
+
+        // Pass props to Form.Item, gets into props from render() and works with custom component and custom render()
+        formItemProps: {},
       },
       // The rest of form items
     ]);

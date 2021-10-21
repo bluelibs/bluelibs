@@ -35,7 +35,14 @@ export type XFormElementBaseType = {
    * This represents an Ant component especially useful when you want a custom renderer.
    */
   component?: React.ComponentType;
+  /**
+   * Pass properties to the component input. Warning: this doesn't work with a custom render() function.
+   */
   componentProps?: any;
+  /**
+   * Pass additional items when using "component"-based rendering. This works with custom render functions.
+   */
+  formItemProps?: Partial<Ant.FormItemProps>;
   listRenderer?: () => ListChildrenFunction;
 };
 
@@ -191,6 +198,7 @@ export abstract class XForm<T = null> extends Consumer<XFormElementType> {
       initialValue,
       fieldKey: item.fieldKey,
       ...options.props,
+      ...(item.formItemProps || {}),
     };
 
     if (props.rules.length === 0 && props.required) {
