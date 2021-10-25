@@ -25,7 +25,6 @@ import { GraphQLError, execute, subscribe } from "graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
-
 export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
     port: 4000,
@@ -38,6 +37,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       maxFiles: 10,
     },
     jit: true,
+    useJSONMiddleware: true,
   };
 
   public httpServer: http.Server;
@@ -151,9 +151,12 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         next();
       },
       cookieParser(),
-      express.json(),
       express.urlencoded({ extended: true })
     );
+
+    if (this.config.useJSONMiddleware) {
+      app.use(express.json());
+    }
 
     if (this.config.middlewares.length) {
       app.use(...this.config.middlewares);
