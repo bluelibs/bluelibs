@@ -16,6 +16,7 @@ export type ApolloBundleConfigType = {
    * Enable JIT JSON encoding and DECODING through GraphQL
    */
   jit?: boolean;
+  useJSONMiddleware?: boolean;
 };
 
 export interface IRouteType {
