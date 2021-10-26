@@ -131,8 +131,13 @@ export default class CollectionNode implements INode {
       this.handleSetupForChild();
     }
 
+    // Store the session for transaction if it exists
     if (context.session) {
       this.session = context.session;
+    } else {
+      if (parent && parent.session) {
+        this.session = parent.session;
+      }
     }
 
     this.spread(this.body);
