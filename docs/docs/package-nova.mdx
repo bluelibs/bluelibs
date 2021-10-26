@@ -5,7 +5,7 @@ title: Nova
 
 import { PackageHeader } from "@site/src/components/PackageHeader";
 
-<PackageHeader version="1.0.0" packageName="nova"  />
+<PackageHeader version="1.1.0" packageName="nova"  />
 
 ## Purpose
 
@@ -906,6 +906,23 @@ const Query = {
       .fetch();
   },
 };
+```
+
+## Transactions
+
+When you're working with transactions, you would like to `query` by passing a `session`:
+
+```ts
+query(
+  usersCollection,
+  {
+    name: 1,
+  },
+  {
+    // This is the MongoDB Client (Transaction) Session
+    session,
+  }
+);
 ```
 
 ## High Performance Queries
