@@ -14,6 +14,8 @@ npm i -S yup @bluelibs/validator-bundle
 ```
 
 ```ts
+import { ValidatorBundle } from "@bluelibs/validator-bundle";
+
 const kernel = new Kernel({
   bundles: [new ValidatorBundle()],
 });
@@ -246,3 +248,4 @@ object.publishAt; // instanceof Date now
 
 - Using `yup` create an input with `newPassword` and `confirmPassword` as fields and ensure they are at least 8 characters in length and they are both equal. (1p)
 - Create an asynchronous validator, which says whether input is a valid country. (1p) `@Is(a.string().country())`
+- Create an endpoint which returns all the invalid errors in the format of `[ {field: "...", errorMessage: "..." }]` something you will most likely need for forms.
