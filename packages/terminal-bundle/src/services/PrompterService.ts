@@ -2,7 +2,7 @@ import { IPrompter, IPrompt, IInquirer } from "../defs";
 import * as inquirer from "inquirer";
 import { QuestionCollection, Inquirer, DistinctQuestion } from "inquirer";
 import { ContainerInstance } from "@bluelibs/core";
-import { ExitInquiryException } from "../exceptions/ExitInquiryException.exception";
+import { ExitInquiryException } from "../exceptions/ExitInquiryException";
 
 const DUMMY_FIELD = "__dummy";
 

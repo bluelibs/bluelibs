@@ -1,1 +1,1 @@
-export * from "./ExitInquiryException.exception";
+export * from "./ExitInquiryException";

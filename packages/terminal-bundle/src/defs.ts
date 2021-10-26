@@ -30,6 +30,7 @@ export interface ICommand {
   description?: string;
   inquirer?: Constructor<IInquirer>;
   writer?: Constructor<IBlueprintWriter>;
+  execute?: Function; // TODO:
   executor?: Constructor<IExecutor>;
   sessionFactory?: (container: ContainerInstance) => IBlueprintWriterSession;
 }
