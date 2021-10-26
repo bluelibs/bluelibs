@@ -33,7 +33,7 @@ const result = EJSON.stringify({ now: new Date() }); // string: {"now": { "$date
 This has been done by Meteor, we migrated it to TypeScript and added some extra flavors. Follow the official and complete documentation here, our implementation is a superset of it:
 https://docs.meteor.com/api/ejson.html
 
-## Custom Objects
+## Custom Types
 
 Works with customly defined objects for easy serialisastion and deserialisation:
 
@@ -65,6 +65,27 @@ EJSON.addType("Distance", function fromJSONValue(json) {
 EJSON.stringify(new Distance(10, "m"));
 // Returns '{"$type":"Distance","$value":{"value":10,"unit":"m"}}'
 ```
+
+## ObjectId
+
+We use and export `ObjectId` from `bson-objectid` npm package (the only dependency of this package).
+
+Basically we encode and decode to `ObjectId` the following set:
+
+```ts
+import { ObjectId } from "@bluelibs/ejson";
+
+const postEJSON = {
+  _id: {
+    $objectId: "XXX",
+  },
+};
+
+const post = EJSON.fromJSONValue(postEJSON);
+post._id instanceof ObjectId; // true
+```
+
+This is mostly used for `MongoDB` database, if you use other databases and don't need it, then you have to leave it be as a dormant functionality.
 
 ## Models
 

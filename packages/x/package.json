@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Scaffolding tool for BlueLibs Framework using X-Framework.",
   "main": "dist/index.js",
   "repository": {
@@ -68,5 +68,8 @@
     "url": "https://github.com/bluelibs/bluelibs"
   },
   "homepage": "https://github.com/bluelibs/bluelibs",
-  "author": "Theodor Diaconu"
+  "author": "Theodor Diaconu",
+  "peerDependencies": {
+    "chalk": "^2.4.2"
+  }
 }
