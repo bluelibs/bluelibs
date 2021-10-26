@@ -7,43 +7,37 @@ import { PackageHeader } from "@site/src/components/PackageHeader";
 
 <PackageHeader version="1.0.0" packageName="nova"  />
 
-Nova is the fetching layer on top of MongoDB Node Driver, which allows SQL-comparable speeds for retrieving relational data.
+## Purpose
+
+Nova is the fetching layer on top of MongoDB Node Driver, which allows SQL-comparable speeds for retrieving relational data. Explore our analysis of [Nova vs the relational world](https://docs.google.com/spreadsheets/d/1F0qRFMoOy34W1dQ2RpvmmPzIesYsBo-TZ3cBTyhX6Do/edit#gid=2089988421) to see how it compares to SQL and other popular MongoDB solutions such as `mongoose`.
 
 GraphQL is treated as a first-class citizen, by offering ability to transform the GraphQL query into a Nova query. **You do not have to use GraphQL to use this library**.
 
 The incredible speed boost is possible thanks to the technology called Hypernova, you can read more in the section with the same name below.
 
-## What does it solve?
-
 - It makes it a joy to use MongoDB as a relational database
 - Support for relational filtering & sorting
-- [Speeds surpassing SQL in various scenarios](https://docs.google.com/spreadsheets/d/1cA2c6e9YvE-fA8LEaDwukgrvYNOIo8RmNjy8cPWby1g/edit#gid=0)
-- [Lower bandwidth used than SQL for joined documents](https://docs.google.com/spreadsheets/d/1cA2c6e9YvE-fA8LEaDwukgrvYNOIo8RmNjy8cPWby1g/edit#gid=0)
+- [Speeds surpassing SQL in various scenarios](https://docs.google.com/spreadsheets/d/1F0qRFMoOy34W1dQ2RpvmmPzIesYsBo-TZ3cBTyhX6Do/edit#gid=2089988421)
+- [Lower bandwidth used than SQL for joined documents](https://docs.google.com/spreadsheets/d/1F0qRFMoOy34W1dQ2RpvmmPzIesYsBo-TZ3cBTyhX6Do/edit#gid=2089988421)
 - Works with the default MongoDB Node Drivers
 - Super light-weight integration for GraphQL
 
-## Installation
+## Install
 
 ```
-npm i -S @bluelibs/nova
+npm i -S mongodb @bluelibs/nova
 ```
 
 ## Linking Collections
 
-Collections are linked through `addLinks(collection, linkingInformation)`, collections are instances of `mongodb.Collection`, if you are using, for example `mongoose` or `Meteor` you can access it like this:
-
-```typescript
-// mongoose
-Model.collection;
-
-// Meteor
-Collection.rawCollection();
-```
+Collections are linked through `addLinks(collection, linkingInformation)`, collections are instances of `mongodb.Collection`.
 
 Let us create a One-to-One relationship in which we have `Patients` and `MedicalProfiles` in two distinct collections.
 
 ```typescript
 import { addLinks } from "@bluelibs/nova";
+
+// Patients, MedicalProfiles are just two `mongodb.Collection`s
 
 addLinks(Patients, {
   // This is the name of the link
@@ -51,9 +45,14 @@ addLinks(Patients, {
     collection: () => MedicalProfiles,
     // Where to read the id, that exists in MedicalProfiles
     field: "medicalProfileId",
+
     // Whether it's an array of ids, or just a single id, in our case
-    // By default it's false.
+    // @default = false
     many: false,
+
+    // We pass this because we don't expect another Patient with the same MedicalProfile ID
+    // @default = false
+    unique: true,
   },
 });
 ```
@@ -268,7 +267,7 @@ addLinks(Users, {
 });
 ```
 
-## Aliased Collections
+### Aliasing
 
 Sometimes you may find useful to fetch the same link but in different contexts, for example you want to get a Company with the last 3 invoices and with overdue invoices without much hassle:
 
@@ -962,4 +961,21 @@ query(Posts, {
 });
 ```
 
+:::note
 Reducers do not need to be added in the schema, as they are computed and added in the `post-processing` phase after the result has been retrieved. Be careful, if you add another field to the request, it must be in the schema, otherwise it won't show up.
+:::
+
+## Meta
+
+### Summary
+
+If you want to use MongoDB, Nova is the most advanced and fastest relational data fetcher on Node ecosystem at the moment. Even if you do not use the whole `BlueLibs` ecosystem it's still a must for you.
+
+### Boilerplates
+
+- Create a free [MongoDB Atlas](https://www.mongodb.com/atlas/database) MongoDB instance
+- [Nova](https://stackblitz.com/edit/node-3ghtwy?file=README.md)
+
+### Challenges
+
+- Try to replicate a social network model with Posts, Comments, Users, Tags, PostCategories, Comment Reactions, Friendships. (4p)
