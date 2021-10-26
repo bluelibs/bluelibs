@@ -67,7 +67,7 @@ const yupSchemaCreators = new Map<Function, () => ObjectSchema<any>>();
  * @param target the object's type (class)
  * @returns The yup schema
  */
-export function getSchemaByType(target: Object) {
+export function getSchemaByType(target: Object): ObjectSchema<any> {
   const constructor = target instanceof Function ? target : target.constructor;
 
   let schema = yupSchemas.get(constructor);
@@ -106,7 +106,7 @@ function createAndStoreSchema(model: Function) {
   return schema;
 }
 
-schema.from = (model: any) => {
+schema.from = (model: any): ObjectSchema<any> => {
   return getSchemaByType(model);
 };
 
