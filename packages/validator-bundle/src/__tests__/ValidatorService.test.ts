@@ -330,6 +330,20 @@ describe("ValidatorService", () => {
       age: number;
     }
 
+    await validator
+      .validate(
+        { name: "Johnny", age: 12 },
+        {
+          model: Person,
+        }
+      )
+      .catch((error) => {
+        if (error instanceof ValidationError) {
+          // console.log("Caught error:");
+          // console.log(error);
+        }
+      });
+
     // You can also have external models:
     @Schema()
     class PersonFinancialStatement {
@@ -346,22 +360,24 @@ describe("ValidatorService", () => {
       @Is(a.string().oneOf(["male", "female", "other"]).required())
       gender: string;
 
-      @Is(() => Schema.from(PersonFinancialStatement))
+      @Is(Schema.from(PersonFinancialStatement))
       financialStatement: PersonFinancialStatement;
     }
 
-    await validator.validate(
-      {
-        name: "Johnny",
-        age: 35,
-        gender: "male",
-        financialStatement: {
-          balance: 1000,
+    expect(
+      validator.validate(
+        {
+          name: "Johnny",
+          age: 35,
+          gender: "male",
+          financialStatement: {
+            balance: 100,
+          },
         },
-      },
-      {
-        model: PersonBusiness,
-      }
-    );
+        {
+          model: PersonBusiness,
+        }
+      )
+    ).rejects.toBeInstanceOf(ValidationError);
   });
 });

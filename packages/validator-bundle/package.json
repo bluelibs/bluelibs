@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/validator-bundle",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Object validation strategy using yup and decorators.",
   "main": "dist/index.js",
   "repository": {
@@ -44,7 +44,7 @@
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.3",
     "typescript": "4.2",
-    "yup": "^0.32.0"
+    "yup": "^0.32.11"
   },
   "typings": "dist/index.d.ts",
   "typescript": {

@@ -40,6 +40,11 @@ export class MetadataStorage {
     return new Map<string, SchemaOrSchemaCreator>(entries);
   }
 
+  /**
+   * Get the hierarchy including self.
+   * @param baseClass
+   * @returns
+   */
   getClassHierarchy(baseClass: Function): Function[] {
     let constructors: Function[] = [];
     let currentConstructor: Function = baseClass;
@@ -54,8 +59,8 @@ export class MetadataStorage {
 
 const metadataStorage = new MetadataStorage();
 
-const YupSchemaCreator = Symbol("YupSchemaCreator");
-const YupSchema = Symbol("YupSchema");
+const yupSchemas = new Map<Function, ObjectSchema<any>>();
+const yupSchemaCreators = new Map<Function, () => ObjectSchema<any>>();
 
 /**
  * Get the schema by type
@@ -64,7 +69,8 @@ const YupSchema = Symbol("YupSchema");
  */
 export function getSchemaByType(target: Object) {
   const constructor = target instanceof Function ? target : target.constructor;
-  let schema = constructor[YupSchema];
+
+  let schema = yupSchemas.get(constructor);
 
   if (!schema) {
     schema = createAndStoreSchema(constructor);
@@ -83,19 +89,19 @@ export function schema(
   return (target) => {
     // The idea is that we don't generate the schema on the fly
     // We get the schema via SchemaStorage service which is responsible of
-    target[YupSchemaCreator] = () => defineSchema(target, objectSchema);
+    yupSchemaCreators.set(target, () => defineSchema(target, objectSchema));
   };
 }
 
 function createAndStoreSchema(model: Function) {
-  const creator = model[YupSchemaCreator];
+  const creator = yupSchemaCreators.get(model);
   if (!creator) {
     console.error("Error finding the schema for", model);
     throw new Error(`No schema creator attached to this model: `);
   }
 
-  const schema = model[YupSchemaCreator]();
-  model[YupSchema] = schema;
+  const schema = yupSchemaCreators.get(model)();
+  yupSchemas.set(model, schema);
 
   return schema;
 }
