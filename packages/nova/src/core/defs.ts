@@ -1,4 +1,4 @@
-import { Collection, FilterQuery } from "mongodb";
+import { ClientSession, Collection, FilterQuery } from "mongodb";
 import { ClassSchema } from "@deepkit/type";
 
 export interface IToArrayable {
@@ -6,6 +6,7 @@ export interface IToArrayable {
 }
 
 export interface IQueryContext {
+  session?: ClientSession;
   // Do be extended by others
 }
 

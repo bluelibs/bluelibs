@@ -26,6 +26,11 @@ import {
 } from "../../core/quickLinkers";
 
 // Read: https://mongodb.github.io/node-mongodb-native/3.3/api/
+declare module "../../core/defs" {
+  export interface IQueryContext {
+    test?: any;
+  }
+}
 
 beforeAll(async () => {
   await client.connect();

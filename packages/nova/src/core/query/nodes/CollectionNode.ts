@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import { ClientSession } from "mongodb";
 import * as dot from "dot-object";
 
 import {
@@ -35,6 +36,7 @@ import {
 } from "../../constants";
 import { BSONLeftoverSerializer } from "./utils/BSONLeftoverSerializer";
 import { SCHEMA_BSON_OBJECT_DECODER_STORAGE } from "../../constants";
+import { Session } from "inspector";
 
 export interface CollectionNodeOptions {
   collection: Collection;
@@ -66,6 +68,11 @@ export default class CollectionNode implements INode {
 
   public isVirtual?: boolean;
   public isOneResult?: boolean;
+
+  /**
+   * We use session when we're searching through Nova inside a transaction.
+   */
+  public session?: ClientSession;
 
   /**
    * When doing .fetchOne() from the Query and forgetting about hard-coding a limit, we should put that limit ourselves to avoid accidentally large queries
@@ -122,6 +129,10 @@ export default class CollectionNode implements INode {
 
     if (parent) {
       this.handleSetupForChild();
+    }
+
+    if (context.session) {
+      this.session = context.session;
     }
 
     this.spread(this.body);
@@ -186,9 +197,7 @@ export default class CollectionNode implements INode {
    * Returns the filters and options needed to fetch this node
    * The argument parentObject is given when we perform recursive fetches
    */
-  public getPropsForQuerying(
-    parentObject?: any
-  ): {
+  public getPropsForQuerying(parentObject?: any): {
     filters: any;
     options: any;
     pipeline: any[];
@@ -322,6 +331,7 @@ export default class CollectionNode implements INode {
           allowDiskUse: true,
           raw: true,
           batchSize: 1_000_000,
+          session: this.session,
         })
         .toArray();
 
@@ -342,6 +352,7 @@ export default class CollectionNode implements INode {
         .aggregate(pipeline, {
           allowDiskUse: true,
           batchSize: 1_000_000,
+          session: this.session,
         })
         .toArray();
     }
@@ -364,9 +375,8 @@ export default class CollectionNode implements INode {
       if (this.collection[SCHEMA_STORAGE]) {
         schema = this.collection[SCHEMA_STORAGE];
         aggregateSchema = this.collection[SCHEMA_AGGREGATE_STORAGE];
-        aggregateDecoder = this.collection[
-          SCHEMA_BSON_AGGREGATE_DECODER_STORAGE
-        ];
+        aggregateDecoder =
+          this.collection[SCHEMA_BSON_AGGREGATE_DECODER_STORAGE];
         documentDecoder = this.collection[SCHEMA_BSON_OBJECT_DECODER_STORAGE];
         serializer = this.collection[SCHEMA_BSON_DOCUMENT_SERIALIZER];
       }

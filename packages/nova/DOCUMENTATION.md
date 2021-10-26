@@ -899,6 +899,23 @@ const Query = {
 };
 ```
 
+## Transactions
+
+When you're working with transactions, you would like to `query` by passing a `session`:
+
+```ts
+query(
+  usersCollection,
+  {
+    name: 1,
+  },
+  {
+    // This is the MongoDB Client (Transaction) Session
+    session,
+  }
+);
+```
+
 ## High Performance Queries
 
 Deeper queries are run in parallel, make sure you have a connection `poolSize` of 10. This can be configured when creating your `MongoClient`. A larger `poolSize` might increase performance, but it can also decrease it.

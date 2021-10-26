@@ -10,7 +10,7 @@ describe("intersectDeep()", () => {
       },
     };
 
-    const intersectBody = {
+    const bodyToIntersect = {
       firstName: 1,
       lastName: 1,
       profile: {
@@ -18,7 +18,7 @@ describe("intersectDeep()", () => {
       },
     };
 
-    const result: any = intersectBody(requestBody, intersectBody);
+    const result: any = intersectBody(requestBody, bodyToIntersect);
 
     assert.isDefined(result.firstName);
     assert.isUndefined(result.lastName);
@@ -34,13 +34,13 @@ describe("intersectDeep()", () => {
       },
     };
 
-    const intersectBody = {
+    const bodyToIntersect = {
       profile: {
         services: {},
       },
     };
 
-    const result: any = intersectBody(requestBody, intersectBody);
+    const result: any = intersectBody(requestBody, bodyToIntersect);
 
     assert.isObject(result.profile);
     assert.isObject(result.profile.services);
@@ -52,11 +52,11 @@ describe("intersectDeep()", () => {
       firstName: {},
     };
 
-    const intersectBody = {
+    const bodyToIntersect = {
       firstName: {},
     };
 
-    const result: any = intersectBody(requestBody, intersectBody);
+    const result: any = intersectBody(requestBody, bodyToIntersect);
 
     assert.isDefined(result.firstName);
   });
