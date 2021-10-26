@@ -707,8 +707,8 @@ You can inject parameters from kernel, or others like this:
 ```typescript
 @Service()
 class A {
-  // Inject via property, Note: it uses a function
-  @Inject(() => "%debug%")
+  // Inject via property
+  @Inject("%debug%")
   protected isDebug: boolean;
 
   // Inject via constructor

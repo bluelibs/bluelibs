@@ -231,7 +231,7 @@ object.publishAt; // instanceof Date now
 
 ### Boilerplates
 
-- COMMING SOON
+- [ValidatorBundle](https://stackblitz.com/edit/node-ndk84t?file=README.md)
 
 ### Challenges
 
