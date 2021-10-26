@@ -1,18 +1,27 @@
-This bundle helps you connect to your favorite (swapable) transporter and render React templates as email. It is thought to work with TypeScript and enjoy type-safety.
+## Purpose
+
+We want to send templated emails to our customers. So we decided to have a neat way to integrate React on the server which can render the emails for us, enjoying TypeSafety but also ability to have responsive emails.
 
 ## Install
 
 ```bash
-npm install @bluelibs/email-bundle react react-dom
+npm install react react-dom @bluelibs/email-bundle @bluelibs/logger-bundle
 ```
 
-## Emails
+```ts
+import { EmailBundle } from "@bluelibs/email-bundle";
+
+const kernel = new Kernel({
+  bundles: [
+    new LoggerBundle({ console: true }),
+    new EmailBundle({ transporter: "console" }),
+  ],
+});
+```
+
+## Config
 
 ```typescript
-kernel.addBundle(
-  new EmailBundle(config);
-)
-
 // The config interface
 
 export interface IEmailBundleConfig {
@@ -24,7 +33,8 @@ export interface IEmailBundleConfig {
   transporter?:
     | "console" // Will console log the email data
     | "nodemailer-test" // Will generate a Preview URL using nodemailer test accounts
-    | { // Or simply use SMTP
+    | {
+        // Or simply use SMTP
         host: string;
         port: number;
         secure?: boolean;
@@ -42,6 +52,8 @@ export interface IEmailBundleConfig {
   };
 }
 ```
+
+## HTTP Transport
 
 You can use it by either providing your own custom transport, you can customise this heavily. A common example would be to use Mailgun HTTP API to send emails:
 
@@ -178,20 +190,19 @@ import { Service } from "@bluelibs/core";
 @Service()
 export class AppEmailService {
   // inject the things you want and do it how you like
+  async send(mailInfo) {
+    // Do send the email here.
+  }
 }
 ```
 
-Next step is to ensure that you have `null` transporter, which basically will not send emails.
+You can opt-out of sending emails completely, but still benefit of the Bundles sending emails for `Password Recovery` for example, you can hook into the event and make it send your own templates in your own way.
 
 ```ts
 new EmailBundle({
   transporter: null,
 });
 ```
-
-However, the rule here is that if you have bundles that use `EmailBeforeSendEvent` and you can hook into that and use your `AppEmailService`.
-
-We do this if you already have bundles that do send emails and you want to use your own system for it:
 
 ```ts
 import { EmailBeforeSendEvent } from "@bluelibs/core";
@@ -202,7 +213,26 @@ eventManager.addListener(EmailBeforeSendEvent, async (e) => {
     mailOptions,
   } = e.data;
 
+  if (component.name === "RecoveryPassword") {
+    // Match somehow the template name with the component type
+    // Bundles should export their email components so you can safely do the comparison
+  }
+
   // You now have to map the component, to a string of your choice and voila!
   appEmailService.send("TEMPLATE", props);
 });
 ```
+
+## Meta
+
+### Summary
+
+We use this bundle to send emails with react, have them responsive, fully flexible transport, cool testing without needing smtps like console printing options and full capability to opt-out.
+
+### Boilerplates
+
+- [Emails](https://stackblitz.com/edit/node-anvty2?file=README.md)
+
+### Challenges
+
+- Send yourself an email congratulating yourself on the fact that were able to send an email. (1p)

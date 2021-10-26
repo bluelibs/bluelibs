@@ -1,11 +1,20 @@
-This bundle allows you to log information that happens in your sistem. The logger can optionally output to `console.log` but later on, as your system grows, all of your instances should output to a centralised log management place. This is why we strongly recommend, as you're building your app, to use `LoggerService` instead of `console.log`
+## Install
 
-```typescript
-new LoggerBundle({
-  // This will just print the log to console as well
-  console: true,
+```bash
+npm i -S yup @bluelibs/logger-bundle
+```
+
+```ts
+import { LoggerBundle } from "@bluelibs/logger-bundle";
+
+const kernel = new Kernel({
+  bundles: [new LoggerBundle()],
 });
 ```
+
+## Purpose
+
+This bundle allows you to log information that happens in your sistem. The logger can optionally output to `console.log` but later on, as your system grows, all of your instances should output to a centralised log management place. This is why we strongly recommend, as you're building your app, to use `LoggerService` instead of `console.log`, it will pay off.
 
 If you want to use it:
 
@@ -77,3 +86,20 @@ const logger = container.get(LoggerService);
 // This will get dispatched, and next you can do custom compute for your log by checking instance of
 logger.send(new UserLog("message", LogLevel.INFO, { userId: "XXX" }));
 ```
+
+You can identify in your log listeners where this is a `UserLog` via `instanceof`.
+
+## Meta
+
+### Summary
+
+It's just logging, simple and scalable.
+
+### Boilerplates
+
+- [Logger](https://stackblitz.com/edit/node-pdsjea?file=README.md)
+
+### Challenges
+
+- Use the 4 types of log levels and send out some messages (1p)
+- Listen to events that are of custom type, like `UserLog` and perform an operation on it (2p)
