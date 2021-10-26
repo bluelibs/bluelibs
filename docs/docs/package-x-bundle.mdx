@@ -1,25 +1,24 @@
 ---
 id: package-x-bundle
-title: Core
+title: Server
 ---
 
 import { PackageHeader } from "@site/src/components/PackageHeader";
 
 <PackageHeader version="1.1.1" packageName="x-bundle"  />
 
+## Purpose
+
 The X-Framework is a set of tools that beautifully bridges the gap between your API Layer (GraphQL), your database (MongoDB), and your service layer. It is thought with fast-prototyping in mind but code scalability as well.
 
-It has the following tools:
+It provides developers the ability to quickly setup cruds, security checks, live data, testing, and so much more:
 
-- Apollo Server Executors (CRUD Operations, Security Checks, Service Delegation)
-- Apollo Server Scalars (Date, ObjectId)
+- GraphQL Server Executors (CRUD Operations, Security Checks, Service Delegation)
+- GraphQL Server Scalars (Date, ObjectId)
 - A defined way for standard CRUD interfaces
 - Validator Transformers (Date, ObjectId, UniqueDatabaseField)
-
-The family of X-Framework bundles is currently composed of:
-
-- X-Generator which uses BlueLibs's Terminal Technology to develop applications fast.
-- X-Password-Bundle which links Security, Mongo, Apollo to create a unified experience
+- API and Web App Routers
+- LiveData Support for [MongoBundle](package-mongo-bundle)
 
 ## Install
 
@@ -32,6 +31,8 @@ import { XBundle } from "@bluelibs/x-bundle";
 
 const kernel = new Kernel({
   bundles: [
+    // You will also need to add other bundles here.
+
     new XBundle({
       // You should take these from environment, the reason we ask them is for easy routing
       // However, they are optional.

@@ -59,15 +59,15 @@
         "label": "X-Framework",
         "items": [
             "x-framework-introduction",
+            "package-x-bundle",
+            "package-x-cli",
             {
                 "type": "category",
-                "label": "Server",
+                "label": "Server Tools",
                 "items": [
-                    "package-x-bundle",
-                    "package-x-cli",
-                    "package-x-cron-bundle",
                     "package-x-password-bundle",
-                    "package-x-s3-uploads"
+                    "package-x-s3-uploads",
+                    "package-x-cron-bundle"
                 ]
             },
             {

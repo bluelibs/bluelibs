@@ -162,23 +162,18 @@ export const map: IElementMap = {
       title: "Introduction",
     },
     {
-      groupLabel: "Server",
+      id: "x-bundle",
+      title: "Server",
+      package: "x-bundle",
+    },
+    {
+      id: "x-cli",
+      title: "Command Line",
+      package: "x",
+    },
+    {
+      groupLabel: "Server Tools",
       elements: [
-        {
-          id: "x-bundle",
-          title: "Core",
-          package: "x-bundle",
-        },
-        {
-          id: "x-cli",
-          title: "Command-line",
-          package: "x",
-        },
-        {
-          id: "x-cron-bundle",
-          title: "Cronjobs",
-          package: "x-cron-bundle",
-        },
         {
           id: "x-password-bundle",
           title: "Passwords",
@@ -189,6 +184,11 @@ export const map: IElementMap = {
           title: "Uploads",
           package: "x-s3-bundle",
         },
+        {
+          id: "x-cron-bundle",
+          title: "Cronjobs",
+          package: "x-cron-bundle",
+        },
       ],
     },
     {
@@ -196,12 +196,12 @@ export const map: IElementMap = {
       elements: [
         {
           id: "x-ui",
-          title: "Core",
+          title: "Web React",
           package: "x-ui",
         },
         {
           id: "x-ui-admin",
-          title: "Administration",
+          title: "Web React Administration",
           package: "x-ui-admin",
         },
         {
