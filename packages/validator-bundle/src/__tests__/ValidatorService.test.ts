@@ -317,4 +317,51 @@ describe("ValidatorService", () => {
       )
     ).rejects.toBeInstanceOf(ValidationError);
   });
+
+  test("Should work with nested and class extension at the same time", async () => {
+    const container = new ContainerInstance(Math.random().toString());
+    const validator = new ValidatorService(container);
+
+    @Schema()
+    class Person {
+      @Is(a.string().required())
+      name: string;
+      @Is(a.number().min(18))
+      age: number;
+    }
+
+    // You can also have external models:
+    @Schema()
+    class PersonFinancialStatement {
+      @Is(a.number().required().min(500))
+      balance: number;
+
+      @Is(a.date())
+      updatedAt: Date;
+    }
+
+    // Schemas can be extended.
+    @Schema()
+    class PersonBusiness extends Person {
+      @Is(a.string().oneOf(["male", "female", "other"]).required())
+      gender: string;
+
+      @Is(() => Schema.from(PersonFinancialStatement))
+      financialStatement: PersonFinancialStatement;
+    }
+
+    await validator.validate(
+      {
+        name: "Johnny",
+        age: 35,
+        gender: "male",
+        financialStatement: {
+          balance: 1000,
+        },
+      },
+      {
+        model: PersonBusiness,
+      }
+    );
+  });
 });

@@ -17,7 +17,7 @@ This package contains a neat, TypeScript-oriented solution to validating models,
 ## Install
 
 ```bash
-npm install --save @bluelibs/validator
+npm install --save @bluelibs/validator-bundle
 ```
 
 ## [Documentation](./DOCUMENTATION.md)
