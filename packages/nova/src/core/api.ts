@@ -16,20 +16,21 @@ import {
   LINK_COLLECTION_OPTIONS_DEFAULTS,
   SCHEMA_AGGREGATE_STORAGE,
   SCHEMA_BSON_OBJECT_DECODER_STORAGE,
+  SCHEMA_BSON_AGGREGATE_DECODER_STORAGE,
+  SCHEMA_BSON_DOCUMENT_SERIALIZER,
 } from "./constants";
 import * as _ from "lodash";
 import Linker from "./query/Linker";
 import Query from "./query/Query";
-import astToQuery from "./graphql/astToQuery";
+import astToQuery, { secureBody } from "./graphql/astToQuery";
 import { IGetLookupOperatorOptions } from "./query/Linker";
 import { Collection } from "mongodb";
 import { ClassSchema } from "@deepkit/type";
 import CollectionNode from "./query/nodes/CollectionNode";
-import {
-  SCHEMA_BSON_AGGREGATE_DECODER_STORAGE,
-  SCHEMA_BSON_DOCUMENT_SERIALIZER,
-} from "./constants";
 import { getBSONDecoder } from "@deepkit/bson";
+import { ISecureOptions } from "./defs";
+
+export { secureBody };
 
 export function query<T>(
   collection: Collection,
@@ -39,10 +40,19 @@ export function query<T>(
   return new Query(collection, body, context);
 }
 
+query.securely = (
+  config: ISecureOptions,
+  collection: Collection,
+  body: QueryBodyType,
+  context?: IQueryContext
+) => {
+  return query(collection, secureBody(body, config), context);
+};
+
 query.graphql = (
   collection: Collection,
   ast: any,
-  options: IAstToQueryOptions,
+  options: ISecureOptions,
   context?: IQueryContext
 ) => {
   return astToQuery(collection, ast, options, context);
@@ -57,16 +67,14 @@ export function clear(collection: Collection) {
 
 export function addSchema(collection: Collection, schema: ClassSchema) {
   collection[SCHEMA_STORAGE] = schema;
-  collection[SCHEMA_AGGREGATE_STORAGE] = CollectionNode.getAggregateSchema(
-    schema
-  );
+  collection[SCHEMA_AGGREGATE_STORAGE] =
+    CollectionNode.getAggregateSchema(schema);
   collection[SCHEMA_BSON_AGGREGATE_DECODER_STORAGE] = getBSONDecoder(
     collection[SCHEMA_AGGREGATE_STORAGE]
   );
   collection[SCHEMA_BSON_OBJECT_DECODER_STORAGE] = getBSONDecoder(schema);
-  collection[
-    SCHEMA_BSON_DOCUMENT_SERIALIZER
-  ] = CollectionNode.getSchemaSerializer(schema);
+  collection[SCHEMA_BSON_DOCUMENT_SERIALIZER] =
+    CollectionNode.getSchemaSerializer(schema);
 }
 
 export function addLinks(collection: Collection, data: ILinkOptions) {

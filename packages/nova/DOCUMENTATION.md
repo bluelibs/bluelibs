@@ -605,6 +605,45 @@ Notes:
 - Just be careful when extending the pipeline it may have unexpected results.
 - We recommend that you initially do not focus on performance, rather on code-clarity
 
+## Secure the Body
+
+Sometimes you might get the body request from the client. You want to ensure the client doesn't ask extra fields and it's at least decent in its request, below we'll explore how we can do this once we get that body:
+
+```ts
+import { secureBody } from "@bluelibs/nova";
+
+const safeBody = secureBody(
+  {
+    title: 1,
+  },
+  {
+    // Intersection is what they have in common
+    // This is the best way to secure your graph. By stating explicitly what you allow query-ing
+
+    // Does not throw exception, just eliminates extra and bogus fields from your body
+    intersect: {},
+
+    // This is useful to avoid a nested attack
+    // Depth applies to deeply nested fields, not only collection links
+    maxDepth: 10,
+
+    // Automatically enforces a maximum number of results
+    maxLimit: 10,
+
+    // Simply removes from the graph what fields it won't allow
+    // Can work with deep strings like 'comments.author'
+    deny: [], // String[]
+
+    // This will get merged with the main body before applying all security restrictions
+    // It is called side, because usually it's designed to blend "$" objects into an extracted query from GQL
+    sideBody: {},
+  }
+);
+
+// Or the handy version
+const result = query.securely(config, collection, body, context).fetch();
+```
+
 ## GraphQL Integration
 
 The integration removes the necessity of writing custom resolvers to fetch related data. Everything is computed efficiently.
@@ -634,24 +673,7 @@ const Query = {
             const authorArguments = getArguments("comments.author");
           },
 
-          // Intersection is what they have in common
-          // This is the best way to secure your graph. By stating explicitly what you allow query-ing
-          intersect: {},
-
-          // This is useful to avoid a nested attack
-          // Depth applies to deeply nested fields, not only collection links
-          maxDepth: 10,
-
-          // Automatically enforces a maximum number of results
-          maxLimit: 10,
-
-          // Simply removes from the graph what fields it won't allow
-          // Can work with deep strings like 'comments.author'
-          deny: [], // String[]
-
-          // This will get merged with the main body before applying all security restrictions
-          // It is called side, because usually it's designed to blend "$" objects into an extracted query from GQL
-          sideBody: {},
+          // The other options from Secure your Body apply here
         })
         .fetch()
     );

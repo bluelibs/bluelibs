@@ -9,7 +9,7 @@ import { SPECIAL_PARAM_FIELD, SCHEMA_FIELD } from "../constants";
  * @param what
  * @param intersection
  */
-export default function intersectBody(what, intersection) {
+export default function intersectBody(what, intersection, andThrow = false) {
   const result = {};
   if (what[ArgumentStore]) {
     result[ArgumentStore] = what[ArgumentStore];

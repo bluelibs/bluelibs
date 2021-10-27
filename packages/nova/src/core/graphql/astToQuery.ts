@@ -4,7 +4,12 @@ import * as graphqlFields from "graphql-fields";
 import { SPECIAL_PARAM_FIELD } from "../constants";
 import Query from "../query/Query";
 import intersectBody from "./intersectBody";
-import { QueryBodyType, IAstToQueryOptions, IQueryContext } from "../defs";
+import {
+  QueryBodyType,
+  IAstToQueryOptions,
+  IQueryContext,
+  ISecureOptions,
+} from "../defs";
 import { mergeDeep } from "./mergeDeep";
 import { Collection } from "mongodb";
 
@@ -56,6 +61,29 @@ export default function astToQuery(
 ) {
   // get the body
   let body = astToBody(ast);
+  body = secureBody(body, config);
+
+  if (config.embody) {
+    const getArguments = createGetArguments(body);
+    config.embody.call(null, body, getArguments);
+  }
+
+  // we return the query
+  return new Query(collection, body, context);
+}
+
+/**
+ * Used to secure and apply limits to your body graph
+ * @param body
+ * @param config
+ * @returns
+ */
+export function secureBody<T = null>(
+  body: QueryBodyType<T>,
+  config: ISecureOptions<T> = {}
+) {
+  body = Object.assign({}, body);
+
   if (!body.$) {
     body.$ = {};
   }
@@ -69,9 +97,11 @@ export default function astToQuery(
       body.$.options = config.options;
     }
   } else {
-    throw new Error(
-      `You tried to apply filters and options on a functionable parameterable object.`
-    );
+    if (config.options || config.filters) {
+      throw new Error(
+        `You tried to apply filters and options on a functionable parameterable object.`
+      );
+    }
   }
 
   if (config.sideBody) {
@@ -94,18 +124,12 @@ export default function astToQuery(
     body = intersectBody(body, config.intersect);
   }
 
-  if (config.embody) {
-    const getArguments = createGetArguments(body);
-    config.embody.call(null, body, getArguments);
-  }
-
   // enforce the maximum amount of data we allow to retrieve
   if (config.maxLimit) {
     enforceMaxLimit(body[SPECIAL_PARAM_FIELD], config.maxLimit);
   }
 
-  // we return the query
-  return new Query(collection, body, context);
+  return body;
 }
 
 export function getMaxDepth(body) {
