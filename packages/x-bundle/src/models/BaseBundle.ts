@@ -16,11 +16,11 @@ import {
 
 export abstract class BaseBundle<T = any> extends CoreBundle<T> {
   async setupBundle(config: {
-    collections?: Record<string, null | Constructor<Collection>>;
-    listeners?: Record<string, null | Constructor<Listener>>;
-    validators?: Record<string, null | Constructor<IValidationMethod<any>>>;
+    collections?: Record<string, any | Constructor<Collection>>;
+    listeners?: Record<string, any | Constructor<Listener>>;
+    validators?: Record<string, any | Constructor<IValidationMethod<any>>>;
     fixtures?: Record<string, any>;
-    graphqlModule?: null | ILoadOptions | ILoadOptions[];
+    graphqlModule?: any | ILoadOptions | ILoadOptions[];
   }) {
     const { collections, listeners, validators, graphqlModule, fixtures } =
       config;
