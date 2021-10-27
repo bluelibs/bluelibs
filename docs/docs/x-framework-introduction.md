@@ -9,19 +9,12 @@ X-Framework is using the `Foundation` giving it an edge when using a fixed stack
 
 Our choise is using MongoDB together with [MongoBundle](package-mongo-bundle) with the powers of [Apollo](package-apollo-bundle) and [GraphQL](package-graphql-bundle).
 
-We have also constructed a UI layer that beautifully blends with the `API` and we built it in React. On top of it we built an `Administration` layer which uses `Ant Design` and has great tooling for creating beautiful admin interfaces.
+We have also
+ministration`layer which uses`Ant Design` and has great tooling for creating beautiful admin interfaces.
 
-X-Framework is also complemented by a cli generator (`@bluelibs/x`), which you can use to create various elements (services, events, collections, graphql entities and mutations, etc). Keep in mind that in order for the smart generator to work, a certain folder structure must be respected. Imagine this folder structure as part of the framework itself, giving you a little bit of complexity in the beginning but keeping things tidy as your app scales quickly.
-
-## Reasoning for the Stack
-
-### MongoDB
-
-MongoDB is a very fast NoSQL solution which supports running JS deep in its core. It is close to us as JS developers, much closer than the SQL language + it offers the ability to have a dynamic schema for your documents in each collection, removing the need of thinking about model migrations from day one.
-
-You will definitely need migrations in the future as your application evolves, for that we have `migration` tooling that you can easily use.
-
-The biggest pain-point and deal-breaker for new adopters is the relational part. It's non-existent basically. Yes, they do offer a `$lookup` aggregator function, but it's extremely slow. We have created [Nova](package-nova) and we have made if faster than SQL in various scenarios and over 4x faster than `mongoose`. Not only is faster and more feature-rich than any other fetching layer, it is also complementing GraphQL enabling the ability to transform a GraphQL query into a Nova query in a snap and very securely.
+The biggest pain-point and deal-breaker for new adopters is the relational part. It's non-existent basically. Yes, they do offer a `$lookup` aggregator function, but it's extremely slow. We have created [Nova](package-nova) and we have made if faster than SQL in various scenarios and over 4x faster than `mongoose`. Not only is faster and more feature-rich than any other fetching layer, it is also complementing GraphQL enabling the ability to transform a
+If you want to manually install it for a project:
+GraphQL query into a Nova query in a snap and very securely.
 
 ### GraphQL
 
@@ -58,27 +51,29 @@ We're sorry about this, but before you dive into X-Framework, it is important to
 
 - [Core](package-core)
 - [Security](package-security-bundle)
-- [Validation](package-validation-bundle)
+- [Validation](package-validator-bundle)
 - [GraphQL](graphql-bundle) & [Apollo](apollo-bundle)
 - [Nova](package-nova)
 - [MongoBundle](package-mongo-bundle)
 
-Without having these principles set in place, X-Framework will look weird and confusing, this is why we strongly encourage you to follow the documentation pages presented above to ensure smooth sailing.
+Without having these principles set in place, X-Framework might look uncomprehensible, this is why we strongly encourage you to follow the documentation pages presented above to ensure smooth sailing, captain.
 
-## Usage
+## Get Started
 
-We start by first installing our cli, we'll use it to generate projects:
+Ensure you have [Node](https://nodejs.org/en/download/) and [MongoDB](https://docs.mongodb.com/v4.4/installation) installed.
 
 ```bash
-npm i -g @bluelibs/x
+npm install -g @bluelibs/x
 x
 ```
 
-Choose a new project, give it a name, and then you can either create additional (frontend or backend) microservices as you find them fit or you can use the Blueprint from the get-go:
+Type "project" and select "x:project", enter the required info.
 
 :::note
 [Blueprint](package-blueprint) is our flagship product which aims at helping you generate applications extremely fast, code which is `X-Framework` compatible.
 :::
+
+If you want to manually install it for a project:
 
 ```bash
 npm install
@@ -99,18 +94,13 @@ In the next step we're going to describe the exact npm packages we are going to 
 | @bluelibs/x-cron-bundle     | Server    | Run cronjobs at the intervals you pick                                                            |
 | @bluelibs/x-password-bundle | Server    | GraphQL endpoints and emails for a fully-featured Password System                                 |
 | @bluelibs/x-ui              | Web React | Works with `XBundle` on the server, type-safe routes, live data, authentication and so much more. |
-| @bluelibs/x-ui-admin        | Web React | Brings joy to administration by integrating `Ant Design`                                          |
-| @bluelibs/smart             | Web React | Morphs logic and state into one object. Highly abstractable and reusable.                         |
 
-## Folder Structure
-
-We can understand this folder structure may not be as beginner friendly, but we believe that your app quickly reaches a phase where such separations are needed, when you go beyond a quick to-do list. Therefore, we have decided to have an almost fixed folder structure, this would allow code-generators to properly read and understand your code base to give you meaningful autocompletions, and automatic exporting and injecting of functionality without you having to do anything extra.
-
-### Server
-
-We recommend sticking to one `AppBundle` for your entire application. The only reason you would want to create additional bundles is when you want to have them reusable in other projects or contexts, otherwise focus on having separation of concerns done via folder structure inside `AppBundle`.
+We recommend sticking
+when you want to have them reusable in other projects or contexts, otherwise focus on having separation of concerns done via folder structure inside `AppBundle`.
 
 ```yaml
+
+If you want to manually install it for a project:
 - package.json
 - src
   - startup

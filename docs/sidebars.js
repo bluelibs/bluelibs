@@ -72,7 +72,7 @@
             },
             {
                 "type": "category",
-                "label": "UI",
+                "label": "X-UI",
                 "items": [
                     "package-x-ui",
                     "package-x-ui-admin",

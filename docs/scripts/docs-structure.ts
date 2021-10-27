@@ -163,7 +163,7 @@ export const map: IElementMap = {
     },
     {
       id: "x-bundle",
-      title: "Server",
+      title: "X-Server",
       package: "x-bundle",
     },
     {
@@ -192,7 +192,7 @@ export const map: IElementMap = {
       ],
     },
     {
-      groupLabel: "UI",
+      groupLabel: "X-UI",
       elements: [
         {
           id: "x-ui",

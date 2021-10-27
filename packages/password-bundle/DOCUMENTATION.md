@@ -168,15 +168,35 @@ await passwordService.updateData(userId, {
 const data = await passwordService.getData(userId);
 ```
 
+## Custom Hasher Service
+
+```ts
+@Service()
+class MyHasherService implements IHasherService {
+  //   generateSalt(userId?: any): string;
+  //   getHashedPassword(plainPassword, salt?: string): string;
+  //   generateToken(userId?: any): string;
+}
+
+class AppBundle extends Bundle {
+  async init() {
+    this.container.set({
+      id: HASHER_SERVICE_TOKEN,
+      type: MyHasherService,
+    });
+  }
+}
+```
+
 ## Meta
 
 ### Summary
 
 This is the raw functionality of handling passwords. A complete integration for this is done inside [XPasswordBundle](package-x-password) that is X-Framework compatible.
 
-## Boilerplates
+### Boilerplates
 
-COMMING SOON
+- COMMING SOON
 
 ### Challenges
 
