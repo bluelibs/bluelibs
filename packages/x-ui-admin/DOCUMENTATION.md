@@ -1,12 +1,16 @@
+## Purpose
+
 This is the place where you configure your enterprise level applications Administration interface. This bundle makes use of `@bluelibs/x-ui`, so it is best if you familiarise yourself with it first.
 
 This bundle uses `Ant Design` to leverage its Admin interface. Allowing you to focus on creating Menu Routes that can be role-dependent. This enables `Wordpress-like` functionality where external bundles that you just add to your `Kernel` extend the menu nicely.
 
-## Basics
+## Install
+
+```bash
+npm i -S @bluelibs/x-ui-admin antd @ant-design/icons
+```
 
 ```tsx
-// kernel
-
 kernel.addBundles([new XUIBundle(), new XUIAdminBundle()]);
 ```
 
@@ -50,7 +54,7 @@ export const DASHBOARD = {
 };
 ```
 
-This is done only once, but ensure you load your routes in bundle init:
+This is done only once, but don't forget to load your routes:
 
 ```ts
 // In your bundle:
@@ -334,7 +338,8 @@ function CompanyCreateForm() {
 }
 ```
 
-Note: The input components under `Form.Item` need to be direct children, something like this will fail:
+:::caution
+The input component under `Form.Item` has to be direct and only child, something like this will fail:
 
 ```tsx
 render() {
@@ -347,12 +352,14 @@ render() {
 }
 ```
 
+:::
+
 If you have a lot of changes to make to your initial form. Typically if you use Blueprint, such a form will be generated and you may want to change how you render certain fields:
 
 ```tsx
-// Do not forget transient, you need a new instance every time
+// Do not forget transient, you need a new instance every time you fetch it from the container.
 @Service({ transient: true })
-class MyForm extends GeneratedForm {
+class MyForm extends BaseGeneratedForm {
   build() {
     super.build();
     this.update("item", { .... })
