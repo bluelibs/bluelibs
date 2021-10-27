@@ -1,17 +1,34 @@
-This bundle is a set of tools allowing you to do beautiful frontends. Using the X-Framework.
+## Purpose
+
+This package enables you to make most out of [X-Framework Server](package-x-bundle). It also brings `Foundation` into the picture in a very elegant manner.
+
+We first built `Foundation` for backend, but when dealing with frontend we realised that the same principles of logic decoupling can be applied naturally to frontend as well.
+
+So we tried to think as decoupled as possible from the frontend, while we chose React, we are sure open to any frontend out there.
+
+We bring the following to the table:
+
+- Use client-side collections to communicate to the server-side ones
+- GraphQL Client
+  - Uploading
+- Authentication & Authorization
+- Persistent Session Data Storage
+- I18N
+- Component Registry with fully customizable components
+- Type-safe Routing (finally!)
 
 ## Install
 
 You can easily create it by running `x`, choose `microservice`, and select `frontend`.
 
 ```bash
-npm i @bluelibs/x-ui @apollo/client
-npm i react react-dom react-router-dom
+npm i -S @bluelibs/x-ui @apollo/client
+npm i -S react react-dom react-router-dom
 ```
 
-## Setup
+## Usage
 
-We begin by defining our kernel, and our initial bundle
+We begin by defining our kernel, and our `UIAppBundle`:
 
 ```tsx title="kernel.ts"
 import { Kernel } from "@bluelibs/core";
@@ -58,7 +75,7 @@ ReactDOM.render(
 
 ## Routing
 
-We add routes through the `XRouter`. Routes are added programatically. Behind the scenes we use `react-router-dom` .
+We add routes through the `XRouter`. Routes are added programatically. Behind the scenes we use `react-router-dom`:
 
 ```tsx
 import { Bundle } from "@bluelibs/core";
@@ -78,7 +95,11 @@ export class UIAppBundle extends Bundle {
 }
 ```
 
-Our strong recommendation is to never rely on strings for routes, this is why we'll add them in a route map and use it like this:
+:::note
+Our strong recommendation is to never rely on strings for routes, this is why we recommend that you use unique constants for their name.
+:::
+
+Managing Routes:
 
 ```ts title="routes.ts"
 export const HOME = {
@@ -163,11 +184,17 @@ If the user doesn't have the role we render the `NotAuthorized` component. Which
 We have succcesfully blended D.I. with React. The concept is easy, you control your container inside the `prepare()` or `init()` phase of a bundle, you use it inside React. The right container is properly passed because everything is wrapped in `<XUIProvider />`.
 
 ```ts
-import { useContainer, useRouter, use } from "@bluelibs/x-ui";
+import { Service, Inject } from "@bluelibs/core";
+import { ApolloClient, useContainer, useRouter, use } from "@bluelibs/x-ui";
 
-class A {}
+@Service()
+class A {
+  @Inject(() => ApolloClient)
+  client: ApolloClient;
+}
 
 function Component() {
+  // Gets the main `ContainerInstance` of the kernel.
   const container = useContainer();
   // You fetch the singleton instance of A
   const a = use(A);
@@ -189,9 +216,13 @@ function Component() {
 }
 ```
 
+:::note
+React Hooks provided by Apollo Client work flawlessly with your selected ApolloClient (yes, you can override that too)
+:::
+
 ## Collections
 
-Collections are an interface to your remote database via `GraphQL` as long as the remote queries and mutations respect a specific interface. That interface you get it in a snap when you create a `GraphQL CRUD` from the cli command `x`.
+Collections are an interface to your remote database via `GraphQL` as long as the remote queries and mutations respect a specific interface described in [X Server](package-x-bundle). That interface you get it in a snap when you create a `GraphQL CRUD` from the cli command `x`.
 
 ```ts
 import { Collection } from "@bluelibs/x-ui";
@@ -209,6 +240,15 @@ export class PostsCollection extends Collection<Post> {
     // Queries: postsFind, postsFindOne, postsCount
     // Mutations: postsInsertOne, postsUpdateOne, postsDeleteOne
     return "posts";
+  }
+
+  // By default it relies on EJSON (the flexy-plus hackish solution)
+  // Blueprint will generate you type-safe solutions, and this is where you can customise the inputs
+  getInputs() {
+    return {
+      insert: "PostInsertInput!",
+      update: "PostUpdateInput!",
+    };
   }
 }
 ```
@@ -495,7 +535,7 @@ const {
 
 ### Lists
 
-We have created a `Smart` that allows you to easily work with lists:
+We have created a [Smart](package-smart) that allows you to easily work with lists:
 
 ```ts title="PostListSmart.ts"
 import { ListSmart } from "@bluelibs/x-ui";
@@ -621,14 +661,12 @@ useLiveData(collectionClass, options, body, {
 ```
 
 :::caution
-When using live data and relations, it is by design to not have reactivity at nested levels. For example if someone updates the comments' text it won't trigger a reactive change. Instead you will have to create separate component that subscribes to that comment via `useLiveData()`.
+When using live data and relations, it is by design to not have reactivity at nested levels. Instead you will have to create separate component that subscribes to that comment via `useLiveData()`.
 :::
 
 ## Integration with Smart
 
-Smart is a very small library which allowes you to integrate logic and state together in a separated class.
-
-The difference here is that `Smart` from this package, allows you to work with the D.I. container:
+[Smart](package-smart) is a very small library which allows you to integrate logic and state together in a separated class, integrated with the `container`.
 
 ```ts
 import { Smart, useSmart, newSmart } from "@bluelibs/x-ui";
@@ -647,9 +685,9 @@ function Component() {
 
 ## Guardian
 
-The guardian is a smart that communicates with the server, providing authentication methods for `register`, `login`, `logout`, `changePassword`, `forgotPassword`, resetPassword, verify email.
+The guardian is a `smart` which communicates with the server, providing authentication methods for `register`, `login`, `logout`, `changePassword`, `forgotPassword`, `resetPassword` or `verify email`.
 
-Explore the examples [in this boilerplate](https://githubs1.com/bluelibs/x-boilerplate/tree/main/microservices/ui/src/bundles/UIAppBundle/pages/Authentication)
+The guardian is designed to be compatible with [XPasswordBundle](package-x-password-bundle) on the server.
 
 It also handles fetching the user data using the `me` standard query, but this behavior can be later changed.
 
@@ -668,7 +706,20 @@ function Component() {
 }
 ```
 
-Let's use guardian in our components
+Beside logging in you can do a lot of cool things:
+
+```ts
+guardian.register({});
+guardian.logout();
+
+guardian.forgotPassword("EMAIL_ADDRESS"); // sends email if it exists, does not expose
+// the username is optional
+guardian.resetPassword(username, token, newPassword); // the token received by email from forgot pass
+guardian.verifyEmail("EMAIL_TOKEN"); // verifies your email address so it marks it in the database
+guardian.changePassword(oldPassword, newPassword); // changes your pw
+```
+
+Let's use guardian in our components:
 
 ```tsx
 function TopBar() {
@@ -735,6 +786,8 @@ class AppGuardianSmart extends GuardianSmart<AppUserType> {
     return this.apolloClient
       .query({
         // custom query
+        fullName: 1,
+        gamerScore: 1,
       })
       .then((response) => {
         return response.data.me;
@@ -751,43 +804,58 @@ new XUIBundle({
 });
 ```
 
-The `register` calls the `registration` mutation with the GraphQL input: `RegistrationInput`. It's enough to change the input on the server-side by overriding `registration` mutation in `XPasswordBundle`.
+And voila!
+
+The `register` calls the `registration` mutation with the GraphQL input: `RegistrationInput`. It's enough to change the input on the server-side by overriding `registration` mutation in [XPasswordBundle](package-x-password-bundle).
 
 However if you want to extend the interface of `Guardian`, meaning you add other methods or add other variables to the existing methods, then besides overriding the `guardianClass` you need to create your own hook, to benefit of autocompletion.
 
 ```tsx
-const appGuardian = (): AppGuardianSmart => {
+const useAppGuardian = (): AppGuardianSmart => {
   return useGuardian() as AppGuardianSmart;
 };
 ```
 
 ## Events
 
-You can use the classic `EventManager` to emit events, but if you want to have a component listen to events during its lifespan (until it gets unmounted), you can use the hook: `useListener`.
+You can use the good ol' reliable `EventManager` to emit events, but if you want to have a component listen to events during its lifespan (until it gets unmounted), you can use the hook: `useListener`.
 
-```tsx title="Emitting Events"
+Let's emit dem vents:
+
+```tsx
 import { useListener, listen, useEventManager } from "@bluelibs/x-ui";
 import { Event } from "@bluelibs/core";
 
-class MyEvent extends Event {}
+class SomethingInTheWorldJustHappenedEvent extends Event<{
+  what: string;
+}> {}
 
 function SomeComponent() {
   const eventManager = useEventManager();
-  eventManager.emit(new MyEvent());
+
+  const onButtonClick = () => {
+    eventManager.emit(
+      new SomethingInTheWorldJustHappenedEvent({
+        what: "Time has passed.",
+      })
+    );
+  };
 }
 
 function OtherComponent() {
   // Use memo to avoid duplication of functions, or use an outside function
   const handler = useMemo(() => {
-    return (e: MyEvent) => {
+    return (e: SomethingInTheWorldJustHappenedEvent) => {
       // handle the event, change the state, or whatever
+
+      // flashbacks:
+      alert(e.data.what);
     };
   });
 
   // The built-in hook lets you listen to events while the component is mounted
   useListener(MyEvent, handler);
-
-  // Analog to useListener which can be confusing is the same function that does the same thing, use what fits best to your ears
+  // alias function that does the same thing:
   listen(MyEvent, handler);
 }
 ```
@@ -815,29 +883,28 @@ The hook provides the following methods:
 ```tsx
 import { useUISession, UISessionStateChangeEvent } from "@bluelibs/x-ui";
 
-const session = useUISession();
+function Component() {
+  const session = useUISession();
 
-/* returns the value of a field. */
-const csrfToken = session.get("csrfToken");
+  /* returns the value of a field. */
+  const csrfToken = session.get("csrfToken");
 
-/* sets a field to a value, e.g. set("lastAuthenticationDate", new Date());
-if you want to wait for the event emissions to run, you must use await.
-you will want to use `options` in order to persist data to localStorage. */
-await session.set(fieldName, value, {
-  // optional options
-  persist: true,
-});
-
-session.onSet(fieldName, (e: UISessionStateChangeEvent) => {
-  // You have access to the field logic here:
-  // e.data.fieldName
-  // e.data.previousValue
-  // e.data.value
-});
-
-// Ideally you would store your above function in a handler
-session.onSetRemove(handler);
+  /* sets a field to a value, e.g. set("lastAuthenticationDate", new Date());
+    if you want to wait for the event emissions to run, you must use await.
+    you will want to use `options` in order to persist data to localStorage. */
+  const onButtonClick = async () => {
+    // To illustrate asynchronicity
+    await session.set(fieldName, value, {
+      // optional options
+      persist: true,
+    });
+  };
+}
 ```
+
+:::note
+If you want to listen to state change events feel free to listen to `UISessionStateChangeEvent` which gets dispatched when this happens, this way you have full control over your session and how their changes impact your app.
+:::
 
 ### Example
 
@@ -865,6 +932,11 @@ function Component() {
 
   useEffect(() => {
     session.onSet("lastAuthenticationDate", authenticationDateHandler);
+
+    return () => {
+      // just ensure the function is the same reference as the onSet one.
+      session.onSetRemove("lastAuthenticationDate", authenticationDateHandler);
+    };
   }, []);
 
   const onSubmit = () => {
@@ -884,10 +956,9 @@ function Component() {
 }
 ```
 
-Note:
-
-For handlers, you'll want to declare them outside of a React component, such that they won't change their memory address. Otherwise, you won't be able to remove them,
-since onSetRemove identifies a handler by comparing functions, which is done on the actual reference.
+:::note
+For handlers, you'll want to declare them outside of a React component, such that they won't change their memory address. Otherwise, you won't be able to remove them, since `onSetRemove` identifies a handler by comparing functions, which is done on the actual reference.
+:::
 
 ### Defaults
 
@@ -911,7 +982,7 @@ export const kernel = new Kernel({
 
 ## UI Components
 
-You have the ability to craft and override UI components:
+Imagine an application where every component you see is "swappable" and everything remains type-safe. This is quite possible with our mechanism of `UIComponents`:
 
 ```ts
 function Component() {
@@ -930,6 +1001,7 @@ import { XUIBundle } from "@bluelibs/x-ui";
 class UIAppBundle extends Bundle {
   async init() {
     const xuiBundle = this.container.get(XUIBundle);
+
     xuiBundle.updateUIComponents({
       Loading: MyLoadingComponent,
     });
