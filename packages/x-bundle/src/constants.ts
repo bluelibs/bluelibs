@@ -1,13 +1,15 @@
 import { Token } from "@bluelibs/core";
-import { IMessenger } from "./defs";
+import { IMessenger, IXBundleConfig } from "./defs";
 import * as chalk from "chalk";
+import { Router } from "./services/Router";
+import { ClientOpts } from "redis";
 
 export const MESSENGER = new Token<IMessenger>("MESSENGER");
-export const IS_LIVE_DEBUG = new Token("IS_LIVE_DEBUG");
-export const REDIS_OPTIONS = new Token("REDIS_OPTIONS");
-export const X_SETTINGS = new Token();
-export const APP_ROUTER = new Token();
-export const ROOT_ROUTER = new Token();
+export const IS_LIVE_DEBUG = new Token<boolean>("IS_LIVE_DEBUG");
+export const REDIS_OPTIONS = new Token<ClientOpts>("REDIS_OPTIONS");
+export const X_SETTINGS = new Token<IXBundleConfig>();
+export const APP_ROUTER = new Token<Router>();
+export const ROOT_ROUTER = new Token<Router>();
 
 export const X_FRAMEWORK_LOGO = String.raw`
 xxxxxxx      xxxxxxx

@@ -58,11 +58,15 @@ export class XGraphQLSecurityService {
       );
     }
 
+    let result;
+
     // Run the subsequent functions
     if (foundRule.run) {
       for (const runFn of foundRule.run) {
-        await runFn(null, args, ctx, ast);
+        result = await runFn(null, args, ctx, ast);
       }
     }
+
+    return result;
   }
 }

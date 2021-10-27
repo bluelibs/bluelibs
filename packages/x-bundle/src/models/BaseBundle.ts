@@ -1,29 +1,29 @@
 import {
   Bundle as CoreBundle,
   BundleAfterInitEvent,
+  Constructor,
   EventManager,
   KernelAfterInitEvent,
+  Listener,
 } from "@bluelibs/core";
-import { Loader } from "@bluelibs/graphql-bundle";
+import { ILoadOptions, Loader } from "@bluelibs/graphql-bundle";
 import { Collection, MongoBundle } from "@bluelibs/mongo-bundle";
-import { ValidatorService, ValidatorBundle } from "@bluelibs/validator-bundle";
+import {
+  ValidatorService,
+  ValidatorBundle,
+  IValidationMethod,
+} from "@bluelibs/validator-bundle";
 
 export abstract class BaseBundle<T = any> extends CoreBundle<T> {
   async setupBundle(config: {
-    collections?: Record<string, any>;
-    listeners?: Record<string, any>;
-    serverRoutes?: Record<string, any>;
-    validators?: Record<string, any>;
+    collections?: Record<string, null | Constructor<Collection>>;
+    listeners?: Record<string, null | Constructor<Listener>>;
+    validators?: Record<string, null | Constructor<IValidationMethod<any>>>;
     fixtures?: Record<string, any>;
-    graphqlModule?: any | any[];
+    graphqlModule?: null | ILoadOptions | ILoadOptions[];
   }) {
-    const {
-      collections,
-      listeners,
-      validators,
-      graphqlModule,
-      fixtures,
-    } = config;
+    const { collections, listeners, validators, graphqlModule, fixtures } =
+      config;
     const eventManager = this.container.get(EventManager);
 
     // Warming up forces instantiation and initialisastion of classes
@@ -39,9 +39,8 @@ export abstract class BaseBundle<T = any> extends CoreBundle<T> {
         if (e.data.bundle instanceof ValidatorBundle) {
           // Adding validators
           if (validators) {
-            const validator = this.container.get<ValidatorService>(
-              ValidatorService
-            );
+            const validator =
+              this.container.get<ValidatorService>(ValidatorService);
             Object.values(validators)
               .filter((v) => Boolean(v))
               .forEach((validatorClass) => validator.addMethod(validatorClass));
