@@ -140,6 +140,7 @@ export class GuardianSmart<
     this.updateState({ fetchingUserData: false });
   }
 
+<<<<<<< HEAD:packages/x-ui-guardian-bundle/src/react/smarts/GuardianSmart.ts
   public async reissueToken(token: string) {
     const newToken = await this.apolloClient
       .mutate({
@@ -158,6 +159,8 @@ export class GuardianSmart<
     await this.load();
   }
 
+=======
+>>>>>>> 047d18a ((initial changes)):packages/x-ui/src/react/smarts/GuardianSmart.ts
   protected async retrieveUser(): Promise<TUserType> {
     return this.apolloClient
       .query({

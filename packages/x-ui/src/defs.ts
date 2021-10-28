@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { IUII18NBundleConfig } from "@bluelibs/x-ui-i18n-bundle";
 import { IUISessionBundleConfigType } from "@bluelibs/x-ui-session-bundle";
+=======
+import { IUII18NBundleConfig } from "@bluelibs/ui-i18n-bundle";
+import { IUISessionBundleConfigType } from "@bluelibs/ui-session-bundle";
+>>>>>>> 047d18a ((initial changes))
 import {
   GuardianSmart,
   IXUIGuardianBundleConfigType,

@@ -1,6 +1,10 @@
 {
   "name": "@bluelibs/x-ui-react-bundle",
+<<<<<<< HEAD
   "version": "1.0.2",
+=======
+  "version": "1.0.0",
+>>>>>>> 047d18a ((initial changes))
   "private": false,
   "description": "XUIReactBundle",
   "main": "dist/index.js",
@@ -15,7 +19,10 @@
     "test": "jest --verbose dist/__tests__/index.js",
     "test:clean": "jest --clearCache",
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+<<<<<<< HEAD
     "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
+=======
+>>>>>>> 047d18a ((initial changes))
     "testonly": "npm test",
     "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
     "coverage": "npm test -- --coverage",
@@ -29,19 +36,30 @@
   },
   "license": "MIT",
   "dependencies": {
+<<<<<<< HEAD
     "@bluelibs/ordered-lists": "^1.0.0"
   },
   "peerDependencies": {
     "@bluelibs/core": "^1.1.0",
     "@bluelibs/smart": "^1.0.0",
+=======
+    "@bluelibs/x-ui-collections-bundle": "^1.0.0",
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/smart": "^1.0.0",
+    "@bluelibs/ordered-lists": "^1.0.0",
+>>>>>>> 047d18a ((initial changes))
     "react": "^17.0.2"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",
     "@types/react-test-renderer": "^17.0.1",
+<<<<<<< HEAD
     "jest": "^27.3.1",
     "react-test-renderer": "^17.0.2",
     "ts-jest": "^27.0.7"
+=======
+    "react-test-renderer": "^17.0.2"
+>>>>>>> 047d18a ((initial changes))
   }
 }

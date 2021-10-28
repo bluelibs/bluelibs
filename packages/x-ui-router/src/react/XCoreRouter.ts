@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+<<<<<<< HEAD:packages/x-ui-router/src/react/XCoreRouter.ts
 import { IRoute, IRouteGenerationProps, IRouteParams } from "../defs";
 import { Service } from "@bluelibs/core";
 import * as queryString from "query-string";
@@ -18,6 +20,34 @@ export abstract class XCoreRouter<
    * @param routes
    */
   add(routes: AddRoutingArguments<RT>) {
+=======
+import { Service } from "@bluelibs/core";
+import {
+  AddRoutingArguments,
+  IRoute,
+  IRouteGenerationProps,
+  IRouteParams,
+  XCoreRouter,
+} from "@bluelibs/x-ui-router";
+
+import * as H from "history";
+import * as queryString from "query-string";
+import { createBrowserHistory } from "history";
+
+@Service()
+export class XRouter extends XCoreRouter {
+  store: IRoute[] = [];
+  history: H.History;
+
+  constructor() {
+    super();
+    this.history = createBrowserHistory();
+  }
+
+  add(routes: AddRoutingArguments) {
+    // TODO: sanity check not to add after kernel initialisation
+
+>>>>>>> 047d18a ((initial changes)):packages/x-ui-react-router-bundle/src/react/XRouter.tsx
     for (const routeName in routes) {
       const route = {
         exact: true,
@@ -76,6 +106,27 @@ export abstract class XCoreRouter<
   }
 
   abstract go<T extends RP, Q extends RP>(
+=======
+import { IRoute, IRouteGenerationProps, IRouteParams } from "../defs";
+import { Service } from "@bluelibs/core";
+
+export type AddRoutingArguments = {
+  [routeName: string]: IRoute;
+};
+
+@Service()
+export abstract class XCoreRouter {
+  abstract add(routes: AddRoutingArguments): void;
+
+  abstract find(routeNameOrPath: string): IRoute | null;
+
+  abstract path<T extends IRouteParams, Q extends IRouteParams>(
+    route: IRoute<T, Q>,
+    options?: IRouteGenerationProps<T, Q>
+  ): string;
+
+  abstract go<T extends IRouteParams, Q extends IRouteParams>(
+>>>>>>> 047d18a ((initial changes))
     route: IRoute<T, Q>,
     options?: IRouteGenerationProps<T, Q>
   ): void;
@@ -83,6 +134,7 @@ export abstract class XCoreRouter<
   /**
    * This method is used to ensure that you do not have duplicated routes
    */
+<<<<<<< HEAD
   protected checkRouteConsistency(route: RT) {
     // Ensure that there isn't another route with the same path or name
     const found = this.store.find((r) => {
@@ -105,4 +157,7 @@ export abstract class XCoreRouter<
       `We cannot add the route: ${route.name}:${route.path} because there's another route has the same name or path: ${foundString}`
     );
   }
+=======
+  protected checkRouteConsistency(route: IRoute) {}
+>>>>>>> 047d18a ((initial changes))
 }
