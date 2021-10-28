@@ -20,7 +20,6 @@ export class {{ fixtureClass }} {
   @Inject()
   kernel: Kernel;
 
-
   async init() {
     if (!(await this.shouldRun())) {
       return;

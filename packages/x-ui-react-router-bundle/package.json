@@ -1,0 +1,45 @@
+{
+  "name": "@bluelibs/x-ui-react-router-bundle",
+  "version": "1.0.0",
+  "private": false,
+  "description": "XUIReactRouterBundle",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluelibs/bluelibs"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "pretest": "npm run compile",
+    "test": "jest --verbose dist/__tests__/index.js",
+    "test:clean": "jest --clearCache",
+    "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "testonly": "npm test",
+    "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "coverage": "npm test -- --coverage",
+    "coverage:upload": "codecov",
+    "prepublishOnly": "npm run compile",
+    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
+  },
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@bluelibs/x-ui-react-bundle": "^1.0.0",
+    "@bluelibs/x-ui-guardian-bundle": "^1.0.0",
+    "@bluelibs/x-ui-router": "^1.0.0",
+    "@bluelibs/core": "^1.0.0",
+    "history": "^4.10.1",
+    "query-string": "^7.0.1",
+    "react-router-dom": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/history": "^4.7.9",
+    "@types/jest": "^27.0.2",
+    "@types/react": "^17.0.33",
+    "@types/react-router-dom": "^5.3.2"
+  }
+}
