@@ -16,7 +16,7 @@ describe("Bundle", () => {
       somethingElse: 10,
     });
 
-    a.setup({} as any);
+    a.setup();
 
     assert.equal(a.getConfig().number, 20);
     assert.equal(a.getConfig().somethingElse, 10);
@@ -47,7 +47,8 @@ describe("Bundle", () => {
     }
 
     const a = new A();
-    a.setup(kernel);
+    a.setKernel(kernel);
+    a.setup();
   });
 
   it("Bundle container is accessible from kernel", async () => {
@@ -140,6 +141,23 @@ describe("Bundle", () => {
     }
 
     assert.isTrue(inError);
+  });
+
+  it("should work with addDependency", async () => {
+    class A extends Bundle {}
+    class B extends Bundle {
+      async extend() {
+        await this.addDependency(A);
+      }
+    }
+
+    const kernel = new Kernel();
+
+    kernel.addBundle(new B());
+
+    await kernel.init();
+
+    assert.isTrue(kernel.hasBundle(A));
   });
 
   it("should properly handle bundle phases", async () => {

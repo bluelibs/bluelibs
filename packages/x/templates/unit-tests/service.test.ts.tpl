@@ -1,4 +1,4 @@
-{{ createImportLine }}
+{{ createImportLines }}
 
 // Jest Setup & Teardown: https://jestjs.io/docs/en/setup-teardown
 // API: https://jestjs.io/docs/en/api

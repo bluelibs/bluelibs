@@ -15,12 +15,15 @@ export class UnitTestModel {
     return this.element.identityName;
   }
 
-  createImportLine() {
+  createImportLines() {
     const relativePath = XElements.importPath(
       path.dirname(this.testTargetPath),
       this.element.importablePath
     );
 
-    return `import { ${this.element.identityName} } from "${relativePath}"`;
+    return `
+import { ${this.element.identityName} } from "${relativePath}";
+import { container } from "../../../__tests__/ecosystem";
+`;
   }
 }

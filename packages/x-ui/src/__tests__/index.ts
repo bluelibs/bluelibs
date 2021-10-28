@@ -1,5 +1,4 @@
-// import "./XUIProvider.test";
-import "./useUISession.test";
+import "./XUIBundle.test";
 import "../index";
 
 declare module "../" {

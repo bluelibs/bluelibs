@@ -1,7 +1,13 @@
 import { Kernel } from "./Kernel";
 import { ContainerInstance } from "typedi";
 import { mergeDeep } from "../utils/mergeDeep";
-import { IBundle, BundlePhase, IBundleConstructor, DeepPartial } from "../defs";
+import {
+  IBundle,
+  BundlePhase,
+  IBundleConstructor,
+  DeepPartial,
+  Constructor,
+} from "../defs";
 import {
   BundleDependencyException,
   BundleFrozenException,
@@ -23,6 +29,10 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
   protected config: T;
   protected kernel: Kernel;
   protected phase: BundlePhase = BundlePhase.DORMANT;
+
+  /**
+   * @deprecated Please use `addDependency`
+   */
   public readonly dependencies: Array<IBundleConstructor<any>> = [];
 
   /**
@@ -37,8 +47,24 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
     }
   }
 
-  public async setup(kernel: Kernel) {
-    this.kernel = kernel;
+  public setKernel(_kernel: Kernel) {
+    this.kernel = _kernel;
+  }
+
+  public async addDependency<K>(
+    bundleClass: Constructor<Bundle<K>>,
+    config?: K
+  ) {
+    if (this.kernel.hasBundle(bundleClass)) return;
+
+    const bundle = new bundleClass(config || {});
+
+    this.kernel.addBundle(bundle);
+
+    await bundle.setup();
+  }
+
+  public async setup() {
     // Note: we do this here because defaultConfig gets the value after construction()
     const config: any = {};
     mergeDeep(config, this.defaultConfig, this.requiredConfig);
@@ -46,8 +72,8 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
     await this.validate(this.config);
 
     // Check dependencies
-    this.dependencies.forEach(dependency => {
-      if (!kernel.hasBundle(dependency)) {
+    this.dependencies.forEach((dependency) => {
+      if (!this.kernel.hasBundle(dependency)) {
         throw new BundleDependencyException({
           requiredBundle: dependency.name,
         });
@@ -62,6 +88,11 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
   get eventManager(): EventManager {
     return this.container.get(EventManager);
   }
+
+  // Here you can extend the kernel by adding dependencies
+  // Use addDependency()
+
+  public async extend() {}
 
   // validate this.config, based on T
   public async validate(config?: T) {}

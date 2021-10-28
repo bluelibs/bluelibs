@@ -45,7 +45,7 @@ export class Kernel {
     this.container = this.createContainer();
 
     if (options.bundles) {
-      options.bundles.map(bundle => this.addBundle(bundle));
+      options.bundles.map((bundle) => this.addBundle(bundle));
     }
 
     this.container.set(ContainerInstance, this.container);
@@ -61,8 +61,21 @@ export class Kernel {
    */
   async init() {
     for (const bundle of this.bundles) {
+      bundle.setKernel(this);
+    }
+
+    this.phase = KernelPhase.BUNDLE_SETUP;
+    for (const bundle of this.bundles) {
       bundle.setPhase(BundlePhase.SETUP);
-      await bundle.setup(this);
+      await bundle.setup();
+    }
+
+    this.phase = KernelPhase.EXTENDING;
+
+    for (const bundle of this.bundles) {
+      bundle.setPhase(BundlePhase.EXTENDING);
+      await bundle.extend();
+      bundle.setPhase(BundlePhase.EXTENDED);
     }
 
     this.phase = KernelPhase.HOOKING;
@@ -139,7 +152,7 @@ export class Kernel {
    * @param classType
    */
   public hasBundle(classType: IBundleConstructor): boolean {
-    return Boolean(this.bundles.find(b => b instanceof classType));
+    return Boolean(this.bundles.find((b) => b instanceof classType));
   }
 
   /**
@@ -157,6 +170,8 @@ export class Kernel {
       this.container.set(bundle.constructor, bundle);
     }
 
+    bundle.setKernel(this);
+
     this.bundles.push(bundle);
   }
 
@@ -165,7 +180,7 @@ export class Kernel {
    * @param bundles
    */
   public addBundles(bundles: Bundle[]) {
-    bundles.forEach(bundle => this.addBundle(bundle));
+    bundles.forEach((bundle) => this.addBundle(bundle));
   }
 
   /**
@@ -209,5 +224,12 @@ export class Kernel {
    */
   public isDebug(): boolean {
     return this.parameters.debug === true;
+  }
+
+  /**
+   * Verify if the kernel is initialised
+   */
+  public isInitialised() {
+    return this.phase === KernelPhase.INITIALISED;
   }
 }
