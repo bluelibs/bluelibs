@@ -21,7 +21,7 @@ export interface IXUIProviderProps {
 export const XUIProvider = (props: IXUIProviderProps) => {
   const { kernel, children, loadingComponent } = props;
 
-  const [isInitialized, setIsInitialized] = useState(kernel.isInitialized());
+  const [isInitialized, setIsInitialized] = useState(kernel.isInitialised());
 
   useEffect(() => {
     if (isInitialized) return;
