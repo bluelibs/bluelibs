@@ -24,36 +24,36 @@ export class Relation extends BaseModel<Relation> {
   /**
    * The relation is stored in the collection from which the relations[] is defined
    */
-  isDirect: boolean;
+  isDirect?: boolean;
 
   /**
    * Single or many relationships
    */
-  isMany: boolean = false;
+  isMany?: boolean = false;
 
   /**
    * Whether it's isDirect, and by which field is it inversed
    */
-  inversedBy: string;
+  inversedBy?: string;
 
   /**
    * If it's an indirect link, specifying unique lets Nova know that when we fetch this link, it should return one result
    */
-  unique: boolean;
+  unique?: boolean;
 
   /**
    * If it's direct in which field are we actually storing the relational data
    * Keep in mind that this field should be in the fields: [] as well
    * @cleanable
    */
-  field: Resolvable<Field>;
+  field?: Resolvable<Field>;
 
   /**
    * This refers to the field that is represented by the collection
    * For example, if I have Post relating to User, user is represented by "fullName"
    * @cleanable
    */
-  representedBy: Resolvable<Field>;
+  representedBy?: Resolvable<Field>;
 
   /**
    * Mocking information, how many should we generate?
@@ -81,12 +81,12 @@ export class Relation extends BaseModel<Relation> {
   /**
    * UI Display Config
    */
-  ui: UIConfigType;
+  ui?: UIConfigType;
 
   /**
    * What does this relation do, what is its purpose?
    */
-  description: string;
+  description?: string;
 
   /**
    * Whether this relation must be present and is present

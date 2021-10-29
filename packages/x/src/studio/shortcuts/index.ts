@@ -272,13 +272,15 @@ export const shortcuts = {
     blameable(
       overrides: BlameableRelationOverrideType = { created: {}, updated: {} }
     ) {
-      const createdOptions = {
+      const createdOptions: Partial<Relation> = {
         id: "createdBy",
+        isRequired: false,
         to: "Users",
         description: "Represents the user who has created this object",
         field: s.field({
           id: "createdById",
           type: s.field.types.OBJECT_ID,
+          isRequired: false,
           description: "Represents the user's id who has created this object",
         }),
         ui: {
@@ -301,6 +303,7 @@ export const shortcuts = {
         field: s.field({
           id: "updatedById",
           type: s.field.types.OBJECT_ID,
+          isRequired: false,
           description:
             "Represents the user's id who has made the latest update on this object",
         }),
@@ -317,7 +320,10 @@ export const shortcuts = {
       };
       _.merge(updatedOptions, overrides.updated);
 
-      return [s.relation(createdOptions), s.relation(updatedOptions)];
+      return [
+        s.relation(createdOptions as Relation),
+        s.relation(updatedOptions),
+      ];
     },
   },
 };

@@ -11,7 +11,7 @@ export class BaseModel<T = null> {
   /**
    * Describe the model, the field, the collection or the relation
    */
-  description: string;
+  description?: string;
 
   blend(data?: DeepPartial<T>) {
     _.merge(this, data);
