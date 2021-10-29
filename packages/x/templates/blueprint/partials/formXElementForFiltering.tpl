@@ -82,7 +82,7 @@ The differences between standard formXElements are:
       <Ant.Form.Item {...props}>
         <Ant.Select
           mode="multiple"
-          placeholder="Please select {{ title }}"
+          placeholder={t('{{ title }}')}
         >
           {{# each enumValues }}
             <Ant.Select.Option value="{{ value }}" key="{{ value }}">{{ label }}</Ant.Select.Option>

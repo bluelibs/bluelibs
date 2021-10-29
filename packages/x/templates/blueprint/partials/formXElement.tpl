@@ -39,7 +39,6 @@
           <UIComponents.RemoteSelect
               collectionClass={ {{ remoteCollectionClass }} }
               field="{{ remoteField }}"
-              placeholder="Please select an option"
               {{# if isMany }}
                 mode="multiple"
               {{/ if }}
@@ -95,7 +94,7 @@
             {{# if isMany }}
               mode="multiple"
             {{/ if }}
-            placeholder="Please select {{ title }}"
+            placeholder={t('{{ title }}')}
           >
             {{# each enumValues }}
               <Ant.Select.Option value="{{ value }}" key="{{ value }}">{{ label }}</Ant.Select.Option>
