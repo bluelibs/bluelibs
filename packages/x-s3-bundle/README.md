@@ -1,4 +1,4 @@
-<h1 align="center">BlueLibs SECURITY-MONGO-BUNDLE</h1>
+<h1 align="center">BlueLibs X-S3-BUNDLE</h1>
 
 <p align="center">
   <a href="https://travis-ci.org/bluelibs/x-s3-bundle">

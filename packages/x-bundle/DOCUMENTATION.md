@@ -481,7 +481,7 @@ As we know, our logic should be stored in the Service Layer instead of the resol
 
   // However you can create your own mapper that returns an array of arguments
   // That will be applied properly
-  X.ToService(ServiceClass, "extended", (_, args, ctx) => ([
+  X.ToService(ServiceClass, "extended", (args, ctx, ast) => ([
     args, ctx
   ]))
 ]

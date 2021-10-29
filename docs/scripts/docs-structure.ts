@@ -180,7 +180,7 @@ export const map: IElementMap = {
           package: "x-password-bundle",
         },
         {
-          id: "x-s3-uploads",
+          id: "x-s3-bundle",
           title: "Uploads",
           package: "x-s3-bundle",
         },

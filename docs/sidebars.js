@@ -66,7 +66,7 @@
                 "label": "Server Tools",
                 "items": [
                     "package-x-password-bundle",
-                    "package-x-s3-uploads",
+                    "package-x-s3-bundle",
                     "package-x-cron-bundle"
                 ]
             },
