@@ -3,7 +3,7 @@
 # Move this to /usr/local/bin/* as it can be very useful when you are testing this in other projects
 
 PACKAGE="$1"
-ROOT="/Users/yashsharma/Documents/CoC/bluelibs"
+ROOT="/Users/yashsharma/Documents/CoC/bluelibs/packages"
 
 rm -rf node_modules/\@bluelibs/$PACKAGE/dist
 rm -rf node_modules/\@bluelibs/$PACKAGE/src
