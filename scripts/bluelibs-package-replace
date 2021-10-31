@@ -3,7 +3,7 @@
 # Move this to /usr/local/bin/* as it can be very useful when you are testing this in other projects
 
 PACKAGE="$1"
-ROOT="/Users/theodor/Projects/bluelibs/packages"
+ROOT="/Users/yashsharma/Documents/CoC/bluelibs/packages"
 
 rm -rf node_modules/\@bluelibs/$PACKAGE/dist
 rm -rf node_modules/\@bluelibs/$PACKAGE/src
@@ -11,4 +11,4 @@ rm -rf node_modules/\@bluelibs/$PACKAGE/package.json
 
 cp -r $ROOT/$PACKAGE/dist "./node_modules/@bluelibs/$PACKAGE/dist"
 cp -r $ROOT/$PACKAGE/src "./node_modules/@bluelibs/$PACKAGE/src"
-cp -r $ROOT/$PACKAGE/src "./node_modules/@bluelibs/$PACKAGE/package.json"
+cp -r $ROOT/$PACKAGE/package.json "./node_modules/@bluelibs/$PACKAGE/package.json"
