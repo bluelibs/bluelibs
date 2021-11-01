@@ -14,5 +14,3 @@ packages/dp-*
 packages/graphql-final
 packages/x-cell-bundle
 packages/apollo-lambda-bundle
-packages/ui/
-packages/ui2/
