@@ -26,6 +26,11 @@ export const newSmart = <S, U, T extends Smart<S, U>>(
   config?: U,
   options?: INewSmartOptions
 ): [T, React.ComponentType<any>] => {
+  if (!targetType)
+    throw new Error(
+      `You have tried to create a Smart with a falsy value: "${targetType}"`
+    );
+
   options = Object.assign({}, options, SmartOptionsDefaults);
 
   // We are using memo values here to avoid redoing this on every rerender

@@ -292,7 +292,7 @@ class UserCreatedEvent extends Event<{
 const manager = container.get(EventManager);
 
 // Note we use the same class
-manager.addListener(UserCreatedEvent, event => {
+manager.addListener(UserCreatedEvent, (event) => {
   // `event` type automatically infered + autocompletion
 
   // The data provided in event's constructor is found in event.data property
@@ -326,7 +326,7 @@ Adding listeners has some extra goodies, one would be specifying the `order` in 
 ```typescript
 manager.addListener(
   UserCreatedEvent,
-  async e => {
+  async (e) => {
     if (notOk(e.data.userId)) {
       throw new Exception("This will cancel all other listener's execution");
     }
@@ -356,11 +356,11 @@ class ObjectInsertedEvent extends Event<{
 
 manager.addListener(
   ObjectInsertedEvent,
-  async e => {
+  async (e) => {
     // Do something when the event
   },
   {
-    filter: e => e.data.collectionName === "users",
+    filter: (e) => e.data.collectionName === "users",
   }
 );
 ```
@@ -577,12 +577,12 @@ class MyBundle extends Bundle {
 
     manager.addListener(
       BundleAfterPrepareEvent,
-      async e => {
+      async (e) => {
         // Do something
       },
       // Optional filter
       {
-        filter: e => e.data.bundle instanceof MyOtherBundle,
+        filter: (e) => e.data.bundle instanceof MyOtherBundle,
       }
     );
   }

@@ -526,7 +526,11 @@ Right now you've seen that bundles get initialised via the `init()` async functi
 
 ```typescript
 class MyBundle extends Bundle<MyBundleConfig> {
-  // This runs first and you can hook to bundle events
+  // This runs first, and its main purpose is to extend the kernel by adding dependencies
+  // Here you should only use the `addDependency` method from the bundle.
+  async extend() {}
+
+  // Here you can hook to bundle events
   // For example (before or after a specific bundle initialises)
   async hook() {}
 
@@ -548,6 +552,33 @@ Kernel also emits the following events (name descriptive enough), and listeners 
 - BundleAfterInitEvent
 - KernelAfterInitEvent
 
+
+### Extending
+
+If you have a bundle which depends on other bundles, and you want to make sure they're in the kernel,
+you can add them in them `extend` phase, using `addDependency()`:
+
+```ts
+import {
+  Bundle,
+  Events,
+  EventManager,
+  Event,
+  BundleAfterPrepareEvent,
+} from "@bluelibs/core";
+
+class MyBundle extends Bundle {
+  async extend() {
+    await this.addDependency(DatabaseBundle, {
+      // optional initialisation config
+    })
+  }
+}
+```
+
+:::note
+`addDependency` will only add the bundle if it's not already in the kernel.
+:::
 ### Hooking
 
 So, in theory you have the chance to hook even more to the bundles you love:
@@ -817,16 +848,20 @@ If you want to have more control over the `setHasher` you can use `bundle.phase`
 ```ts title="Phases for bundles and kernel"
 export enum KernelPhase {
   DORMANT = "dormant",
+  EXTENDING = "extending",
   BUNDLE_SETUP = "bundle-setup",
   HOOKING = "hooking",
   PREPARING = "preparing",
   INITIALISING = "initialising",
   INITIALISED = "initialised",
   FROZEN = INITIALISED,
+  SHUTDOWN = "shutdown",
 }
 
 export enum BundlePhase {
   DORMANT = "dormant",
+  EXTENDING = "extending",
+  EXTENDED = "extended",
   SETUP = "setup",
   HOOKING = "hooking",
   HOOKED = "hooked",
@@ -835,6 +870,7 @@ export enum BundlePhase {
   BEFORE_INITIALISATION = "initialising",
   INITIALISED = "initialised",
   FROZEN = INITIALISED,
+  SHUTDOWN = "shutdown",
 }
 ```
 

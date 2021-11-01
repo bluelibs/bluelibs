@@ -44,6 +44,7 @@ export enum KernelContext {
 export enum KernelPhase {
   DORMANT = "dormant",
   BUNDLE_SETUP = "bundle-setup",
+  EXTENDING = "extending",
   HOOKING = "hooking",
   PREPARING = "preparing",
   INITIALISING = "initialising",
@@ -55,6 +56,8 @@ export enum KernelPhase {
 export enum BundlePhase {
   DORMANT = "dormant",
   SETUP = "setup",
+  EXTENDING = "extending",
+  EXTENDED = "extended",
   HOOKING = "hooking",
   HOOKED = "hooked",
   BEFORE_PREPARATION = "preparing",
