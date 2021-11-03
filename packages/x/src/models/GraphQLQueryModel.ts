@@ -65,7 +65,7 @@ export class GraphQLQueryModel {
       case QueryDelegateType.SERVICE:
         return `X.ToService(${this.serviceElement.identityName}, "${
           this.serviceMethodName
-        }"${!this.hasInput && ", (_, ctx) => [ctx.userId]"}),`;
+        }"${this.hasInput ? "" : ", (_, ctx) => [ctx.userId]"}),`;
       case QueryDelegateType.NOVA:
         if (this.returnTypeIsArray) {
           return `ToNova()`;

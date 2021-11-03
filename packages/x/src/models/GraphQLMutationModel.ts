@@ -75,7 +75,7 @@ export class GraphQLMutationModel {
       case MutationDelegateType.SERVICE:
         return `X.ToService(${this.serviceElement.identityName}, "${
           this.serviceMethodName
-        }"${!this.hasInput && ", (_, ctx) => [ctx.userId]"}),`;
+        }"${this.hasInput ? "" : ", (_, ctx) => [ctx.userId]"}),`;
       case MutationDelegateType.COLLECTION_ACTION:
         switch (this.collectionOperation) {
           case GraphQLCollectionMutationOperation.INSERT:
