@@ -37,7 +37,10 @@ export class CollectionWriter extends BlueprintWriter {
       );
     };
 
-    copyTemp("collection", {});
+    copyTemp("collection", {
+      // if overrideCollectionIfExists === true, we don't ignore it, we override it
+      ignoreIfExists: !model.overrideCollectionIfExists,
+    });
     copyTemp("links", {});
     copyTemp("reducers", {
       ignoreIfExists: true,
