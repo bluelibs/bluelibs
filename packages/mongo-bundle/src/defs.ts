@@ -6,6 +6,7 @@ import {
 } from "@bluelibs/nova";
 import { IValidateOptions } from "@bluelibs/validator-bundle";
 import { ContainerInstance, Constructor } from "@bluelibs/core";
+import { ClientSession } from "mongodb";
 
 export type BehaviorType = (collectionEventManager: Collection<any>) => void;
 
@@ -24,6 +25,10 @@ export interface IExecutionContext {
    * This userId is needed for blamable behaviors. You can omit it if it's done by the system
    */
   userId?: any;
+  /**
+   * Used for transactions
+   */
+  session?: ClientSession;
 }
 
 export interface IContextAware {

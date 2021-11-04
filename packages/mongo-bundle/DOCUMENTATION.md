@@ -725,6 +725,25 @@ await dbService.transact((session) => {
 
 The beautiful thing is that any kind of exception will result in transaction revertion. If you want to have event listeners that don't fail transactions, you simply wrap them in such a way that their promises resolve.
 
+:::note
+If you have event listeners inside the transaction and they perform custom operations, you can access the `session` variable from the event data.
+:::
+
+If you want to do a query with [Nova](/docs/package-nova), you can also pass the session as the second argument to the body:
+
+```ts
+await dbService.transact((session) => {
+  await usersCollection.insertOne(document, { session });
+  // works with query, queryOne, queryGraphQL, queryOneGraphQL
+  await usersCollection.queryOne(
+    {
+      // your request body
+    },
+    session
+  );
+});
+```
+
 ## Migrations
 
 Migrations allow you to version and easily add new changes to database while staying safe. Migrations are added in the `prepare()` phase of your bundles.

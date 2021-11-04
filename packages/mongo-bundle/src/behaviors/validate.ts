@@ -23,12 +23,10 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
   behaviorOptions.castOptions = behaviorOptions.castOptions || {};
 
   return (collection: Collection) => {
-    const validatorService = collection.container.get<ValidatorService>(
-      ValidatorService
-    );
-    const dbService = collection.container.get<DatabaseService>(
-      DatabaseService
-    );
+    const validatorService =
+      collection.container.get<ValidatorService>(ValidatorService);
+    const dbService =
+      collection.container.get<DatabaseService>(DatabaseService);
 
     collection.localEventManager.addListener(
       BeforeInsertEvent,
@@ -81,6 +79,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
             isMany: false,
             context: options?.context,
             fields,
+            options,
           })
         );
 
@@ -110,6 +109,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
           context: options?.context,
           fields,
           result,
+          options,
         })
       );
 
@@ -141,6 +141,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
             isMany: true,
             context: options?.context,
             fields,
+            options,
           })
         );
 
@@ -173,6 +174,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
           context: options?.context,
           fields,
           result,
+          options,
         })
       );
 
@@ -195,6 +197,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
             isMany: false,
             context: options?.context,
             fields,
+            options,
           })
         );
         const element = await collection.findOneAndUpdate(
@@ -225,6 +228,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
           context: options?.context,
           fields,
           result,
+          options,
         })
       );
 

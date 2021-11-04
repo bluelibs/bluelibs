@@ -4,6 +4,7 @@ import { Posts, Post } from "./dummy/posts";
 import { Users, User } from "./dummy/users";
 import { assert, expect } from "chai";
 import { AfterDeleteEvent } from "../../events";
+import { DatabaseService } from "../../services/DatabaseService";
 import {
   BeforeInsertEvent,
   AfterInsertEvent,
@@ -305,5 +306,48 @@ describe("Collection", () => {
     assert.equal(await comments.count(), 0);
 
     await teardown();
+  });
+
+  it.only("Should work with transactions", async () => {
+    const { container, teardown } = await createEcosystem();
+
+    const dbService = container.get(DatabaseService);
+    const comments = container.get(Comments);
+
+    dbService.transact(async (session) => {
+      const _id = (await comments.insertOne({ title: "test" })).insertedId;
+      let obj = await comments.queryOne(
+        {
+          $: {
+            filters: { _id },
+          },
+          title: 1,
+        },
+        session
+      );
+
+      assert.equal(obj.title, "test");
+
+      await comments.updateOne(
+        { _id },
+        {
+          $set: {
+            title: "test2",
+          },
+        }
+      );
+
+      obj = await comments.queryOne(
+        {
+          $: {
+            filters: { _id },
+          },
+          title: 1,
+        },
+        session
+      );
+
+      assert.equal(obj.title, "test2");
+    });
   });
 });
