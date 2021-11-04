@@ -3,8 +3,8 @@ import {
   AfterInsertEvent,
   AfterUpdateEvent,
   BeforeUpdateEvent,
-  BeforeRemoveEvent,
-  AfterRemoveEvent,
+  BeforeDeleteEvent,
+  AfterDeleteEvent,
   BehaviorType,
 } from "@bluelibs/mongo-bundle";
 import { DocumentMutationType, MESSENGER } from "../constants";
@@ -51,6 +51,7 @@ export function Live(): BehaviorType {
 
         const documentsToUpdate = await collection
           .find(e.data.filter, {
+            ...e.data.options,
             projection: { _id: 1 },
           })
           .toArray();
@@ -94,14 +95,15 @@ export function Live(): BehaviorType {
     );
 
     collection.localEventManager.addListener(
-      BeforeRemoveEvent,
-      async (e: BeforeRemoveEvent) => {
+      BeforeDeleteEvent,
+      async (e: BeforeDeleteEvent) => {
         if (shouldSkipLive(e.data.context)) {
           return;
         }
 
         const documentsToRemove = await collection
           .find(e.data.filter, {
+            ...e.data.options,
             projection: { _id: 1 },
           })
           .toArray();
@@ -118,8 +120,8 @@ export function Live(): BehaviorType {
     );
 
     collection.localEventManager.addListener(
-      AfterRemoveEvent,
-      (e: AfterRemoveEvent) => {
+      AfterDeleteEvent,
+      (e: AfterDeleteEvent) => {
         if (shouldSkipLive(e.data.context)) {
           return;
         }
