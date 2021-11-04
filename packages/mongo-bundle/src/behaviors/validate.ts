@@ -64,10 +64,11 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       let result = null;
       const fields = dbService.getFields(update);
 
-      await dbService.transact(async () => {
+      await dbService.transact(async (session) => {
         // first we find it so we can retrieve it later
         const element = await collection.findOne(filter, {
           projection: { _id: 1 },
+          session,
         });
 
         // dispatch before update
@@ -79,7 +80,10 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
             isMany: false,
             context: options?.context,
             fields,
-            options,
+            options: {
+              ...options,
+              session,
+            },
           })
         );
 
@@ -90,10 +94,16 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
         result = await collection.collection.updateOne(
           { _id: element._id },
           update,
-          options
+          {
+            ...options,
+            session,
+          }
         );
 
-        const document = await collection.findOne({ _id: element._id });
+        const document = await collection.findOne(
+          { _id: element._id },
+          { session }
+        );
         await validatorService.validate(document, {
           ...behaviorOptions.options,
           model: behaviorOptions.model,

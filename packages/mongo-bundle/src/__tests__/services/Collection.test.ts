@@ -308,7 +308,7 @@ describe("Collection", () => {
     await teardown();
   });
 
-  it.only("Should work with transactions", async () => {
+  it("Should work with transactions", async () => {
     const { container, teardown } = await createEcosystem();
 
     const dbService = container.get(DatabaseService);
@@ -348,6 +348,8 @@ describe("Collection", () => {
       );
 
       assert.equal(obj.title, "test2");
+
+      await teardown();
     });
   });
 });

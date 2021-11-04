@@ -40,6 +40,16 @@ describe("Validate behavior", () => {
       extraField: "test",
     });
 
+    await collection.updateOne(
+      { _id: result.insertedId },
+      {
+        $set: {
+          name: "Smith",
+          age: 101,
+        },
+      }
+    );
+
     await expect(
       collection.updateOne(
         { _id: result.insertedId },
