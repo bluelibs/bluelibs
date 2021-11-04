@@ -19,6 +19,11 @@ export class CollectionModel {
   hasSubscriptions: boolean = false;
 
   /**
+   * Should we override the .collection.ts file if it exists?
+   */
+  overrideCollectionIfExists: boolean = true;
+
+  /**
    * This refers when the collection extends something else (We use it for Users to extend from SecurityMongoBundle)
    */
   customCollectionImport: string; // "@bluelibs/security-mongo-bundle";

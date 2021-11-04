@@ -19,7 +19,10 @@ export class SanityChecker {
       for (const mode of COLLECTION_UI_MODES_REQUIRES_FIELDS) {
         if (collection.ui[mode]) {
           const fields = collection.fields.filter((f) => f.ui && f.ui[mode]);
-          if (fields.length === 0) {
+          const relations = collection.relations.filter(
+            (f) => f.ui && f.ui[mode]
+          );
+          if (fields.length + relations.length === 0) {
             throw new Error(
               `Collection: ${collection.id} has no fields which are in UI "${mode}" mode. As a safety precaution please disable this mode from the collection itself.`
             );

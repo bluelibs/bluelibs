@@ -659,6 +659,7 @@ export class StudioWriter {
       collectionModel.collectionName = collection.id;
       collectionModel.bundleName = "AppBundle";
       collectionModel.createEntity = false;
+      collectionModel.overrideCollectionIfExists = false;
 
       if (collection.enableGraphQL) {
         const graphQLModel = XBridge.collectionToGenericModel(collection, {

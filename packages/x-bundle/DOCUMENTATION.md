@@ -9,7 +9,7 @@ It provides developers the ability to code rapidly and skip through a lot of con
 - A defined way for standard CRUD interfaces
 - Validator Transformers (Date, ObjectId, UniqueDatabaseField)
 - API and Web App Routers
-- LiveData Support for [MongoBundle](package-mongo-bundle)
+- LiveData Support for [MongoBundle](package-mongo)
 
 ## Install
 
@@ -256,7 +256,7 @@ Whether you have mission critical queries/mutations in which you need logs for t
 ```
 
 :::note
-These executors make use of the [LoggerBundle](package-logger-bundle) to send out the logs, meaning you can even send them to your central log management service without changing a line in the future.
+These executors make use of the [LoggerBundle](package-logger) to send out the logs, meaning you can even send them to your central log management service without changing a line in the future.
 :::
 
 ### Models & Validation
@@ -757,13 +757,13 @@ When subscribing for the first time, I will get `added` events with all the docu
 
 The job of the client (whatever it may be iOS, Web, React Native, etc) is to update its own store then notify the client to ensure the UI gets rerendered with fresh data.
 
-Behind the scenes what happens is that when a change happens in the system through [MongoBundle](package-mongo-bundle) Collection updates, is sent out to the `messenger` and delivered to all instances listening for that change.
+Behind the scenes what happens is that when a change happens in the system through [MongoBundle](package-mongo) Collection updates, is sent out to the `messenger` and delivered to all instances listening for that change.
 
 The system is very advanced as it can support fetching relational data through Nova and doing complex searches such as finding the last 5 invoices who have `status = paid` and sorted by `paidAt`. The live data is not limited to a document, but rather an actual mongodb query you would normally do filtering and sorting included.
 
 ### Data Flow
 
-The client updates something in the database through a GraphQL mutation, this change is caught through [MongoBundle](package-mongo-bundle) Collection events and they are translated and submitted to specific channels in your network pubsub system.
+The client updates something in the database through a GraphQL mutation, this change is caught through [MongoBundle](package-mongo) Collection events and they are translated and submitted to specific channels in your network pubsub system.
 
 At the same time, besides sending messages, your server also listens for messages, whenever a client subscribes to a reactive data set, the server opens the path to incoming events on special channels relevant to the subscription.
 
@@ -1076,6 +1076,6 @@ x
 ### Challenges
 
 - What executor would I use if I want to apply 2 different security rules depending on wether the user is `Admin` or `Manager` role? (1p)
-- Make use of [XPasswordBundle](x-password-bundle) to enhance your server with authentication and create a user (3p)
+- Make use of [XPasswordBundle](package-x-password-bundle) to enhance your server with authentication and create a user (3p)
 - Can I use Apache Kafka or any other pubsub system for my live data? (1p)
 - What function should we use when we receive a Nova body from the client to secure it? (2p)

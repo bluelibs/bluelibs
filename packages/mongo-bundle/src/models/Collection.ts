@@ -18,6 +18,7 @@ import {
   Cursor,
   FindOneAndDeleteOption,
   MongoCountPreferences,
+  ClientSession,
 } from "mongodb";
 import {
   Inject,
@@ -33,8 +34,8 @@ import { DatabaseService } from "../services/DatabaseService";
 import {
   BeforeInsertEvent,
   AfterInsertEvent,
-  BeforeRemoveEvent,
-  AfterRemoveEvent,
+  BeforeDeleteEvent,
+  AfterDeleteEvent,
   BeforeUpdateEvent,
   AfterUpdateEvent,
   CollectionEvent,
@@ -169,6 +170,12 @@ export abstract class Collection<T = any> {
     return this.toModel(result);
   }
 
+  /**
+   * Inserts a single document inside the collection
+   *
+   * @param document
+   * @param options
+   */
   async insertOne(
     document: Partial<T>,
     options: IContextAware & CollectionInsertOneOptions = {}
@@ -180,6 +187,7 @@ export abstract class Collection<T = any> {
     const eventData = {
       document,
       context: options.context,
+      options,
     };
 
     const event = new BeforeInsertEvent<any>(eventData);
@@ -215,6 +223,7 @@ export abstract class Collection<T = any> {
         new BeforeInsertEvent({
           document,
           context: options.context,
+          options,
         })
       );
     });
@@ -234,6 +243,7 @@ export abstract class Collection<T = any> {
           document: events[i].data.document,
           _id: result.insertedIds[i],
           context: options.context,
+          options,
         })
       );
     }
@@ -258,6 +268,7 @@ export abstract class Collection<T = any> {
         fields,
         isMany: false,
         context: options.context,
+        options,
       })
     );
 
@@ -271,6 +282,7 @@ export abstract class Collection<T = any> {
         context: options.context,
         isMany: false,
         result,
+        options,
       })
     );
 
@@ -285,6 +297,7 @@ export abstract class Collection<T = any> {
     if (options) {
       options.context = options.context || {};
     }
+
     const fields = this.databaseService.getFields(update);
 
     await this.emit(
@@ -294,6 +307,7 @@ export abstract class Collection<T = any> {
         fields,
         isMany: true,
         context: options.context,
+        options,
       })
     );
 
@@ -307,6 +321,7 @@ export abstract class Collection<T = any> {
         isMany: true,
         context: options.context,
         result,
+        options,
       })
     );
 
@@ -321,21 +336,23 @@ export abstract class Collection<T = any> {
       options.context = options.context || {};
     }
     await this.emit(
-      new BeforeRemoveEvent({
+      new BeforeDeleteEvent({
         filter: filters,
         isMany: false,
         context: options.context,
+        options,
       })
     );
 
     const result = await this.collection.deleteOne(filters, options);
 
     await this.emit(
-      new AfterRemoveEvent({
+      new AfterDeleteEvent({
         filter: filters,
         isMany: false,
         context: options.context,
         result,
+        options,
       })
     );
 
@@ -355,21 +372,23 @@ export abstract class Collection<T = any> {
     }
 
     await this.emit(
-      new BeforeRemoveEvent({
+      new BeforeDeleteEvent({
         filter: filters,
         isMany: true,
         context: options.context,
+        options,
       })
     );
 
     const result = await this.collection.deleteMany(filters, options);
 
     await this.emit(
-      new AfterRemoveEvent({
+      new AfterDeleteEvent({
         filter: filters,
         context: options.context,
         isMany: true,
         result,
+        options,
       })
     );
 
@@ -378,28 +397,30 @@ export abstract class Collection<T = any> {
 
   async findOneAndDelete(
     filters: FilterQuery<T> = {},
-    options?: IContextAware & FindOneAndDeleteOption<any>
+    options: IContextAware & FindOneAndDeleteOption<any> = {}
   ): Promise<FindAndModifyWriteOpResultObject<T>> {
     if (options) {
       options.context = options.context || {};
     }
 
     await this.emit(
-      new BeforeRemoveEvent({
+      new BeforeDeleteEvent({
         context: options?.context || {},
         filter: filters,
         isMany: false,
+        options,
       })
     );
 
     const result = await this.collection.findOneAndDelete(filters, options);
 
     await this.emit(
-      new AfterRemoveEvent({
+      new AfterDeleteEvent({
         context: options?.context || {},
         filter: filters,
         isMany: false,
         result,
+        options,
       })
     );
 
@@ -427,6 +448,7 @@ export abstract class Collection<T = any> {
         fields,
         isMany: false,
         context: options.context,
+        options,
       })
     );
 
@@ -444,6 +466,7 @@ export abstract class Collection<T = any> {
         context: options.context,
         isMany: false,
         result,
+        options,
       })
     );
 
@@ -464,12 +487,16 @@ export abstract class Collection<T = any> {
 
   /**
    * Queries the classes and transforms them to object of the model if it exists
-   *
+   *§
    * @param request
    */
-  async query(request: QueryBodyType<T>): Promise<Array<Partial<T>>> {
+  async query(
+    request: QueryBodyType<T>,
+    session?: ClientSession
+  ): Promise<Array<Partial<T>>> {
     const results = await query(this.collection, request, {
       container: this.container,
+      session,
     }).fetch();
 
     return this.toModel(results);
@@ -480,10 +507,16 @@ export abstract class Collection<T = any> {
    *
    * @param request
    */
-  async queryOne(request: QueryBodyType<T>): Promise<Partial<T>> {
-    const result = await this.query(request);
+  async queryOne(
+    request: QueryBodyType<T>,
+    session?: ClientSession
+  ): Promise<Partial<T>> {
+    const result = await query(this.collection, request, {
+      container: this.container,
+      session,
+    }).fetchOne();
 
-    return result[0] || null;
+    return this.toModel(result);
   }
 
   /**
@@ -575,11 +608,13 @@ export abstract class Collection<T = any> {
    */
   async queryGraphQL(
     ast: any,
-    config?: IAstToQueryOptions<T>
+    config?: IAstToQueryOptions<T>,
+    session?: ClientSession
   ): Promise<Array<Partial<T>>> {
     const result = await query
       .graphql(this.collection, ast, config, {
         container: this.container,
+        session,
       })
       .fetch();
 
@@ -593,11 +628,13 @@ export abstract class Collection<T = any> {
    */
   async queryOneGraphQL(
     ast,
-    config?: IAstToQueryOptions<T>
+    config?: IAstToQueryOptions<T>,
+    session?: ClientSession
   ): Promise<Partial<T>> {
     const result = await query
       .graphql(this.collection, ast, config, {
         container: this.container,
+        session,
       })
       .fetchOne();
 

@@ -11,7 +11,7 @@ import {
   IContextAware,
   ISoftdeletableBehaviorOptions,
 } from "../defs";
-import { AfterRemoveEvent, BeforeRemoveEvent } from "../events";
+import { AfterDeleteEvent, BeforeDeleteEvent } from "../events";
 import { Collection } from "../models/Collection";
 
 const overridableMethods = [
@@ -195,10 +195,11 @@ async function emulateDeletion(
   isMany: boolean
 ): Promise<DeleteWriteOpResultObject> {
   await collection.emit(
-    new BeforeRemoveEvent({
+    new BeforeDeleteEvent({
       filter,
       isMany,
       context: options?.context,
+      options,
     })
   );
 
@@ -222,11 +223,12 @@ async function emulateDeletion(
   )) as UpdateWriteOpResult;
 
   await collection.emit(
-    new AfterRemoveEvent({
+    new AfterDeleteEvent({
       filter,
       isMany,
       context: options?.context,
       result,
+      options,
     })
   );
 

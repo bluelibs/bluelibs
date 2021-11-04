@@ -24,6 +24,7 @@ export const kernel = new Kernel({
   parameters: {
     context: env.CONTEXT,
     debug: false,
+    testing: process.env.NODE_ENV === "test",
   },
   bundles: [
     new LoggerBundle(),

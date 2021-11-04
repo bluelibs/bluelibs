@@ -19,7 +19,7 @@ This module works with any database and you can have different `persistance laye
 
 ## Configuration
 
-By default it uses an in-memory database as persistance for users/permission/sessions, which means that on every server-restart everything will be forgotten. Either implement your own persistance layers either use some already done such as: [Security Mongo Bundle](security-mongo-bundle)
+By default it uses an in-memory database as persistance for users/permission/sessions, which means that on every server-restart everything will be forgotten. Either implement your own persistance layers either use some already done such as: [Security Mongo Bundle](package-security-mongo)
 
 ```typescript
 import { SecurityBundle } from "@bluelibs/security-bundle";
