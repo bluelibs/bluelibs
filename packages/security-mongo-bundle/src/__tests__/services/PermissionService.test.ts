@@ -1,4 +1,4 @@
-import { SecurityService, PermissionService } from "@bluelibs/security-bundle";
+import { PermissionService } from "@bluelibs/security-bundle";
 import { permissionServiceTestDefinitions } from "@bluelibs/security-bundle/dist/__tests__/reusable";
 import { ecosystem } from "../ecosystem";
 

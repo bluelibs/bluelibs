@@ -1,6 +1,6 @@
 import { IPermissionTree } from "../../../defs";
 
-export const Permissions: any = {
+export const Permissions = {
   USER: "USER",
   ADMIN: "ADMIN",
   INVOICE_MANAGEMENT: "INVOICE_MANAGEMENT",

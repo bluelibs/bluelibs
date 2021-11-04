@@ -1,10 +1,19 @@
 import {
   IPermissionPersistance,
-  IPermission,
+  IPermission as BasePermission,
   IPermissionSearchFilters,
   UserId,
+  IUser,
 } from "@bluelibs/security-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
+
+import * as links from "./Permissions.links";
+
+export interface IPermission extends BasePermission {
+  user: IUser;
+
+  createdBy?: IUser;
+}
 
 export class PermissionsCollection<T extends IPermission>
   extends Collection<IPermission>
@@ -12,12 +21,12 @@ export class PermissionsCollection<T extends IPermission>
 {
   static collectionName = "permissions";
 
+  static links = links;
+
   async insertPermission(permission: T): Promise<any> {
     permission = this.getCleanedPermission(permission) as T;
 
-    await this.insertOne({
-      ...permission,
-    });
+    await this.insertOne(permission);
   }
 
   async removePermission(filters: IPermissionSearchFilters): Promise<void> {
