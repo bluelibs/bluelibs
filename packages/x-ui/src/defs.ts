@@ -1,4 +1,4 @@
-import { IUII18NBundleConfig } from "@bluelibs/ui-i18n-bundle";
+import { IUII18NBundleConfig } from "@bluelibs/x-ui-i18n-bundle";
 import { IUISessionBundleConfigType } from "@bluelibs/ui-session-bundle";
 import {
   GuardianSmart,

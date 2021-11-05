@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/ui-apollo-bundle",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Apollo Bundle for UI",
   "main": "dist/index.js",
   "repository": {

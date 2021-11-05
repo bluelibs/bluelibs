@@ -14,6 +14,7 @@
     "pretest": "npm run compile",
     "test": "jest --verbose dist/__tests__/index.js",
     "test:clean": "jest --clearCache",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
     "testonly": "npm test",
     "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
@@ -28,17 +29,21 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@bluelibs/ui-apollo-bundle": "^1.0.0",
-    "@bluelibs/x-ui-react-bundle": "^1.0.0",
+    "graphql-tag": "^2.12.5"
+  },
+  "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/smart": "^1.0.0",
-    "graphql-tag": "^2.12.5",
+    "@bluelibs/ui-apollo-bundle": "^1.0.0",
+    "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "react": "^17.0.2"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",
     "@types/react-test-renderer": "^17.0.1",
-    "react-test-renderer": "^17.0.2"
+    "jest": "^27.3.1",
+    "react-test-renderer": "^17.0.2",
+    "ts-jest": "^27.0.7"
   }
 }

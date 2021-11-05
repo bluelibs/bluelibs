@@ -3,7 +3,9 @@ import { Event } from "@bluelibs/core";
 import { ConnectionParams } from "subscriptions-transport-ws";
 
 export class ApolloBeforeOperationEvent extends Event<{
-  context?: any;
+  context: {
+    [key: string]: any;
+  };
   operation: GraphQLRequest;
 }> {}
 

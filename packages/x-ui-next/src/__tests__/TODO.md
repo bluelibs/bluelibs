@@ -1,9 +1,0 @@
-- XUIProvider
-  - Routing
-  - Smart
-    - Dependency Injection
-    - Transient Feature
-- ApolloClient
-- Collection
-  - A way to instantiate the apollo bundle
-- All hooks

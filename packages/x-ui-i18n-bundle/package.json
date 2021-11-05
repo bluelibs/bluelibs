@@ -1,5 +1,5 @@
 {
-  "name": "@bluelibs/ui-i18n-bundle",
+  "name": "@bluelibs/x-ui-i18n-bundle",
   "version": "1.0.0",
   "description": "I18N bundle for UI",
   "main": "dist/index.js",
@@ -14,6 +14,7 @@
     "test": "jest --verbose dist/__tests__/index.js",
     "test:clean": "jest --clearCache",
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
     "testonly": "npm test",
     "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
     "coverage": "npm test -- --coverage",
@@ -27,12 +28,18 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@bluelibs/x-ui-react-bundle": "^1.0.0",
-    "@bluelibs/core": "^1.0.0",
     "node-polyglot": "^2.4.2"
+  },
+  "peerDependencies": {
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/x-ui-react-bundle": "^1.0.1",
+    "react": "^17.0.2"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
-    "@types/node-polyglot": "^2.4.2"
+    "@types/node-polyglot": "^2.4.2",
+    "@types/react": "^17.0.34",
+    "jest": "^27.3.1",
+    "ts-jest": "^27.0.7"
   }
 }
