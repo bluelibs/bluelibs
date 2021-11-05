@@ -57,7 +57,11 @@ export class UICRUDModel {
       } = true;
 
   hasFeature(feature: CRUDFeatureType) {
-    return this.features === true || this.features[feature];
+    console.log("hasFeature", this.collectionName, feature, this.features);
+    if (this.features === true) {
+      return true;
+    }
+    return this.features[feature];
   }
 
   get sheetName() {
@@ -71,7 +75,7 @@ export class UICRUDModel {
   // The icon from UI Generated.
   get icon() {
     if (this.studioCollection.ui === false) {
-      throw new Error("Shouldn't a menu for it");
+      throw new Error("Shouldn't add a menu for it");
     }
 
     return this.studioCollection.ui.icon || "SettingFilled";

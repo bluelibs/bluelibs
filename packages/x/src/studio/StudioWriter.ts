@@ -340,6 +340,7 @@ export class StudioWriter {
       const model = new UICRUDModel();
       model.bundleName = "UIAppBundle";
       model.studioCollection = collection;
+      model.features = collection.ui;
 
       writer.write(model, session);
       this.success(`(UI) Created CRUD interfaces for: "${collection.id}"`);
