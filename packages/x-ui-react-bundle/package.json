@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-react-bundle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "XUIReactBundle",
   "main": "dist/index.js",
@@ -29,8 +29,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@bluelibs/ordered-lists": "^1.0.0"
+  },
+  "peerDependencies": {
     "@bluelibs/core": "^1.1.0",
-    "@bluelibs/ordered-lists": "^1.0.0",
     "@bluelibs/smart": "^1.0.0",
     "react": "^17.0.2"
   },

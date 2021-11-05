@@ -27,7 +27,7 @@
     "definition": "dist/index.d.ts"
   },
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "@apollo/client": "^3.4.16",
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
