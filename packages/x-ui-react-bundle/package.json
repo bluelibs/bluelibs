@@ -15,6 +15,7 @@
     "test": "jest --verbose dist/__tests__/index.js",
     "test:clean": "jest --clearCache",
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
     "testonly": "npm test",
     "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
     "coverage": "npm test -- --coverage",
@@ -28,16 +29,17 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@bluelibs/x-ui-collections-bundle": "^1.0.0",
-    "@bluelibs/core": "^1.0.0",
-    "@bluelibs/smart": "^1.0.0",
+    "@bluelibs/core": "^1.1.0",
     "@bluelibs/ordered-lists": "^1.0.0",
+    "@bluelibs/smart": "^1.0.0",
     "react": "^17.0.2"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",
     "@types/react-test-renderer": "^17.0.1",
-    "react-test-renderer": "^17.0.2"
+    "jest": "^27.3.1",
+    "react-test-renderer": "^17.0.2",
+    "ts-jest": "^27.0.7"
   }
 }
