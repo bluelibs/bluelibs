@@ -1,4 +1,4 @@
-import { split, ApolloLink } from "@apollo/client/core";
+import { split, ApolloLink, GraphQLRequest } from "@apollo/client/core";
 import { createUploadLink } from "apollo-upload-client";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
@@ -8,18 +8,22 @@ import {
 } from "subscriptions-transport-ws";
 import { setContext } from "apollo-link-context";
 import { EventManager } from "@bluelibs/core";
-import { ApolloBeforeOperationEvent } from "../../events";
+import {
+  ApolloBeforeOperationEvent,
+  ApolloSubscriptionOnConnectionParamsSetEvent,
+} from "../../events";
 
-const createHeadersMiddlewareLink = (eventManager: EventManager) =>
-  setContext(async () => {
-    const headers = {};
+const createContextLink = (eventManager: EventManager) => {
+  return setContext(async (operation: GraphQLRequest, prevContext: any) => {
+    const newContext = Object.assign({}, prevContext);
 
-    await eventManager.emit(new ApolloBeforeOperationEvent({ headers }));
+    await eventManager.emit(
+      new ApolloBeforeOperationEvent({ context: newContext, operation })
+    );
 
-    return {
-      headers,
-    };
+    return newContext;
   });
+};
 
 type CreateLinkOptions = {
   subscriptions: boolean;
@@ -41,7 +45,7 @@ export function createApolloLink(
     uri,
   });
   const enhancedHttpLink = ApolloLink.from([
-    createHeadersMiddlewareLink(eventManager) as any,
+    createContextLink(eventManager) as any,
     uploadLink,
   ]);
 
@@ -55,16 +59,15 @@ export function createApolloLink(
       {
         reconnect: true,
         connectionParams: async () => {
-          const subscriptionConnectionParams: ConnectionParams = {};
+          const params: ConnectionParams = {};
 
           await eventManager.emit(
-            new ApolloBeforeOperationEvent({
-              isSubscription: true,
-              subscriptionConnectionParams,
+            new ApolloSubscriptionOnConnectionParamsSetEvent({
+              params,
             })
           );
 
-          return subscriptionConnectionParams;
+          return params;
         },
       }
     );
