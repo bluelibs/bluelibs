@@ -24,7 +24,7 @@ import {
   StudioWritersType,
 } from "./defs";
 import { ContainerInstance } from "@bluelibs/core";
-import { ModelRaceEnum } from "../models";
+import { FrontendReactMicroserviceModel, ModelRaceEnum } from "../models";
 import { execSync, spawnSync } from "child_process";
 
 const ADMIN_FOLDER = "admin";
@@ -723,12 +723,13 @@ export class StudioWriter {
     session: XSession,
     commit: () => Promise<void>
   ) {
-    const frontendMicroservice = new Models.FrontendMicroserviceModel();
+    FrontendReactMicroserviceModel;
+    const frontendMicroservice = new Models.FrontendReactMicroserviceModel();
     frontendMicroservice.name = ADMIN_FOLDER;
     frontendMicroservice.projectName = model.id + "-admin-ui";
     frontendMicroservice.adminMode = true;
     frontendMicroservice.hasCustomGuardian = true;
-    frontendMicroservice.type = Models.MicroserviceTypeEnum.FRONTEND;
+    frontendMicroservice.type = Models.MicroserviceTypeEnum.FRONTEND_REACT;
 
     this.writers.microservice.write(frontendMicroservice, session);
 

@@ -30,6 +30,10 @@ export const SessionCopyOptionsDefaults = {
 export class FSOperator {
   constructor(public readonly session: XSession, public readonly model: any) {}
 
+  isTemplate(content: string) {
+    return Boolean(content.match("{{(.*)}}"));
+  }
+
   add(paths: string | string[], fn) {
     this.session.addOperation({
       type: "custom",
@@ -156,9 +160,14 @@ export class FSOperator {
       allFilePaths.forEach((filePath) => {
         filePath = filePath.replace(src, dest);
 
+        const content = this.getContents(filePath);
+
         this.writeFileSmartly(
           filePath,
-          this.renderTemplate(this.getContents(filePath), filePath)
+          this.isTemplate(content)
+            ? this.renderTemplate(content, filePath)
+            : content,
+          false
         );
       });
 
@@ -174,7 +183,7 @@ export class FSOperator {
   /**
    * Renders the template for the current model
    */
-  renderTemplate(content: string, filePath?: string): string {
+  renderTemplate(content: string, filePath?: string, silent?: boolean): string {
     try {
       return handlebars.compile(content, {
         noEscape: true,
@@ -193,8 +202,9 @@ export class FSOperator {
    * @param filePath
    * @param content
    */
-  writeFileSmartly(filePath, content) {
-    content = this.renderTemplate(content, filePath);
+  writeFileSmartly(filePath, content, shouldRenderContent = true) {
+    if (shouldRenderContent) content = this.renderTemplate(content, filePath);
+
     const prettierParserType = this.getPrettierParser(filePath);
 
     if (prettierParserType) {

@@ -30,7 +30,14 @@
   "dependencies": {
     "@bluelibs/x-ui-router": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
+<<<<<<< HEAD
     "@bluelibs/x-ui-guardian-bundle": "^1.0.0",
+=======
+    "@bluelibs/ui-apollo-bundle": "^1.0.0",
+    "@bluelibs/x-ui-guardian-bundle": "^1.0.0",
+    "@bluelibs/x-ui-collections-bundle": "^1.0.0",
+    "@bluelibs/ui-session-bundle": "^1.0.0",
+>>>>>>> 2027a85 ((feat) x-next-boilerplate)
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/smart": "^1.0.0",
     "next": "11.1.2",

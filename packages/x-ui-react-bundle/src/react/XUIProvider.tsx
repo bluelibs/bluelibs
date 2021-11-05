@@ -1,12 +1,12 @@
 import * as React from "react";
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { Kernel, ContainerInstance } from "@bluelibs/core";
 import { listen, useContainer } from "./hooks";
 import { useUIComponents } from "./hooks/useUIComponents";
 import { LocaleChangedEvent } from "./events/LocaleChangedEvent";
 import { XUIReactBundle } from "..";
-import { generateWrapperTree } from "./utils";
+import { ChildrenContext, generateWrapperTree } from "./utils";
 import { Components } from ".";
 
 export const ContainerContext = createContext<ContainerInstance>(null);
@@ -17,6 +17,10 @@ export interface IXUIProviderProps {
   loadingComponent?: JSX.Element;
   children?: any;
 }
+
+type IChildrenProviderProps = {
+  finalChildren: JSX.Element;
+};
 
 export const XUIProvider = (props: IXUIProviderProps) => {
   const { kernel, children, loadingComponent } = props;
@@ -46,7 +50,9 @@ export const XUIProvider = (props: IXUIProviderProps) => {
 
   return (
     <ContainerContext.Provider value={kernel.container}>
-      <XUIProviderInitialised children={children} />
+      <ChildrenProvider finalChildren={children}>
+        <XUIProviderInitialised />
+      </ChildrenProvider>
     </ContainerContext.Provider>
   );
 };
@@ -55,7 +61,7 @@ export const XUIProvider = (props: IXUIProviderProps) => {
  * The component that is rendered once the Kernel has been initialised
  * @returns
  */
-const XUIProviderInitialised: React.FC = (props) => {
+const XUIProviderInitialised: React.FC = () => {
   const UIComponents = useUIComponents();
 
   const container = useContainer();
@@ -66,18 +72,26 @@ const XUIProviderInitialised: React.FC = (props) => {
 
   listen(LocaleChangedEvent, handler);
 
-  const wrappersWithXUIProviderChildren = useMemo(
-    () =>
-      container.get(XUIReactBundle).wrappers.concat({
-        component: () => props.children as any,
-      }),
-    []
-  );
-
   const WrapperComponents = useMemo(
-    () => generateWrapperTree(wrappersWithXUIProviderChildren),
+    () => generateWrapperTree(container.get(XUIReactBundle).wrappers),
     []
   );
 
-  return <UIComponents.ErrorBoundary children={WrapperComponents} />;
+  return (
+    <UIComponents.ErrorBoundary>{WrapperComponents}</UIComponents.ErrorBoundary>
+  );
+};
+
+export const ChildrenProvider: React.FC<IChildrenProviderProps> = (props) => {
+  const [children, setChildren] = useState(null);
+
+  useEffect(() => {
+    setChildren(props.finalChildren);
+  }, [props.finalChildren]);
+
+  return (
+    <ChildrenContext.Provider value={{ setChildren, children }}>
+      {props.children}
+    </ChildrenContext.Provider>
+  );
 };

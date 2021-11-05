@@ -10,7 +10,8 @@ import {
   GenericFieldTypeEnum,
   GenericModel,
   CollectionModel,
-  FrontendMicroserviceModel,
+  FrontendReactMicroserviceModel,
+  FrontendNextMicroserviceModel,
 } from "../models";
 import { FSUtils } from "../utils/FSUtils";
 import * as path from "path";
@@ -22,7 +23,10 @@ import { CollectionWriter } from "./CollectionWriter";
 
 export class MicroserviceWriter extends BlueprintWriter {
   write(
-    model: FrontendMicroserviceModel | BackendMicroserviceModel,
+    model:
+      | FrontendReactMicroserviceModel
+      | FrontendNextMicroserviceModel
+      | BackendMicroserviceModel,
     session: XSession
   ) {
     const fsOperator = new FSOperator(session, model);
@@ -63,16 +67,37 @@ export class MicroserviceWriter extends BlueprintWriter {
       FSUtils.setMicroservicePathOverride(null);
     }
 
+    // TODO: write AppGuardianSmart.ts only if "hasCustomGuardian"
+    if (
+      [
+        MicroserviceTypeEnum.FRONTEND_REACT,
+        MicroserviceTypeEnum.FRONTEND_NEXT,
+      ].includes(model.type)
+    ) {
+      const frontendModel = model as
+        | FrontendReactMicroserviceModel
+        | FrontendNextMicroserviceModel;
+
+      if (frontendModel.hasCustomGuardian) {
+      }
+    }
+
     session.afterCommitInstruction(() => {
       console.log(`Your ${model.type} microservice is now ready`);
       if (model.type === MicroserviceTypeEnum.BACKEND) {
-        console.log(
+        return console.log(
           `cd ${model.name} ; npm install ; npm update ; npm run start:dev`
         );
       }
-      if (model.type === MicroserviceTypeEnum.FRONTEND) {
-        console.log(
+      if (model.type === MicroserviceTypeEnum.FRONTEND_REACT) {
+        return console.log(
           `cd ${model.name} ; npm install ; npm update ; npm run start:dev`
+        );
+      }
+
+      if (model.type === MicroserviceTypeEnum.FRONTEND_NEXT) {
+        return console.log(
+          `cd ${model.name} ; npm install; npm update; npm run dev`
         );
       }
     });
