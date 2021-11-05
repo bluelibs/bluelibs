@@ -2,7 +2,7 @@
   const props = {
     type: "{{ rendererType }}",
     {{# if (@root.typeIs rendererType "objectId") }}
-      value: value.toString()
+      value,
     {{ else }}
       value,
     {{/ if }}
