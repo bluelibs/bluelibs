@@ -57,7 +57,6 @@ export class UICRUDModel {
       } = true;
 
   hasFeature(feature: CRUDFeatureType) {
-    console.log("hasFeature", this.collectionName, feature, this.features);
     if (this.features === true) {
       return true;
     }
