@@ -27,38 +27,41 @@ export interface IFieldMap {
 }
 export interface IPermissioning {
   addPermission(userPermission: IPermission): any;
+
   hasPermission(
     userId: UserId,
     permission: string,
     domain?: string,
     domainIdentifier?: string
-  );
+  ): boolean;
 
   findPermission(
     permission?: string,
     userId?: UserId,
     domain?: string,
     domainIdentifier?: string
-  );
+  ): IPermission;
 
   findPermissions(
     userId?: UserId,
     permission?: string,
     domain?: string,
     domainIdentifier?: string
-  );
+  ): IPermission[];
+
   removePermission(
     userId: UserId,
     permission: string,
     domain?: string,
     domainIdentifier?: string
-  );
+  ): void;
+
   removePermissions(
     userId: UserId,
     permission?: string,
     domain?: string,
     domainIdentifier?: string
-  );
+  ): void;
 }
 
 export interface IUserPersistance {
@@ -127,28 +130,32 @@ export interface IPermissionSearchFilter {
   userId?: UserId | UserId[];
   permission?: string | string[];
   domain?: string | string[];
-  domainIdentifier?: string | string[];
+  domainIdentifier?: string | string[] | ObjectId | ObjectId[];
+  createdById?: UserId | UserId[];
 }
 
 export interface IPermissionSearchFilters {
   userId?: any[];
   permission?: string[];
   domain?: string[];
-  domainIdentifier?: string[];
+  domainIdentifier?: string[] | ObjectId[];
+  createdById?: any[];
 }
 
 export interface IPermissionSearch {
   userId?: any;
   permission?: string;
   domain?: string;
-  domainIdentifier?: string;
+  domainIdentifier?: string | ObjectId;
+  createdById?: any;
 }
 
 export interface IPermission {
   userId: UserId;
   permission: string;
   domain: string;
-  domainIdentifier?: string;
+  domainIdentifier?: string | ObjectId;
+  createdById?: UserId;
 }
 
 export interface IPermissionTree {
