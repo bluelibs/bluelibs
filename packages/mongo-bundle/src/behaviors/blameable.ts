@@ -22,7 +22,7 @@ export default function blameable(
     return context[userIdFieldInContext];
   };
 
-  const checkUserId = (userId, collection: Collection<any>) => {
+  const checkUserId = (userId: any, collection: Collection<any>) => {
     if (userId === undefined && throwErrorWhenMissing) {
       throw new Error(
         `You have to provide { userId } inside the context when you perform this insert mutation on ${collection.collectionName} collection.`
@@ -34,8 +34,13 @@ export default function blameable(
     collection.localEventManager.addListener(
       BeforeInsertEvent,
       (e: BeforeInsertEvent) => {
-        const userId = extractUserID(e.data.context);
+        const { context } = e.data;
+
+        const userId = extractUserID(context);
+
         checkUserId(userId, collection);
+
+        if (userId === undefined) return;
 
         const document = e.data.document;
 
@@ -49,8 +54,13 @@ export default function blameable(
     collection.localEventManager.addListener(
       BeforeUpdateEvent,
       (e: BeforeUpdateEvent) => {
-        const userId = extractUserID(e.data.context);
+        const { context } = e.data;
+
+        const userId = extractUserID(context);
+
         checkUserId(userId, collection);
+
+        if (userId === undefined) return;
 
         const update = e.data.update;
 

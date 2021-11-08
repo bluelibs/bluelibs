@@ -15,12 +15,35 @@ describe("Behaviors", () => {
 
     const userIdToUpdate = "123";
     const userIdToCreate = "XXX";
+    const userIdToCreate2 = "YYY";
 
     const behaviors = container.get(Behaviors);
+
+    const getQueryBody = (insertedId: any) => ({
+      $: {
+        filters: {
+          _id: insertedId,
+        },
+      },
+      createdAt: 1,
+      updatedAt: 1,
+      createdById: 1,
+      updatedById: 1,
+    });
+
+    const b0 = await behaviors.insertOne({
+      test: 1,
+      createdById: userIdToCreate,
+    });
+
+    const b0Object = await behaviors.queryOne(getQueryBody(b0.insertedId));
+
+    assert.equal(b0Object.createdById, userIdToCreate);
 
     const b1 = await behaviors.insertOne(
       {
         test: 1,
+        createdById: userIdToCreate2,
       },
       {
         context: {
@@ -29,19 +52,7 @@ describe("Behaviors", () => {
       }
     );
 
-    const queryBody = {
-      $: {
-        filters: {
-          _id: b1.insertedId,
-        },
-      },
-      createdAt: 1,
-      updatedAt: 1,
-      createdById: 1,
-      updatedById: 1,
-    };
-
-    let b1Object = await behaviors.queryOne(queryBody);
+    let b1Object = await behaviors.queryOne(getQueryBody(b1.insertedId));
 
     assert.instanceOf(b1Object.createdAt, Date);
     assert.instanceOf(b1Object.updatedAt, Date);
@@ -68,7 +79,7 @@ describe("Behaviors", () => {
       }
     );
 
-    b1Object = await behaviors.queryOne(queryBody);
+    b1Object = await behaviors.queryOne(getQueryBody(b1.insertedId));
 
     assert.isTrue(b1Object.updatedAt > b1Object.createdAt);
 
