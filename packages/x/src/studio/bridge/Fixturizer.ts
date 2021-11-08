@@ -154,7 +154,7 @@ export class Fixturizer {
       const storage = reversedRelation.cleaned.field.id;
 
       result.forEach((r) => {
-        r[storage] = reversedRelation.isMany ? [document._id] : document.id;
+        r[storage] = reversedRelation.isMany ? [document._id] : document._id;
       });
     }
   }

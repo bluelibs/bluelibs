@@ -14,6 +14,10 @@ export class CollectionLinkModel {
   linkFromB: string;
   fieldName: string;
 
+  // opt-in customisation to just render one of these
+  shouldProcessA: boolean = true;
+  shouldProcessB: boolean = true;
+
   get isMany() {
     return ["oneToMany", "manyToMany"].includes(this.type);
   }

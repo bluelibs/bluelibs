@@ -30,8 +30,8 @@ export class CollectionLinkWriter extends BlueprintWriter {
      * When the link is stored in collection "A", then for sure we have to add the link there
      * So the logic is we process collection "A" inversed if the link from collection "B" is specified
      */
-    const shouldProcessA = Boolean(model.linkFromA);
-    const shouldProcessB = Boolean(model.linkFromB);
+    const shouldProcessA = model.shouldProcessA && Boolean(model.linkFromA);
+    const shouldProcessB = model.shouldProcessB && Boolean(model.linkFromB);
 
     if (shouldProcessA) {
       if (!this.alreadyExportsLink(aLinksPath, model.linkFromA)) {
@@ -51,7 +51,7 @@ export class CollectionLinkWriter extends BlueprintWriter {
     }
 
     if (shouldProcessB) {
-      if (this.alreadyExportsLink(blinksPath, model.linkFromB)) {
+      if (!this.alreadyExportsLink(blinksPath, model.linkFromB)) {
         fsOperator.sessionAppendFile(
           blinksPath,
           fsOperator.getContents(
@@ -86,6 +86,10 @@ export class CollectionLinkWriter extends BlueprintWriter {
     // Later, we should do this by statically analysing the file.
     const isComment = fileContent.indexOf(`// export const ${name}`) > -1;
 
-    return !isComment;
+    if (isComment) {
+      return false;
+    }
+
+    return true;
   }
 }
