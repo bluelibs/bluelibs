@@ -39,6 +39,10 @@ export class ServiceWriter extends BlueprintWriter {
     const unitTestModel = this.createUnitTestModel(model, microserviceDir);
 
     this.getWriter(UnitTestWriter).write(unitTestModel, session);
+    fsOperator.sessionPrependFile(
+      path.join(bundlePath, "__tests__", "index.ts"),
+      `import "./${model.serviceName}.service.test.ts"`
+    );
   }
 
   protected createUnitTestModel(model: ServiceModel, microserviceDir: any) {
