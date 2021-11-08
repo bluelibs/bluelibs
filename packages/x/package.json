@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x",
-  "version": "1.5.13",
+  "version": "1.5.14",
   "description": "Scaffolding tool for BlueLibs Framework using X-Framework.",
   "main": "dist/index.js",
   "repository": {
