@@ -42,7 +42,7 @@ export class XUINextBundle extends Bundle<IXUINextBundleConfigType> {
   async extend() {
     const config = this.config;
 
-    await this.addDependency(UIApolloBundle, this.config.apollo);
+    await this.addDependency(UIApolloBundle, config.apollo);
 
     await this.addDependency(XUIGuardianBundle, config.guardian);
 
