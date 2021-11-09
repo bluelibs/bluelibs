@@ -34,7 +34,7 @@
     "@bluelibs/ui-apollo-bundle": "^1.0.0",
     "@bluelibs/x-ui-collections-bundle": "^1.0.0",
     "@bluelibs/x-ui-guardian-bundle": "^1.0.0",
-    "@bluelibs/x-ui-i18n-bundle": "^1.0.0",
+    "@bluelibs/x-ui-i18n-bundle": "^1.0.1",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "@bluelibs/x-ui-react-router-bundle": "^1.0.0",
     "@bluelibs/x-ui-session-bundle": "^1.0.0",
@@ -43,6 +43,8 @@
   "devDependencies": {
     "@apollo/client": "^3.4.16",
     "@types/jest": "^27.0.2",
+    "@types/node": "^16.11.7",
+    "@types/node-polyglot": "^2.4.2",
     "@types/react-test-renderer": "^17.0.1",
     "jest": "^27.3.1",
     "react-test-renderer": "^17.0.2",
