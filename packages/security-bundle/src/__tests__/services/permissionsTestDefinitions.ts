@@ -3,6 +3,7 @@ import { PermissionService, PermissionGraph, IPermissionService } from "../..";
 import { PermissionsPersistanceService } from "./mocks/PermissionsPersistanceService.mock";
 import { EventManager } from "@bluelibs/core";
 import { SecurityService } from "../../services/SecurityService";
+import { ObjectId } from "@bluelibs/ejson";
 
 const permission = new PermissionGraph(PermissionTree);
 const PERMISSION_DEFAULT_DOMAIN = "app";
@@ -170,7 +171,7 @@ export const permissionServiceTestDefinitions = [
   },
   {
     message: "Should work finding all permissions and all domains",
-    async test(service: IPermissionService) {
+    async test(service: PermissionService) {
       await service.add({
         userId: "U1",
         permission: Permissions.ADMIN,
@@ -242,6 +243,26 @@ export const permissionServiceTestDefinitions = [
       });
 
       expect(await service.hasRole("U1", Permissions.ADMIN)).toBe(true);
+    },
+  },
+  {
+    message: "Should work with createdById",
+    async test(service: PermissionService) {
+      const userId = "userId";
+      const createdById = "createdById";
+
+      await service.add({
+        userId,
+        createdById,
+        permission: Permissions.ADMIN,
+        domain: PERMISSION_DEFAULT_DOMAIN,
+      });
+
+      const permissions = await service.findPermissions({
+        createdById,
+      });
+
+      expect(permissions).toHaveLength(1);
     },
   },
 ];

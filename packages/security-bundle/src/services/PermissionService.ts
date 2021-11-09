@@ -155,7 +155,7 @@ export class PermissionService implements IPermissionService {
    * Prepares your easy search and transforms it so it reaches persistance layers properly
    * @param object
    */
-  protected transformToFilters(object): IPermissionSearchFilters {
+  protected transformToFilters(object: any): IPermissionSearchFilters {
     const newObject = {};
     ["userId", "permission", "domain", "domainIdentifier"].forEach((key) => {
       if (object[key]) {
@@ -174,7 +174,7 @@ export class PermissionService implements IPermissionService {
    *
    * @param userId
    */
-  async findDomains(userId) {
+  async findDomains(userId: UserId) {
     return this.persistance.findDomains(userId);
   }
 }

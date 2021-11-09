@@ -1,3 +1,4 @@
+import { ObjectId } from "@bluelibs/ejson";
 import {
   IPermissionPersistance,
   IPermission,
@@ -12,9 +13,7 @@ export class PermissionsPersistanceService implements IPermissionPersistance {
   }
 
   async insertPermission(permission: IPermission) {
-    this.db.push({
-      ...permission,
-    });
+    this.db.push(permission);
   }
 
   async removePermission(filters: IPermissionSearchFilters) {
@@ -66,8 +65,11 @@ export class PermissionsPersistanceService implements IPermissionPersistance {
 
     let domainIdentifierCheck = true;
     if (search.domainIdentifier && search.domainIdentifier.length) {
-      domainIdentifierCheck = search.domainIdentifier.includes(
-        permission.domainIdentifier
+      domainIdentifierCheck = search.domainIdentifier.some(
+        (id: string | ObjectId) =>
+          id instanceof ObjectId
+            ? id.equals(permission.domainIdentifier as any)
+            : id === permission.domainIdentifier
       );
     }
 
