@@ -1,5 +1,5 @@
 import * as React from "react";
-import { I18NService } from "@bluelibs/ui-i18n-bundle";
+import { I18NService } from "@bluelibs/x-ui-i18n-bundle";
 import { GuardianSmart } from "@bluelibs/x-ui-guardian-bundle";
 import {
   useContainer,

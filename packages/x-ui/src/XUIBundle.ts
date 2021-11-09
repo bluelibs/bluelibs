@@ -10,7 +10,7 @@ import {
   I18NService,
   UII18NBundle,
 } from "@bluelibs/x-ui-i18n-bundle";
-import { UISessionBundle } from "@bluelibs/ui-session-bundle";
+import { UISessionBundle } from "@bluelibs/x-ui-session-bundle";
 import {
   GuardianSmart,
   XUIGuardianBundle,
