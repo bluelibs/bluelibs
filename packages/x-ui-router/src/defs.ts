@@ -1,6 +1,4 @@
-import { RouteProps } from "react-router-dom";
-
-export interface IRoute<T = IRouteParams, Q = IRouteParams> extends RouteProps {
+export interface IRoute<T = IRouteParams, Q = IRouteParams> {
   name?: string;
   /**
    * If the user has any of these roles, the route will render, otherwise it will render the component: "NotAuthorized" which can be modified
