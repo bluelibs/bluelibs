@@ -140,6 +140,24 @@ export class GuardianSmart<
     this.updateState({ fetchingUserData: false });
   }
 
+  public async reissueToken(token: string) {
+    const newToken = await this.apolloClient
+      .mutate({
+        mutation: gql`
+          mutation ($token: String) {
+            reissueToken(token: $token)
+          }
+        `,
+        variables: {
+          token,
+        },
+      })
+      .then((response) => response.data.reissueToken as string);
+
+    await this.storeToken(newToken);
+    await this.load();
+  }
+
   protected async retrieveUser(): Promise<TUserType> {
     return this.apolloClient
       .query({
