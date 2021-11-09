@@ -144,7 +144,7 @@ export class GuardianSmart<
     const newToken = await this.apolloClient
       .mutate({
         mutation: gql`
-          mutation ($token: String) {
+          mutation ($token: String!) {
             reissueToken(token: $token)
           }
         `,
