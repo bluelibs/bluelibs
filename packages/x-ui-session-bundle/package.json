@@ -17,6 +17,7 @@
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
     "testonly": "npm test",
     "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
     "coverage": "npm test -- --coverage",
     "coverage:upload": "codecov",
     "prepublishOnly": "npm run compile",
@@ -27,16 +28,18 @@
     "definition": "dist/index.d.ts"
   },
   "license": "MIT",
-  "dependencies": {
-    "@bluelibs/x-ui-react-bundle": "^1.0.0",
+  "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
+    "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^7.0.2",
     "@types/jest": "^27.0.2",
-    "@types/react": "^17.0.33"
+    "@types/react": "^17.0.33",
+    "jest": "^27.3.1",
+    "ts-jest": "^27.0.7"
   }
 }
