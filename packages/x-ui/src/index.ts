@@ -8,6 +8,6 @@ export * from "@bluelibs/ui-apollo-bundle";
 
 export * from "./XUIBundle";
 export * from "./defs";
-import { IRoute, IComponents } from "./overrides";
+import { IRoute, IComponents, useUIComponents } from "./overrides";
 
-export { IRoute, IComponents };
+export { IRoute, IComponents, useUIComponents };
