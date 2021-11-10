@@ -41,7 +41,7 @@ export class ServiceWriter extends BlueprintWriter {
     this.getWriter(UnitTestWriter).write(unitTestModel, session);
     fsOperator.sessionPrependFile(
       path.join(bundlePath, "__tests__", "index.ts"),
-      `import "./${model.serviceName}.service.test.ts"`
+      `import "./${model.serviceName}.service.test.ts";\n`
     );
   }
 

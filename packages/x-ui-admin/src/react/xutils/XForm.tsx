@@ -144,7 +144,7 @@ export abstract class XForm<T = null> extends Consumer<XFormElementType> {
       newData.componentProps = {};
     }
 
-    this.update(id, newData);
+    super.update(id, newData);
   }
 
   protected isLeaf(item: XFormElementType): item is XFormElementLeafType {
