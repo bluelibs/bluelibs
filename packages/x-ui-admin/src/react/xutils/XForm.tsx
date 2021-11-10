@@ -209,7 +209,7 @@ export abstract class XForm<T = null> extends Consumer<XFormElementType> {
     }
 
     // Create a "render" from the component instructions
-    if (item.component) {
+    if (!item.render && item.component) {
       this.createRenderFunctionFromComponentDefinitions(item);
     }
 
