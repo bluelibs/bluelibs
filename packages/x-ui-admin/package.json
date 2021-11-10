@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-admin",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "public": true,
   "description": "The administration interface built for speed.",
   "main": "dist/index.js",
