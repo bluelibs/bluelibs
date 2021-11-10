@@ -9,11 +9,12 @@ export * from "@bluelibs/ui-apollo-bundle";
 export * from "./XUIBundle";
 export * from "./defs";
 
-import { IReactRoute } from "@bluelibs/x-ui-react-router-bundle";
+import { IReactRoute, IRouteParams } from "@bluelibs/x-ui-react-router-bundle";
 /**
  * We use `IRoute` here for compatibility reasons
  */
-export interface IRoute extends IReactRoute {}
+export interface IRoute<T = IRouteParams, Q = IRouteParams>
+  extends IReactRoute<T, Q> {}
 
 /**
  * The code below is designed to offer backwards compatibility
