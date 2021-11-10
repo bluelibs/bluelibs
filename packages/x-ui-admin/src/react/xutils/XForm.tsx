@@ -129,6 +129,24 @@ export abstract class XForm<T = null> extends Consumer<XFormElementType> {
     }
   }
 
+  /**
+   * Update the element information. If you're specifying a component, the render function will be set to null.
+   * @param id
+   * @param data
+   */
+  update(id: string, data: Partial<XFormElementType>) {
+    const newData: Partial<XFormElementType> = Object.assign({}, data);
+
+    if (newData.component) {
+      (newData as XFormElementLeafType).render = null;
+    } else if (newData["render"]) {
+      newData.component = undefined;
+      newData.componentProps = {};
+    }
+
+    this.update(id, newData);
+  }
+
   protected isLeaf(item: XFormElementType): item is XFormElementLeafType {
     if (item["nest"]) {
       return false;
