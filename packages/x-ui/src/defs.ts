@@ -1,52 +1,35 @@
-import * as React from "react";
-import { RouteProps } from "react-router-dom";
-import { ApolloClientOptions } from "@apollo/client/core";
-import { GuardianSmart } from "./react";
+import { IUII18NBundleConfig } from "@bluelibs/x-ui-i18n-bundle";
+import { IUISessionBundleConfigType } from "@bluelibs/x-ui-session-bundle";
+import {
+  GuardianSmart,
+  IXUIGuardianBundleConfigType,
+} from "@bluelibs/x-ui-guardian-bundle";
+import { IXUIReactBundleConfigType } from "@bluelibs/x-ui-react-bundle";
+import {
+  ApolloClientOptions,
+  IUIApolloBundleConfig,
+} from "@bluelibs/ui-apollo-bundle";
 import { Constructor } from "@bluelibs/core";
-import { IComponents } from "./react";
-import { IUISessionStore } from "./react/services/UISession.service";
-import * as Polyglot from "node-polyglot";
 
-export type XUIBundleConfigType = {
-  graphql: Partial<ApolloClientOptions<any>>;
-  guardianClass: Constructor<GuardianSmart>;
-  enableSubscriptions: boolean;
-  react: {
-    components: IComponents;
-  };
-  session: {
-    localStorageKey?: string;
-    defaults?: IUISessionStore;
-  };
-  i18n: {
-    defaultLocale: string;
-    /**
-     * This is used for when you want customly configured polyglots allowing you to customise the options
-     */
-    polyglots: Array<Polyglot.PolyglotOptions & { locale: string }>;
-  };
-};
-
-export interface IRoute<T = IRouteParams, Q = IRouteParams> extends RouteProps {
-  name?: string;
+export type XUIBundleConfigType = Partial<{
   /**
-   * If the user has any of these roles, the route will render, otherwise it will render the component: "NotAuthorized" which can be modified
+   * @deprecated Please use `apollo.client`
    */
-  roles?: string[];
-  path: string;
-}
+  graphql: Partial<ApolloClientOptions<any>>;
 
-export type RouteMap = {
-  [key: string]: IRoute<any>;
-};
+  /**
+   * @deprecated Please use `guardian.guardianClass`
+   */
+  guardianClass: Constructor<GuardianSmart>;
 
-export interface IRouteGenerationProps<T = any, Q = any> {
-  params?: T;
-  query?: Q;
-}
+  /**
+   * @deprecated Please use `apollo.enableSubscriptions`
+   */
+  enableSubscriptions: boolean;
 
-export type UserRolesType = "anonymous" | string[];
-
-export interface IRouteParams {
-  [key: string]: string | number;
-}
+  apollo: IUIApolloBundleConfig;
+  guardian: IXUIGuardianBundleConfigType;
+  sessions: IUISessionBundleConfigType;
+  react: IXUIReactBundleConfigType;
+  i18n: IUII18NBundleConfig;
+}>;

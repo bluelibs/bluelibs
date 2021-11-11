@@ -1,92 +1,96 @@
-import {
-  Bundle,
-  BundlePhase,
-  EventManager,
-  KernelAfterInitEvent,
-  KernelBeforeInitEvent,
-  KernelPhase,
-} from "@bluelibs/core";
+import { Bundle, KernelPhase } from "@bluelibs/core";
 import { setDefaults } from "@bluelibs/smart";
-import { InMemoryCache } from "@apollo/client/core";
-
-import { XUIBundleConfigType } from "./defs";
 import {
-  APOLLO_CLIENT_OPTIONS_TOKEN,
-  XUI_CONFIG_TOKEN,
-  XUI_COMPONENTS_TOKEN,
-} from "./constants";
-import { RoutingPreparationEvent } from "./events/RoutingPreparationEvent";
-import { XRouter } from "./react/XRouter";
-import { ApolloClient } from "./graphql/ApolloClient";
-import { GuardianSmart } from "./react/smarts/GuardianSmart";
-import { DefaultComponents, IComponents } from "./react/components/types";
-import { I18NConfig, I18NService } from "./react/services/I18N.service";
+  ApolloClient,
+  ApolloProvider,
+  UIApolloBundle,
+} from "@bluelibs/ui-apollo-bundle";
+import {
+  I18NConfig,
+  I18NService,
+  UII18NBundle,
+} from "@bluelibs/x-ui-i18n-bundle";
+import { UISessionBundle } from "@bluelibs/x-ui-session-bundle";
+import {
+  GuardianSmart,
+  XUIGuardianBundle,
+  XUIGuardianProvider,
+} from "@bluelibs/x-ui-guardian-bundle";
+import { Components, XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
+import { IComponents } from "./overrides";
+import {
+  XBrowserRouter,
+  XRouter,
+  XUIReactRouterBundle,
+} from "@bluelibs/x-ui-react-router-bundle";
+import { XUICollectionsBundle } from "@bluelibs/x-ui-collections-bundle";
+import { XUIBundleConfigType } from "./defs";
 
 export class XUIBundle extends Bundle<XUIBundleConfigType> {
-  protected defaultConfig: XUIBundleConfigType = {
-    graphql: {},
-    guardianClass: GuardianSmart,
-    enableSubscriptions: true,
-    react: {
-      components: DefaultComponents,
-    },
-    session: {
-      localStorageKey: "BLUELIBS_SESSION",
-    },
-    i18n: {
-      defaultLocale: "en",
-      polyglots: [],
-    },
-  };
+  protected defaultConfig = {
+    apollo: {},
+    guardian: {},
+    i18n: {},
+    react: {},
+    sessions: {},
+  } as XUIBundleConfigType;
 
-  async validate(config: XUIBundleConfigType) {
-    if (!config.graphql?.uri) {
-      throw new Error(
-        `You have to provide a valid 'graphql.uri' for it to connect to the GraphQL API`
-      );
-    }
-  }
+  async extend() {
+    const config = this.config;
 
-  async hook() {
-    const eventManager = this.container.get(EventManager);
-    const router = this.container.get(XRouter);
-
-    // After the kernel has passed through all intialisation of all bundles and all routes have been added
-    // It's time to hook into them and have extensions for configuration
-    eventManager.addListener(
-      KernelAfterInitEvent,
-      async (e: KernelBeforeInitEvent) => {
-        await eventManager.emit(
-          new RoutingPreparationEvent({
-            routes: router.store,
-          })
-        );
-      }
+    // TODO: cleanup after deprecation
+    await this.addDependency(
+      UIApolloBundle,
+      (config.graphql && {
+        client: config.graphql,
+        enableSubscriptions: config.enableSubscriptions,
+      }) ||
+        this.config.apollo
     );
+
+    await this.addDependency(
+      XUIGuardianBundle,
+      (config.guardianClass && {
+        guardianClass: config.guardianClass,
+      }) ||
+        config.guardian
+    );
+
+    await this.addDependency(XUIReactBundle, config.react);
+
+    await this.addDependency(UISessionBundle, config.sessions);
+
+    await this.addDependency(UII18NBundle, config.i18n);
+
+    await this.addDependency(XUIReactRouterBundle);
+
+    await this.addDependency(XUICollectionsBundle);
   }
 
   async prepare() {
-    if (!this.config.graphql.cache) {
-      this.config.graphql.cache = new InMemoryCache({
-        dataIdFromObject: (object) => (object?._id as string) || null,
-      }).restore((window as any).__APOLLO_STATE__ || {});
-    }
+    const xuiReactBundle = this.container.get(XUIReactBundle);
 
-    this.container.set(XUI_COMPONENTS_TOKEN, this.config.react.components);
-    this.container.set(XUI_CONFIG_TOKEN, this.config);
-    this.container.set({
-      id: APOLLO_CLIENT_OPTIONS_TOKEN,
-      value: this.config.graphql,
-    });
-  }
-
-  async init() {
-    const container = this.container;
-    setDefaults({
-      factory(targetType, config) {
-        return container.get(targetType);
+    xuiReactBundle.addWrappers([
+      {
+        component: ApolloProvider,
+        props: () => ({
+          client: this.container.get(ApolloClient),
+        }),
+        order: 10,
       },
-    });
+      // FIXME: find a way to pass him an `initialisingComponent`, if needed?
+      {
+        component: XUIGuardianProvider,
+        order: 20,
+      },
+      {
+        component: XBrowserRouter,
+        props: () => ({
+          router: this.container.get(XRouter),
+        }),
+        order: Infinity,
+      },
+    ]);
   }
 
   /**
@@ -96,7 +100,7 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
   setGuardianClass(guardianClass: { new (): GuardianSmart }) {
     const phase = this.kernel.getPhase();
     if ([KernelPhase.PREPARING, KernelPhase.INITIALISING].includes(phase)) {
-      this.config.guardianClass = guardianClass;
+      this.config.guardian.guardianClass = guardianClass;
     } else {
       throw new Error(
         `You cannot set the guardian at this stage, do it before the bundle is initialised.`
@@ -109,7 +113,9 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
    * @param components
    */
   updateComponents(components: Partial<IComponents>) {
-    Object.assign(this.config.react.components, components);
+    const xuiReactBundle = this.container.get(XUIReactBundle);
+
+    xuiReactBundle.updateComponents(components);
   }
 
   /**

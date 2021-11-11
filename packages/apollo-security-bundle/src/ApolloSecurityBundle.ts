@@ -38,6 +38,7 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
 
   async prepare() {
     this.loadContextReducer();
+    this.loadTokenReissue();
   }
 
   async init() {
@@ -45,7 +46,7 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
     passportService.init();
   }
 
-  loadTokenReissue() {
+  protected loadTokenReissue() {
     const loader = this.container.get(Loader);
 
     loader.load({
@@ -69,7 +70,7 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
     });
   }
 
-  loadContextReducer() {
+  protected loadContextReducer() {
     const loader = this.container.get(Loader);
 
     loader.load({
