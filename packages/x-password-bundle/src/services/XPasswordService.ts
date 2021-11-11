@@ -1,7 +1,7 @@
 import { SecurityService, UserId } from "@bluelibs/security-bundle";
 import { PasswordService } from "@bluelibs/password-bundle";
 import { EmailService } from "@bluelibs/email-bundle";
-import { Service, Inject } from "@bluelibs/core";
+import { Service, Inject, ContainerInstance } from "@bluelibs/core";
 import { InvalidPasswordException } from "../exceptions/InvalidPasswordException";
 import { IXPasswordService } from "./IXPasswordService";
 import { InvalidTokenException } from "../exceptions/InvalidTokenException";
@@ -28,6 +28,7 @@ function sleep(ms) {
 @Service()
 export class XPasswordService implements IXPasswordService {
   constructor(
+    protected readonly container: ContainerInstance,
     @Inject(APP_ROUTER)
     protected readonly router: Router,
     protected readonly securityService: SecurityService,
