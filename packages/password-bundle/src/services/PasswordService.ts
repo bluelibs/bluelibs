@@ -237,6 +237,8 @@ export class PasswordService implements IPasswordService {
       resetPasswordRequestedAt: 1,
     });
 
+    if (!result?.resetPasswordRequestedAt) return false;
+
     if (
       result.resetPasswordRequestedAt.getTime() +
         ms(this.config.resetPassword.expiresAfter) <
@@ -245,7 +247,7 @@ export class PasswordService implements IPasswordService {
       throw new PasswordResetExpiredException();
     }
 
-    if (result?.resetPasswordVerificationToken) {
+    if (result.resetPasswordVerificationToken) {
       return result.resetPasswordVerificationToken === token;
     }
 
