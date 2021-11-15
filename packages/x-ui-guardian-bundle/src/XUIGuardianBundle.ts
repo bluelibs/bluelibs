@@ -1,10 +1,7 @@
 import { Bundle } from "@bluelibs/core";
 import {
   ApolloBeforeOperationEvent,
-<<<<<<< HEAD
   ApolloSubscriptionOnConnectionParamsSetEvent,
-=======
->>>>>>> 047d18a ((initial changes))
   ApolloClient,
   UIApolloBundle,
 } from "@bluelibs/ui-apollo-bundle";
@@ -32,7 +29,6 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
 
       if (!token) return;
 
-<<<<<<< HEAD
       const {
         data: { context },
       } = e;
@@ -49,19 +45,6 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
         e.data.params[LOCAL_STORAGE_TOKEN_KEY] = token;
       }
     );
-=======
-      const { data } = e;
-
-      const objectToModify = data.isSubscription
-        ? data.subscriptionConnectionParams
-        : data.headers;
-
-      objectToModify[LOCAL_STORAGE_TOKEN_KEY] = token;
-    });
-
-    // FIXME: this is how it was before, in ApolloClient, for the next two listeners. do we need this condition?
-    // if (!options.client.link)
->>>>>>> 047d18a ((initial changes))
 
     this.eventManager.addListener(
       UserLoggedInEvent,

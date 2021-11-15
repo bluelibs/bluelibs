@@ -1,8 +1,4 @@
-<<<<<<< HEAD:packages/ui-apollo-bundle/src/graphql/utils/createApolloLink.ts
 import { split, ApolloLink, GraphQLRequest } from "@apollo/client/core";
-=======
-import { split, ApolloLink } from "@apollo/client/core";
->>>>>>> 047d18a ((initial changes)):packages/x-ui/src/graphql/utils/createApolloLink.ts
 import { createUploadLink } from "apollo-upload-client";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
@@ -12,7 +8,6 @@ import {
 } from "subscriptions-transport-ws";
 import { setContext } from "apollo-link-context";
 import { EventManager } from "@bluelibs/core";
-<<<<<<< HEAD:packages/ui-apollo-bundle/src/graphql/utils/createApolloLink.ts
 import {
   ApolloBeforeOperationEvent,
   ApolloSubscriptionOnConnectionParamsSetEvent,
@@ -29,20 +24,6 @@ const createContextLink = (eventManager: EventManager) => {
     return newContext;
   });
 };
-=======
-import { ApolloBeforeOperationEvent } from "../../events";
-
-const createHeadersMiddlewareLink = (eventManager: EventManager) =>
-  setContext(async () => {
-    const headers = {};
-
-    await eventManager.emit(new ApolloBeforeOperationEvent({ headers }));
-
-    return {
-      headers,
-    };
-  });
->>>>>>> 047d18a ((initial changes)):packages/x-ui/src/graphql/utils/createApolloLink.ts
 
 type CreateLinkOptions = {
   subscriptions: boolean;
@@ -64,11 +45,7 @@ export function createApolloLink(
     uri,
   });
   const enhancedHttpLink = ApolloLink.from([
-<<<<<<< HEAD:packages/ui-apollo-bundle/src/graphql/utils/createApolloLink.ts
     createContextLink(eventManager) as any,
-=======
-    createHeadersMiddlewareLink(eventManager) as any,
->>>>>>> 047d18a ((initial changes)):packages/x-ui/src/graphql/utils/createApolloLink.ts
     uploadLink,
   ]);
 
@@ -82,7 +59,6 @@ export function createApolloLink(
       {
         reconnect: true,
         connectionParams: async () => {
-<<<<<<< HEAD:packages/ui-apollo-bundle/src/graphql/utils/createApolloLink.ts
           const params: ConnectionParams = {};
 
           await eventManager.emit(
@@ -92,18 +68,6 @@ export function createApolloLink(
           );
 
           return params;
-=======
-          const subscriptionConnectionParams: ConnectionParams = {};
-
-          await eventManager.emit(
-            new ApolloBeforeOperationEvent({
-              isSubscription: true,
-              subscriptionConnectionParams,
-            })
-          );
-
-          return subscriptionConnectionParams;
->>>>>>> 047d18a ((initial changes)):packages/x-ui/src/graphql/utils/createApolloLink.ts
         },
       }
     );

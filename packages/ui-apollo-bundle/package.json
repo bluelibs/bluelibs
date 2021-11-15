@@ -1,10 +1,6 @@
 {
   "name": "@bluelibs/ui-apollo-bundle",
-<<<<<<< HEAD
   "version": "1.0.2",
-=======
-  "version": "1.0.0",
->>>>>>> 047d18a ((initial changes))
   "description": "Apollo Bundle for UI",
   "main": "dist/index.js",
   "repository": {
@@ -17,10 +13,7 @@
     "pretest": "npm run compile",
     "test": "jest --verbose dist/__tests__/index.js",
     "test:clean": "jest --clearCache",
-<<<<<<< HEAD
     "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
-=======
->>>>>>> 047d18a ((initial changes))
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
     "testonly": "npm test",
     "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
@@ -34,11 +27,7 @@
     "definition": "dist/index.d.ts"
   },
   "license": "MIT",
-<<<<<<< HEAD
   "peerDependencies": {
-=======
-  "dependencies": {
->>>>>>> 047d18a ((initial changes))
     "@apollo/client": "^3.4.16",
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
@@ -50,12 +39,8 @@
   "devDependencies": {
     "@types/apollo-upload-client": "^14.1.0",
     "@types/jest": "^27.0.2",
-<<<<<<< HEAD
     "@types/react": "^17.0.33",
     "jest": "^27.3.1",
     "ts-jest": "^27.0.7"
-=======
-    "@types/react": "^17.0.33"
->>>>>>> 047d18a ((initial changes))
   }
 }

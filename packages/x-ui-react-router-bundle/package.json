@@ -15,10 +15,7 @@
     "test": "jest --verbose dist/__tests__/index.js",
     "test:clean": "jest --clearCache",
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
-<<<<<<< HEAD
     "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
-=======
->>>>>>> 047d18a ((initial changes))
     "testonly": "npm test",
     "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
     "coverage": "npm test -- --coverage",
@@ -32,36 +29,22 @@
   },
   "license": "MIT",
   "dependencies": {
-<<<<<<< HEAD
-=======
-    "@bluelibs/x-ui-react-bundle": "^1.0.0",
-    "@bluelibs/x-ui-guardian-bundle": "^1.0.0",
-    "@bluelibs/x-ui-router": "^1.0.0",
-    "@bluelibs/core": "^1.0.0",
->>>>>>> 047d18a ((initial changes))
     "history": "^4.10.1",
     "query-string": "^7.0.1",
     "react-router-dom": "^5.3.0"
   },
-<<<<<<< HEAD
   "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/x-ui-guardian-bundle": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "@bluelibs/x-ui-router": "^1.0.0"
   },
-=======
->>>>>>> 047d18a ((initial changes))
   "devDependencies": {
     "@types/history": "^4.7.9",
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",
-<<<<<<< HEAD
     "@types/react-router-dom": "^5.3.2",
     "jest": "^27.3.1",
     "ts-jest": "^27.0.7"
-=======
-    "@types/react-router-dom": "^5.3.2"
->>>>>>> 047d18a ((initial changes))
   }
 }
