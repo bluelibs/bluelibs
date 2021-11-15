@@ -7,7 +7,6 @@ export interface IComponents<Error = any, NOT_AUTHORIZED = any> {
   Loading: React.ComponentType;
   NotAuthorized: React.ComponentType<NOT_AUTHORIZED>;
   NotFound: React.ComponentType;
-  Protect: React.ComponentType;
 }
 
 export const DefaultComponents: IComponents = {
@@ -16,5 +15,4 @@ export const DefaultComponents: IComponents = {
   Loading: Components.Loading,
   NotAuthorized: Components.NotAuthorized,
   NotFound: Components.NotFound,
-  Protect: Components.Protect,
 };
