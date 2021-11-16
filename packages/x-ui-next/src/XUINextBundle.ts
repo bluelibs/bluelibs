@@ -5,23 +5,25 @@ import {
   XUIGuardianProvider,
 } from "@bluelibs/x-ui-guardian-bundle";
 import { IComponents, XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
-import { IXUINextBundleConfigType } from "./defs";
+import { XUINextBundleConfigType } from "./defs";
 
 import {
   ApolloClient,
   ApolloProvider,
   UIApolloBundle,
 } from "@bluelibs/ui-apollo-bundle";
-import { UISessionBundle } from "@bluelibs/ui-session-bundle";
+import { UISessionBundle } from "@bluelibs/x-ui-session-bundle";
+import { UII18NBundle } from "@bluelibs/x-ui-i18n-bundle";
 import { XUICollectionsBundle } from "@bluelibs/x-ui-collections-bundle";
 
-export class XUINextBundle extends Bundle<IXUINextBundleConfigType> {
+export class XUINextBundle extends Bundle<XUINextBundleConfigType> {
   protected defaultConfig = {
     apollo: {},
     guardian: {},
     react: {},
     sessions: {},
-  } as IXUINextBundleConfigType;
+    i18n: {},
+  } as XUINextBundleConfigType;
 
   async extend() {
     const config = this.config;
@@ -33,6 +35,8 @@ export class XUINextBundle extends Bundle<IXUINextBundleConfigType> {
     await this.addDependency(XUIReactBundle, config.react);
 
     await this.addDependency(UISessionBundle, config.sessions);
+
+    await this.addDependency(UII18NBundle, config.i18n);
 
     await this.addDependency(XUICollectionsBundle);
   }

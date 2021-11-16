@@ -1,5 +1,4 @@
 import {
-  AddRoutingArguments,
   IRoute,
   IRouteGenerationProps,
   IRouteParams,
@@ -10,7 +9,7 @@ import NextRouter from "next/router";
 import { Service } from "@bluelibs/core";
 
 @Service()
-export class XNextRouter extends XCoreRouter {
+export class XNextRouter extends XCoreRouter<IRoute> {
   private nextRouter = NextRouter;
 
   go<T extends IRouteParams, Q extends IRouteParams>(
