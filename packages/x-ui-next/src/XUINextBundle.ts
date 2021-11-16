@@ -29,15 +29,10 @@ export class XUINextBundle extends Bundle<XUINextBundleConfigType> {
     const config = this.config;
 
     await this.addDependency(UIApolloBundle, config.apollo);
-
     await this.addDependency(XUIGuardianBundle, config.guardian);
-
     await this.addDependency(XUIReactBundle, config.react);
-
     await this.addDependency(UISessionBundle, config.sessions);
-
     await this.addDependency(UII18NBundle, config.i18n);
-
     await this.addDependency(XUICollectionsBundle);
   }
 
