@@ -13,6 +13,7 @@ import {
   UISessionStateChangeEventProps,
 } from "../../events";
 import { UISessionStorage } from "./UISesssionStorage";
+import { UISessionInitialisingEvent } from "../../events/UISesssionInitialisingEvent";
 
 export interface IUISessionOptions {
   persist?: boolean;
@@ -31,11 +32,20 @@ export class UISessionService {
     @Inject(() => UISessionStorage)
     protected readonly storage: UISessionStorage,
     @Inject(UI_SESSION_BUNDLE_CONFIG_TOKEN)
-    config: IUISessionBundleConfigType
-  ) {
-    const { defaults } = config;
+    protected readonly config: IUISessionBundleConfigType
+  ) {}
 
-    this._state = Object.assign({}, defaults, storage.all());
+  async init() {
+    const { defaults } = this.config;
+    const newDefaults = Object.assign({}, defaults, this.storage.all());
+
+    await this.eventManager.emit(
+      new UISessionInitialisingEvent({
+        defaults: newDefaults,
+      })
+    );
+
+    this._state = Object.assign({}, newDefaults);
   }
 
   /**
