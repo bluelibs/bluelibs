@@ -234,4 +234,11 @@ export class Kernel {
   public isInitialised() {
     return this.phase === KernelPhase.INITIALISED;
   }
+
+  /**
+   * Returns the current context the kernel runs in
+   */
+  public getExecutionContext(): ExecutionContext {
+    return this.parameters.executionContext;
+  }
 }

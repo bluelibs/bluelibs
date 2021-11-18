@@ -6,6 +6,7 @@ import { Bundle } from "./models/Bundle";
 import { Exception } from "./models/Exception";
 import { EventManager, Event } from "./models/EventManager";
 import { Listener, On } from "./models/Listener";
+export { ExecutionContext, getExecutionContext } from "./utils/modes";
 
 export * from "./exceptions";
 export * from "./di";
