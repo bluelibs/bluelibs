@@ -1,14 +1,18 @@
-import { EventManager, Service, Event } from "@bluelibs/core";
+import {
+  EventManager,
+  Service,
+  Event,
+  Inject,
+  ExecutionContext,
+} from "@bluelibs/core";
 import { useEffect, useState } from "react";
+import { UI_SESSION_BUNDLE_CONFIG_TOKEN } from "../../constants";
 import { IUISessionBundleConfigType, IUISessionStore } from "../../defs";
 import {
   UISessionStateChangeEvent,
   UISessionStateChangeEventProps,
 } from "../../events";
-import {
-  getLocalStorageState,
-  updateLocalStorageState,
-} from "./utils/UISession.utils";
+import { UISessionStorage } from "./UISesssionStorage";
 
 export interface IUISessionOptions {
   persist?: boolean;
@@ -21,18 +25,17 @@ export type UISessionEventChangeHandler = (
 @Service()
 export class UISessionService {
   protected _state: IUISessionStore;
-  protected localStorageKey: string;
 
   constructor(
     protected readonly eventManager: EventManager,
+    @Inject(() => UISessionStorage)
+    protected readonly storage: UISessionStorage,
+    @Inject(UI_SESSION_BUNDLE_CONFIG_TOKEN)
     config: IUISessionBundleConfigType
   ) {
-    const { localStorageKey, defaults } = config;
+    const { defaults } = config;
 
-    const localStorageState = getLocalStorageState(localStorageKey);
-
-    this._state = Object.assign({}, defaults, localStorageState);
-    this.localStorageKey = localStorageKey;
+    this._state = Object.assign({}, defaults, storage.all());
   }
 
   /**
@@ -80,7 +83,7 @@ export class UISessionService {
     });
 
     if (options?.persist) {
-      updateLocalStorageState(fieldName, value, this.localStorageKey);
+      this.storage.setItem(fieldName, value);
     }
 
     return this.eventManager.emit(
