@@ -552,7 +552,6 @@ Kernel also emits the following events (name descriptive enough), and listeners 
 - BundleAfterInitEvent
 - KernelAfterInitEvent
 
-
 ### Extending
 
 If you have a bundle which depends on other bundles, and you want to make sure they're in the kernel,
@@ -571,7 +570,7 @@ class MyBundle extends Bundle {
   async extend() {
     await this.addDependency(DatabaseBundle, {
       // optional initialisation config
-    })
+    });
   }
 }
 ```
@@ -579,6 +578,7 @@ class MyBundle extends Bundle {
 :::note
 `addDependency` will only add the bundle if it's not already in the kernel.
 :::
+
 ### Hooking
 
 So, in theory you have the chance to hook even more to the bundles you love:
@@ -712,7 +712,7 @@ Kernels may store global data which is accessible through the container. This ca
 ```js
 new Kernel({
   parameters: {
-    // Just some examples, they can be anything
+    // Just some examples, they can be anything, it overrides the default parameters
     applicationUrl: "https://www.google.com/",
     debug: true,
   },
@@ -758,7 +758,8 @@ By default the available parameters are:
 export interface IKernelParameters {
   debug: boolean; // Whether you are using in debug mode
   testing: boolean; // Whether you are using the kernel to run tests
-  context: KernelContext;
+  context: KernelContext; // development, pre-production, production
+  executionContext: ExecutionContext; // server, react, react-native
 }
 
 export enum KernelContext {

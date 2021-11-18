@@ -1,6 +1,7 @@
 import { Bundle } from "./models/Bundle";
 import { Kernel } from "./models/Kernel";
 import { Event } from "./models/EventManager";
+import { ExecutionContext } from "./utils/modes";
 
 export interface IBundle<T = any> {
   setup(kernel: Kernel): Promise<void>;
@@ -74,7 +75,11 @@ export interface IKernelParameters {
    * Are we currently in test mode, running our test suite?
    */
   testing: boolean;
+  /**
+   * This refers to what release stage are you in: development, pre-production or production
+   */
   context: KernelContext;
+  executionContext: ExecutionContext;
   [key: string]: any;
 }
 

@@ -18,6 +18,7 @@ import {
   BundlePhase,
 } from "../defs";
 import { EventManager } from "./EventManager";
+import { ExecutionContext, getExecutionContext } from "../utils/modes";
 import {
   KernelFrozenException,
   BundleSingleInstanceException,
@@ -27,6 +28,7 @@ export const KernelDefaultParameters = {
   debug: false,
   testing: false,
   context: KernelContext.DEVELOPMENT,
+  executionContext: getExecutionContext(),
 };
 
 export class Kernel {
@@ -45,7 +47,7 @@ export class Kernel {
     this.container = this.createContainer();
 
     if (options.bundles) {
-      options.bundles.map((bundle) => this.addBundle(bundle));
+      options.bundles.map(bundle => this.addBundle(bundle));
     }
 
     this.container.set(ContainerInstance, this.container);
@@ -152,7 +154,7 @@ export class Kernel {
    * @param classType
    */
   public hasBundle(classType: IBundleConstructor): boolean {
-    return Boolean(this.bundles.find((b) => b instanceof classType));
+    return Boolean(this.bundles.find(b => b instanceof classType));
   }
 
   /**
@@ -180,7 +182,7 @@ export class Kernel {
    * @param bundles
    */
   public addBundles(bundles: Bundle[]) {
-    bundles.forEach((bundle) => this.addBundle(bundle));
+    bundles.forEach(bundle => this.addBundle(bundle));
   }
 
   /**

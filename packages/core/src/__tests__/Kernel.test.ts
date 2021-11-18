@@ -2,6 +2,7 @@ import { Bundle } from "../models/Bundle";
 import { assert, expect } from "chai";
 import { Kernel } from "../models/Kernel";
 import { KernelContext, KernelPhase } from "../defs";
+import { ExecutionContext } from "../utils/modes";
 
 describe("Kernel", () => {
   it("Should be instantiable with bundles, parameters, and can addBundles", async () => {
@@ -104,5 +105,8 @@ describe("Kernel", () => {
     assert.isTrue(kernel2.isTesting());
     assert.isTrue(kernel2.isDebug());
     assert.isFalse(kernel2.isProduction());
+    assert.isTrue(
+      kernel2.parameters.executionContext === ExecutionContext.SERVER
+    );
   });
 });
