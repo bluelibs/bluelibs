@@ -1,6 +1,6 @@
 import * as React from "react";
 import { act, renderHook, RenderResult } from "@testing-library/react-hooks";
-import { UISessionEventChangeHandler, IUISessionStore } from "../";
+import { UISessionEventChangeHandler, IXUISessionStore } from "../";
 import { useUISession } from "../react/hooks";
 import { sessionsConfig } from "./ecosystem";
 import { UISessionService } from "../react";
@@ -32,7 +32,7 @@ const getContainerHook = (): ContainerInstance => {
   return result.current;
 };
 
-const getFieldHook = <T extends keyof IUISessionStore>(
+const getFieldHook = <T extends keyof IXUISessionStore>(
   sessionHook: RenderResult<UISessionService>,
   fieldName: T
 ) => {

@@ -1,10 +1,10 @@
 import { Bundle, EventManager } from "@bluelibs/core";
 import { UISessionService } from "./react/services/UISession.service";
 import { UI_SESSION_BUNDLE_CONFIG_TOKEN } from "./constants";
-import { IUISessionBundleConfigType } from "./defs";
+import { IXUISessionBundleConfigType } from "./defs";
 
-export class UISessionBundle extends Bundle<IUISessionBundleConfigType> {
-  protected defaultConfig = {} as IUISessionBundleConfigType;
+export class XUISessionBundle extends Bundle<IXUISessionBundleConfigType> {
+  protected defaultConfig = {} as IXUISessionBundleConfigType;
 
   async prepare() {
     this.container.set(UI_SESSION_BUNDLE_CONFIG_TOKEN, this.config);

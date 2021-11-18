@@ -7,7 +7,7 @@ import {
 } from "@bluelibs/core";
 import { useEffect, useState } from "react";
 import { UI_SESSION_BUNDLE_CONFIG_TOKEN } from "../../constants";
-import { IUISessionBundleConfigType, IUISessionStore } from "../../defs";
+import { IXUISessionBundleConfigType, IXUISessionStore } from "../../defs";
 import {
   UISessionStateChangeEvent,
   UISessionStateChangeEventProps,
@@ -25,14 +25,14 @@ export type UISessionEventChangeHandler = (
 
 @Service()
 export class UISessionService {
-  protected _state: IUISessionStore;
+  protected _state: IXUISessionStore;
 
   constructor(
     protected readonly eventManager: EventManager,
     @Inject(() => UISessionStorage)
     protected readonly storage: UISessionStorage,
     @Inject(UI_SESSION_BUNDLE_CONFIG_TOKEN)
-    protected readonly config: IUISessionBundleConfigType
+    protected readonly config: IXUISessionBundleConfigType
   ) {}
 
   async init() {
@@ -51,14 +51,14 @@ export class UISessionService {
   /**
    * We don't want to expose the state for modification without using .set()
    */
-  get state(): IUISessionStore {
+  get state(): IXUISessionStore {
     return this._state;
   }
 
-  public get<T extends keyof IUISessionStore>(
+  public get<T extends keyof IXUISessionStore>(
     fieldName: T,
-    defaultValue?: IUISessionStore[T]
-  ): IUISessionStore[T] {
+    defaultValue?: IXUISessionStore[T]
+  ): IXUISessionStore[T] {
     const fieldValue =
       defaultValue !== undefined && this._state[fieldName] === undefined
         ? defaultValue
@@ -81,9 +81,9 @@ export class UISessionService {
     return value;
   }
 
-  public async set<T extends keyof IUISessionStore>(
+  public async set<T extends keyof IXUISessionStore>(
     fieldName: T,
-    value: IUISessionStore[T],
+    value: IXUISessionStore[T],
     options?: IUISessionOptions
   ) {
     const previousValue = this.state[fieldName];
@@ -111,7 +111,7 @@ export class UISessionService {
    * @param fieldName
    * @param handler
    */
-  onSet<T extends keyof IUISessionStore>(
+  onSet<T extends keyof IXUISessionStore>(
     fieldName: T,
     handler: UISessionEventChangeHandler
   ) {
