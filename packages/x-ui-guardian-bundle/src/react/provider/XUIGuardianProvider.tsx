@@ -9,6 +9,7 @@ export const XUIGuardianProvider: React.FC<IXUIGuardianProviderProps> = (
 ) => {
   const guardianSmart = use(GUARDIAN_SMART_TOKEN);
   const [guardian, GuardianProvider] = newSmart(guardianSmart);
+
   if (!guardian.state.initialised && props.loadingComponent) {
     // We want to prevent re-renders at page/route level due to guardian
     // Not doing so, it may imply a re-render almost 4 times on every page load
