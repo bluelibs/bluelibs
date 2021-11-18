@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-session-bundle",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": false,
   "description": "UISessionBundle",
   "main": "dist/index.js",
@@ -43,6 +43,7 @@
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",
     "jest": "^27.3.1",
+    "object-assign": "^4.1.1",
     "ts-jest": "^27.0.7"
   }
 }

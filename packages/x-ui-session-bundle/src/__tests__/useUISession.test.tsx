@@ -26,12 +26,6 @@ const getSessionHook = () => {
   return result;
 };
 
-const getContainerHook = (): ContainerInstance => {
-  const { result } = renderHook(useContainer, {});
-
-  return result.current;
-};
-
 const getFieldHook = <T extends keyof IXUISessionStore>(
   sessionHook: RenderResult<UISessionService>,
   fieldName: T
