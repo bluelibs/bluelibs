@@ -12,8 +12,8 @@ import {
   ApolloProvider,
   UIApolloBundle,
 } from "@bluelibs/ui-apollo-bundle";
-import { UISessionBundle } from "@bluelibs/x-ui-session-bundle";
-import { UII18NBundle } from "@bluelibs/x-ui-i18n-bundle";
+import { XUISessionBundle } from "@bluelibs/x-ui-session-bundle";
+import { XUII18NBundle } from "@bluelibs/x-ui-i18n-bundle";
 import { XUICollectionsBundle } from "@bluelibs/x-ui-collections-bundle";
 
 export class XUINextBundle extends Bundle<XUINextBundleConfigType> {
@@ -31,8 +31,8 @@ export class XUINextBundle extends Bundle<XUINextBundleConfigType> {
     await this.addDependency(UIApolloBundle, config.apollo);
     await this.addDependency(XUIGuardianBundle, config.guardian);
     await this.addDependency(XUIReactBundle, config.react);
-    await this.addDependency(UISessionBundle, config.sessions);
-    await this.addDependency(UII18NBundle, config.i18n);
+    await this.addDependency(XUISessionBundle, config.sessions);
+    await this.addDependency(XUII18NBundle, config.i18n);
     await this.addDependency(XUICollectionsBundle);
   }
 
@@ -46,11 +46,6 @@ export class XUINextBundle extends Bundle<XUINextBundleConfigType> {
           client: this.container.get(ApolloClient),
         }),
         order: 10,
-      },
-      // FIXME: find a way to pass him an `initialisingComponent`, if needed?
-      {
-        component: XUIGuardianProvider,
-        order: 20,
       },
     ]);
   }
