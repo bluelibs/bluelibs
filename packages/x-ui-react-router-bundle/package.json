@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-react-router-bundle",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "private": false,
   "description": "XUIReactRouterBundle",
   "main": "dist/index.js",
