@@ -8,7 +8,6 @@ import { jsonToGraphQLQuery, VariableType } from "json-to-graphql-query";
 import { gql, DocumentNode, FetchPolicy } from "@apollo/client/core";
 import { EJSON, ObjectId } from "@bluelibs/ejson";
 import { MongoFilterQuery, QueryBodyType } from "./defs";
-import { UpdateFilter } from "mongodb";
 import { getSideBody } from "./utils/getSideBody";
 import { cleanTypename } from "./utils/cleanTypename";
 import { ApolloClient, IEventsMap } from "@bluelibs/ui-apollo-bundle";
@@ -16,6 +15,10 @@ import { ApolloClient, IEventsMap } from "@bluelibs/ui-apollo-bundle";
 type CompiledQueriesTypes = "Count" | "InsertOne" | "UpdateOne" | "DeleteOne";
 
 type TransformPartial<T> = Partial<{ [key in keyof T]: any }>;
+
+type UpdateFilter<T = any> = {
+  [key: string]: any;
+};
 
 export type CollectionTransformMap<T> = Partial<{
   [key in keyof T]: (value: any) => any;

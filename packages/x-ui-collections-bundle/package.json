@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-collections-bundle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": false,
   "description": "XUICollectionsBundle",
   "main": "dist/index.js",
@@ -29,7 +29,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/mongodb": "^4.0.7",
     "json-to-graphql-query": "^2.1.0"
   },
   "peerDependencies": {
@@ -48,10 +47,10 @@
     "@bluelibs/smart": "^1.0.0",
     "@bluelibs/ui-apollo-bundle": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
-    "react": "^17.0.2",
     "@types/jest": "^27.0.2",
-    "@types/react": "^17.0.33",
+    "@types/react": "^17.0.35",
     "jest": "^27.3.1",
+    "react": "^17.0.2",
     "ts-jest": "^27.0.7"
   }
 }
