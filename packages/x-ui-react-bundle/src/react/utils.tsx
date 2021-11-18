@@ -17,9 +17,16 @@ export const generateWrapperTree = (
 
   const wrapper = wrappers[index];
 
+  let props;
+  if (typeof wrapper.props === "function") {
+    props = wrapper.props();
+  } else if (typeof wrapper.props === "object") {
+    props = wrapper.props;
+  }
+
   return createElement(
     wrapper.component,
-    wrapper.props && wrapper.props(),
+    props,
     generateWrapperTree(wrappers, index + 1)
   );
 };
