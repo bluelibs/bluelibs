@@ -10,12 +10,7 @@ import {
 import { RouteProps } from "react-router-dom";
 import * as H from "history";
 import { createBrowserHistory } from "history";
-
-export interface IRoute<T = IRouteParams, Q = IRouteParams>
-  extends IBaseRoute<T, Q>,
-    Omit<RouteProps, "path"> {
-  path: string;
-}
+import { IRoute } from "../defs";
 
 @Service()
 export class XRouter extends XCoreRouter<IRoute> {
