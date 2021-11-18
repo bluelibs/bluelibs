@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-guardian-bundle",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "private": false,
   "description": "XUIGuardianBundle",
   "main": "dist/index.js",
@@ -32,13 +32,18 @@
     "graphql-tag": "^2.12.5"
   },
   "peerDependencies": {
-    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/core": "^1.2.0",
     "@bluelibs/smart": "^1.0.0",
     "@bluelibs/ui-apollo-bundle": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "react": "^17.0.2"
   },
   "devDependencies": {
+    "@bluelibs/core": "^1.2.0",
+    "@bluelibs/smart": "^1.0.0",
+    "@bluelibs/ui-apollo-bundle": "^1.0.0",
+    "@bluelibs/x-ui-react-bundle": "^1.0.0",
+    "react": "^17.0.2",
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",
     "@types/react-test-renderer": "^17.0.1",
