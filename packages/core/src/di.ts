@@ -76,6 +76,7 @@ export class ContainerInstance extends BaseContainerInstance {
           return super.get(id);
         }
       }
+      console.error(`ServiceNotFoundError for ID: ${id}`);
       throw e;
     }
   }
