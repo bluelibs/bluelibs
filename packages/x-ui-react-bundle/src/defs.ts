@@ -2,8 +2,8 @@ import { ComponentType } from "react";
 import { IComponents } from "./react/components";
 
 export interface WrapperComponentType<T> {
-  component: (props: T) => JSX.Element;
-  props?: () => Partial<Omit<T, "children">>;
+  component: ComponentType<T> | ((props: T) => JSX.Element);
+  props?: Partial<Omit<T, "children">> | (() => Partial<Omit<T, "children">>);
 }
 
 export type WrapperType<T> = WrapperComponentType<T> & {

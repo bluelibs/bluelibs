@@ -1,9 +1,12 @@
-import { IReactRoute, IRouteParams } from "@bluelibs/x-ui-react-router-bundle";
+import {
+  IRoute as IBaseRoute,
+  IRouteParams,
+} from "@bluelibs/x-ui-react-router-bundle";
 /**
  * We use `IRoute` here for compatibility reasons
  */
 export interface IRoute<T = IRouteParams, Q = IRouteParams>
-  extends IReactRoute<T, Q> {}
+  extends IBaseRoute<T, Q> {}
 
 /**
  * The code below is designed to offer backwards compatibility

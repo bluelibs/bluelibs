@@ -1,5 +1,5 @@
 import { IUII18NBundleConfig } from "@bluelibs/x-ui-i18n-bundle";
-import { IUISessionBundleConfigType } from "@bluelibs/x-ui-session-bundle";
+import { IXUISessionBundleConfigType } from "@bluelibs/x-ui-session-bundle";
 import {
   GuardianSmart,
   IXUIGuardianBundleConfigType,
@@ -29,7 +29,7 @@ export type XUIBundleConfigType = Partial<{
 
   apollo: IUIApolloBundleConfig;
   guardian: IXUIGuardianBundleConfigType;
-  sessions: IUISessionBundleConfigType;
+  sessions: IXUISessionBundleConfigType;
   react: IXUIReactBundleConfigType;
   i18n: IUII18NBundleConfig;
 }>;

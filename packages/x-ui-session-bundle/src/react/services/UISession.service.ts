@@ -1,14 +1,19 @@
-import { EventManager, Service, Event } from "@bluelibs/core";
+import {
+  EventManager,
+  Service,
+  Event,
+  Inject,
+  ExecutionContext,
+} from "@bluelibs/core";
 import { useEffect, useState } from "react";
-import { IUISessionBundleConfigType, IUISessionStore } from "../../defs";
+import { UI_SESSION_BUNDLE_CONFIG_TOKEN } from "../../constants";
+import { IXUISessionBundleConfigType, IXUISessionStore } from "../../defs";
 import {
   UISessionStateChangeEvent,
   UISessionStateChangeEventProps,
 } from "../../events";
-import {
-  getLocalStorageState,
-  updateLocalStorageState,
-} from "./utils/UISession.utils";
+import { UISessionStorage } from "./UISesssionStorage";
+import { UISessionInitialisingEvent } from "../../events/UISesssionInitialisingEvent";
 
 export interface IUISessionOptions {
   persist?: boolean;
@@ -20,32 +25,40 @@ export type UISessionEventChangeHandler = (
 
 @Service()
 export class UISessionService {
-  protected _state: IUISessionStore;
-  protected localStorageKey: string;
+  protected _state: IXUISessionStore;
 
   constructor(
     protected readonly eventManager: EventManager,
-    config: IUISessionBundleConfigType
-  ) {
-    const { localStorageKey, defaults } = config;
+    @Inject(() => UISessionStorage)
+    protected readonly storage: UISessionStorage,
+    @Inject(UI_SESSION_BUNDLE_CONFIG_TOKEN)
+    protected readonly config: IXUISessionBundleConfigType
+  ) {}
 
-    const localStorageState = getLocalStorageState(localStorageKey);
+  async init() {
+    const { defaults } = this.config;
+    const newDefaults = Object.assign({}, defaults, this.storage.all());
 
-    this._state = Object.assign({}, defaults, localStorageState);
-    this.localStorageKey = localStorageKey;
+    await this.eventManager.emit(
+      new UISessionInitialisingEvent({
+        defaults: newDefaults,
+      })
+    );
+
+    this._state = Object.assign({}, newDefaults);
   }
 
   /**
    * We don't want to expose the state for modification without using .set()
    */
-  get state(): IUISessionStore {
+  get state(): IXUISessionStore {
     return this._state;
   }
 
-  public get<T extends keyof IUISessionStore>(
+  public get<T extends keyof IXUISessionStore>(
     fieldName: T,
-    defaultValue?: IUISessionStore[T]
-  ): IUISessionStore[T] {
+    defaultValue?: IXUISessionStore[T]
+  ): IXUISessionStore[T] {
     const fieldValue =
       defaultValue !== undefined && this._state[fieldName] === undefined
         ? defaultValue
@@ -68,9 +81,9 @@ export class UISessionService {
     return value;
   }
 
-  public async set<T extends keyof IUISessionStore>(
+  public async set<T extends keyof IXUISessionStore>(
     fieldName: T,
-    value: IUISessionStore[T],
+    value: IXUISessionStore[T],
     options?: IUISessionOptions
   ) {
     const previousValue = this.state[fieldName];
@@ -80,7 +93,7 @@ export class UISessionService {
     });
 
     if (options?.persist) {
-      updateLocalStorageState(fieldName, value, this.localStorageKey);
+      this.storage.setItem(fieldName, value);
     }
 
     return this.eventManager.emit(
@@ -98,7 +111,7 @@ export class UISessionService {
    * @param fieldName
    * @param handler
    */
-  onSet<T extends keyof IUISessionStore>(
+  onSet<T extends keyof IXUISessionStore>(
     fieldName: T,
     handler: UISessionEventChangeHandler
   ) {

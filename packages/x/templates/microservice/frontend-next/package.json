@@ -1,0 +1,34 @@
+{
+  "name": "{{ name }}",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.4.16",
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/ejson": "^1.0.0",
+    "@bluelibs/ordered-lists": "^1.0.0",
+    "@bluelibs/smart": "^1.0.0",
+    "apollo-link-context": "^1.0.20",
+    "apollo-upload-client": "^16.0.0",
+    "babel-plugin-inline-react-svg": "^2.0.1",
+    "json-to-graphql-query": "^2.1.0",
+    "next": "12.0.1",
+    "query-string": "^7.0.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "subscriptions-transport-ws": "^0.9.19"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.6",
+    "@types/react": "17.0.33",
+    "eslint": "7.32.0",
+    "eslint-config-next": "12.0.1",
+    "typescript": "4.4.4"
+  }
+}

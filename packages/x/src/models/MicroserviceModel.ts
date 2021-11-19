@@ -18,11 +18,16 @@ export class BackendMicroserviceModel extends MicroserviceModel {
   createUsersCollection: boolean = true;
 }
 
-export class FrontendMicroserviceModel extends MicroserviceModel {
+export class FrontendReactMicroserviceModel extends MicroserviceModel {
+  hasCustomGuardian: boolean;
+}
+
+export class FrontendNextMicroserviceModel extends MicroserviceModel {
   hasCustomGuardian: boolean;
 }
 
 export enum MicroserviceTypeEnum {
   BACKEND = "backend",
-  FRONTEND = "frontend",
+  FRONTEND_REACT = "frontend-react",
+  FRONTEND_NEXT = "frontend-next",
 }

@@ -33,6 +33,17 @@ export class MicroserviceInquirer extends Inquirer<MicroserviceModel> {
       "name",
       Shortcuts.input("Enter the name of the microservice")
     );
+    if (
+      [
+        MicroserviceTypeEnum.FRONTEND_REACT,
+        MicroserviceTypeEnum.FRONTEND_NEXT,
+      ].includes(this.model.type)
+    ) {
+      await this.prompt(
+        "hasCustomGuardian",
+        Shortcuts.confirm("Do you want to add a custom GuardianSmart?")
+      );
+    }
 
     if (this.model.type === MicroserviceTypeEnum.BACKEND) {
       await this.prompt(

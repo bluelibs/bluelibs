@@ -138,9 +138,10 @@ export abstract class XForm<T = null> extends Consumer<XFormElementType> {
     const newData: Partial<XFormElementType> = Object.assign({}, data);
 
     if (newData.component) {
-      (newData as XFormElementLeafType).render = null;
+      newData["render"] = undefined;
     } else if (newData["render"]) {
-      newData.component = undefined;
+      newData["nest"] = undefined;
+      newData["component"] = undefined;
       newData.componentProps = {};
     }
 

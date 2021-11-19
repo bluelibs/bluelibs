@@ -1,4 +1,6 @@
-import { Filter } from "mongodb";
+type Filter<T = any> = {
+  [key: string]: any;
+};
 
 export interface IQueryOptions<T = any> {
   limit?: number;

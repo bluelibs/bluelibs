@@ -1,3 +1,5 @@
+import "./defs";
+
 export { Consumer as FormConsumer } from "./react/models/Consumer";
 export { EJSON } from "@bluelibs/ejson";
 export { XUIAdminBundle } from "./XUIAdminBundle";

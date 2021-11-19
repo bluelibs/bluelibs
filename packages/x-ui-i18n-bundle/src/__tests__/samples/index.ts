@@ -1,8 +1,8 @@
 import { Kernel } from "@bluelibs/core";
-import { UII18NBundle } from "../../UII18NBundle";
+import { XUII18NBundle } from "../../XUII18NBundle";
 
 export function createSampleKernel() {
   return new Kernel({
-    bundles: [new UII18NBundle()],
+    bundles: [new XUII18NBundle()],
   });
 }

@@ -5,9 +5,17 @@ import { GuardianSmart, ProtectProps } from ".";
 
 export type IXUIGuardianBundleConfigType = {
   guardianClass: Constructor<GuardianSmart>;
+  /**
+   * Provide this component if you want to prevent rendering until Guardian has been initialised.
+   * Most likely this is used when your application renders very differently for a logged-in person vs non-logged-in
+   */
+  loadingComponent?: React.ComponentType;
 };
 
 export type IXUIGuardianProviderProps = {
+  /**
+   * Provide this component
+   */
   loadingComponent?: React.ComponentType;
 };
 

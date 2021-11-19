@@ -14,7 +14,6 @@ import { UISessionBundle } from "@bluelibs/x-ui-session-bundle";
 import {
   GuardianSmart,
   XUIGuardianBundle,
-  XUIGuardianProvider,
 } from "@bluelibs/x-ui-guardian-bundle";
 import { Components, XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { IComponents } from "./overrides";
@@ -77,18 +76,6 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
           client: this.container.get(ApolloClient),
         }),
         order: 10,
-      },
-      // FIXME: find a way to pass him an `initialisingComponent`, if needed?
-      {
-        component: XUIGuardianProvider,
-        order: 20,
-      },
-      {
-        component: XBrowserRouter,
-        props: () => ({
-          router: this.container.get(XRouter),
-        }),
-        order: Infinity,
       },
     ]);
   }

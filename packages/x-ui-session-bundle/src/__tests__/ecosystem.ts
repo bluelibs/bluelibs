@@ -4,7 +4,6 @@ export const sessionsConfig = {
   defaults: {
     locale: "en",
   },
-  localStorageKey: "BlueLibs_UI_SESSION",
 };
 
 export const kernel = createSampleKernel();

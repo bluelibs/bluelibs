@@ -1,10 +1,10 @@
 import { Event } from "@bluelibs/core";
-import { IUISessionStore } from "..";
+import { IXUISessionStore } from "..";
 
 export type UISessionStateChangeEventProps = {
-  fieldName: keyof IUISessionStore;
-  previousValue: IUISessionStore[keyof IUISessionStore];
-  value: IUISessionStore[keyof IUISessionStore];
+  fieldName: keyof IXUISessionStore;
+  previousValue: IXUISessionStore[keyof IXUISessionStore];
+  value: IXUISessionStore[keyof IXUISessionStore];
 };
 
 export class UISessionStateChangeEvent extends Event<UISessionStateChangeEventProps> {}

@@ -12,6 +12,7 @@ import { IXUIGuardianBundleConfigType } from "./defs";
 import { setDefaults } from "@bluelibs/smart";
 import { Protect } from "./react/components/Protect";
 import { UserLoggedInEvent, UserLoggedOutEvent } from "./events";
+import { XUIGuardianProvider } from "./react/provider/XUIGuardianProvider";
 
 export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
   protected defaultConfig = {
@@ -66,8 +67,18 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
   }
 
   async prepare() {
-    this.container.get(XUIReactBundle).updateComponents({
+    const xuiReactBundle = this.container.get(XUIReactBundle);
+
+    xuiReactBundle.updateComponents({
       Protect,
+    });
+
+    xuiReactBundle.addWrapper({
+      component: XUIGuardianProvider,
+      props: {
+        loadingComponent: this.config.loadingComponent,
+      },
+      order: 20,
     });
   }
 

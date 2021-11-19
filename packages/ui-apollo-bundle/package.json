@@ -37,6 +37,13 @@
     "subscriptions-transport-ws": "^0.9.19"
   },
   "devDependencies": {
+    "@apollo/client": "^3.4.16",
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/ejson": "^1.0.0",
+    "apollo-link-context": "^1.0.20",
+    "apollo-upload-client": "^16.0.0",
+    "react": "^17.0.2",
+    "subscriptions-transport-ws": "^0.9.19",
     "@types/apollo-upload-client": "^14.1.0",
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",

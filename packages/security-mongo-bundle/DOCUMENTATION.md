@@ -1,7 +1,7 @@
 ## Install
 
 ```bash
-npm i -S @bluelibs/security-bundle @bluelibs-security-mongo-bundle
+npm i -S @bluelibs/security-bundle @bluelibs/security-mongo-bundle
 ```
 
 ```js

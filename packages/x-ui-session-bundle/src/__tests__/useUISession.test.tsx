@@ -1,11 +1,14 @@
 import * as React from "react";
 import { act, renderHook, RenderResult } from "@testing-library/react-hooks";
-import { UISessionEventChangeHandler, IUISessionStore } from "../";
+import { UISessionEventChangeHandler, IXUISessionStore } from "../";
 import { useUISession } from "../react/hooks";
-import { getLocalStorageState } from "../react/services/utils/UISession.utils";
-import { container, sessionsConfig } from "./ecosystem";
+import { sessionsConfig } from "./ecosystem";
 import { UISessionService } from "../react";
-import { ContainerContext } from "@bluelibs/x-ui-react-bundle";
+import { ContainerContext, useContainer } from "@bluelibs/x-ui-react-bundle";
+import { UISessionStorage } from "../react/services/UISesssionStorage";
+import { ContainerInstance } from "@bluelibs/core";
+import { container } from "./ecosystem";
+import { EJSON } from "@bluelibs/ejson";
 
 const containerContextProvider = ({ children }) => {
   return (
@@ -23,7 +26,7 @@ const getSessionHook = () => {
   return result;
 };
 
-const getFieldHook = <T extends keyof IUISessionStore>(
+const getFieldHook = <T extends keyof IXUISessionStore>(
   sessionHook: RenderResult<UISessionService>,
   fieldName: T
 ) => {
@@ -86,11 +89,8 @@ describe("useUISession", () => {
       sessionHook.current.set("locale", locale, { persist: true })
     );
 
-    const localStorageState = getLocalStorageState(
-      sessionsConfig.localStorageKey
-    );
-
-    expect(localStorageState.locale).toEqual(locale);
+    const storage = container.get(UISessionStorage);
+    expect(storage.getItem("locale")).toEqual(locale);
   });
 
   test("persistance - set with handler", async () => {
@@ -112,32 +112,25 @@ describe("useUISession", () => {
       })
     );
 
-    const localStorageState = getLocalStorageState(
-      sessionsConfig.localStorageKey
-    );
+    const storage = container.get(UISessionStorage);
 
     expect(handlerIsCalled).toStrictEqual(true);
-    expect(localStorageState.locale).toStrictEqual(locale);
+    expect(storage.getItem("locale")).toStrictEqual(locale);
   });
 
   test("uses existing values from localStorage, and defaults for rest", () => {
     const sessionHook = getSessionHook();
 
-    const localStorageState = getLocalStorageState(
-      sessionsConfig.localStorageKey
-    );
-
+    const storage = container.get(UISessionStorage);
+    const localStorageState = storage.all();
     const localStorageStateKeys = Object.keys(localStorageState);
 
-    const { localStorageKey, defaults } = sessionsConfig;
+    const { defaults } = sessionsConfig;
 
     for (const key of Object.keys(defaults)) {
       const value = sessionHook.current.state[key];
-      if (localStorageStateKeys.includes(key)) {
-        expect(value).toStrictEqual(localStorageState[key]);
-      } else {
-        expect(value).toStrictEqual(sessionsConfig[key]);
-      }
+
+      expect(value).toStrictEqual(sessionHook.current.state[key]);
     }
   });
 

@@ -1,9 +1,9 @@
+import "@bluelibs/x-ui-router";
 import * as React from "react";
-import "@bluelibs/x-ui";
 import { IComponents, IRoute } from "@bluelibs/x-ui";
 import "./react/components/types";
 
-declare module "@bluelibs/x-ui" {
+declare module "@bluelibs/x-ui-router" {
   export interface IRoute {
     menu?: IMenuItemConfig;
   }

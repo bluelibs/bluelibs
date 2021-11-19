@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-session-bundle",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "private": false,
   "description": "UISessionBundle",
   "main": "dist/index.js",
@@ -29,17 +29,21 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/core": "^1.2.0",
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
   "devDependencies": {
+    "@bluelibs/core": "^1.2.0",
+    "@bluelibs/ejson": "^1.0.0",
+    "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "@testing-library/react-hooks": "^7.0.2",
     "@types/jest": "^27.0.2",
     "@types/react": "^17.0.33",
     "jest": "^27.3.1",
+    "object-assign": "^4.1.1",
     "ts-jest": "^27.0.7"
   }
 }
