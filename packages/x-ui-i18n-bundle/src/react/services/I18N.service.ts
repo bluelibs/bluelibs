@@ -1,7 +1,7 @@
 import { EventManager, Inject, Service } from "@bluelibs/core";
 
 import * as Polyglot from "node-polyglot";
-import { IUII18NBundleConfig } from "../../defs";
+import { IXUII18NBundleConfig } from "../../defs";
 import { I18N_CONFIG_TOKEN } from "../../constants";
 
 export type I18NConfig = Record<string, I18NMessages>;
@@ -17,7 +17,7 @@ export class I18NService {
 
   constructor(
     @Inject(I18N_CONFIG_TOKEN)
-    protected readonly config: IUII18NBundleConfig,
+    protected readonly config: IXUII18NBundleConfig,
     protected readonly eventManager: EventManager
   ) {
     if (config.polyglots) {
