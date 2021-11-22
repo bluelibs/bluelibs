@@ -7,6 +7,7 @@ import {
   ServiceOptions,
   Constructable,
   ServiceMetadata,
+  Token,
 } from "typedi";
 
 export { Inject, Token } from "typedi";
@@ -76,7 +77,9 @@ export class ContainerInstance extends BaseContainerInstance {
           return super.get(id);
         }
       }
-      console.error(`ServiceNotFoundError for ID: ${id}`);
+      console.error(
+        `ServiceNotFoundError for ID: ${id instanceof Token ? id.name : id}`
+      );
       throw e;
     }
   }

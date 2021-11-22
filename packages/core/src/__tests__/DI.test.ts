@@ -4,6 +4,8 @@ import { Kernel } from "../models/Kernel";
 import { EventManager } from "../models/EventManager";
 import { BundlePhase } from "../defs";
 import { Inject, Service } from "../di";
+import { ContainerInstance } from "..";
+import { ServiceNotFoundError, Token } from "typedi";
 
 describe("DI", () => {
   it("Should work without specifying @Service()", async () => {
@@ -80,5 +82,21 @@ describe("DI", () => {
     expect(
       kernel.container.get(MyService) === kernel.container.get(MyService)
     ).toBe(false);
+  });
+
+  it("should throw a readable error when service is not found", async () => {
+    const kernel = new Kernel({});
+
+    await kernel.init();
+
+    expect(() => kernel.container.get("test")).toThrow(
+      new ServiceNotFoundError("test")
+    );
+
+    const token = new Token("TOKEN_NAME");
+
+    expect(() => kernel.container.get(token)).toThrow(
+      new ServiceNotFoundError("Token<TOKEN_NAME>")
+    );
   });
 });
