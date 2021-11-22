@@ -9,6 +9,7 @@ import {
 } from "../../events";
 import { LOCAL_STORAGE_TOKEN_KEY } from "../../constants";
 import { Smart } from "@bluelibs/smart";
+import { ObjectId } from "@bluelibs/ejson";
 
 export type State<UserType = GuardianUserType> = {
   /**
@@ -158,6 +159,19 @@ export class GuardianSmart<
     await this.load();
   }
 
+  /**
+   * Transforms the user received from retrieveUser().
+   * By default, it only makes _id an ObjectId.
+   * @param user
+   * @returns user
+   */
+  public transformUser(user: TUserType): TUserType {
+    return {
+      ...user,
+      _id: new ObjectId(user._id as any),
+    };
+  }
+
   protected async retrieveUser(): Promise<TUserType> {
     return this.apolloClient
       .query({
@@ -177,7 +191,9 @@ export class GuardianSmart<
         fetchPolicy: "network-only",
       })
       .then((response) => {
-        return response.data.me;
+        const user = response.data.me;
+
+        return this.transformUser(user);
       });
   }
 

@@ -6,7 +6,7 @@ import { XUIGuardianProvider } from "../react/provider";
 import * as TestRenderer from "react-test-renderer";
 import { XUIProvider } from "@bluelibs/x-ui-react-bundle";
 
-describe("UII18NBundle", () => {
+describe("XUIGuardianBundle", () => {
   test("Container Injection", async () => {
     const guardianSmart = container.get(GuardianSmart);
 
