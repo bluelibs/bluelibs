@@ -179,5 +179,4 @@ jobs:
       node: 14
       cache: npm
       env: TARGET=packages/x-ui-session-bundle
-
-script: if .travis/build-condition.sh $TRAVIS_COMMIT_RANGE $TARGET; then echo "$TARGET is being built" && cd $TARGET && npm install && npm run test; else echo "$TARGET is NOT being built"; fi
+# script: if .travis/build-condition.sh $TRAVIS_COMMIT_RANGE $TARGET; then echo "$TARGET is being built" && cd $TARGET && npm install && npm run test; else echo "$TARGET is NOT being built"; fi
