@@ -902,7 +902,7 @@ const subscription = {
         filters: args.filters,
         options: {
           // Note that we only subscribe by _id we only care about new things that are added
-          fields: { _id: 1 },
+          projection: { _id: 1 },
         },
       },
       // Other fields

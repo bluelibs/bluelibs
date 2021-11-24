@@ -363,7 +363,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
   protected async requery(event: ISubscriptionEvent<T>) {
     const freshIds = (
       await this.collection
-        .find(this.filters, { ...this.options, fields: { _id: 1 } })
+        .find(this.filters, { ...this.options, projection: { _id: 1 } })
         .toArray()
     ).map((document) => document._id);
 
