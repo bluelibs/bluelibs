@@ -82,7 +82,7 @@ export function secureBody<T = null>(
   body: QueryBodyType<T>,
   config: ISecureOptions<T> = {}
 ) {
-  body = Object.assign({}, body);
+  body = Object.assign({}, body) as QueryBodyType<T>;
 
   if (!body.$) {
     body.$ = {};
@@ -121,7 +121,7 @@ export function secureBody<T = null>(
   }
 
   if (config.intersect) {
-    body = intersectBody(body, config.intersect);
+    body = intersectBody(body, config.intersect) as QueryBodyType<T>;
   }
 
   // enforce the maximum amount of data we allow to retrieve

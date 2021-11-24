@@ -18,7 +18,7 @@ export interface ISecureOptions<T = null> {
   /**
    * Enforce filters
    */
-  filters?: FilterQuery<any>;
+  filters?: T extends null ? FilterQuery<any> : FilterQuery<T>;
   options?: any;
   /**
    * This gets deeply merged with the body (useful for $ argument)
@@ -125,7 +125,7 @@ export interface IQueryOptions<T = any> {
 }
 
 export interface ICollectionQueryConfig<T = any> {
-  filters?: T extends null ? any : FilterQuery<T>;
+  filters?: T extends null ? FilterQuery<any> : FilterQuery<T>;
   options?: IQueryOptions<T>;
   pipeline?: any[];
 }
