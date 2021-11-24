@@ -29,7 +29,7 @@
     "@types/chai": "^4.2.22",
     "@types/chai-as-promised": "^7.1.4",
     "@types/graphql": "^14.2.3",
-    "@types/jest": "^27.0.2",
+    "@types/jest": "^27.0.3",
     "@types/node": "^16.11.6",
     "@types/react": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "5.2.0",

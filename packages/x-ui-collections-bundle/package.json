@@ -47,7 +47,7 @@
     "@bluelibs/smart": "^1.0.0",
     "@bluelibs/ui-apollo-bundle": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
-    "@types/jest": "^27.0.2",
+    "@types/jest": "^27.0.3",
     "@types/react": "^17.0.35",
     "jest": "^27.3.1",
     "react": "^17.0.2",

@@ -25,12 +25,12 @@
     "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
   },
   "dependencies": {
-    "chalk": "^2.4.2",
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/terminal-bundle": "^1.0.0",
     "@graphql-tools/merge": "^6.0.7",
     "@types/faker": "^5.5.7",
+    "chalk": "^2.4.2",
     "faker": "^5.5.3",
     "fast-glob": "^3.2.2",
     "fs-extra": "^9.0.0",
@@ -45,7 +45,7 @@
     "@types/chai": "^4.2.3",
     "@types/chai-as-promised": "^7.1.2",
     "@types/fs-extra": "^9.0.1",
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^27.0.3",
     "@types/lodash": "^4.14.154",
     "@types/node": "^12.12.43",
     "@typescript-eslint/eslint-plugin": "2.3.0",
@@ -55,7 +55,7 @@
     "eslint": "^6.6.0",
     "eslint-config-prettier": "6.3.0",
     "eslint-plugin-prettier": "3.1.1",
-    "jest": "^26.0.0",
+    "jest": "^27.3.1",
     "jest-junit": "^10.0.0",
     "source-map-support": "^0.5.13",
     "typescript": "^4.0.2"
