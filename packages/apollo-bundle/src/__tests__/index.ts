@@ -6,7 +6,7 @@ import { gql } from "apollo-boost";
 import { assert } from "chai";
 import { PubSub } from "graphql-subscriptions";
 
-let currentServer;
+let currentKernel;
 
 async function createEcosystemWithInit(
   loadable: any,
@@ -31,16 +31,15 @@ async function createEcosystemWithInit(
 
   await kernel.init();
 
-  currentServer = kernel.container.get(ApolloBundle).httpServer;
+  currentKernel = kernel;
 
   return kernel;
 }
 
 describe("ApolloBundle", () => {
-  afterEach(() => {
-    if (currentServer) {
-      currentServer.close();
-      currentServer = null;
+  afterEach(async () => {
+    if (currentKernel) {
+      await currentKernel.shutdown();
     }
   });
 
@@ -57,8 +56,6 @@ describe("ApolloBundle", () => {
         },
       },
     });
-
-    currentServer = kernel.container.get(ApolloBundle).httpServer;
 
     const client = createApolloClient(6000);
 
@@ -126,7 +123,6 @@ describe("ApolloBundle", () => {
             data: { postAdded },
           } = result;
           assert.equal(MESSAGE, postAdded);
-          currentServer.close();
           resolve();
         },
       });
