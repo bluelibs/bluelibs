@@ -12,105 +12,105 @@ jobs:
   include:
     - name: apollo-bundle
       cache: npm
-      env: TARGET=projects/apollo-bundle
+      env: TARGET=packages/apollo-bundle
     - name: apollo-security-bundle
       cache: npm
-      env: TARGET=projects/apollo-security-bundle
+      env: TARGET=packages/apollo-security-bundle
     - name: core
       cache: npm
-      env: TARGET=projects/core
+      env: TARGET=packages/core
     - name: ejson
       cache: npm
-      env: TARGET=projects/ejson
+      env: TARGET=packages/ejson
     - name: email-bundle
       cache: npm
-      env: TARGET=projects/email-bundle
+      env: TARGET=packages/email-bundle
     - name: graphql-bundle
       cache: npm
-      env: TARGET=projects/graphql-bundle
+      env: TARGET=packages/graphql-bundle
     - name: http-bundle
       cache: npm
-      env: TARGET=projects/http-bundle
+      env: TARGET=packages/http-bundle
     - name: logger-bundle
       cache: npm
-      env: TARGET=projects/logger-bundle
+      env: TARGET=packages/logger-bundle
     - name: mikroorm-bundle
       cache: npm
-      env: TARGET=projects/mikroorm-bundle
+      env: TARGET=packages/mikroorm-bundle
     - name: mongo-bundle
       cache: npm
-      env: TARGET=projects/mongo-bundle
+      env: TARGET=packages/mongo-bundle
     - name: nova
       cache: npm
-      env: TARGET=projects/nova
+      env: TARGET=packages/nova
     - name: password-bundle
       cache: npm
-      env: TARGET=projects/password-bundle
+      env: TARGET=packages/password-bundle
     - name: rabbitmq-bundle
       cache: npm
-      env: TARGET=projects/rabbitmq-bundle
+      env: TARGET=packages/rabbitmq-bundle
     - name: security-bundle
       cache: npm
-      env: TARGET=projects/security-bundle
+      env: TARGET=packages/security-bundle
     - name: security-mongo-bundle
       cache: npm
-      env: TARGET=projects/security-mongo-bundle
+      env: TARGET=packages/security-mongo-bundle
     - name: smart
       cache: npm
-      env: TARGET=projects/smart
+      env: TARGET=packages/smart
     - name: terminal-bundle
       cache: npm
-      env: TARGET=projects/terminal-bundle
+      env: TARGET=packages/terminal-bundle
     - name: ui-apollo-bundle
       cache: npm
-      env: TARGET=projects/ui-apollo-bundle
+      env: TARGET=packages/ui-apollo-bundle
     - name: validator-bundle
       cache: npm
-      env: TARGET=projects/validator-bundle
+      env: TARGET=packages/validator-bundle
     - name: x
       cache: npm
-      env: TARGET=projects/x
+      env: TARGET=packages/x
     - name: x-bundle
       cache: npm
-      env: TARGET=projects/x-bundle
+      env: TARGET=packages/x-bundle
     - name: x-cron-bundle
       cache: npm
-      env: TARGET=projects/x-cron-bundle
+      env: TARGET=packages/x-cron-bundle
     - name: x-password-bundle
       cache: npm
-      env: TARGET=projects/x-password-bundle
+      env: TARGET=packages/x-password-bundle
     - name: x-s3-bundle
       cache: npm
-      env: TARGET=projects/x-s3-bundle
+      env: TARGET=packages/x-s3-bundle
     - name: x-ui
       cache: npm
-      env: TARGET=projects/x-ui
+      env: TARGET=packages/x-ui
     - name: x-ui-admin
       cache: npm
-      env: TARGET=projects/x-ui-admin
+      env: TARGET=packages/x-ui-admin
     - name: x-ui-collections-bundle
       cache: npm
-      env: TARGET=projects/x-ui-collections-bundle
+      env: TARGET=packages/x-ui-collections-bundle
     - name: x-ui-guardian-bundle
       cache: npm
-      env: TARGET=projects/x-ui-guardian-bundle
+      env: TARGET=packages/x-ui-guardian-bundle
     - name: x-ui-i18n-bundle
       cache: npm
-      env: TARGET=projects/x-ui-i18n-bundle
+      env: TARGET=packages/x-ui-i18n-bundle
     - name: x-ui-next
       cache: npm
-      env: TARGET=projects/x-ui-next
+      env: TARGET=packages/x-ui-next
     - name: x-ui-react-bundle
       cache: npm
-      env: TARGET=projects/x-ui-react-bundle
+      env: TARGET=packages/x-ui-react-bundle
     - name: x-ui-react-router-bundle
       cache: npm
-      env: TARGET=projects/x-ui-react-router-bundle
+      env: TARGET=packages/x-ui-react-router-bundle
     - name: x-ui-router
       cache: npm
-      env: TARGET=projects/x-ui-router
+      env: TARGET=packages/x-ui-router
     - name: x-ui-session-bundle
       cache: npm
-      env: TARGET=projects/x-ui-session-bundle
+      env: TARGET=packages/x-ui-session-bundle
 script: cd $TARGET && npm install && npm run test
 # script: if .travis/build-condition.sh $TRAVIS_COMMIT_RANGE $TARGET; then echo "$TARGET is being built" && cd $TARGET && npm install && npm run test; else echo "$TARGET is NOT being built"; fi
