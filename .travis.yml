@@ -1,0 +1,183 @@
+language: generic
+
+notifications:
+  email: false
+
+services:
+  - mongodb
+  - redis
+
+jobs:
+  include:
+    - name: apollo-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/apollo-bundle
+    - name: apollo-security-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/apollo-security-bundle
+    - name: core
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/core
+    - name: ejson
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/ejson
+    - name: email-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/email-bundle
+    - name: graphql-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/graphql-bundle
+    - name: http-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/http-bundle
+    - name: logger-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/logger-bundle
+    - name: mikroorm-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/mikroorm-bundle
+    - name: mongo-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/mongo-bundle
+    - name: nova
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/nova
+    - name: password-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/password-bundle
+    - name: rabbitmq-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/rabbitmq-bundle
+    - name: security-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/security-bundle
+    - name: security-mongo-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/security-mongo-bundle
+    - name: smart
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/smart
+    - name: terminal-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/terminal-bundle
+    - name: ui-apollo-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/ui-apollo-bundle
+    - name: validator-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/validator-bundle
+    - name: x
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x
+    - name: x-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-bundle
+    - name: x-cron-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-cron-bundle
+    - name: x-password-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-password-bundle
+    - name: x-s3-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-s3-bundle
+    - name: x-ui
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui
+    - name: x-ui-admin
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-admin
+    - name: x-ui-collections-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-collections-bundle
+    - name: x-ui-guardian-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-guardian-bundle
+    - name: x-ui-i18n-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-i18n-bundle
+    - name: x-ui-next
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-next
+    - name: x-ui-react-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-react-bundle
+    - name: x-ui-react-router-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-react-router-bundle
+    - name: x-ui-router
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-router
+    - name: x-ui-session-bundle
+      language: node_js
+      node: 14
+      cache: npm
+      env: TARGET=packages/x-ui-session-bundle
+
+script: if .travis/build-condition.sh $TRAVIS_COMMIT_RANGE $TARGET; then echo "$TARGET is being built" && cd $TARGET && npm install && npm run test; else echo "$TARGET is NOT being built"; fi
