@@ -2,7 +2,7 @@ import { Token } from "@bluelibs/core";
 import { IMessenger, IXBundleConfig } from "./defs";
 import * as chalk from "chalk";
 import { Router } from "./services/Router";
-import { ClientOpts } from "redis";
+import type { ClientOpts } from "redis";
 
 export const MESSENGER = new Token<IMessenger>("MESSENGER");
 export const IS_LIVE_DEBUG = new Token<boolean>("IS_LIVE_DEBUG");

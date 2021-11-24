@@ -1,6 +1,6 @@
 import { Inject, Listener, On } from "@bluelibs/core";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import { BeforeRemoveEvent } from "@bluelibs/mongo-bundle";
+import { BeforeDeleteEvent } from "@bluelibs/mongo-bundle";
 import { AppFileGroupsCollection } from "../collections/appFileGroups/AppFileGroups.collection";
 import { AppFilesCollection } from "../collections/appFiles/AppFiles.collection";
 import {
@@ -23,11 +23,11 @@ export class AppFileListener extends Listener {
   @Inject(() => LoggerService)
   protected logger: LoggerService;
 
-  @On(BeforeRemoveEvent, {
-    filter: (e: BeforeRemoveEvent) =>
+  @On(BeforeDeleteEvent, {
+    filter: (e: BeforeDeleteEvent) =>
       e.collection instanceof AppFilesCollection,
   })
-  async onAppFileDelete(e: BeforeRemoveEvent) {
+  async onAppFileDelete(e: BeforeDeleteEvent) {
     const filters = e.data.filter;
     // This means that this deletion comes from `removeFile` from FileManagementService
     // So we don't need to do anything

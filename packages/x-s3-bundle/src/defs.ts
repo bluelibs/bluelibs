@@ -4,6 +4,13 @@ import { ReadStream } from "fs";
 import { AppFilesCollection } from "./collections/appFiles/AppFiles.collection";
 import { AppFileGroupsCollection } from "./collections/appFileGroups/AppFileGroups.collection";
 import { ResizeOptions } from "sharp";
+import "@bluelibs/mongo-bundle";
+
+declare module "@bluelibs/mongo-bundle" {
+  interface IExecutionContext {
+    fileDeletionProcessed: boolean;
+  }
+}
 
 export type File = {
   filename: string;
