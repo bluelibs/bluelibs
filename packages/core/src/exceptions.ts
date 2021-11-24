@@ -6,6 +6,14 @@ export class KernelFrozenException extends Exception {
   }
 }
 
+export class KernelInitException extends Exception<{
+  isInitialising: boolean;
+}> {
+  getMessage() {
+    return `Kernel is already initialised or is initialising. You cannot perform this action.`;
+  }
+}
+
 export class BundleSingleInstanceException extends Exception {
   getMessage() {
     return "You must not have multiple instances of the same bundle inside the Kernel";

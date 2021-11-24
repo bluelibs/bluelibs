@@ -22,6 +22,7 @@ import { ExecutionContext, getExecutionContext } from "../utils/modes";
 import {
   KernelFrozenException,
   BundleSingleInstanceException,
+  KernelInitException,
 } from "../exceptions";
 
 export const KernelDefaultParameters = {
@@ -62,6 +63,13 @@ export class Kernel {
    * Initialising the Kernel
    */
   async init() {
+    // We do not allow kernel initialisation if it's initialising or has been initialised
+    if (this.phase !== KernelPhase.DORMANT) {
+      throw new KernelInitException({
+        isInitialising: this.phase !== KernelPhase.INITIALISED,
+      });
+    }
+
     for (const bundle of this.bundles) {
       bundle.setKernel(this);
     }
@@ -114,7 +122,6 @@ export class Kernel {
     }
 
     this.phase = KernelPhase.INITIALISED;
-
     await manager.emit(new KernelAfterInitEvent({ kernel: this }));
   }
 
