@@ -3,6 +3,7 @@ import { EventManager, Inject, Service } from "@bluelibs/core";
 import * as Polyglot from "node-polyglot";
 import { IXUII18NBundleConfig } from "../../defs";
 import { I18N_CONFIG_TOKEN } from "../../constants";
+import { LocaleChangedEvent } from "../events";
 
 export type I18NConfig = Record<string, I18NMessages>;
 
@@ -67,7 +68,7 @@ export class I18NService {
    */
   setLocale(locale: string) {
     this.activePolyglot = this.getPolyglot(locale);
-    // this.eventManager.emit(new LocaleChangedEvent({ locale }));
+    this.eventManager.emit(new LocaleChangedEvent({ locale }));
   }
 
   /**

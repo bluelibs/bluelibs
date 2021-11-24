@@ -1,156 +1,70 @@
-This is used to detect the userId based on the authentication token and inject it inside the GraphQL's context. On top of that it offers a seamless integration with `Passport` for easy integration with different auth providers
-
-## Install
+We are leveraging the [Polyglot](https://airbnb.io/polyglot.js/) in order to integrate within our way of doing things:
 
 ```bash
-npm i -S @bluelibs/apollo-bundle @bluelibs/apollo-security-bundle passport
+npm i -S @bluelibs/x-ui-react-bundle @bluelibs/x-ui-i18n-bundle
 ```
-
-```typescript
-import { ApolloSecurityBundle } from "@bluelibs/apollo-security-bundle";
-
-kernel.addBundle(new ApolloSecurityBundle());
-```
-
-Options:
-
-```js
-export interface IApolloSecurityBundleConfig {
-  // All true by default
-  support: {
-    headers?: boolean,
-    cookies?: boolean,
-    websocket?: boolean,
-  };
-  // bluelibs-token is the default for all
-  identifiers: {
-    headers?: string, // Has priority over cookies
-    cookies?: string, // If no header is present it will read from here
-    // For websocket you have to send the connection params in order to work
-    websocket?: string,
-  };
-}
-```
-
-## Context
-
-`IGraphQLContext` is properly extended by this package:
-
-```js
-import { IResolverMap } from "@bluelibs/graphql-bundle";
-
-load({
-  resolvers: {
-    Query: {
-      findMyPosts(_, args, context) {
-        // Context should have authenticationToken and userId
-        if (!context.userId) {
-          // You can throw an error.
-        }
-      },
-    } as IResolverMap,
-  },
-});
-```
-
-## Passport
-
-Benefit of over 500+ authentication strategies, by offering plug-in support for most popular library: [passport](http://www.passportjs.org/)
-
-```bash
-npm i -S passport passport-facebook
-```
-
-### Authenticator
-
-We define our methods of authentication through `Authenticator` classes. Read through it as the comments will explain the behavior.
-
-```ts title="services/authenticators/FacebookAuthenticator.ts"
-import * as passport from "passport";
-import { Strategy as FacebookStrategy } from "passport-facebook";
-import { ApolloPassportStrategy } from "../models/ApolloPassportStrategy";
-
-export class FacebookAuthenticator extends PassportAuthenticator {
-  createStrategy() {
-    // This is documented in the passport-facebook package: http://www.passportjs.org/docs/facebook/
-    return new FacebookStrategy(
-      {
-        // Read this either from process.env or inject them inside the classes
-        clientID: "XXX",
-        clientSecret: "XXX",
-        callbackURL: "http://localhost:4000/auth/facebook/callback",
-      },
-      async (accesstoken, refreshToken, profile, done) => {
-        try {
-          // If the user is newly created, `isNew` will be true, so you can adapt the profile
-          const { isNew, user } = await this.findOrCreate(profile.id);
-
-          // By default we store the "profile.id" inside "facebookId" at user level which is derived from strategy name
-          // You can customise the name by overriding get name()
-
-          if (isNew) {
-            this.securityService.updateUser(user._id, {
-              // other things
-            });
-          }
-
-          done(null, user);
-        } catch (err) {
-          done(err);
-        }
-      }
-    );
-  }
-
-  route() {
-    // This will redirect to facebook to ask for permissions
-    // this.app is an express application
-    this.app.get("/auth/facebook", passport.authenticate(this.name));
-
-    // This is a helper function to allow easy handle of success
-    this.get(
-      "/auth/facebook/callback",
-      {},
-      async (err, user, req, res, next) => {
-        // this creates the authentication token for the user
-        const token = await this.getToken(user._id);
-
-        res.redirect(`https://uihost.com/facebook/success?token={token}`);
-      }
-    );
-  }
-}
-```
-
-Note, if you are using `X-Framework`, you can inject the AppRouter which generates urls for the app:
 
 ```ts
-import { APP_ROUTER, Router } from "@bluelibs/x-bundle";
+import { Kernel } from "@bluelibs/core";
+import { XUII18NBundle } from "@bluelibs/x-ui-i18n-bundle";
+import { XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 
-class FacebookAuthenticator extends PassportAuthenticator {
-  @Inject(APP_ROUTER)
-  router: Router;
+const kernel = new Kernel({
+  bundles: [
+    new XUIReactBundle(),
+    new XUII18NBundle({
+      defaultLocale: "fr", // default is "en",
+      // You can omit this if you want to use the default options for polyglots
+      polyglots: [
+        // ...rest represents the rest of custom options for Polyglot constructor, includign phrases
+        { locale: "en", ...rest },
+      ],
+    });
+  ]
+})
+```
 
-  function getRedirectURL(token: string) {
-    return this.router.path("/facebook/success/:token", {
-      token
+```ts
+import { useTranslate } from "@bluelibs/x-ui-i18n-bundle";
+
+function Component() {
+  const t = useTranslate();
+
+  return <h1>{t('pages.home.header.text')</h1>;
+}
+```
+
+Changing the language of the default:
+
+```ts
+import { I18NService } from "@bluelibs/x-ui";
+
+class UIAppBundle extends Bundle {
+  async init() {
+    const i18n = this.container.get(I18NService);
+
+    // Add messages to your locale
+    i18n.extend("en", messages);
+
+    // get it from window.locale or session, or cookies, or however you find fit
+    const locale = "";
+    i18n.setLocale(locale);
+  }
+}
+```
+
+When you change your language from the app simply use the `I18NService` and run `setLocale()`.
+
+## Events
+
+You can listen to when local is changed via `LocaleChangedEvent`:
+
+```ts
+class UIAppBundle extends Bundle {
+  async prepare() {
+    this.eventManager.addListener(LocaleChangedEvent, (e) => {
+      // e.data.locale
     });
   }
 }
 ```
-
-```ts
-// register it inside the passport service
-class AppBundle extends Bundle {
-  async init() {
-    const passportService = this.container.get(PassportService);
-    passportService.register(FacebookAuthenticator);
-  }
-}
-```
-
-### Token Security
-
-By using `getToken()` we create an actual token for authentication for the user. The problem is that when we pass that to the `ui` microservice, the url can be sniffed, leading to a security whole in the system.
-
-The solution is that once you arrive at that specific url call the mutation `reissueToken(token)` which will return instead a newly freshly created token that you can store in `localStorage` or where you prefer.

@@ -6,7 +6,7 @@ import { IUIApolloBundleConfig } from "./defs";
 export class UIApolloBundle extends Bundle<IUIApolloBundleConfig> {
   protected defaultConfig = {
     client: {
-      uri: "http://localhost:3000",
+      uri: "http://localhost:4000/graphql",
       cache: new InMemoryCache(),
     },
     enableSubscriptions: false,

@@ -12,9 +12,7 @@ export type WrapperType<T> = WrapperComponentType<T> & {
 
 export type IXUIReactBundleConfigType = {
   wrappers: WrapperType<any>[];
-
   components?: Partial<IComponents>;
-
   initialisingComponent?: React.ComponentType;
 };
 

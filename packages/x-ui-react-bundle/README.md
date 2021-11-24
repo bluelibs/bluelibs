@@ -1,15 +1,4 @@
-<h1 align="center">BlueLibs X-UI</h1>
-
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/x-ui">
-    <img src="https://api.travis-ci.org/bluelibs/x-ui.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/x-ui?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/x-ui/badge.svg?branch=master" />
-  </a>
-</p>
-
-This is the X-Framework of handling password authentication blended with GraphQL.
+<h1 align="center">BlueLibs X-UI-React</h1>
 
 ## Install
 

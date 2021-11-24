@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-i18n-bundle",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "I18N bundle for UI",
   "main": "dist/index.js",
   "repository": {

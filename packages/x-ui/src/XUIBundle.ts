@@ -10,7 +10,7 @@ import {
   I18NService,
   UII18NBundle,
 } from "@bluelibs/x-ui-i18n-bundle";
-import { UISessionBundle } from "@bluelibs/x-ui-session-bundle";
+import { XUISessionBundle } from "@bluelibs/x-ui-session-bundle";
 import {
   GuardianSmart,
   XUIGuardianBundle,
@@ -57,7 +57,7 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
 
     await this.addDependency(XUIReactBundle, config.react);
 
-    await this.addDependency(UISessionBundle, config.sessions);
+    await this.addDependency(XUISessionBundle, config.sessions);
 
     await this.addDependency(UII18NBundle, config.i18n);
 

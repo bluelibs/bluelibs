@@ -101,6 +101,7 @@ export class UISessionService {
         fieldName,
         value: value,
         previousValue,
+        options,
       })
     );
   }
