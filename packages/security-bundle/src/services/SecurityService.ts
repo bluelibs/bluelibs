@@ -402,7 +402,7 @@ export class SecurityService implements ISecurityService {
       return [];
     }
 
-    return [] || user?.roles;
+    return user?.roles || [];
   }
 
   /**
