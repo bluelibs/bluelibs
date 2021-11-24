@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-bundle",
-  "version": "1.1.4",
+  "version": "1.1.6",
   "description": "X-Framework is a feature-rich solution with fast prototyping in mind for BlueLibs",
   "main": "dist/index.js",
   "repository": {
@@ -32,7 +32,8 @@
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.2",
     "queue": "^6.0.2",
-    "redis": "^3.0.2"
+    "redis": "^3.0.2",
+    "uuid": "^8.3.2"
   },
   "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
@@ -50,7 +51,7 @@
     "@bluelibs/apollo-bundle": "^1.0.0",
     "@bluelibs/apollo-security-bundle": "^1.0.0",
     "@bluelibs/core": "^1.0.0",
-    "@bluelibs/ejson": "^1.0.0",
+    "@bluelibs/ejson": "^1.0.3",
     "@bluelibs/email-bundle": "^1.0.0",
     "@bluelibs/graphql-bundle": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
@@ -69,6 +70,7 @@
     "@types/node": "^8.0.28",
     "@types/react": "^17.0.18",
     "@types/react-dom": "^17.0.9",
+    "@types/serve-static": "^1.13.10",
     "@typescript-eslint/eslint-plugin": "2.3.0",
     "@typescript-eslint/parser": "2.3.0",
     "chai": "^4.2.0",
@@ -76,6 +78,7 @@
     "eslint": "^6.6.0",
     "eslint-config-prettier": "6.3.0",
     "eslint-plugin-prettier": "3.1.1",
+    "express-serve-static-core": "^0.1.1",
     "graphql": "^15.5.1",
     "jest": "^27.3.1",
     "jest-junit": "^10.0.0",
@@ -86,7 +89,7 @@
     "react-dom": "^17.0.2",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.3",
-    "typescript": "^4.0.2",
+    "typescript": "4.5",
     "yup": "^0.32.9"
   },
   "types": "dist/index.d.ts",

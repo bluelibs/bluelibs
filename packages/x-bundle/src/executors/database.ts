@@ -66,7 +66,7 @@ export function ToNovaByResultID<T>(
         filters: {
           _id: getResult(ctx),
         },
-      };
+      } as any;
 
       return graphqlOptions;
     };
