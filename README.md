@@ -1,12 +1,43 @@
-# BlueLibs Repository
+<p align="center">
+  <a href="https://www.bluelibs.com" target="_blank"><img src="https://www.bluelibs.com/img/logo.svg" alt="BlueLibs Logo" width="400"/></a>
+</p>
 
-To find more about ourselves, our mission please go to [BlueLibs Official Website](https://www.bluelibs.com/) and [BlueLibs Official Documentation](https://www.bluelibs.com/docs/).
+<p align="center">
+  <a href="https://circleci.com/gh/bluelibs/bluelibs/tree/main"><img src="https://circleci.com/gh/bluelibs/bluelibs/tree/main.svg?style=svg" alt="coverage" /></a>
+  <a href="https://github.com/bluelibs/bluelibs/blob/main/LICENSE.md"><img alt="GitHub license" src="https://img.shields.io/github/license/bluelibs/bluelibs"></a>
+  <a href="https://github.com/bluelibs/bluelibs/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/bluelibs/bluelibs?label=stars"></a>
+  <a href="https://discord.com/invite/GmNeRDqxvp" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+  <a href="https://www.npmjs.com/org/bluelibs" target="_blank"><img alt="npm" src="https://img.shields.io/npm/dm/@bluelibs/core"></a>
+</p>
 
-## Introduction
+## About BlueLibs
+
+BlueLibs is a collection of open-source products written in TypeScript designed for the modern web and enterprise scale. We believe web development should be fun and engaging. BlueLibs allows you to quickly prototype applications or design fully custom ones all in the Node ecosystem.
+
+- [Dependency Injection & Module Management](https://www.bluelibs.com/docs/package-core)
+- Database-agnostic and fully featured [Security System](https://www.bluelibs.com/docs/package-security)
+- Server-agnostic [GraphQL Integration](https://www.bluelibs.com/docs/package-graphql) with [Apollo](https://www.bluelibs.com/docs/package-apollo)
+- [MongoDB](https://www.bluelibs.com/docs/package-mongo) & [PostgreSQL](https://www.bluelibs.com/docs/package-sql) Integrations
+- Rapid Prototyping via [Blueprint](https://www.bluelibs.com/products/blueprint/) and [X-Framework](https://www.bluelibs.com/products/x-framework/)
+- [Code Generation Tooling](https://www.bluelibs.com/docs/package-x-cli)
+- [GraphQL Live Data for Single Documents & Queries](https://www.bluelibs.com/docs/package-x-bundle#live-data) via X-Framework
+
+## Learning BlueLibs
+
+We have designed a custom [documentation](https://www.bluelibs.com/docs) experience with custom code snippets and challenges.
+
+## Security Vulnerabilities
+
+If you discover a security vulnerability within BlueLibs packages, please send an e-mail to Theodor Diaconu via [theodor@bluelibs.com](mailto:theodor@bluelibs.com). All security vulnerabilities will be promptly addressed.
+
+## License
+
+The BlueLibs ecosystem is open-sourced software licensed under the MIT License.
+
+## Repository Structure
 
 This monorepo is split like this:
 
-- ./docs a microservice which represents our main website
 - ./templates/\* things that are re-usable, like a new package template and others
 - ./scripts/\* things we use for internal development
 - ./packages/\* where all packages lie
@@ -24,8 +55,6 @@ sudo ln -s /usr/local/bin/bluelibs-package-replace `pwd`/scripts/bluelibs-packag
 
 Now go to your `microservice` and simply run `bluelibs-package-replace x-ui`. This will properly update your package version to the one you have in the monorepo. Make sure you're also watching changes in `x-ui` package via `npm run watch`.
 
-## Testing
-
 Each package uses jest and ts-jest for development testing:
 
 ```bash
@@ -33,15 +62,3 @@ npm run test:dev
 ```
 
 To run tests in C.I, we have the command `npm run test` which compiles the code and runs the final tests.
-
-## Documentation
-
-The documentation of each package is typically stored inside the package `DOCUMENTATION.md`. We decided for a separation between `README.md` and these files to keep README's a bit cleaner.
-
-We store the docs in `./docs`, to compile all the documentation from all packages:
-
-```bash
-npm run docs:generate
-```
-
-The structure of the documentation can be found in: `docs/scripts/docs-structure.ts` based on it we craft the sections of the sidebar.

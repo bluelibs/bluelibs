@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 set -e
+printenv
 
 readonly REPO_TYPE=$( echo "${CIRCLE_REPOSITORY_URL}" | awk '{ match($0,/@github/) ? r="github" : r="bitbucket"; print r }' )
 readonly PROJECT_SLUG="${REPO_TYPE}/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
@@ -106,17 +107,20 @@ function diff {
   builds_file=$2
 
   while read -r package paths; do
-    last_build_sha=$(jq --raw-output --arg p "${package}" '.[$p][0]' "${builds_file}")
-    if [[ "${last_build_sha}" != "null" && "x${last_build_sha}" != "x" ]]; then
-      # diff changes since most recent successfull build for current workflow
-      echo "$(git diff "${last_build_sha}"..HEAD --name-only -- ${paths} | wc -l)" "${last_build_sha:0:9}" built "${package}"
-    elif [[ "x${parent_sha}" != "x" ]]; then
-      # diff changes since parent branch commit sha 
-      echo "$(git diff "${parent_sha}"..HEAD --name-only -- ${paths} | wc -l)" "${parent_sha:0:9}" new "${package}"
-    else
-      # no builds and missing parent branch (detached?)
-      echo 99999 - new "${package}"
-    fi
+    echo "1" "${parent_sha:0:9}" new "${package}"
+
+    # RUN MODIFIED PACKAGES MODE DISABLED
+    # last_build_sha=$(jq --raw-output --arg p "${package}" '.[$p][0]' "${builds_file}")
+    # if [[ "${last_build_sha}" != "null" && "x${last_build_sha}" != "x" ]]; then
+    #   # diff changes since most recent successfull build for current workflow
+    #   echo "$(git diff "${last_build_sha}"..HEAD --name-only -- ${paths} | wc -l)" "${last_build_sha:0:9}" built "${package}"
+    # elif [[ "x${parent_sha}" != "x" ]]; then
+    #   # diff changes since parent branch commit sha 
+    #   echo "$(git diff "${parent_sha}"..HEAD --name-only -- ${paths} | wc -l)" "${parent_sha:0:9}" new "${package}"
+    # else
+    #   # no builds and missing parent branch (detached?)
+    #   echo 99999 - new "${package}"
+    # fi
   done
 }
 
@@ -236,7 +240,9 @@ function main {
       'split("\n") | map(select(. != "")) | map(split(" ")) | map({ package: .[3], parent: .[1], branch: .[2], changes: .[0] | tonumber })')
 
   print_status "${statuses}"
-  changed_packages=$( echo "${statuses}" | jq '. | map(select(.changes > 0)) | length' )
+  # RUN MODIFIED PACKAGES MODE DISABLED
+  # changed_packages=$( echo "${statuses}" | jq '. | map(select(.changes > 0)) | length' )
+  changed_packages=$( echo "${statuses}" | jq '. | length' )
   total_packages=$( echo "${statuses}" | jq '. | length' )
 
   echo "Number of packages changed: ${changed_packages} / ${total_packages}"
