@@ -11,6 +11,10 @@ parameters:
     type: boolean
     default: false
 
+  nova:
+    type: boolean
+    default: false
+
   # Custom parameters
   deploy:
     type: boolean
@@ -98,7 +102,7 @@ workflows:
   # Workflows defined for each package.
 
   core:
-    when: << pipeline.parameters.api >>
+    when: << pipeline.parameters.core >>
     jobs:
       - build:
           name: core-build
@@ -110,7 +114,7 @@ workflows:
             - core-build
 
   nova:
-    when: << pipeline.parameters.api >>
+    when: << pipeline.parameters.nova >>
     jobs:
       - build:
           name: nova-build
