@@ -1,0 +1,122 @@
+version: 2.1
+
+parameters:
+  # This parameter is used to trigger the main workflow
+  trigger:
+    type: boolean
+    default: true
+
+  # A parameter per package
+  core:
+    type: boolean
+    default: false
+
+  # Custom parameters
+  deploy:
+    type: boolean
+    default: false
+
+executors:
+  node:
+    docker:
+      - image: circleci/node:16.13.0
+      - image: circleci/mongo:latest
+
+jobs:
+  trigger-workflows:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          # This step is added to demonstrate the possibility to dynamically set the user token
+          name: Set token
+          command: echo "export CIRCLE_USER_TOKEN=${CIRCLE_TOKEN}" >> $BASH_ENV
+      - run:
+          name: Trigger workflows
+          command: chmod +x .circleci/monorepo.sh && .circleci/monorepo.sh
+          environment:
+            # (optional) print additional debug information
+            MONOREPO_DEBUG: "true"
+            # (optional) additional CI parameters to include in the pipeline (must be a valid JSON)
+            CI_PARAMETERS: '{ "deploy": true }'
+
+  build:
+    parameters:
+      package_name:
+        type: string
+
+    executor: node
+    working_directory: ~/project/packages/<< parameters.package_name >>
+
+    steps:
+      - checkout:
+          path: ~/project
+      # This step is added only to show that we are in the package directory
+      - run:
+          name: Content
+          command: |
+            cat README.md 
+            echo "<< parameters.package_name >> built." > build.txt
+      - run:
+          name: Build
+          command: echo "Build << parameters.package_name >> ..."
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - packages/<< parameters.package_name >>
+
+  deploy:
+    parameters:
+      package_name:
+        type: string
+
+    executor: node
+    working_directory: ~/project/packages/<< parameters.package_name >>
+
+    steps:
+      - attach_workspace:
+          at: ~/project
+      # This step is added to show that files are available from the build job.
+      - run:
+          name: Content to deploy
+          command: ls && cat build.txt
+      - deploy:
+          name: Deploy
+          command: echo "Deploying << parameters.package_name >> (<< pipeline.parameters.deploy >>) ..."
+
+workflows:
+  version: 2
+
+  # The main workflow responsible for triggering all other workflows
+  # in which changes are detected.
+  ci:
+    when: << pipeline.parameters.trigger >>
+    jobs:
+      - trigger-workflows
+
+  # Workflows defined for each package.
+
+  core:
+    when: << pipeline.parameters.api >>
+    jobs:
+      - build:
+          name: core-build
+          package_name: core
+      - deploy:
+          name: core-deploy
+          package_name: core
+          requires:
+            - core-build
+
+  nova:
+    when: << pipeline.parameters.api >>
+    jobs:
+      - build:
+          name: nova-build
+          package_name: nova
+      - deploy:
+          name: nova-deploy
+          package_name: nova
+          requires:
+            - nova-build

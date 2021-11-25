@@ -1,0 +1,8 @@
+{
+  "root": "packages",
+  "pages": 3,
+  "packages": {
+    "core": ["packages/core/"],
+    "nova": ["packages/nova/"]
+  }
+}
