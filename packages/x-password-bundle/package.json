@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-password-bundle",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Password integration with Apollo Bundle using X-Framework.",
   "main": "dist/index.js",
   "repository": {
