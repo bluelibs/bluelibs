@@ -1,12 +1,14 @@
 version: 2.1
+# orbs:
+#   coveralls: coveralls/coveralls@1.0.6
 
 parameters:
-  # This parameter is used to trigger the main workflow
+  # This parameter is used to trigger the main workflow.
   trigger:
     type: boolean
     default: true
 
-  # A parameter per package
+  # A parameter per packages
   core:
     type: boolean
     default: false
@@ -16,15 +18,15 @@ parameters:
     default: false
 
   # Custom parameters
-  deploy:
-    type: boolean
-    default: false
+  # deploy:
+  #   type: boolean
+  #   default: false
 
 executors:
   node:
     docker:
       - image: circleci/node:16.13.0
-      - image: circleci/mongo:latest
+      - image: circleci/mongo:4.4.4
 
 jobs:
   trigger-workflows:
@@ -35,7 +37,7 @@ jobs:
       - run:
           # This step is added to demonstrate the possibility to dynamically set the user token
           name: Set token
-          command: echo "export CIRCLE_USER_TOKEN=${CIRCLE_TOKEN}" >> $BASH_ENV
+          command: echo "export CIRCLE_USER_TOKEN=${CIRCLE_USER_TOKEN}" >> $BASH_ENV
       - run:
           name: Trigger workflows
           command: chmod +x .circleci/monorepo.sh && .circleci/monorepo.sh
@@ -43,9 +45,9 @@ jobs:
             # (optional) print additional debug information
             MONOREPO_DEBUG: "true"
             # (optional) additional CI parameters to include in the pipeline (must be a valid JSON)
-            CI_PARAMETERS: '{ "deploy": true }'
+            # CI_PARAMETERS: '{ "deploy": true }'
 
-  build:
+  test:
     parameters:
       package_name:
         type: string
@@ -57,37 +59,33 @@ jobs:
       - checkout:
           path: ~/project
       # This step is added only to show that we are in the package directory
+      - restore_cache:
+          keys:
+            - v2-npm-deps-<< parameters.package_name >>-{{ checksum "package.json" }}
+            - v2-npm-deps-<< parameters.package_name >>-
       - run:
-          name: Content
+          name: Setup
           command: |
-            cat README.md 
-            echo "<< parameters.package_name >> built." > build.txt
+            npm install
+      - save_cache:
+          key: v2-npm-deps-<< parameters.package_name >>-{{ checksum "package.json" }}
+          paths:
+            - node_modules
       - run:
-          name: Build
-          command: echo "Build << parameters.package_name >> ..."
+          name: Test
+          command: |
+            echo "Build << parameters.package_name >> ..."
+            npm run test
+      # - run:
+      #     command: |
+      #       npm run coverage
+      # - coveralls/upload:
+      #     verbose: true
+      #     flag_name: << parameters.package_name >>
       - persist_to_workspace:
           root: ~/project
           paths:
             - packages/<< parameters.package_name >>
-
-  deploy:
-    parameters:
-      package_name:
-        type: string
-
-    executor: node
-    working_directory: ~/project/packages/<< parameters.package_name >>
-
-    steps:
-      - attach_workspace:
-          at: ~/project
-      # This step is added to show that files are available from the build job.
-      - run:
-          name: Content to deploy
-          command: ls && cat build.txt
-      - deploy:
-          name: Deploy
-          command: echo "Deploying << parameters.package_name >> (<< pipeline.parameters.deploy >>) ..."
 
 workflows:
   version: 2
@@ -104,23 +102,13 @@ workflows:
   core:
     when: << pipeline.parameters.core >>
     jobs:
-      - build:
-          name: core-build
+      - test:
+          name: core-test
           package_name: core
-      - deploy:
-          name: core-deploy
-          package_name: core
-          requires:
-            - core-build
 
   nova:
     when: << pipeline.parameters.nova >>
     jobs:
-      - build:
-          name: nova-build
+      - test:
+          name: nova-test
           package_name: nova
-      - deploy:
-          name: nova-deploy
-          package_name: nova
-          requires:
-            - nova-build
