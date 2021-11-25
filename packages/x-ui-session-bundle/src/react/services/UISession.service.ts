@@ -12,7 +12,7 @@ import {
   UISessionStateChangeEvent,
   UISessionStateChangeEventProps,
 } from "../../events";
-import { UISessionStorage } from "./UISesssionStorage";
+import { UISessionStorage } from "./UISessionStorage";
 import { UISessionInitialisingEvent } from "../../events/UISesssionInitialisingEvent";
 
 export interface IUISessionOptions {
