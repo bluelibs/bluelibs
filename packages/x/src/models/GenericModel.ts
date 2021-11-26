@@ -8,6 +8,7 @@ import {
   EnumConfigExtractResult,
 } from "./defs";
 import * as path from "path";
+import * as Inflected from "inflected";
 
 // This model can be inquired for asking:
 // GraphQL Types, Inputs, Model Classes
@@ -385,7 +386,9 @@ ${field.description}
         this.extractAndAddEnumConfigToResult(
           field.model.fields,
           result,
-          _.upperFirst(field.name)
+          _.upperFirst(
+            field.isMany ? Inflected.singularize(field.name) : field.name
+          )
         );
       }
     });

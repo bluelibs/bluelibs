@@ -141,7 +141,13 @@ export class XBridge {
     if (isInput && field.type === Models.GenericFieldTypeEnum.ENUM) {
       field.type = Models.GenericFieldTypeEnum.MODEL;
       field.model = {
-        name: enumPrefix + _.upperFirst(studioField.id),
+        name:
+          enumPrefix +
+          _.upperFirst(
+            studioField.isArray
+              ? Inflected.singularize(studioField.id)
+              : studioField.id
+          ),
         storage: "outside",
         local: false,
         absoluteImport: pathsInfo.fromInputToAll,
