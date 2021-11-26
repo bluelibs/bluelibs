@@ -1,6 +1,7 @@
 import * as _ from "lodash";
 import { GenericModel } from "../models";
 import { IGenericField, GenericFieldTypeEnum } from "../models/defs";
+import * as Inflected from "inflected";
 
 export class ModelUtils {
   static getFieldSignatureForGraphQL(field: IGenericField) {
@@ -189,7 +190,12 @@ export class ModelUtils {
       modelClass = modelClass.replace("Input", "");
     }
 
-    return modelClass + _.upperFirst(field.name);
+    let name = field.name;
+    if (field.isMany) {
+      name = Inflected.singularize(field.name);
+    }
+
+    return modelClass + _.upperFirst(name);
   }
 
   static isFieldModel(field: IGenericField) {
