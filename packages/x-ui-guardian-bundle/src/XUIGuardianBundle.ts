@@ -75,9 +75,9 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
 
     xuiReactBundle.addWrapper({
       component: XUIGuardianProvider,
-      props: {
+      props: () => ({
         loadingComponent: this.config.loadingComponent,
-      },
+      }),
       order: 20,
     });
   }

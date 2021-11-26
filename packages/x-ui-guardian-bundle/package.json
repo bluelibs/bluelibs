@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-guardian-bundle",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": false,
   "description": "XUIGuardianBundle",
   "main": "dist/index.js",
@@ -44,7 +44,7 @@
     "@bluelibs/ui-apollo-bundle": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
     "@types/jest": "^27.0.3",
-    "@types/react": "^17.0.33",
+    "@types/react": "^17.0.37",
     "@types/react-test-renderer": "^17.0.1",
     "jest": "^27.3.1",
     "react": "^17.0.2",
