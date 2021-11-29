@@ -36,6 +36,7 @@ export function useLiveData<T>(
     const subscription = new XSubscription(observable, setDataSet, {
       onReady: () => setIsReady(true),
       onError: (err) => setError(err),
+      ...subscriptionOptions,
     });
     return () => {
       subscription.stop();
