@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://www.bluelibs.com" target="_blank"><img src="https://www.bluelibs.com/img/logo.svg" alt="BlueLibs Logo" width="400"/></a>
+  <a href="https://www.bluelibs.com" target="_blank"><img src="https://www.bluelibs.com/img/github/bluelibs-logo.svg" alt="BlueLibs Logo" width="60%"/></a>
 </p>
 
 <p align="center">
