@@ -1257,6 +1257,14 @@ describe("Main tests", function () {
     await GeoPoint.createIndex({
       loc: "2dsphere",
     });
+
+    // Sleep to ensure that index has been actually created
+    await new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 500);
+    });
+
     GeoPoint.insertOne({
       loc: { type: "Point", coordinates: [-73.99279, 40.719296] },
       name: "Central Park",
