@@ -31,6 +31,19 @@ export class SanityChecker {
       }
     }
 
+    // This makes no sense, because CRUD implies using the entity.
+    if (collection.hasGraphQL("crud") && !collection.hasGraphQL("entity")) {
+      throw new Error(
+        `You cannot have "enableGraphQL.crud" enabled, and "enableGraphQL.entity" disabled for ${collection.id}`
+      );
+    }
+
+    if (collection.ui && !collection.hasGraphQL("entity")) {
+      throw new Error(
+        `You cannot have "ui" enabled, and "enableGraphQL.entity" disabled for ${collection.id}`
+      );
+    }
+
     if (collection.fields.length === 0 && !collection.isExternal()) {
       throw new Error(
         `Collection: ${collection.id} has no fields added. Only collections from external packages can have an empty field list, as they are virtual`

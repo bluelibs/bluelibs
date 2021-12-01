@@ -80,7 +80,12 @@ export class Collection extends BaseModel<Collection> {
   /**
    * Whether this collection is something users can see and we expose it as a Type
    */
-  enableGraphQL: boolean = true;
+  enableGraphQL:
+    | boolean
+    | {
+        crud?: boolean;
+        entity?: boolean;
+      } = true;
 
   /**
    * Mocking information, how many should we generate. Keep in mind that if you put 0 and the collection has relations
@@ -123,6 +128,23 @@ export class Collection extends BaseModel<Collection> {
     });
 
     this.cleanDuplicateFields();
+    this.enableGraphQLCleaning();
+  }
+
+  protected enableGraphQLCleaning() {
+    if (typeof this.enableGraphQL === "boolean") {
+      const value = this.enableGraphQL;
+      this.enableGraphQL = {
+        crud: value,
+        entity: value,
+      };
+    } else {
+      ["crud", "entity"].forEach((type) => {
+        if (this.enableGraphQL[type] === undefined) {
+          this.enableGraphQL[type] = true;
+        }
+      });
+    }
   }
 
   /**
@@ -204,5 +226,19 @@ export class Collection extends BaseModel<Collection> {
 
   getMongoCollectionName() {
     return _.camelCase(this.id);
+  }
+
+  /**
+   * This checks whether the collection has exposure to graphql, and if so, to what degree.
+   *
+   * @param type
+   * @returns
+   */
+  hasGraphQL(type: "crud" | "entity") {
+    if (typeof this.enableGraphQL === "boolean") {
+      return this.enableGraphQL;
+    } else {
+      return this.enableGraphQL[type];
+    }
   }
 }

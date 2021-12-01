@@ -1,3 +1,7 @@
+
+{{# unless isInputMode }}
+  export * from "./{{ localBaseName }}";
+{{/ unless }}
 {{# if yupValidation }}
   import { Schema, Is, a, an } from "@bluelibs/validator-bundle";
 {{/ if }}
