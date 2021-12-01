@@ -357,7 +357,7 @@ export class StudioWriter {
     const writer = this.writers.uiCollection;
 
     studioApp.collections
-      .filter((c) => c.enableGraphQL === true)
+      .filter((c) => c.hasGraphQL("entity"))
       .forEach((collection) => {
         if (collection.isExternal()) {
           return;
@@ -406,7 +406,7 @@ export class StudioWriter {
     const microservicePath = session.getMicroservicePath();
     const crudWriter = this.writers.graphQLCRUD;
     for (const collection of studioApp.collections) {
-      if (!collection.enableGraphQL) {
+      if (!collection.hasGraphQL("crud")) {
         continue;
       }
       if (collection.isExternal()) {
@@ -663,7 +663,7 @@ export class StudioWriter {
       collectionModel.createEntity = false;
       collectionModel.overrideCollectionIfExists = false;
 
-      if (collection.enableGraphQL) {
+      if (collection.hasGraphQL("entity")) {
         const graphQLModel = XBridge.collectionToGenericModel(collection, {
           graphql: true,
         });

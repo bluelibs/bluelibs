@@ -84,6 +84,29 @@ collection({
 });
 ```
 
+### GraphQL
+
+We generate GraphQL entities (models reflecting the ones from the database) and GraphQL Module CRUDs which allow us to interact easily with the server.
+
+If you do not want to have CRUD only, but you need the Entity because it's maybe used by some other entites:
+
+```ts
+collection({
+  // ...
+  enableGraphQL: {
+    entity: true,
+    crud: false,
+  },
+});
+
+// Using enableGraphQL: true, will enable both
+// Using enableGraphQL: false, will disable both
+```
+
+:::note
+Having `entity` false, will not create UI Collections, because those collections would have interacted with the CRUD endpoints created.
+:::
+
 ### Behaviors
 
 This refers to the capability to add [Collection Behaviors from MongoBundle](https://www.bluelibs.com/docs/package-mongo#behaviors)
