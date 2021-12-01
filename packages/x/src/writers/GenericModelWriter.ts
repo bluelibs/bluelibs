@@ -43,6 +43,13 @@ export class GenericModelWriter extends BlueprintWriter {
         { ignoreIfExists: true }
       );
       modelOperator.sessionCopy(modelTpls("ts/model.ts.tpl"), basePath);
+
+      if (!model.isInputMode) {
+        modelOperator.sessionPrependFile(
+          model.targetPath,
+          `export * from "./${model.localBaseName}";\n`
+        );
+      }
     } else {
       modelOperator.sessionCopy(modelTpls("ts/model.ts.tpl"), model.targetPath);
     }

@@ -1,5 +1,5 @@
 {{# if isBaseExtendMode }}
-/** overridable */
+/** @overridable */
 {{/ if }}
 {{# if yupValidation }}
   import { Schema, Is, a, an } from "@bluelibs/validator-bundle";
