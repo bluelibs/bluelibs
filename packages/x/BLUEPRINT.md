@@ -356,6 +356,10 @@ collection({
 });
 ```
 
+:::note One-to-One
+If you want to benefit of a one-to-one relationship, use `unique: true` inside the direct relationship definition. This will make the inversed side refer to the direct side as a single object instead of an array.
+:::
+
 ### Rendering
 
 So, relations have an additional field which we call `representedBy` this basically means, if I have a `Post` and I have a post owner which is a `User` how do I show that user? Do I show his id, what fields from user do I show? And the typical answer is either a specific field that indifies it or a reducer. This helps the UI Lists to properly render data and know what to query.

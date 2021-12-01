@@ -95,11 +95,16 @@ export class XBridge {
         },
       };
     } else {
+      let isMany = true;
+      if (relation.reversedRelation.unique) {
+        isMany = false;
+      }
+
       return {
         name: relation.id,
         description: relation.description,
         type: relation.to.entityName,
-        isMany: true,
+        isMany,
         model: {
           name: relation.to.entityName,
           local: false,
