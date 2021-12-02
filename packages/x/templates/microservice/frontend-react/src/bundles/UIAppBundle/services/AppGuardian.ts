@@ -8,7 +8,7 @@ import {
   GuardianSmart,
   GuardianUserType,
   GuardianUserRegistrationType,
-  use,
+  useSmart,
 } from "@bluelibs/x-ui";
 import { gql } from "@apollo/client";
 
@@ -49,5 +49,5 @@ export class AppGuardian extends GuardianSmart<AppUserType, AppRegisterType> {
  * @returns
  */
 export function useAppGuardian(): AppGuardian {
-  return use(AppGuardian);
+  return useSmart(AppGuardian);
 }
