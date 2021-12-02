@@ -10,21 +10,28 @@
   <a href="https://www.npmjs.com/org/bluelibs" target="_blank"><img alt="npm" src="https://img.shields.io/npm/dm/@bluelibs/core"></a>
 </p>
 
+## Quick Note
+
+If you want to keep track of our progress, or just show a little bit of support, click the `Watch` 👁‍🗨 button or give us a `Star` ⭐️. Thank you!
+
 ## About BlueLibs
 
 BlueLibs is a collection of open-source products written in TypeScript designed for the modern web and enterprise scale. We believe web development should be fun and engaging. BlueLibs allows you to quickly prototype applications or design fully custom ones all in the Node ecosystem.
 
-- [Dependency Injection & Module Management](https://www.bluelibs.com/docs/package-core)
-- Database-agnostic and fully featured [Security System](https://www.bluelibs.com/docs/package-security)
-- Server-agnostic [GraphQL Integration](https://www.bluelibs.com/docs/package-graphql) with [Apollo](https://www.bluelibs.com/docs/package-apollo)
-- [MongoDB](https://www.bluelibs.com/docs/package-mongo) & [PostgreSQL](https://www.bluelibs.com/docs/package-sql) Integrations
-- Rapid Prototyping via [Blueprint](https://www.bluelibs.com/products/blueprint/) and [X-Framework](https://www.bluelibs.com/products/x-framework/)
-- [Code Generation Tooling](https://www.bluelibs.com/docs/package-x-cli)
-- [GraphQL Live Data for Single Documents & Queries](https://www.bluelibs.com/docs/package-x-bundle#live-data) via X-Framework
+- 👉 [Dependency Injection & Module Management](https://www.bluelibs.com/docs/package-core)
+- 👉 Database-agnostic and fully featured [Security System](https://www.bluelibs.com/docs/package-security)
+- 👉 Server-agnostic [GraphQL Integration](https://www.bluelibs.com/docs/package-graphql) with [Apollo](https://www.bluelibs.com/docs/package-apollo)
+- 👉 [MongoDB](https://www.bluelibs.com/docs/package-mongo) & [PostgreSQL](https://www.bluelibs.com/docs/package-sql) Integrations
+- 👉 Rapid Prototyping via [Blueprint](https://www.bluelibs.com/products/blueprint/) and [X-Framework](https://www.bluelibs.com/products/x-framework/)
+- 👉 [Code Generation Tooling](https://www.bluelibs.com/docs/package-x-cli)
+- 👉 [GraphQL Live Data for Single Documents & Queries](https://www.bluelibs.com/docs/package-x-bundle#live-data) via X-Framework
 
 ## Learning BlueLibs
 
 We have designed a custom [documentation](https://www.bluelibs.com/docs) experience with custom code snippets and challenges.
+
+- [Introduction to BlueLibs](https://www.youtube.com/watch?v=uXmiC3LogYw)
+- [BlueSessions (Live Coding with Theo)](https://www.youtube.com/watch?v=6ooKaI6KyA8&list=PLZjXvs8vDYPzBAjFbTGSp49Nu3_Vj2IzN)
 
 ## Security Vulnerabilities
 
