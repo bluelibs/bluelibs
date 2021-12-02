@@ -26,6 +26,22 @@ BlueLibs is a collection of open-source products written in TypeScript designed 
 - 👉 [Code Generation Tooling](https://www.bluelibs.com/docs/package-x-cli)
 - 👉 [GraphQL Live Data for Single Documents & Queries](https://www.bluelibs.com/docs/package-x-bundle#live-data) via X-Framework
 
+## Get Started
+
+Our rapid prototyping solution (Blueprint for X-Framework) is tightly coupled to GraphQL and MongoDB. BlueLibs as a whole isn't. and supports [SQL](https://www.bluelibs.com/docs/package-sql).
+
+```bash
+# Install MongoDB & Node 14+
+npm i -g @bluelibs/x
+x # pick project and complete it there
+cd project
+npm run blueprint:generate
+npm run start:api
+npm run start:admin # Start after API has started
+```
+
+
+
 ## Learning BlueLibs
 
 We have designed a custom [documentation](https://www.bluelibs.com/docs) experience with custom code snippets and challenges.
