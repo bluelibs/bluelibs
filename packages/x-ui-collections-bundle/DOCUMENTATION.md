@@ -285,6 +285,7 @@ function PostsList() {
     data: posts,
     isLoading,
     error,
+    refetch,
   } = useData(
     PostsCollection,
     {
@@ -312,8 +313,11 @@ const {
   data: post,
   isLoading,
   error,
+  refetch,
 } = useDataOne(PostsCollection, new ObjectId(props.id), body);
 ```
+
+If you want to refetch the data simply call the `refetch()` function from your event listeners.
 
 ### Lists
 

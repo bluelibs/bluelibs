@@ -120,6 +120,10 @@ export class Collection extends BaseModel<Collection> {
       r.from = this;
       r.app = this.app;
       r.clean();
+      if (r.isDirect) {
+        // UI is controlled now by the relation itself
+        r.cleaned.field.ui = false;
+      }
     });
     this.fields.forEach((f) => {
       f.collection = this;
