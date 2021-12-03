@@ -122,6 +122,7 @@ export class ModelUtils {
             name: field.model.name,
             type: GenericFieldTypeEnum.ENUM,
             isMany: field.isMany,
+            isOptional: field.isOptional,
           },
           ""
         );
