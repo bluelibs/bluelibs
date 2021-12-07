@@ -1,5 +1,6 @@
-import { ClientSession, Collection, FilterQuery } from "mongodb";
+import { ClientSession, Collection } from "mongodb";
 import { ClassSchema } from "@deepkit/type";
+import { Filter as FilterQuery } from "mongodb";
 
 export interface IToArrayable {
   toArray(): Promise<any[]>;
