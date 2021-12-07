@@ -31,7 +31,7 @@
     "lodash": "^4.17.15"
   },
   "peerDependencies": {
-    "mongodb": "^3.3.3"
+    "mongodb": "^3.3.3 | ^4.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.3",
