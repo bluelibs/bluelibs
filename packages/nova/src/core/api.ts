@@ -30,7 +30,7 @@ import CollectionNode from "./query/nodes/CollectionNode";
 import { getBSONDecoder } from "@deepkit/bson";
 import { ISecureOptions } from "./defs";
 
-export { secureBody };
+export { secureBody, Linker };
 
 export function query<T>(
   collection: Collection,
