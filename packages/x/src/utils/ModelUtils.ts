@@ -267,7 +267,7 @@ export const TSFieldMap = {
   [GenericFieldTypeEnum.FLOAT]: "number",
   [GenericFieldTypeEnum.INT]: "number",
   [GenericFieldTypeEnum.OBJECT]: "any",
-  [GenericFieldTypeEnum.ID]: "any",
+  [GenericFieldTypeEnum.ID]: "ObjectId",
 };
 
 export const YupFieldMap = {

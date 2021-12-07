@@ -1,6 +1,7 @@
 {{# if isBaseExtendMode }}
 /** @overridable */
 {{/ if }}
+import { ObjectId } from "@bluelibs/ejson";
 {{# if yupValidation }}
   import { Schema, Is, a, an } from "@bluelibs/validator-bundle";
 {{/ if }}

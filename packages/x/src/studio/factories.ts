@@ -39,6 +39,7 @@ export type FieldFactoryFunction<T, RT extends (keyof T)[]> = FactoryFunction<
   date: FieldFactoryShortcut;
   boolean: FieldFactoryShortcut;
   object: FieldFactoryShortcut;
+  objectId: FieldFactoryShortcut;
 };
 
 export const field: FieldFactoryFunction<Field, ["id", "type"]> = (config) => {
@@ -86,3 +87,4 @@ field.float = fieldShortcutFactory(FieldValueKind.FLOAT);
 field.date = fieldShortcutFactory(FieldValueKind.DATE);
 field.boolean = fieldShortcutFactory(FieldValueKind.BOOLEAN);
 field.object = fieldShortcutFactory(FieldValueKind.OBJECT);
+field.objectId = fieldShortcutFactory(FieldValueKind.OBJECT_ID);
