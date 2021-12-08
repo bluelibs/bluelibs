@@ -31,6 +31,10 @@ beforeAll(async () => {
   await kernel.init();
 });
 
+afterAll(async () => {
+  await kernel.shutdown();
+});
+
 beforeEach(async () => {
   const dbService = kernel.container.get<DatabaseService>(DatabaseService);
   const db = dbService.client.db("test");

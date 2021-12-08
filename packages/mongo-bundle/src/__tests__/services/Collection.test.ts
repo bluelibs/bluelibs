@@ -124,6 +124,7 @@ describe("Collection", () => {
 
     expect(foundUser).toBeInstanceOf(User);
     expect(foundUser.comments).toHaveLength(2);
+
     expect(foundUser.posts).toHaveLength(1);
   });
 

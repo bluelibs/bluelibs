@@ -1,3 +1,4 @@
+import "./helpers";
 import "./services/Collection.test";
 import "./services/DatabaseService.test";
 import "./services/MigrationService.test";
