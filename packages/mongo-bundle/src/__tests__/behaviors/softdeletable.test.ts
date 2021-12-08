@@ -1,11 +1,10 @@
-import { createEcosystem } from "../helpers";
+import { getEcosystem } from "../helpers";
 import softdeletable from "../../behaviors/softdeletable";
 import { Collection } from "../..";
-import { assert } from "chai";
 
 describe("Softdeletable behavior", () => {
   it("Should soft-delete one or more documents and not be able to be found via find, findOne, findOneAndUpdate, aggregate", async () => {
-    const { container, teardown } = await createEcosystem();
+    const { container } = await getEcosystem();
 
     class SoftdeletableCollection extends Collection<any> {
       static behaviors = [softdeletable()];
@@ -20,25 +19,26 @@ describe("Softdeletable behavior", () => {
       title: "Hello my friend",
     });
 
-    assert.isObject(await collection.findOne({ _id: result.insertedId }));
+    expect(await collection.findOne({ _id: result.insertedId })).toBeInstanceOf(
+      Object
+    );
 
     await collection.deleteOne({ _id: result.insertedId });
 
-    assert.isNull(await collection.findOne({ _id: result.insertedId }));
-    assert.isObject(
+    expect(await collection.findOne({ _id: result.insertedId })).toBeNull();
+    expect(
       await collection.findOne({ _id: result.insertedId, isDeleted: true })
-    );
+    ).toBeInstanceOf(Object);
 
-    assert.lengthOf(
-      await collection.find({ _id: result.insertedId }).toArray(),
-      0
-    );
-    assert.lengthOf(
+    expect(
+      await collection.find({ _id: result.insertedId }).toArray()
+    ).toHaveLength(0);
+
+    expect(
       await collection
         .find({ _id: result.insertedId, isDeleted: true })
-        .toArray(),
-      1
-    );
+        .toArray()
+    ).toHaveLength(1);
 
     await collection.findOneAndUpdate(
       { _id: result.insertedId },
@@ -52,12 +52,13 @@ describe("Softdeletable behavior", () => {
       _id: result.insertedId,
       isDeleted: true,
     });
-    assert.notEqual(obj.title, "findOneAndUpdated");
+
+    expect(obj.title === "findOneAndUpdated").toBe(false);
 
     await collection.findOneAndDelete({ _id: result.insertedId });
-    assert.isObject(
+    expect(
       await collection.findOne({ _id: result.insertedId, isDeleted: true })
-    );
+    ).toBeTruthy();
 
     let aggregateResult = await collection
       .aggregate([
@@ -67,7 +68,7 @@ describe("Softdeletable behavior", () => {
       ])
       .toArray();
 
-    assert.lengthOf(aggregateResult, 0);
+    expect(aggregateResult).toHaveLength(0);
 
     aggregateResult = await collection
       .aggregate([
@@ -80,13 +81,11 @@ describe("Softdeletable behavior", () => {
       ])
       .toArray();
 
-    assert.lengthOf(aggregateResult, 1);
-
-    teardown();
+    expect(aggregateResult).toHaveLength(1);
   });
 
   it("Shouldnt allow to update deleted elements without explicit specification", async () => {
-    const { container, teardown } = await createEcosystem();
+    const { container } = await getEcosystem();
 
     class SoftdeletableCollection extends Collection<any> {
       static behaviors = [softdeletable()];
@@ -117,9 +116,7 @@ describe("Softdeletable behavior", () => {
       isDeleted: true,
     });
 
-    assert.equal(obj.title, "Hello my friend");
-
-    teardown();
+    expect(obj.title).toEqual("Hello my friend");
   });
 
   // TODO:

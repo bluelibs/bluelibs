@@ -6,13 +6,7 @@ import {
   BeforeUpdateEvent,
   AfterUpdateEvent,
 } from "../events";
-import {
-  FilterQuery,
-  UpdateQuery,
-  UpdateOneOptions,
-  UpdateManyOptions,
-  FindOneAndUpdateOption,
-} from "mongodb";
+import * as MongoDB from "mongodb";
 import { DatabaseService } from "../services/DatabaseService";
 
 // Some things here can be re-used between updateOne, updateMany and findOneAndUpdate
@@ -57,9 +51,9 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
     // and decide which use-case is best for them.
 
     collection.updateOne = async (
-      filter: FilterQuery<any>,
-      update: UpdateQuery<any>,
-      options: IContextAware & UpdateOneOptions = {}
+      filter: MongoDB.Filter<any>,
+      update: MongoDB.UpdateFilter<any>,
+      options: IContextAware & MongoDB.UpdateOptions = {}
     ) => {
       let result = null;
       const fields = dbService.getFields(update);
@@ -127,9 +121,9 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
     };
 
     collection.updateMany = async (
-      filter: FilterQuery<any>,
-      update: UpdateQuery<any>,
-      options: IContextAware & UpdateManyOptions = {}
+      filter: MongoDB.Filter<any>,
+      update: MongoDB.UpdateFilter<any>,
+      options: IContextAware & MongoDB.UpdateOptions = {}
     ) => {
       let result;
       const fields = dbService.getFields(update);
@@ -192,9 +186,9 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
     };
 
     collection.findOneAndUpdate = async (
-      filter: FilterQuery<any> = {},
-      update: UpdateQuery<any>,
-      options: IContextAware & FindOneAndUpdateOption<any> = {}
+      filter: MongoDB.Filter<any> = {},
+      update: MongoDB.UpdateFilter<any>,
+      options: IContextAware & MongoDB.FindOneAndUpdateOptions = {}
     ) => {
       let result;
       const fields = dbService.getFields(update);

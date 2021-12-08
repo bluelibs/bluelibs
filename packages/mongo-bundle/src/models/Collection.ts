@@ -1,25 +1,4 @@
-import {
-  Collection as MongoCollection,
-  FilterQuery,
-  CollectionInsertOneOptions,
-  UpdateQuery,
-  UpdateWriteOpResult,
-  InsertOneWriteOpResult,
-  InsertWriteOpResult,
-  DeleteWriteOpResultObject,
-  CommonOptions,
-  UpdateOneOptions,
-  UpdateManyOptions,
-  CollectionAggregationOptions,
-  IndexSpecification,
-  FindOneAndUpdateOption,
-  FindAndModifyWriteOpResultObject,
-  FindOneOptions,
-  Cursor,
-  FindOneAndDeleteOption,
-  MongoCountPreferences,
-  ClientSession,
-} from "mongodb";
+import * as MongoDB from "mongodb";
 import {
   Inject,
   EventManager,
@@ -29,6 +8,7 @@ import {
   IEventConstructor,
   Constructor,
   EventHandlerType,
+  DeepPartial,
 } from "@bluelibs/core";
 import { DatabaseService } from "../services/DatabaseService";
 import {
@@ -40,8 +20,14 @@ import {
   AfterUpdateEvent,
   CollectionEvent,
 } from "../events";
-import { BehaviorType, IContextAware, IBundleLinkOptions } from "../defs";
-import { toModel } from "@bluelibs/ejson";
+import {
+  BehaviorType,
+  IContextAware,
+  IBundleLinkOptions,
+  IExecutionContext,
+} from "../defs";
+import { ObjectId, toModel } from "@bluelibs/ejson";
+import { DeepSyncDocumentNode } from "../services/deep-sync/DeepSyncDocumentNode";
 import {
   query,
   ILinkOptions,
@@ -53,15 +39,31 @@ import {
   addSchema,
   addLinks,
   IAstToQueryOptions,
+  LINK_STORAGE,
+  Linker,
 } from "@bluelibs/nova";
+import {
+  DocumentWithID,
+  ID,
+  LinkOperatorModel,
+  Unpacked,
+} from "./LinkOperator";
 
+/**
+ * This symbol allows us to access this collection from the MongoCollection
+ */
+export const MONGO_BUNDLE_COLLECTION = Symbol("MONGO_BUNDLE_COLLECTION");
+/**
+ * This represents which ids have been deleted so we know how to do propper cascading
+ */
+const DELETED_IDS = Symbol("DELETED_IDS");
 @Service()
 export abstract class Collection<T = any> {
   static model: any;
   static links: IBundleLinkOptions = {};
   static reducers: IReducerOptions = {};
   static expanders: IExpanderOptions = {};
-  static indexes: IndexSpecification[] = [];
+  static indexes: MongoDB.IndexDescription[] = [];
   static behaviors: BehaviorType[] = [];
   /**
    * This schema can be created by using { t } from @bluelibs/nova package t.schema({})
@@ -72,7 +74,7 @@ export abstract class Collection<T = any> {
 
   public isInitialised: boolean = false;
   protected onInitFunctions: Function[] = [];
-  public collection: MongoCollection<T>;
+  public collection: MongoDB.Collection<T>;
   /**
    * Refers to the event manager that is only within this collection's context
    */
@@ -108,7 +110,9 @@ export abstract class Collection<T = any> {
 
     this.collection = this.databaseService.getMongoCollection(
       this.getStaticVariable("collectionName")
-    );
+    ) as MongoDB.Collection<T>;
+
+    this.collection[MONGO_BUNDLE_COLLECTION] = this;
 
     // Create the links, reducers, expanders
     this.initialiseNova();
@@ -129,9 +133,9 @@ export abstract class Collection<T = any> {
    * @param options
    */
   find(
-    filter: FilterQuery<T> = {},
-    options?: FindOneOptions<T extends T ? T : T>
-  ): Cursor<T> {
+    filter: MongoDB.Filter<T> = {},
+    options?: MongoDB.FindOptions<T extends T ? T : T>
+  ): MongoDB.FindCursor<MongoDB.WithId<T>> {
     const cursor = this.collection.find(filter, options);
 
     const oldToArray = cursor.toArray.bind(cursor);
@@ -150,8 +154,8 @@ export abstract class Collection<T = any> {
    * @returns
    */
   async count(
-    filter: FilterQuery<T> = {},
-    options?: MongoCountPreferences
+    filter: MongoDB.Filter<T> = {},
+    options?: MongoDB.CountOptions
   ): Promise<number> {
     return this.collection.countDocuments(filter, options);
   }
@@ -162,8 +166,8 @@ export abstract class Collection<T = any> {
    * @param options
    */
   async findOne(
-    query: FilterQuery<T> = {},
-    options?: FindOneOptions<T extends T ? T : T>
+    query: MongoDB.Filter<T> = {},
+    options?: MongoDB.FindOptions<T extends T ? T : T>
   ): Promise<T> {
     const result = await this.collection.findOne(query, options);
 
@@ -178,8 +182,10 @@ export abstract class Collection<T = any> {
    */
   async insertOne(
     document: Partial<T>,
-    options: IContextAware & CollectionInsertOneOptions = {}
-  ): Promise<InsertOneWriteOpResult<any>> {
+    options: IContextAware & MongoDB.InsertOneOptions = {}
+  ): Promise<MongoDB.InsertOneResult<T>> {
+    await this.setDefaults(document, options.context || {});
+
     if (options) {
       options.context = options.context || {};
     }
@@ -211,14 +217,16 @@ export abstract class Collection<T = any> {
 
   async insertMany(
     documents: Partial<T>[],
-    options: IContextAware & CollectionInsertOneOptions = {}
-  ): Promise<InsertWriteOpResult<any>> {
+    options: IContextAware & MongoDB.InsertOneOptions = {}
+  ): Promise<MongoDB.InsertManyResult<T>> {
     if (options) {
       options.context = options.context || {};
     }
     const events = [];
 
-    documents.forEach((document) => {
+    for (const document of documents) {
+      await this.setDefaults(document, options.context || {});
+
       events.push(
         new BeforeInsertEvent({
           document,
@@ -226,7 +234,7 @@ export abstract class Collection<T = any> {
           options,
         })
       );
-    });
+    }
 
     for (const event of events) {
       await this.emit(event);
@@ -252,10 +260,10 @@ export abstract class Collection<T = any> {
   }
 
   async updateOne(
-    filters: FilterQuery<T>,
-    update: UpdateQuery<T>,
-    options: IContextAware & UpdateOneOptions = {}
-  ): Promise<UpdateWriteOpResult> {
+    filters: MongoDB.Filter<T>,
+    update: MongoDB.UpdateFilter<T>,
+    options: IContextAware & MongoDB.UpdateOptions = {}
+  ): Promise<MongoDB.UpdateResult> {
     if (options) {
       options.context = options.context || {};
     }
@@ -290,10 +298,10 @@ export abstract class Collection<T = any> {
   }
 
   async updateMany(
-    filters: FilterQuery<T>,
-    update: UpdateQuery<T>,
-    options: IContextAware & UpdateManyOptions = {}
-  ): Promise<UpdateWriteOpResult> {
+    filters: MongoDB.Filter<T>,
+    update: MongoDB.UpdateFilter<T>,
+    options: IContextAware & MongoDB.UpdateOptions = {}
+  ): Promise<MongoDB.UpdateResult> {
     if (options) {
       options.context = options.context || {};
     }
@@ -320,18 +328,18 @@ export abstract class Collection<T = any> {
         fields,
         isMany: true,
         context: options.context,
-        result,
+        result: result as MongoDB.UpdateResult,
         options,
       })
     );
 
-    return result;
+    return result as MongoDB.UpdateResult;
   }
 
   async deleteOne(
-    filters: FilterQuery<T>,
-    options: IContextAware & CommonOptions = {}
-  ): Promise<DeleteWriteOpResultObject> {
+    filters: MongoDB.Filter<T>,
+    options: IContextAware & MongoDB.DeleteOptions = {}
+  ): Promise<MongoDB.DeleteResult> {
     if (options) {
       options.context = options.context || {};
     }
@@ -364,9 +372,9 @@ export abstract class Collection<T = any> {
    * @param options
    */
   async deleteMany(
-    filters: FilterQuery<T>,
-    options: IContextAware & CommonOptions = {}
-  ): Promise<DeleteWriteOpResultObject> {
+    filters: MongoDB.Filter<T>,
+    options: IContextAware & MongoDB.DeleteOptions = {}
+  ): Promise<MongoDB.DeleteResult> {
     if (options) {
       options.context = options.context || {};
     }
@@ -396,9 +404,9 @@ export abstract class Collection<T = any> {
   }
 
   async findOneAndDelete(
-    filters: FilterQuery<T> = {},
-    options: IContextAware & FindOneAndDeleteOption<any> = {}
-  ): Promise<FindAndModifyWriteOpResultObject<T>> {
+    filters: MongoDB.Filter<T> = {},
+    options: IContextAware & MongoDB.FindOneAndDeleteOptions = {}
+  ): Promise<MongoDB.ModifyResult<T>> {
     if (options) {
       options.context = options.context || {};
     }
@@ -419,7 +427,7 @@ export abstract class Collection<T = any> {
         context: options?.context || {},
         filter: filters,
         isMany: false,
-        result,
+        result: result as MongoDB.ModifyResult<T>,
         options,
       })
     );
@@ -432,10 +440,10 @@ export abstract class Collection<T = any> {
   }
 
   async findOneAndUpdate(
-    filters: FilterQuery<T> = {},
-    update: UpdateQuery<T>,
-    options: IContextAware & FindOneAndUpdateOption<any> = {}
-  ): Promise<FindAndModifyWriteOpResultObject<T>> {
+    filters: MongoDB.Filter<T> = {},
+    update: MongoDB.UpdateFilter<T>,
+    options: IContextAware & MongoDB.FindOneAndUpdateOptions = {}
+  ): Promise<MongoDB.ModifyResult<T>> {
     if (options) {
       options.context = options.context || {};
     }
@@ -481,7 +489,7 @@ export abstract class Collection<T = any> {
    * @param pipeline Pipeline options from mongodb
    * @param options
    */
-  aggregate(pipeline: any[], options?: CollectionAggregationOptions) {
+  aggregate(pipeline: any[], options?: MongoDB.AggregateOptions) {
     return this.collection.aggregate(pipeline, options);
   }
 
@@ -492,7 +500,7 @@ export abstract class Collection<T = any> {
    */
   async query(
     request: QueryBodyType<T>,
-    session?: ClientSession
+    session?: MongoDB.ClientSession
   ): Promise<Array<Partial<T>>> {
     const results = await query(this.collection, request, {
       container: this.container,
@@ -509,7 +517,7 @@ export abstract class Collection<T = any> {
    */
   async queryOne(
     request: QueryBodyType<T>,
-    session?: ClientSession
+    session?: MongoDB.ClientSession
   ): Promise<Partial<T>> {
     const result = await query(this.collection, request, {
       container: this.container,
@@ -601,6 +609,12 @@ export abstract class Collection<T = any> {
   }
 
   /**
+   * Override this method to set defaults for insertion.
+   * @param plain
+   */
+  async setDefaults(plain: Partial<T>, context?: IExecutionContext) {}
+
+  /**
    * Perform a query directly from GraphQL resolver based on requested fields. Returns an array.
    *
    * @param ast
@@ -609,7 +623,7 @@ export abstract class Collection<T = any> {
   async queryGraphQL(
     ast: any,
     config?: IAstToQueryOptions<T>,
-    session?: ClientSession
+    session?: MongoDB.ClientSession
   ): Promise<Array<Partial<T>>> {
     const result = await query
       .graphql(this.collection, ast, config, {
@@ -629,7 +643,7 @@ export abstract class Collection<T = any> {
   async queryOneGraphQL(
     ast,
     config?: IAstToQueryOptions<T>,
-    session?: ClientSession
+    session?: MongoDB.ClientSession
   ): Promise<Partial<T>> {
     const result = await query
       .graphql(this.collection, ast, config, {
@@ -649,6 +663,36 @@ export abstract class Collection<T = any> {
     event.prepare(this);
     await this.localEventManager.emit(event);
     await this.globalEventManager.emit(event);
+  }
+
+  /**
+   * TODO: transactions fix
+   * Transaction-based deep synchronisation syncing.
+   *
+   * @param object
+   * @param options
+   * @returns
+   */
+  async deepSync(
+    object: DeepPartial<T> | DeepPartial<T>[],
+    options: IContextAware &
+      (MongoDB.InsertOneOptions | MongoDB.UpdateOptions) = {}
+  ): Promise<void> {
+    const objects = Array.isArray(object) ? object : [object];
+
+    for (const object of objects) {
+      const node = new DeepSyncDocumentNode(this.collection, object);
+
+      await node.flush({
+        ...options,
+      });
+    }
+  }
+
+  getLinkOperator<K extends DocumentWithID = null, Q extends keyof T = keyof T>(
+    linkName: T extends null ? string : Q
+  ): LinkOperatorModel<T extends null ? K : Unpacked<T[Q]>> {
+    return new LinkOperatorModel(this, linkName as string);
   }
 
   onInit(fn: Function) {

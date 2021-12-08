@@ -1,22 +1,14 @@
-import { createEcosystem } from "../helpers";
+import { getEcosystem } from "../helpers";
 import { Comments } from "./dummy/comments";
 import { Posts } from "./dummy/posts";
 import { Users, User } from "./dummy/users";
-import { assert, expect } from "chai";
-import {
-  BeforeInsertEvent,
-  AfterInsertEvent,
-  BeforeUpdateEvent,
-  AfterUpdateEvent,
-  BeforeRemoveEvent,
-  AfterRemoveEvent,
-} from "../../events";
+
 import { DatabaseService } from "../../services/DatabaseService";
 import { MigrationService } from "../../services/MigrationService";
 
 describe("Migrations", () => {
-  it("Should work with basic migration and ensure all run", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with basic migration and ensure all run", async () => {
+    const { container } = await getEcosystem();
 
     const comments = container.get<Comments>(Comments);
     const posts = container.get<Posts>(Posts);
@@ -54,27 +46,21 @@ describe("Migrations", () => {
 
     await migrationService.migrateToLatest();
     const status = await migrationService.getStatus();
-    assert.equal(status.version, 2);
-    assert.equal(await posts.find().count(), 2);
+    expect(status.version).toBe(2);
+    expect(await posts.find().count()).toBe(2);
 
     await migrationService.migrateTo(1);
-    assert.equal(await posts.find().count(), 1);
+    expect(await posts.find().count()).toBe(1);
 
     await migrationService.migrateTo(0);
-    assert.equal(await posts.find().count(), 1);
+    expect(await posts.find().count()).toBe(1);
 
     await migrationService.migrateToLatest();
-    assert.equal(await posts.find().count(), 2);
-
-    await teardown();
+    expect(await posts.find().count()).toBe(2);
   });
 
-  it("Should have sanity checks for adding migrations", async () => {
-    const { container, teardown } = await createEcosystem();
-
-    // const comments = container.get<Comments>(Comments);
-    // const posts = container.get<Posts>(Posts);
-    // const users = container.get<Users>(Users);
+  test("Should have sanity checks for adding migrations", async () => {
+    const { container } = await getEcosystem();
 
     const migrationService = container.get(MigrationService);
 
@@ -85,24 +71,22 @@ describe("Migrations", () => {
       async down() {},
     });
 
-    assert.throws(() => {
+    expect(() => {
       migrationService.add({
         name: "Add a new post",
         version: 1,
         async up() {},
         async down() {},
       });
-    }, "You already have a migration added with this version.");
+    }).toThrowError();
 
-    assert.throws(() => {
+    expect(() => {
       migrationService.add({
         name: "Add a new post",
         version: 0,
         async up() {},
         async down() {},
       });
-    });
-
-    await teardown();
+    }).toThrow();
   });
 });

@@ -1,8 +1,7 @@
-import { createEcosystem } from "../helpers";
+import { getEcosystem } from "../helpers";
 import { Comments, Comment } from "./dummy/comments";
 import { Posts, Post } from "./dummy/posts";
 import { Users, User } from "./dummy/users";
-import { assert, expect } from "chai";
 import { AfterDeleteEvent } from "../../events";
 import { DatabaseService } from "../../services/DatabaseService";
 import {
@@ -10,13 +9,12 @@ import {
   AfterInsertEvent,
   BeforeUpdateEvent,
   AfterUpdateEvent,
-  BeforeRemoveEvent,
-  AfterRemoveEvent,
 } from "../../events";
+import { DeepPartial } from "@bluelibs/core";
 
 describe("Collection", () => {
-  it("Should dispatch events properly", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should dispatch events properly", async () => {
+    const { container } = await getEcosystem();
 
     const comments = container.get<Comments>(Comments);
 
@@ -66,18 +64,16 @@ describe("Collection", () => {
 
     await comments.deleteOne({ _id: c1.insertedId });
 
-    assert.isTrue(lifecycle.beforeInsert);
-    assert.isTrue(lifecycle.afterInsert);
-    assert.isTrue(lifecycle.beforeUpdate);
-    assert.isTrue(lifecycle.afterUpdate);
-    assert.isTrue(lifecycle.beforeDelete);
-    assert.isTrue(lifecycle.afterDelete);
-
-    await teardown();
+    expect(lifecycle.beforeInsert).toBe(true);
+    expect(lifecycle.afterInsert).toBe(true);
+    expect(lifecycle.beforeUpdate).toBe(true);
+    expect(lifecycle.afterUpdate).toBe(true);
+    expect(lifecycle.beforeDelete).toBe(true);
+    expect(lifecycle.afterDelete).toBe(true);
   });
 
-  it("Should work with nova integration", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with nova integration", async () => {
+    const { container } = await getEcosystem();
 
     const comments = container.get<Comments>(Comments);
     const posts = container.get<Posts>(Posts);
@@ -123,23 +119,22 @@ describe("Collection", () => {
       },
     });
 
-    assert.lengthOf(foundUsers, 1);
+    expect(foundUsers).toHaveLength(1);
     const foundUser = foundUsers[0];
 
-    assert.instanceOf(foundUser, User);
-    assert.lengthOf(foundUser.comments, 2);
-    assert.lengthOf(foundUser.posts, 1);
-
-    await teardown();
+    expect(foundUser).toBeInstanceOf(User);
+    expect(foundUser.comments).toHaveLength(2);
+    expect(foundUser.posts).toHaveLength(1);
   });
 
-  it("Should prevent execution/update when event listeners throw", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should prevent execution/update when event listeners throw", async () => {
+    const { container } = await getEcosystem();
     const posts = container.get<Posts>(Posts);
 
-    posts.on(BeforeUpdateEvent, async () => {
+    const errorHandler = async () => {
       throw new Error();
-    });
+    };
+    posts.on(BeforeUpdateEvent, errorHandler);
 
     const p1 = await posts.insertOne({
       title: "new",
@@ -156,7 +151,7 @@ describe("Collection", () => {
           },
         }
       )
-    ).to.eventually.be.rejectedWith(Error);
+    ).rejects.toBeInstanceOf(Error);
 
     const post = await posts.queryOne({
       $: {
@@ -167,34 +162,27 @@ describe("Collection", () => {
       title: 1,
     });
 
-    assert.equal(post.title, "new");
+    expect(post.title).toBe("new");
 
     await posts.deleteOne({
       _id: p1.insertedId,
     });
 
-    await teardown();
+    posts.localEventManager.removeListener(BeforeUpdateEvent, errorHandler);
   });
 
-  it("Should work with indexes", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with indexes", async () => {
+    const { container } = await getEcosystem();
     const posts = container.get(Posts);
 
-    // Give time for indexes to persist
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 500);
-    });
     const result = await posts.collection.listIndexes().toArray();
 
-    // for _id and for authorId
-    assert.lengthOf(result, 2);
-    await teardown();
+    // for _id and for authorId, tagsIds
+    expect(result).toHaveLength(3);
   });
 
-  it("Should work with find and findOne", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with find and findOne", async () => {
+    const { container } = await getEcosystem();
     const posts = container.get(Posts);
 
     await posts.deleteMany({});
@@ -202,17 +190,15 @@ describe("Collection", () => {
     const p1 = await posts.insertOne({ title: "hello" });
 
     const postObjects = await posts.find({}).toArray();
-    assert.lengthOf(postObjects, 1);
-    assert.instanceOf(postObjects[0], Post);
+    expect(postObjects).toHaveLength(1);
+    expect(postObjects[0]).toBeInstanceOf(Post);
 
     const postObject = await posts.findOne({});
-    assert.instanceOf(postObject, Post);
-
-    await teardown();
+    expect(postObject).toBeInstanceOf(Post);
   });
 
-  it("Should work with findOneAndSTUFF", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with findOneAndSTUFF", async () => {
+    const { container } = await getEcosystem();
     const posts = container.get(Posts);
 
     await posts.deleteMany({});
@@ -228,25 +214,23 @@ describe("Collection", () => {
       }
     );
 
-    assert.instanceOf(result.value, Post);
+    expect(result.value).toBeInstanceOf(Post);
 
     let post = await posts.findOne({});
-    assert.equal(post.title, "hello2");
+    expect(post.title).toBe("hello2");
 
     result = await posts.findOneAndDelete({ _id: p1.insertedId });
-    assert.instanceOf(result.value, Post);
-
-    await teardown();
+    expect(result.value).toBeInstanceOf(Post);
   });
 
-  it("Should work with count", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with count", async () => {
+    const { container } = await getEcosystem();
 
     const posts = container.get(Posts);
 
     const postsCount = await posts.count();
 
-    assert.equal(postsCount, 0);
+    expect(postsCount).toBe(0);
 
     const postsToInsertCount = Math.ceil(5 + Math.random() * 10);
 
@@ -268,15 +252,13 @@ describe("Collection", () => {
       }
     );
 
-    assert.equal(allPostsCountAfterInsert, postsToInsertCount);
-    assert.equal(postsCountWithGivenTitle, 1);
-    assert.equal(postsCountLimit5, 5);
-
-    await teardown();
+    expect(allPostsCountAfterInsert).toBe(postsToInsertCount);
+    expect(postsCountWithGivenTitle).toBe(1);
+    expect(postsCountLimit5).toBe(5);
   });
 
-  it("Should work with count when having softdeletable behavior (deleteOne, deleteMany)", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with count when having softdeletable behavior (deleteOne, deleteMany)", async () => {
+    const { container } = await getEcosystem();
 
     const comments = container.get(Comments);
 
@@ -284,7 +266,7 @@ describe("Collection", () => {
     await comments.deleteOne({ _id });
 
     const commentsCount = await comments.count();
-    assert.equal(commentsCount, 0);
+    expect(commentsCount).toBe(0);
 
     const randomNumberOfComments = Math.ceil(5 + Math.random() * 10);
 
@@ -299,22 +281,20 @@ describe("Collection", () => {
 
     await comments.insertMany(commentsArray);
 
-    assert.equal(await comments.count(), randomNumberOfComments);
+    expect(await comments.count()).toBe(randomNumberOfComments);
 
     await comments.deleteMany({});
 
-    assert.equal(await comments.count(), 0);
-
-    await teardown();
+    expect(await comments.count()).toBe(0);
   });
 
-  it("Should work with transactions", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with transactions", async () => {
+    const { container } = await getEcosystem();
 
     const dbService = container.get(DatabaseService);
     const comments = container.get(Comments);
 
-    dbService.transact(async (session) => {
+    await dbService.transact(async (session) => {
       const _id = (await comments.insertOne({ title: "test" })).insertedId;
       let obj = await comments.queryOne(
         {
@@ -326,7 +306,7 @@ describe("Collection", () => {
         session
       );
 
-      assert.equal(obj.title, "test");
+      expect(obj.title).toBe("test");
 
       await comments.updateOne(
         { _id },
@@ -347,9 +327,7 @@ describe("Collection", () => {
         session
       );
 
-      assert.equal(obj.title, "test2");
-
-      await teardown();
+      expect(obj.title).toBe("test2");
     });
   });
 });

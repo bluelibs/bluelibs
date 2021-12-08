@@ -3,7 +3,7 @@ import {
   MongoClient,
   Db,
   Collection as MongoCollection,
-  UpdateQuery,
+  UpdateFilter as UpdateQuery,
   TransactionOptions,
   ClientSession,
 } from "mongodb";

@@ -1,15 +1,5 @@
 import { Event } from "@bluelibs/core";
-import {
-  FilterQuery,
-  UpdateQuery,
-  UpdateWriteOpResult,
-  DeleteWriteOpResultObject,
-  FindAndModifyWriteOpResultObject,
-  ClientSession,
-  CollectionInsertOneOptions,
-  UpdateOneOptions,
-  CommonOptions,
-} from "mongodb";
+import * as MongoDB from "mongodb";
 import { IExecutionContext, IGetFieldsResponse } from "./defs";
 import { Collection } from "./models/Collection";
 
@@ -37,48 +27,48 @@ export abstract class CollectionEvent<
 export class BeforeInsertEvent<T = any> extends CollectionEvent<{
   document: T;
   context: IExecutionContext;
-  options: CollectionInsertOneOptions;
+  options: MongoDB.InsertOneOptions;
 }> {}
 
 export class AfterInsertEvent<T = any> extends CollectionEvent<{
   document: T;
   _id: any;
   context: IExecutionContext;
-  options: CollectionInsertOneOptions;
+  options: MongoDB.InsertOneOptions;
 }> {}
 
 export class BeforeUpdateEvent<T = any> extends CollectionEvent<{
-  filter: FilterQuery<T>;
-  update: UpdateQuery<T>;
+  filter: MongoDB.Filter<T>;
+  update: MongoDB.UpdateFilter<T>;
   fields: IGetFieldsResponse;
   isMany: boolean;
   context: IExecutionContext;
-  options: UpdateOneOptions;
+  options: MongoDB.UpdateOptions;
 }> {}
 
 export class AfterUpdateEvent<T = any> extends CollectionEvent<{
-  filter: FilterQuery<T>;
-  update: UpdateQuery<T>;
+  filter: MongoDB.Filter<T>;
+  update: MongoDB.UpdateFilter<T>;
   fields: IGetFieldsResponse;
   isMany: boolean;
   context: IExecutionContext;
-  result: UpdateWriteOpResult | FindAndModifyWriteOpResultObject<any>;
-  options: UpdateOneOptions;
+  result: MongoDB.UpdateResult | MongoDB.ModifyResult<T>;
+  options: MongoDB.UpdateOptions;
 }> {}
 
 export class BeforeDeleteEvent<T = any> extends CollectionEvent<{
-  filter: FilterQuery<T>;
+  filter: MongoDB.Filter<T>;
   isMany: boolean;
   context: IExecutionContext;
-  options: CommonOptions;
+  options: MongoDB.DeleteOptions | MongoDB.FindOneAndDeleteOptions;
 }> {}
 
 export class AfterDeleteEvent<T = any> extends CollectionEvent<{
-  filter: FilterQuery<T>;
+  filter: MongoDB.Filter<T>;
   isMany: boolean;
   context: any;
-  result: DeleteWriteOpResultObject | FindAndModifyWriteOpResultObject<any>;
-  options: CommonOptions;
+  result: MongoDB.DeleteResult | MongoDB.ModifyResult<T>;
+  options: MongoDB.DeleteOptions | MongoDB.FindOneAndDeleteOptions;
 }> {}
 
 /**

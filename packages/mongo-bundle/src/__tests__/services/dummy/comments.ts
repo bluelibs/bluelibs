@@ -1,11 +1,11 @@
 import { Collection } from "../../..";
-import { ObjectID } from "mongodb";
+import { ObjectId } from "mongodb";
 import { User, Users } from "./users";
 import { Post, Posts } from "./posts";
 import { Behaviors } from "../../../behaviors";
 
 export class Comment {
-  _id: ObjectID;
+  _id?: ObjectId;
   title: string;
   date: Date;
 
@@ -17,10 +17,10 @@ export class Comment {
     return this.title + " " + this.userId;
   }
 
-  userId: ObjectID;
+  userId: ObjectId;
   user: User;
 
-  postId: ObjectID;
+  postId: ObjectId;
   post: Post;
 }
 

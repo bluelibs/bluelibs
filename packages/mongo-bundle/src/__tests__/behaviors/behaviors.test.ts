@@ -1,12 +1,11 @@
-import { createEcosystem } from "../helpers";
-import { assert } from "chai";
+import { getEcosystem } from "../helpers";
 import { Collection } from "../../models/Collection";
 import timestampable from "../../behaviors/timestampable";
 import blameable from "../../behaviors/blameable";
 
 describe("Behaviors", () => {
   it("Should work with timestampable behaviors, context", async () => {
-    const { container, teardown } = await createEcosystem();
+    const { container } = await getEcosystem();
 
     class Behaviors extends Collection<any> {
       static behaviors = [timestampable(), blameable()];
@@ -38,7 +37,7 @@ describe("Behaviors", () => {
 
     const b0Object = await behaviors.queryOne(getQueryBody(b0.insertedId));
 
-    assert.equal(b0Object.createdById, userIdToCreate);
+    expect(b0Object.createdById).toEqual(userIdToCreate);
 
     const b1 = await behaviors.insertOne(
       {
@@ -54,14 +53,14 @@ describe("Behaviors", () => {
 
     let b1Object = await behaviors.queryOne(getQueryBody(b1.insertedId));
 
-    assert.instanceOf(b1Object.createdAt, Date);
-    assert.instanceOf(b1Object.updatedAt, Date);
-    assert.isTrue(
-      b1Object.createdAt.getTime() === b1Object.updatedAt.getTime()
+    expect(b1Object.createdAt).toBeInstanceOf(Date);
+    expect(b1Object.updatedAt).toBeInstanceOf(Date);
+    expect(b1Object.createdAt.getTime() === b1Object.updatedAt.getTime()).toBe(
+      true
     );
 
-    assert.equal(b1Object.createdById, userIdToCreate);
-    assert.equal(b1Object.updatedById, userIdToCreate);
+    expect(b1Object.createdById).toEqual(userIdToCreate);
+    expect(b1Object.updatedById).toEqual(userIdToCreate);
 
     await behaviors.updateOne(
       {
@@ -81,16 +80,14 @@ describe("Behaviors", () => {
 
     b1Object = await behaviors.queryOne(getQueryBody(b1.insertedId));
 
-    assert.isTrue(b1Object.updatedAt > b1Object.createdAt);
+    expect(b1Object.updatedAt > b1Object.createdAt).toBe(true);
 
-    assert.equal(b1Object.createdById, userIdToCreate);
-    assert.equal(b1Object.updatedById, userIdToUpdate);
-
-    teardown();
+    expect(b1Object.createdById).toEqual(userIdToCreate);
+    expect(b1Object.updatedById).toEqual(userIdToUpdate);
   });
 
   it("Should work with updateMany and insertMany", async () => {
-    const { container, teardown } = await createEcosystem();
+    const { container } = await getEcosystem();
 
     class Behaviors extends Collection<any> {
       static behaviors = [timestampable(), blameable()];
@@ -131,14 +128,14 @@ describe("Behaviors", () => {
 
     let b1s = await behaviors.query(queryBody);
 
-    assert.lengthOf(b1s, 3);
+    expect(b1s).toHaveLength(3);
     b1s.forEach((b1s) => {
-      assert.instanceOf(b1s.createdAt, Date);
-      assert.instanceOf(b1s.updatedAt, Date);
-      assert.isTrue(b1s.createdAt.getTime() === b1s.updatedAt.getTime());
+      expect(b1s.createdAt).toBeInstanceOf(Date);
+      expect(b1s.updatedAt).toBeInstanceOf(Date);
+      expect(b1s.createdAt.getTime() === b1s.updatedAt.getTime()).toBe(true);
 
-      assert.equal(b1s.createdById, userIdToCreate);
-      assert.equal(b1s.updatedById, userIdToCreate);
+      expect(b1s.createdById).toEqual(userIdToCreate);
+      expect(b1s.updatedById).toEqual(userIdToCreate);
     });
 
     await behaviors.updateMany(
@@ -158,12 +155,10 @@ describe("Behaviors", () => {
     b1s = await behaviors.query(queryBody);
 
     b1s.forEach((b1s) => {
-      assert.isTrue(b1s.updatedAt > b1s.createdAt);
+      expect(b1s.updatedAt > b1s.createdAt).toBe(true);
 
-      assert.equal(b1s.createdById, userIdToCreate);
-      assert.equal(b1s.updatedById, userIdToUpdate);
+      expect(b1s.createdById).toEqual(userIdToCreate);
+      expect(b1s.updatedById).toEqual(userIdToUpdate);
     });
-
-    teardown();
   });
 });

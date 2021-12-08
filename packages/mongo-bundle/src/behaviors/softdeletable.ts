@@ -1,11 +1,5 @@
 import { IAstToQueryOptions, QueryBodyType } from "@bluelibs/nova";
-import {
-  CollectionAggregationOptions,
-  CommonOptions,
-  DeleteWriteOpResultObject,
-  FilterQuery,
-  UpdateWriteOpResult,
-} from "mongodb";
+import * as MongoDB from "mongodb";
 import {
   BehaviorType,
   IContextAware,
@@ -49,7 +43,7 @@ export default function softdeletable(
     // For all of them the filter field is the first argument
     overridableMethods.forEach((override) => {
       const old = collection[override];
-      collection[override] = (filter: FilterQuery<any>, ...args: any[]) => {
+      collection[override] = (filter: MongoDB.Filter<any>, ...args: any[]) => {
         return old.call(
           collection,
           getPreparedFiltersForSoftdeletion(filter, fields.isDeleted),
@@ -61,7 +55,7 @@ export default function softdeletable(
     const oldAggregate = collection.aggregate;
     collection.aggregate = (
       pipeline: any[],
-      options?: CollectionAggregationOptions
+      options?: MongoDB.AggregateOptions
     ) => {
       // Search for pipeline a $match containing the isDeleted field
       let containsIsDeleted = false;
@@ -156,7 +150,7 @@ function prepareQueryOptions(
 }
 
 function getPreparedFiltersForSoftdeletion(
-  filter: FilterQuery<any>,
+  filter: MongoDB.Filter<any>,
   isDeletedField: string
 ) {
   filter = Object.assign({}, filter);
@@ -189,11 +183,11 @@ function extractUserID(context: any) {
  */
 async function emulateDeletion(
   collection: Collection<any>,
-  filter: FilterQuery<any>,
-  options: IContextAware & CommonOptions,
+  filter: MongoDB.Filter<any>,
+  options: IContextAware & MongoDB.OperationOptions,
   softdeleteOptions: ISoftdeletableBehaviorOptions,
   isMany: boolean
-): Promise<DeleteWriteOpResultObject> {
+): Promise<MongoDB.DeleteResult> {
   await collection.emit(
     new BeforeDeleteEvent({
       filter,
@@ -220,24 +214,23 @@ async function emulateDeletion(
       },
     },
     options
-  )) as UpdateWriteOpResult;
+  )) as MongoDB.UpdateResult;
 
   await collection.emit(
     new AfterDeleteEvent({
       filter,
       isMany,
       context: options?.context,
-      result,
+      result: {
+        ...result,
+        deletedCount: result.modifiedCount,
+      },
       options,
     })
   );
 
   return {
-    result: {
-      ok: result.result.ok,
-      n: result.result.n,
-    },
-    connection: result.connection,
-    deletedCount: result.result.nModified,
+    ...result,
+    deletedCount: result.modifiedCount,
   };
 }

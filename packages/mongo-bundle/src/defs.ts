@@ -72,6 +72,10 @@ export interface ISoftdeletableBehaviorOptions {
 export interface IBundleLinkCollectionOption
   extends Omit<ILinkCollectionOptions, "collection"> {
   collection: (container: ContainerInstance) => Constructor<Collection>;
+  /**
+   * If you want to delete this relationship when this gets deleted, cleaning can only be used for reversed relationships.
+   */
+  onDelete?: "CASCADE" | "CLEAN";
 }
 
 export interface IBundleLinkOptions {

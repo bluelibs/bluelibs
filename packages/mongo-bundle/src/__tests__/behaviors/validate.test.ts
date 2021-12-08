@@ -1,11 +1,11 @@
-import { createEcosystem } from "../helpers";
+import { getEcosystem } from "../helpers";
 import { Collection } from "../..";
 import validate from "../../behaviors/validate";
 import { Schema, Is, a, ValidationError } from "@bluelibs/validator-bundle";
 
 describe("Validate behavior", () => {
   it("Should be able to validate on insert and update", async () => {
-    const { container, teardown } = await createEcosystem();
+    const { container, teardown } = await getEcosystem();
 
     @Schema()
     class User {
