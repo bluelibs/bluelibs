@@ -17,6 +17,10 @@ parameters:
     type: boolean
     default: false
 
+  mongo-bundle:
+    type: boolean
+    default: false
+
   # Custom parameters
   # deploy:
   #   type: boolean
@@ -112,3 +116,9 @@ workflows:
       - test:
           name: nova-test
           package_name: nova
+  mongo-bundle:
+    when: << pipeline.parameters.mongo-bundle >>
+    jobs:
+      - test:
+          name: mongo-bundle-test
+          package_name: mongo-bundle
