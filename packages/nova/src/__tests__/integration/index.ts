@@ -1262,7 +1262,7 @@ describe("Main tests", function () {
     await new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         resolve();
-      }, 500);
+      }, 1000);
     });
 
     GeoPoint.insertOne({
