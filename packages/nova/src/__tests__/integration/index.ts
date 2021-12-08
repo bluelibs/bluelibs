@@ -1262,10 +1262,10 @@ describe("Main tests", function () {
     await new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         resolve();
-      }, 500);
+      }, 200);
     });
 
-    GeoPoint.insertOne({
+    await GeoPoint.insertOne({
       loc: { type: "Point", coordinates: [-73.99279, 40.719296] },
       name: "Central Park",
       category: "Parks",
