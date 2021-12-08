@@ -189,7 +189,7 @@ export class GuardianSmart<
     );
   }
 
-  protected async storeToken(token: string | null) {
+  async storeToken(token: string | null) {
     await this.eventManager.emit(new AuthenticationTokenUpdateEvent({ token }));
 
     if (token === null) {
