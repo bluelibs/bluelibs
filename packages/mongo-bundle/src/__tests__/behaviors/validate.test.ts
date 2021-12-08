@@ -5,7 +5,7 @@ import { Schema, Is, a, ValidationError } from "@bluelibs/validator-bundle";
 
 describe("Validate behavior", () => {
   it("Should be able to validate on insert and update", async () => {
-    const { container, teardown } = await getEcosystem();
+    const { container } = await getEcosystem();
 
     @Schema()
     class User {
@@ -98,7 +98,5 @@ describe("Validate behavior", () => {
         }
       )
     ).rejects.toBeInstanceOf(ValidationError);
-
-    teardown();
   });
 });
