@@ -61,7 +61,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "source-map-support": "^0.5.13",
-    "typescript": "^4.4.4"
+    "typescript": "4.4.4"
   },
   "typings": "dist/index.d.ts",
   "typescript": {
