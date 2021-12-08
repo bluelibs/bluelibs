@@ -11,7 +11,7 @@
     "compile": "tsc",
     "watch": "tsc -w",
     "pretest": "npm run compile",
-    "test": "jest --verbose dist/__tests__/index.js",
+    "test": "jest --verbose dist/__tests__/index.js -i",
     "test:clean": "jest --clearCache",
     "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
