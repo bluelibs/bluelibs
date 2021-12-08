@@ -29,6 +29,7 @@ import { useTranslate } from "@bluelibs/x-ui-i18n-bundle";
 
 function Component() {
   const t = useTranslate();
+  const tWithPRefix = useTranslate("pages.home"); // tWithPrefix("header.text")
 
   return <h1>{t('pages.home.header.text')</h1>;
 }
