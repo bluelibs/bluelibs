@@ -1,37 +1,35 @@
-import { createEcosystem } from "../helpers";
+import { getEcosystem } from "../helpers";
 import { Comments } from "./dummy/comments";
 import { Posts } from "./dummy/posts";
 import { Users, User } from "./dummy/users";
-import { assert, expect } from "chai";
 import {
   BeforeInsertEvent,
   AfterInsertEvent,
   BeforeUpdateEvent,
   AfterUpdateEvent,
-  BeforeRemoveEvent,
-  AfterRemoveEvent,
 } from "../../events";
 import { DatabaseService } from "../../services/DatabaseService";
 
 describe("DatabaseService", () => {
-  it("Should work with transaction", async () => {
-    const { container, teardown } = await createEcosystem();
+  test("Should work with transaction throwing an exception", async () => {
+    const { container } = await getEcosystem();
 
     const comments = container.get<Comments>(Comments);
     const posts = container.get<Posts>(Posts);
     const users = container.get<Users>(Users);
 
     await users.deleteMany({});
-
-    posts.on(AfterInsertEvent, () => {
+    const errorHandler = () => {
       throw new Error("oops?");
-    });
+    };
+    posts.on(AfterInsertEvent, errorHandler);
 
     const dbService = container.get(DatabaseService);
 
     let u1,
       p1,
       caught = false;
+
     try {
       await dbService.transact(async (session) => {
         u1 = await users.insertOne(
@@ -53,10 +51,11 @@ describe("DatabaseService", () => {
       });
     } catch (e) {
       caught = true;
-      assert.isUndefined(u1);
+      expect(u1).toBeUndefined();
     }
 
-    assert.isTrue(caught);
-    await teardown();
+    expect(caught).toBe(true);
+
+    posts.localEventManager.removeListener(AfterInsertEvent, errorHandler);
   });
 });

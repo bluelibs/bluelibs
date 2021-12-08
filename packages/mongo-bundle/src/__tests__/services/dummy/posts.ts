@@ -1,19 +1,25 @@
 import { Collection } from "../../..";
-
-import { ObjectID } from "mongodb";
+import { ObjectId } from "mongodb";
 import { Comment, Comments } from "./comments";
 import { User, Users } from "./users";
+import { Tag, Tags } from "./tags";
 
 export class Post {
-  _id: ObjectID;
+  constructor(data: Partial<Post> = {}) {
+    Object.assign(this, data);
+  }
+
+  _id?: ObjectId;
   title: string;
 
-  comments: Comment[];
+  comments: Comment[] = [];
 
-  authorId: ObjectID | any;
+  authorId: ObjectId | any;
   author: User;
 
   number?: string | number;
+  tags: Tag[] = [];
+  tagsIds: ObjectId[] = [];
 }
 
 export class Posts extends Collection<Post> {
@@ -30,6 +36,11 @@ export class Posts extends Collection<Post> {
     comments: {
       collection: () => Comments,
       inversedBy: "post",
+    },
+    tags: {
+      collection: () => Tags,
+      field: "tagsIds",
+      many: true,
     },
     author: {
       collection: () => Users,

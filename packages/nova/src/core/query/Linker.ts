@@ -1,5 +1,5 @@
 import * as _ from "lodash";
-import { Collection, FilterQuery } from "mongodb";
+import { Collection } from "mongodb";
 import { LINK_STORAGE } from "../constants";
 import { ILinkCollectionOptions, HardwiredFiltersOptions } from "../defs";
 

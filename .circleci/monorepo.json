@@ -3,6 +3,7 @@
   "pages": 3,
   "packages": {
     "core": ["packages/core/"],
-    "nova": ["packages/nova/"]
+    "nova": ["packages/nova/"],
+    "mongo-bundle": ["packages/mongo-bundle/"]
   }
 }

@@ -710,6 +710,36 @@ user.lastName; // will NOT exist
 user.fullName; // will be what you requested
 ```
 
+## Default Values
+
+You have two ways to benefit of default values, one is via model:
+
+```ts
+class User {
+  constructor(data: Partial<User> = {}) {
+    Object.assign(this, data);
+  }
+  name: string;
+  status: string = StatusEnum.IN_PROGRESS;
+}
+
+const user = new User({
+  name: "John",
+});
+
+usersCollection.insertOne(user);
+```
+
+Or via `setDefaults` method inside the collection, which is only applied on `insertOne` and `insertMany`. This is useful for when you have business logic, or async logic for storing defaults.
+
+```ts
+class UsersCollection extends Collection<User> {
+  async setDefaults(data: Partial<User>, context?: IExecutionContext) {
+    // Mutate "data".
+  }
+}
+```
+
 ## Transactions
 
 If you want to ensure that all your updates are run and if an exception occurs you would like to rollback. For example, you have event listeners that you never want to fail, or you do multiple operations in which you must ensure that all run and if something bad happens you can revert.
@@ -742,6 +772,117 @@ await dbService.transact((session) => {
     session
   );
 });
+```
+
+## Deep Sync
+
+The deep synchronisation is a mechanism which allows us to deeply persist data and automatically link collections, for example:
+
+```ts
+const usersCollection = container.get(UsersCollection);
+
+// Works with classes or plain objects, doesn't really matter
+const user = new User({
+  name: "John",
+  // assuming a 1:1 relationship here regardless of being direct or indirect
+  gameProfile: new UserGameProfile({
+    score: 0,
+  }),
+});
+
+usersCollection.deepSync(user, options); // The options such as `context` and others are passed to the insert/update as options.
+usersCollection.deepSync([user]); // works with arrays too
+
+user._id; // exists
+user.gameProfile._id; // exists
+```
+
+If you are using `Blameable` behavior, or want to pass other options:
+
+```ts
+usersCollection.deepSync(user, {
+  context: { userId: "USER_ID_WHO_PERFORMS_SYNC" },
+});
+```
+
+:::note Transactions
+If you want to perform the `deepSync` with transactions, ensure you pass `{ session }` inside the options argument.
+:::
+
+The presence of an `_id` inside deep synchronisation will transform the operation in an update if there are any non-relation fields in the first place:
+
+```ts
+usersCollection.deepSync({
+  _id: "XXX", // Will perform no-update since there isn't anything to update.
+  gameProfile: {
+    _id: "YYY", // Will perform an update of {$set: {score: 10}}
+    score: 10,
+  },
+});
+```
+
+Therefore, existence of an `_id` merely represents the fact that the element already exists. If there is an `_id` and that element does not exist in the database, the update will have 0 modified elements, it will not create a new one.
+
+### Objects & Circular Deps
+
+Support for complex-like ORM solutions, including recurrent links with circular deps.
+
+```ts
+// assuming the relationship: Comment { userId, postId }, Post { userId }, User
+const user = new User();
+const post1 = new Post();
+const post2 = new Post();
+user.posts.push(post1, post2);
+const comment1 = new Comment();
+post1.push(comment1);
+comment1.user = user;
+
+usersCollection.deepSync(user);
+```
+
+Even if user isn't added in the database yet, it will know it's the same reference and properly re-use it through your deep-sync graph.
+
+The synchronisation works with any type of links direct or inversed. The most important aspect to understand that there's never a full override of linked data, there's only addition. If a `Post` stores links to `Tag` via `tagsIds`, and you perform this operation:
+
+```ts
+postsCollection.deepSync({
+  _id: "POST_ID",
+  tags: [{ name: "Test" }], // This will just add another tag to the post.
+});
+```
+
+Note, this will not override `tagsIds`, regard deepSync as a sort of **append-only** mechanism especially for `many` relationships.
+
+### Operators
+
+We have a new concept that lets us play with linking data without thinking about where the data is stored, or whether I'm from an inversed link or direct link.
+
+```ts
+const operator = postsCollection.getLinkOperator("tags");
+
+await operator.clean(postId, { delete: true }); // removes tags and delets them
+await operator.link(postId, [tagId1, tagId2], {
+  // in case of a many link, it will override all the unneded things
+  override: true,
+  // in case override is true, it automatically delets the orphaned elements (which are no longer linked )
+  deleteOrphans: true,
+}); // overrides
+
+await operator.unlink(postId, [tagId1, tagId2], {
+  // Not only it unlinks it but also will delete tagId1, tagId2 from database
+  delete: true,
+});
+```
+
+Operators don't just work with `_id`s they work with full objects:
+
+```ts
+const tag1 = new Tag({ name: "Tag 1" });
+const tag2 = new Tag({ name: "Tag 2" });
+
+await operator.link(postId, [tag1, tag2]);
+// tag1._id is now defined
+// tag2._id is now defined
 ```
 
 ## Migrations
