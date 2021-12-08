@@ -781,6 +781,7 @@ The deep synchronisation is a mechanism which allows us to deeply persist data a
 ```ts
 const usersCollection = container.get(UsersCollection);
 
+// Works with classes or plain objects, doesn't really matter
 const user = new User({
   name: "John",
   // assuming a 1:1 relationship here regardless of being direct or indirect
