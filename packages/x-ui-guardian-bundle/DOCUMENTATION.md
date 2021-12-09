@@ -154,3 +154,9 @@ const useAppGuardian = (): AppGuardianSmart => {
   return useGuardian() as AppGuardianSmart;
 };
 ```
+
+## Events
+
+| Event                      | What                                                                                                   | Props                |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------- |
+| GuardianUserRetrievedEvent | After the user is fetched from the API we launch this event giving you a chance to do other operations | data.user : UserType |
