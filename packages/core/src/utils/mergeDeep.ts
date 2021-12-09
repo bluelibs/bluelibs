@@ -4,7 +4,12 @@
  * @returns {boolean}
  */
 export function isObject(item) {
-  return item && typeof item === "object" && !Array.isArray(item);
+  return (
+    item &&
+    typeof item === "object" &&
+    !isClassInstance(item) &&
+    !Array.isArray(item)
+  );
 }
 
 /**
@@ -33,4 +38,16 @@ export function mergeDeep(target, ...sources) {
   }
 
   return mergeDeep(target, ...sources);
+}
+
+/**
+ * Check to see if value is an instance of a constructor class to be able to avoid deep merging
+ *
+ * @param value
+ * @returns
+ */
+export function isClassInstance(value: any) {
+  return (
+    typeof value?.constructor === "function" && value.constructor !== Object
+  );
 }

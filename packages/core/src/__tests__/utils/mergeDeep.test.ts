@@ -45,4 +45,38 @@ describe("mergeDeep", () => {
 
     assert.equal(target.a.a1, 1);
   });
+
+  it("should not merge with instance of classes", () => {
+    class Cache {
+      constructor(public readonly id: string) {}
+    }
+
+    const target: any = {
+      a: {
+        cache: new Cache("target"),
+        test: "1",
+      },
+    };
+
+    const obj1 = {
+      a: {
+        cache: new Cache("obj1"),
+        test: "obj1",
+        a1: 1,
+      },
+    };
+
+    const obj2 = {
+      a: {
+        cache: new Cache("obj2"),
+        test: "obj2",
+        a1: 1,
+      },
+    };
+
+    mergeDeep(target, obj1, obj2);
+
+    expect(target.a.cache.id).toBe("obj2");
+    expect(target.a.test).toBe("obj2");
+  });
 });

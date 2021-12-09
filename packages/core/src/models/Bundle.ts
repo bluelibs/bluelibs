@@ -25,6 +25,9 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
    * and static variables cannot reference class type parameters (TS2302)
    */
   protected defaultConfig: DeepPartial<T>;
+  /**
+   * The config provided by the instantiation of the bundle is stored inside requiredConfig
+   */
   protected requiredConfig: R | DeepPartial<T>;
   protected config: T;
   protected kernel: Kernel;
@@ -72,7 +75,7 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
     await this.validate(this.config);
 
     // Check dependencies
-    this.dependencies.forEach((dependency) => {
+    this.dependencies.forEach(dependency => {
       if (!this.kernel.hasBundle(dependency)) {
         throw new BundleDependencyException({
           requiredBundle: dependency.name,
