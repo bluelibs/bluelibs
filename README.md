@@ -16,7 +16,9 @@ If you want to keep track of our progress, or just show a little bit of support,
 
 ## About BlueLibs
 
-BlueLibs is a collection of open-source products written in TypeScript designed for the modern web and enterprise scale. We believe web development should be fun and engaging. BlueLibs allows you to quickly prototype applications or design fully custom ones all in the Node ecosystem.
+BlueLibs is a collection of open-source products which help you quickly prototype web applications and giving you a set of tools to help you scale your app. We believe web development should be fun and engaging, and we hope you will enjoy our work. This is [our official website](https://www.bluelibs.com), and here you can get started with [our documentation](https://www.bluelibs.com/docs/).
+
+Features:
 
 - 👉 [Dependency Injection & Module Management](https://www.bluelibs.com/docs/package-core)
 - 👉 Database-agnostic and fully featured [Security System](https://www.bluelibs.com/docs/package-security)
