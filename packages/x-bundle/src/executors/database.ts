@@ -1,19 +1,21 @@
 import { Collection, DocumentNotFoundException } from "@bluelibs/mongo-bundle";
 import { getResult, IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { Constructor } from "@bluelibs/core";
-import { FilterQuery, UpdateQuery } from "mongodb";
+import { Filter, UpdateFilter } from "mongodb";
 import { prepareForExecution } from "./utils/prepareForExecution";
 import { GraphQLToNovaOptionsResolverType } from "./utils/GraphQLToNovaOptionsResolverType";
 import { NOVA_AST_TO_QUERY_OPTIONS } from "./security";
+import { IAstToQueryOptions } from "@bluelibs/nova";
 
-const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<any> =
-  async (_, args) => {
-    const { query } = args;
-    return {
-      filters: query?.filters || {},
-      options: query?.options || {},
-    };
+const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<
+  any
+> = async (_, args) => {
+  const { query } = args;
+  return {
+    filters: query?.filters || {},
+    options: query?.options || {},
   };
+};
 
 /**
  * If your input is of "QueryInput" it will automatically apply the filters and options
@@ -30,7 +32,11 @@ export function ToNova<T>(
 
   return async function (_, args, ctx, ast) {
     let options = await optionsResolver(_, args, ctx, ast);
-    options = prepareForExecution(ctx, collectionClass, options);
+    options = prepareForExecution(
+      ctx,
+      collectionClass,
+      options
+    ) as IAstToQueryOptions<T>;
 
     const collection = ctx.container.get(collectionClass);
 
@@ -48,7 +54,11 @@ export function ToNovaOne<T>(
 
   return async function (_, args, ctx, ast) {
     let options = await optionsResolver(_, args, ctx, ast);
-    options = prepareForExecution(ctx, collectionClass, options);
+    options = prepareForExecution(
+      ctx,
+      collectionClass,
+      options
+    ) as IAstToQueryOptions<T>;
 
     const collection = ctx.container.get(collectionClass);
 
@@ -74,7 +84,11 @@ export function ToNovaByResultID<T>(
   return async function (_, args, ctx, ast) {
     const collection = ctx.container.get(collectionClass);
     let options = await optionsResolver(_, args, ctx, ast);
-    options = prepareForExecution(ctx, collectionClass, options);
+    options = prepareForExecution(
+      ctx,
+      collectionClass,
+      options
+    ) as IAstToQueryOptions<T>;
 
     return collection.queryOneGraphQL(ast, options);
   };
@@ -82,12 +96,7 @@ export function ToNovaByResultID<T>(
 
 export function ToCollectionCount<T>(
   collectionClass: Constructor<Collection<T>>,
-  filterResolver?: (
-    _,
-    args,
-    ctx,
-    ast
-  ) => FilterQuery<T> | Promise<FilterQuery<T>>
+  filterResolver?: (_, args, ctx, ast) => Filter<T> | Promise<Filter<T>>
 ) {
   if (!filterResolver) {
     filterResolver = (_, args) => {
@@ -115,8 +124,8 @@ export function ToCollectionCount<T>(
  * @param collectionClass
  * @param idResolver
  */
-export function CheckDocumentExists(
-  collectionClass: Constructor<Collection<any>>,
+export function CheckDocumentExists<T>(
+  collectionClass: Constructor<Collection<T>>,
   idResolver?: (args: any) => any | Promise<any>
 ) {
   if (!idResolver) {
@@ -144,8 +153,8 @@ export function CheckDocumentExists(
  * @param extend Possibly extend the document, such as adding additional fields like a userId or whatever you wish.
  * @returns
  */
-export function ToDocumentInsert(
-  collectionClass: Constructor<Collection<any>>,
+export function ToDocumentInsert<T>(
+  collectionClass: Constructor<Collection<T>>,
   field = "document",
   extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
 ) {
@@ -174,7 +183,7 @@ export function ToDocumentInsert(
 export function ToDocumentUpdateByID<T>(
   collectionClass: Constructor<Collection<T>>,
   idArgumentResolver?: (args) => any | Promise<any>,
-  mutateResolver?: (args) => UpdateQuery<T> | Promise<UpdateQuery<T>>
+  mutateResolver?: (args) => UpdateFilter<T> | Promise<UpdateFilter<T>>
 ) {
   if (!idArgumentResolver) {
     idArgumentResolver = (args) => args._id;
@@ -199,8 +208,8 @@ export function ToDocumentUpdateByID<T>(
   };
 }
 
-export function ToDocumentDeleteByID(
-  collectionClass: Constructor<Collection<any>>,
+export function ToDocumentDeleteByID<T>(
+  collectionClass: Constructor<Collection<T>>,
   idArgumentResolver?: (args) => any | Promise<any>
 ) {
   if (!idArgumentResolver) {

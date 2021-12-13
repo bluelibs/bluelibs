@@ -1,7 +1,7 @@
 import { Inject, Service } from "@bluelibs/core";
 import { Collection } from "@bluelibs/mongo-bundle";
 import { QueryBodyType } from "@bluelibs/nova";
-import { FilterQuery } from "mongodb";
+import { Filter } from "mongodb";
 import { PubSub } from "graphql-subscriptions";
 import { EventEmitter } from "events";
 import { v4 as uuid } from "uuid";
@@ -107,7 +107,7 @@ export class SubscriptionStore {
    */
   async createAsyncIteratorForCounting<T>(
     collection: Collection<T>,
-    filters: FilterQuery<T> = {},
+    filters: Filter<T> = {},
     subscriptionOptions: SubscriptionProcessorOptionsType = {}
   ): Promise<AsyncIterator<any>> {
     const channel = uuid();
