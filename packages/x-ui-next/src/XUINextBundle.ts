@@ -2,7 +2,6 @@ import { Bundle, KernelPhase } from "@bluelibs/core";
 import {
   GuardianSmart,
   XUIGuardianBundle,
-  XUIGuardianProvider,
 } from "@bluelibs/x-ui-guardian-bundle";
 import { IComponents, XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { XUINextBundleConfigType } from "./defs";
