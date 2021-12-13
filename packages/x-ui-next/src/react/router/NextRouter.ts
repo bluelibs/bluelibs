@@ -5,17 +5,33 @@ import {
   XCoreRouter,
 } from "@bluelibs/x-ui-router";
 
-import NextRouter from "next/router";
-import { Service } from "@bluelibs/core";
+import { NextRouter } from "next/router";
+import BaseNextRouter from "next/router";
 
-@Service()
-export class XNextRouter extends XCoreRouter<IRoute> {
-  private nextRouter = NextRouter;
+import { Constructor, Service } from "@bluelibs/core";
 
-  go<T extends IRouteParams, Q extends IRouteParams>(
-    route: IRoute<T, Q>,
-    options?: IRouteGenerationProps<T, Q>
-  ): void {
-    this.nextRouter.push(this.path(route, options));
+export type XNextRouterClass = XCoreRouter<IRoute> & NextRouter;
+
+export const XNextRouter = ((): Constructor<XNextRouterClass> => {
+  @Service()
+  class XNextRouterClass extends XCoreRouter<IRoute> {
+    constructor() {
+      super();
+
+      Object.assign(this, BaseNextRouter.router);
+
+      BaseNextRouter.router.events.on("routeChangeComplete", () => {
+        Object.assign(this, BaseNextRouter.router);
+      });
+    }
+
+    go<T extends IRouteParams, Q extends IRouteParams>(
+      route: IRoute<T, Q>,
+      options?: IRouteGenerationProps<T, Q>
+    ): void {
+      BaseNextRouter.push(this.path(route, options));
+    }
   }
-}
+
+  return XNextRouterClass as any;
+})();
