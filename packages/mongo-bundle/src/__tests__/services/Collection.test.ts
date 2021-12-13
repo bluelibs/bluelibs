@@ -10,7 +10,6 @@ import {
   BeforeUpdateEvent,
   AfterUpdateEvent,
 } from "../../events";
-import { DeepPartial } from "@bluelibs/core";
 
 describe("Collection", () => {
   test("Should dispatch events properly", async () => {

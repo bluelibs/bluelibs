@@ -58,7 +58,7 @@ export const MONGO_BUNDLE_COLLECTION = Symbol("MONGO_BUNDLE_COLLECTION");
  */
 const DELETED_IDS = Symbol("DELETED_IDS");
 @Service()
-export abstract class Collection<T = any> {
+export abstract class Collection<T extends MongoDB.Document = any> {
   static model: any;
   static links: IBundleLinkOptions = {};
   static reducers: IReducerOptions = {};
@@ -110,7 +110,7 @@ export abstract class Collection<T = any> {
 
     this.collection = this.databaseService.getMongoCollection(
       this.getStaticVariable("collectionName")
-    ) as MongoDB.Collection<T>;
+    ) as unknown as MongoDB.Collection<T>;
 
     this.collection[MONGO_BUNDLE_COLLECTION] = this;
 

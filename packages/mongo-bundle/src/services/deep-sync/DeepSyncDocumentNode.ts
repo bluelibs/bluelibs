@@ -31,7 +31,7 @@ export class DeepSyncDocumentNode {
   links: Array<{
     id: string;
     nodes: DeepSyncDocumentNode[];
-    collection: MongoCollection;
+    collection: MongoCollection<any>;
     // Virtual refers to the fact that storage is stored on the other side.
     linker: Linker;
   }> = [];
@@ -40,7 +40,7 @@ export class DeepSyncDocumentNode {
 
   inFlush: boolean = false;
 
-  constructor(collection: MongoCollection, data: any) {
+  constructor(collection: MongoCollection<any>, data: any) {
     this.collection = collection;
     const plain = Object.assign({}, data);
     this.data = data;
