@@ -6,7 +6,7 @@ import {
   UserId,
 } from "@bluelibs/security-bundle";
 import { Collection, Behaviors } from "@bluelibs/mongo-bundle";
-import { FilterQuery } from "mongodb";
+import { Filter } from "mongodb";
 
 export class UsersCollection<K extends IUser>
   extends Collection<K>
@@ -21,12 +21,13 @@ export class UsersCollection<K extends IUser>
 
     return result.insertedId;
   }
+  x;
 
   async updateUser(userId: UserId, data: any): Promise<void> {
     await this.updateOne(
       {
         _id: userId,
-      } as FilterQuery<K>,
+      } as Filter<K>,
       {
         $set: data,
       }
@@ -34,7 +35,7 @@ export class UsersCollection<K extends IUser>
   }
 
   async deleteUser(userId: UserId): Promise<void> {
-    await this.deleteOne({ _id: userId } as FilterQuery<K>);
+    await this.deleteOne({ _id: userId } as Filter<K>);
   }
 
   async findUser(filters: any, projection?: IFieldMap): Promise<IUser> {
@@ -55,7 +56,7 @@ export class UsersCollection<K extends IUser>
       }
     }
 
-    return this.findOne({ _id: userId } as FilterQuery<K>, options);
+    return this.findOne({ _id: userId } as Filter<K>, options);
   }
 
   async updateAuthenticationStrategyData<T = any>(
@@ -111,7 +112,7 @@ export class UsersCollection<K extends IUser>
     strategyName: string
   ): Promise<T> {
     // TODO: implement projection
-    const user = await this.findOne({ _id: userId } as FilterQuery<K>, {
+    const user = await this.findOne({ _id: userId } as Filter<K>, {
       projection: {
         [strategyName]: 1,
       },
@@ -125,7 +126,7 @@ export class UsersCollection<K extends IUser>
     methodName: string
   ): Promise<void> {
     await this.updateOne(
-      { _id: userId } as FilterQuery<K>,
+      { _id: userId } as Filter<K>,
       {
         $unset: {
           [methodName]: 1,
