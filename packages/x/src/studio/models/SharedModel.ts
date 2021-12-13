@@ -2,6 +2,7 @@ import { Field } from "./Field";
 import { BaseModel } from "./App";
 import * as _ from "lodash";
 import { Resolvable, UIConfigType } from "../defs";
+import { Fixturizer } from "../bridge/Fixturizer";
 
 /**
  * This model will be written under models?
@@ -35,7 +36,19 @@ export class SharedModel extends BaseModel<SharedModel> {
   /**
    * Default UI Configuration for this model
    */
-  ui: UIConfigType;
+  ui: UIConfigType | false = false;
+
+  /**
+   * Mock info how to generate the field in a custom fashion. Keep in mind this won't work with when `isRelationStorageField` is true
+   */
+  mock = {
+    generator: null,
+    /**
+     * This only applies to subfields
+     */
+    minCount: 0,
+    maxCount: 0,
+  };
 
   clean() {
     this.storeUIDefaults();
