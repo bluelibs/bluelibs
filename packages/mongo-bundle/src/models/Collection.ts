@@ -1,6 +1,5 @@
 import {
   Collection as MongoCollection,
-  FilterQuery,
   CollectionInsertOneOptions,
   UpdateQuery,
   UpdateWriteOpResult,
@@ -40,7 +39,12 @@ import {
   AfterUpdateEvent,
   CollectionEvent,
 } from "../events";
-import { BehaviorType, IContextAware, IBundleLinkOptions } from "../defs";
+import {
+  BehaviorType,
+  IContextAware,
+  IBundleLinkOptions,
+  FilterQuery,
+} from "../defs";
 import { toModel } from "@bluelibs/ejson";
 import {
   query,
@@ -132,7 +136,7 @@ export abstract class Collection<T = any> {
     filter: FilterQuery<T> = {},
     options?: FindOneOptions<T extends T ? T : T>
   ): Cursor<T> {
-    const cursor = this.collection.find(filter, options);
+    const cursor = this.collection.find(filter as any, options);
 
     const oldToArray = cursor.toArray.bind(cursor);
     cursor.toArray = async (...rest) => {
@@ -153,7 +157,7 @@ export abstract class Collection<T = any> {
     filter: FilterQuery<T> = {},
     options?: MongoCountPreferences
   ): Promise<number> {
-    return this.collection.countDocuments(filter, options);
+    return this.collection.countDocuments(filter as any, options);
   }
 
   /**
@@ -165,7 +169,7 @@ export abstract class Collection<T = any> {
     query: FilterQuery<T> = {},
     options?: FindOneOptions<T extends T ? T : T>
   ): Promise<T> {
-    const result = await this.collection.findOne(query, options);
+    const result = this.collection.findOne(query as any, options);
 
     return this.toModel(result);
   }
@@ -263,7 +267,7 @@ export abstract class Collection<T = any> {
 
     await this.emit(
       new BeforeUpdateEvent({
-        filter: filters,
+        filter: filters as any,
         update,
         fields,
         isMany: false,
@@ -272,11 +276,15 @@ export abstract class Collection<T = any> {
       })
     );
 
-    const result = await this.collection.updateOne(filters, update, options);
+    const result = await this.collection.updateOne(
+      filters as any,
+      update,
+      options
+    );
 
     await this.emit(
       new AfterUpdateEvent({
-        filter: filters,
+        filter: filters as any,
         update,
         fields,
         context: options.context,
@@ -302,7 +310,7 @@ export abstract class Collection<T = any> {
 
     await this.emit(
       new BeforeUpdateEvent({
-        filter: filters,
+        filter: filters as any,
         update,
         fields,
         isMany: true,
@@ -311,11 +319,15 @@ export abstract class Collection<T = any> {
       })
     );
 
-    const result = await this.collection.updateMany(filters, update, options);
+    const result = await this.collection.updateMany(
+      filters as any,
+      update,
+      options
+    );
 
     await this.emit(
       new AfterUpdateEvent({
-        filter: filters,
+        filter: filters as any,
         update,
         fields,
         isMany: true,
@@ -337,18 +349,18 @@ export abstract class Collection<T = any> {
     }
     await this.emit(
       new BeforeDeleteEvent({
-        filter: filters,
+        filter: filters as any,
         isMany: false,
         context: options.context,
         options,
       })
     );
 
-    const result = await this.collection.deleteOne(filters, options);
+    const result = await this.collection.deleteOne(filters as any, options);
 
     await this.emit(
       new AfterDeleteEvent({
-        filter: filters,
+        filter: filters as any,
         isMany: false,
         context: options.context,
         result,
@@ -373,18 +385,18 @@ export abstract class Collection<T = any> {
 
     await this.emit(
       new BeforeDeleteEvent({
-        filter: filters,
+        filter: filters as any,
         isMany: true,
         context: options.context,
         options,
       })
     );
 
-    const result = await this.collection.deleteMany(filters, options);
+    const result = await this.collection.deleteMany(filters as any, options);
 
     await this.emit(
       new AfterDeleteEvent({
-        filter: filters,
+        filter: filters as any,
         context: options.context,
         isMany: true,
         result,
@@ -406,18 +418,21 @@ export abstract class Collection<T = any> {
     await this.emit(
       new BeforeDeleteEvent({
         context: options?.context || {},
-        filter: filters,
+        filter: filters as any,
         isMany: false,
         options,
       })
     );
 
-    const result = await this.collection.findOneAndDelete(filters, options);
+    const result = await this.collection.findOneAndDelete(
+      filters as any,
+      options
+    );
 
     await this.emit(
       new AfterDeleteEvent({
         context: options?.context || {},
-        filter: filters,
+        filter: filters as any,
         isMany: false,
         result,
         options,
@@ -443,7 +458,7 @@ export abstract class Collection<T = any> {
 
     await this.emit(
       new BeforeUpdateEvent({
-        filter: filters,
+        filter: filters as any,
         update,
         fields,
         isMany: false,
@@ -453,14 +468,14 @@ export abstract class Collection<T = any> {
     );
 
     const result = await this.collection.findOneAndUpdate(
-      filters,
+      filters as any,
       update,
       options
     );
 
     await this.emit(
       new AfterUpdateEvent({
-        filter: filters,
+        filter: filters as any,
         update,
         fields,
         context: options.context,

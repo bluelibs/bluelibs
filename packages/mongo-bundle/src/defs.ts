@@ -6,9 +6,16 @@ import {
 } from "@bluelibs/nova";
 import { IValidateOptions } from "@bluelibs/validator-bundle";
 import { ContainerInstance, Constructor } from "@bluelibs/core";
-import { ClientSession } from "mongodb";
+import { ClientSession, Condition, RootQuerySelector } from "mongodb";
+import { ObjectId } from "@bluelibs/ejson";
 
 export type BehaviorType = (collectionEventManager: Collection<any>) => void;
+
+export type FilterQuery<T> = {
+  [P in keyof T]?: T[P] extends ObjectId
+    ? Condition<T[P]> | string
+    : Condition<T[P]>;
+} & RootQuerySelector<T>;
 
 declare module "@bluelibs/nova" {
   export interface IQueryContext {
