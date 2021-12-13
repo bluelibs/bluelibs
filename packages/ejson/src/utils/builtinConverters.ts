@@ -1,7 +1,7 @@
 import { isObject, keysOf, isInfOrNaN, hasOwn, lengthOf } from "../utilities";
 import { Base64 } from "../base64";
 import { EJSON } from "../ejson";
-import ObjectId from "bson-objectid";
+import { ObjectId } from "../objectid";
 
 export const builtinConverters = [
   {
@@ -11,9 +11,6 @@ export const builtinConverters = [
     },
     matchObject(obj) {
       if (obj instanceof ObjectId) {
-        return true;
-      }
-      if (ObjectId.isValid(obj)) {
         return true;
       }
       if (obj?._bsontype === "ObjectID") {

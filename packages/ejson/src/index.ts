@@ -1,4 +1,4 @@
-import ObjectId from "bson-objectid";
+import { ObjectId } from "./objectid";
 import { toModel } from "./toModel";
 
 export { EJSON } from "./ejson";
