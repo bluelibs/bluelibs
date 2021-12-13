@@ -33,39 +33,42 @@ import { ISecureOptions } from "./defs";
 export { secureBody, Linker };
 
 export function query<T>(
-  collection: Collection,
+  collection: Collection<T>,
   body: QueryBodyType,
   context?: IQueryContext
 ) {
   return new Query(collection, body, context);
 }
 
-query.securely = (
+query.securely = function securely<T = any>(
   config: ISecureOptions,
-  collection: Collection,
+  collection: Collection<T>,
   body: QueryBodyType,
   context?: IQueryContext
-) => {
+) {
   return query(collection, secureBody(body, config), context);
 };
 
-query.graphql = (
-  collection: Collection,
+query.graphql = function graphql<T = any>(
+  collection: Collection<T>,
   ast: any,
   options: ISecureOptions,
   context?: IQueryContext
-) => {
+) {
   return astToQuery(collection, ast, options, context);
 };
 
-export function clear(collection: Collection) {
+export function clear(collection: Collection<any>) {
   collection[LINK_STORAGE] = {};
   collection[REDUCER_STORAGE] = {};
   collection[EXPANDER_STORAGE] = {};
   collection[SCHEMA_STORAGE] = null;
 }
 
-export function addSchema(collection: Collection, schema: ClassSchema) {
+export function addSchema<T = any>(
+  collection: Collection<T>,
+  schema: ClassSchema
+) {
   collection[SCHEMA_STORAGE] = schema;
   collection[SCHEMA_AGGREGATE_STORAGE] =
     CollectionNode.getAggregateSchema(schema);
@@ -77,7 +80,10 @@ export function addSchema(collection: Collection, schema: ClassSchema) {
     CollectionNode.getSchemaSerializer(schema);
 }
 
-export function addLinks(collection: Collection, data: ILinkOptions) {
+export function addLinks<T = any>(
+  collection: Collection<T>,
+  data: ILinkOptions
+) {
   if (!collection[LINK_STORAGE]) {
     collection[LINK_STORAGE] = {};
   }
@@ -100,7 +106,10 @@ export function addLinks(collection: Collection, data: ILinkOptions) {
   });
 }
 
-export function addExpanders(collection: Collection, data: IExpanderOptions) {
+export function addExpanders<T = any>(
+  collection: Collection<T>,
+  data: IExpanderOptions
+) {
   if (!collection[EXPANDER_STORAGE]) {
     collection[EXPANDER_STORAGE] = {};
   }
@@ -116,7 +125,10 @@ export function addExpanders(collection: Collection, data: IExpanderOptions) {
   });
 }
 
-export function getLinker(collection: Collection, name: string): Linker {
+export function getLinker<T = any>(
+  collection: Collection<T>,
+  name: string
+): Linker {
   if (collection[LINK_STORAGE] && collection[LINK_STORAGE][name]) {
     return collection[LINK_STORAGE][name];
   } else {
@@ -126,7 +138,10 @@ export function getLinker(collection: Collection, name: string): Linker {
   }
 }
 
-export function hasLinker(collection: Collection, name: string): boolean {
+export function hasLinker<T = any>(
+  collection: Collection<T>,
+  name: string
+): boolean {
   if (collection[LINK_STORAGE]) {
     return Boolean(collection[LINK_STORAGE][name]);
   } else {
@@ -139,7 +154,7 @@ export function hasLinker(collection: Collection, name: string): boolean {
  * This is useful for complex searching and filtering
  */
 export function lookup(
-  collection: Collection,
+  collection: Collection<any>,
   linkName: string,
   options?: IGetLookupOperatorOptions
 ) {
@@ -147,7 +162,7 @@ export function lookup(
 }
 
 export function getReducerConfig(
-  collection: Collection,
+  collection: Collection<any>,
   name: string
 ): IReducerOption {
   if (collection[REDUCER_STORAGE]) {
@@ -156,7 +171,7 @@ export function getReducerConfig(
 }
 
 export function getExpanderConfig(
-  collection: Collection,
+  collection: Collection<any>,
   name: string
 ): QueryBodyType {
   if (collection[EXPANDER_STORAGE]) {
@@ -164,7 +179,10 @@ export function getExpanderConfig(
   }
 }
 
-export function addReducers(collection: Collection, data: IReducerOptions) {
+export function addReducers<T = any>(
+  collection: Collection<T>,
+  data: IReducerOptions
+) {
   if (!collection[REDUCER_STORAGE]) {
     collection[REDUCER_STORAGE] = {};
   }

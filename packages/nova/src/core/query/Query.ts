@@ -4,8 +4,8 @@ import CollectionNode from "./nodes/CollectionNode";
 import hypernova from "./hypernova/hypernova";
 import { Collection } from "mongodb";
 
-export default class Query {
-  public collection: Collection;
+export default class Query<T = any> {
+  public collection: Collection<T>;
   private graph: CollectionNode;
   public readonly body: any;
   public queryName: string;
@@ -17,7 +17,7 @@ export default class Query {
    * @param body
    */
   constructor(
-    collection: Collection,
+    collection: Collection<T>,
     body: QueryBodyType,
     context?: IQueryContext
   ) {

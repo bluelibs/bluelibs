@@ -39,7 +39,7 @@ import { SCHEMA_BSON_OBJECT_DECODER_STORAGE } from "../../constants";
 import { Session } from "inspector";
 
 export interface CollectionNodeOptions {
-  collection: Collection;
+  collection: Collection<any>;
   body: QueryBodyType;
   explain?: boolean;
   name?: string;
@@ -57,7 +57,7 @@ export enum NodeLinkType {
 export default class CollectionNode implements INode {
   public body: QuerySubBodyType;
   public name: string;
-  public collection: Collection;
+  public collection: Collection<any>;
   public parent: CollectionNode;
   public alias: string;
   public schema: ClassSchema;

@@ -8,8 +8,8 @@ export enum LinkStrategy {
   MANY,
 }
 
-export default class Linker {
-  public mainCollection: Collection;
+export default class Linker<T = any> {
+  public mainCollection: Collection<T>;
   public linkConfig: ILinkCollectionOptions & {
     strategy: LinkStrategy;
   };
@@ -23,7 +23,7 @@ export default class Linker {
    * @param linkConfig
    */
   constructor(
-    mainCollection: Collection,
+    mainCollection: Collection<T>,
     linkName: string,
     linkConfig: ILinkCollectionOptions
   ) {

@@ -53,8 +53,8 @@ function replaceArgumentsWithOurs(body: any) {
   });
 }
 
-export default function astToQuery(
-  collection: Collection,
+export default function astToQuery<T = any>(
+  collection: Collection<T>,
   ast,
   config: IAstToQueryOptions = {},
   context?: IQueryContext
