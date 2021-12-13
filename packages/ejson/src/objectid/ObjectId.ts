@@ -35,7 +35,7 @@ export class ObjectId {
   static cacheHexString: boolean;
 
   /** ObjectId Bytes @internal */
-  private [kId]: Buffer;
+  private [kId]?: Buffer;
   /** ObjectId hexString cache @internal */
   private __id?: string;
 
@@ -323,17 +323,6 @@ export class ObjectId {
     } catch {
       return false;
     }
-  }
-
-  /** @internal */
-  toExtendedJSON(): ObjectIdExtended {
-    if (this.toHexString) return { $oid: this.toHexString() };
-    return { $oid: this.toString("hex") };
-  }
-
-  /** @internal */
-  static fromExtendedJSON(doc: ObjectIdExtended): ObjectId {
-    return new ObjectId(doc.$oid);
   }
 
   /**

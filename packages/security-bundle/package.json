@@ -29,7 +29,7 @@
   },
   "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
-    "@bluelibs/ejson": "^1.0.0"
+    "@bluelibs/ejson": "^1.1.1"
   },
   "devDependencies": {
     "@bluelibs/core": "^1.0.0",
