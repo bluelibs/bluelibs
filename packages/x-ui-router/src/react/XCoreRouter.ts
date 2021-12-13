@@ -66,10 +66,10 @@ export abstract class XCoreRouter<
           );
         }
       }
+    }
 
-      if (options?.query && Object.keys(options.query).length) {
-        queryPath = queryString.stringify(options.query);
-      }
+    if (options?.query && Object.keys(options.query).length) {
+      queryPath = `?${queryString.stringify(options.query)}`;
     }
 
     return finalPath + queryPath;
