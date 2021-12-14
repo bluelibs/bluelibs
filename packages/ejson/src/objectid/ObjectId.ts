@@ -134,10 +134,6 @@ export class ObjectId {
     return this.id.readInt32BE(0);
   }
 
-  get str(): string {
-    return this.toString();
-  }
-
   set generationTime(value: number) {
     // Encode time into first 4 bytes
     this.id.writeUInt32BE(value, 0);
