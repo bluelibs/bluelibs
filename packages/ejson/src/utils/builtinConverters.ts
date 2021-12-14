@@ -16,6 +16,7 @@ export const builtinConverters = [
       if (obj?._bsontype === "ObjectID") {
         return true;
       }
+      return false;
     },
     toJSONValue(obj: ObjectId) {
       return { $objectId: obj.toString() };

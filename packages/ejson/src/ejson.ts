@@ -127,6 +127,7 @@ export class EJSON {
       } else {
         serialized = JSON.stringify(json);
       }
+
       return serialized;
     } catch (error) {
       const isMaxStack = checkError.maxStack(error.message);

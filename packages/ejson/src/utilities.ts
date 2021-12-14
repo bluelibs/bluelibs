@@ -1,6 +1,9 @@
+import { ObjectId } from "./objectid";
+
 export const isFunction = (fn) => typeof fn === "function";
 
-export const isObject = (fn) => typeof fn === "object";
+export const isObject = (fn) =>
+  typeof fn === "object" && !(fn instanceof ObjectId);
 
 export const keysOf = (obj) => Object.keys(obj);
 
