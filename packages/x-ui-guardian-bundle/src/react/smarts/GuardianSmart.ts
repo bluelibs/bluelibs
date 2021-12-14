@@ -179,13 +179,14 @@ export class GuardianSmart<
         fetchPolicy: "network-only",
       })
       .then(async (response) => {
-        const user = response.data.me;
+        let user = Object.assign({}, response.data.me);
 
         try {
           user._id = new ObjectId(user._id as any);
         } catch (e) {
           console.error(
-            `We could not transform user._id in an ObjectId for value: ${user._id}`
+            `We could not transform user._id in an ObjectId for value: ${user._id}`,
+            e
           );
         }
 
