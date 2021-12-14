@@ -96,31 +96,40 @@ Our `Collection` services have a neat integration with the `EventManager`. We di
 
 ### Types
 
-```ts
+All events contain `context` of type `IExecutionContext` which can be extendable. We use the context to pass meta information about our database mutation, for example we want to pass an `userId` to be able to have Blameable behavior automatic.
+
+```yaml
 - BeforeInsertEvent
   - document
-  - context
+  - options: MongoDB.InsertOneOptions;
 - AfterInsertEvent
   - document
-  - _id
+  - _id: any; # When performing .insertMany() this will be triggered numerous times
+  - options: MongoDB.InsertOneOptions;
 - BeforeUpdateEvent
-  - filter (filters for update)
-  - update (the modifier)
-  - fields (the fields affected by the update)
-  - isMany
+  - filter: MongoDB.Filter<T>;
+  - update: MongoDB.UpdateFilter<T>;
+  - fields: IGetFieldsResponse;
+  - isMany: boolean;
+  - options: MongoDB.UpdateOptions;
 - AfterUpdateEvent
-  - filter (filters for update)
-  - update (the modifier)
-  - fields (the fields affected by the update)
-  - isMany
-  - result: UpdateWriteOpResult | FindAndModifyWriteOpResultObject
+  - filter: MongoDB.Filter<T>;
+  - update: MongoDB.UpdateFilter<T>;
+  - fields: IGetFieldsResponse;
+  - isMany: boolean;
+  - result: MongoDB.UpdateResult | MongoDB.ModifyResult<T>;
+  - options: MongoDB.UpdateOptions;
 - BeforeDeleteEvent
-  - filter (what gets deleted)
-  - isMany (if it is a removeMany());
+  - filter: MongoDB.Filter<T>;
+  - isMany: boolean;
+  - context: any;
+  - options: MongoDB.DeleteOptions | MongoDB.FindOneAndDeleteOptions;
 - AfterDeleteEvent
-  - filter
-  - isMany
-  - result: DeleteWriteOpResultObject | FindAndModifyWriteOpResultObject<any>;
+  - filter: MongoDB.Filter<T>;
+  - isMany: boolean;
+  - context: any;
+  - result: MongoDB.DeleteResult | MongoDB.ModifyResult<T>;
+  - options: MongoDB.DeleteOptions | MongoDB.FindOneAndDeleteOptions;
 ```
 
 Events accepts an optional generic representing the document, example: `AfterUpdateEvent<User>` so you can get better autocompletion when performing the changes.
