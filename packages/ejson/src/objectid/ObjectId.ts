@@ -49,6 +49,10 @@ export class ObjectId {
   ) {
     if (!(this instanceof ObjectId)) return new ObjectId(inputId);
 
+    if (inputId instanceof ObjectId) {
+      inputId = inputId.toString();
+    }
+
     // workingId is set based on type of input and whether valid id exists for the input
     let workingId;
     if (typeof inputId === "object" && inputId && "id" in inputId) {
