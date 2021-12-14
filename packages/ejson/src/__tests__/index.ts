@@ -318,5 +318,6 @@ test("should work with objectid and plainToClass", () => {
 test("should work with parsing object ids and everything", () => {
   const _id = new ObjectId();
   const str = EJSON.stringify({ _id });
-  expect(str).toEqual(`{"_id":"${_id.toString()}"}`);
+
+  expect(str).toEqual(`{"_id":{"$objectId":"${_id.toString()}"}}`);
 });

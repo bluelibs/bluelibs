@@ -1,3 +1,4 @@
+import { ObjectId } from "../objectid/ObjectId";
 import { isObject, keysOf, isInfOrNaN } from "../utilities";
 import { toJSONValueHelper } from "./toJSONValueHelper";
 // for both arrays and objects, in-place modification.
@@ -20,11 +21,17 @@ export const adjustTypesToJSONValue = (obj) => {
   // Iterate over array or object structure.
   keysOf(obj).forEach((key) => {
     const value = obj[key];
-    if (!isObject(value) && value !== undefined && !isInfOrNaN(value)) {
+    if (
+      !isObject(value) &&
+      value !== undefined &&
+      !isInfOrNaN(value) &&
+      !(value instanceof ObjectId)
+    ) {
       return; // continue
     }
 
     const changed = toJSONValueHelper(value);
+
     if (changed) {
       obj[key] = changed;
       return; // on to the next key
