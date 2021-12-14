@@ -115,7 +115,7 @@ class UniqueFieldValidator implements IValidationMethod<UniqueFieldConfig> {
 }
 ```
 
-Now we have to tell `TypeScript` about this so it can provide us with propper type-safety when using `@Is(a.string().uniqueField({ table: "users", field: "email" }))`
+Now we have to tell `TypeScript` about this so it can provide us with propper type-safety when using `@Is(() => a.string().uniqueField({ table: "users", field: "email" }))`
 
 ```typescript
 // declarations.ts
@@ -147,12 +147,16 @@ class AppBundle extends Bundle {
 }
 ```
 
+:::note
+If you're using custom extensions, since these extensions are created in the `prepare()` or `init()` phase. Ensure to use a function to return the validation, otherwise it might fail saying there's no such function.
+:::
+
 Now you could safely use it like this:
 
 ```typescript
 @Schema()
 class UserRegistrationInput {
-  @Is(
+  @Is(() =>
     a.string().email().uniqueField({
       table: "users",
       field: "email",
@@ -209,7 +213,7 @@ Now you could safely use it like this:
 ```typescript
 @Schema()
 class PostCreateInput {
-  @Is(a.date().format())
+  @Is(() => a.date().format())
   publishAt: Date;
 }
 
