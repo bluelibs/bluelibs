@@ -538,7 +538,7 @@ input PostInput {
 @Schema()
 class Post {
   // More about formats here: https://date-fns.org/v2.14.0/docs/format
-  @Is(a.date().format("YYYY-MM-DD"))
+  @Is(() => a.date().format("YYYY-MM-DD"))
   publishedAt: Date;
 }
 ```
@@ -572,7 +572,8 @@ If we want to easily prevent users from signing up with the same "phone number" 
 
 ```ts
 class UserRegistrationInput {
-  @Is(
+  // Note the () =>, since uniqueField is a custom validator
+  @Is(() =>
     a.string().required().uniqueField({
       collection: UsersCollection,
       // Because we're in MongoDB's realm you can also use '.' for your fields for nested value (profile.phoneNumber)
