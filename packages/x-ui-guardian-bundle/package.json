@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-guardian-bundle",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": false,
   "description": "XUIGuardianBundle",
   "main": "dist/index.js",
