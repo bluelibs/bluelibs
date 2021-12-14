@@ -256,6 +256,10 @@ export abstract class Collection<T = any> {
     _id: ObjectId | string,
     body: QueryBodyType<T>
   ): Promise<Partial<T>> {
+    if (typeof _id === "string") {
+      _id = new ObjectId(_id);
+    }
+
     return this.hybridFind(true, { filters: { _id } }, body);
   }
 
