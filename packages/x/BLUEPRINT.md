@@ -41,6 +41,10 @@ This will generate:
     - Create Forms
     - Easy Deletion
 
+:::note
+You can use the `x` command to generate collections and shared models inside Blueprint: `blueprint:collection` and `blueprint:shared-model`
+:::
+
 ## Collections
 
 Let's start from scratch with a simple blueprint to walk you through the main concepts
