@@ -95,6 +95,16 @@ const commands: ICommand[] = [
     inquirer: Inquirers.EmailTemplateInquirer,
     writer: Writers.EmailTemplateWriter,
   },
+  {
+    id: "blueprint:collection",
+    inquirer: Inquirers.BlueprintCollectionInquirer,
+    writer: Writers.BlueprintCollectionWriter,
+  },
+  {
+    id: "blueprint:shared-model",
+    inquirer: Inquirers.BlueprintSharedModelInquirer,
+    writer: Writers.BlueprintSharedModelWriter,
+  },
 ];
 
 commands.map((command) => {

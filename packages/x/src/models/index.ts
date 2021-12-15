@@ -19,3 +19,5 @@ export * from "./ServerRouteModel";
 export * from "./ServiceModel";
 export * from "./UnitTestModel";
 export * from "./ValidatorModel";
+export * from "./BlueprintCollectionModel";
+export * from "./BlueprintSharedModelModel";

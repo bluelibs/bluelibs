@@ -1,12 +1,9 @@
 import {
-  generateProject,
-  app,
   collection,
   field,
   relation,
   shortcuts,
   sharedModel,
-  GeneratorKind,
   faker,
 } from "../utils";
 

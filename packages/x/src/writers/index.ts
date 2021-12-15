@@ -18,3 +18,5 @@ export * from "./ServiceWriter";
 export * from "./UnitTestWriter";
 export * from "./ValidatorWriter";
 export * from "./EmailTemplateWriter";
+export * from "./BlueprintCollectionWriter";
+export * from "./BlueprintSharedModelWriter";

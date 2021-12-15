@@ -18,3 +18,5 @@ export * from "./ServerRouteInquirer";
 export * from "./ServiceInquirer";
 export * from "./ValidatorInquirer";
 export * from "./EmailTemplateInquirer";
+export * from "./BlueprintCollectionInquirer";
+export * from "./BlueprintSharedModelInquirer";

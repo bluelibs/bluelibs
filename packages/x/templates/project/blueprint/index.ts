@@ -1,12 +1,11 @@
-import { Users } from "./collections/Users";
+import * as Collections from "./collections";
+import * as SharedModels from "./shared-models";
 import { generateProject, app } from "./utils";
 
 const application = app({
   id: "{{ name }}",
-  sharedModels: [
-    // Configure shared models
-  ],
-  collections: [Users],
+  sharedModels: Object.values(SharedModels),
+  collections: Object.values(Collections),
 });
 
 generateProject(application, {
