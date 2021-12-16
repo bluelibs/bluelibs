@@ -1,6 +1,9 @@
-export default { resolvers: {
-{{className}}: {
-{{#each elements}}
-  {{id}}: "{{value}}",
-{{/each}}
-}, } }
+export default {
+  resolvers: {
+    {{ className }}: {
+      {{# each elements }}
+        {{ id }}: "{{ value }}",
+      {{/ each }}
+    },
+  }
+}

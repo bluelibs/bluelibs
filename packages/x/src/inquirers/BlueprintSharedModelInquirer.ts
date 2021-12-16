@@ -13,5 +13,10 @@ export class BlueprintSharedModelInquirer extends Inquirer<BlueprintSharedModelM
         "Enter your shared model name or a list of them comma separated"
       )
     );
+
+    await this.prompt(
+      "isEnum",
+      Shortcuts.confirm("Do you want to add it as enums?", false)
+    );
   }
 }

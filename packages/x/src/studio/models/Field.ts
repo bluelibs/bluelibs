@@ -142,7 +142,9 @@ export class Field extends BaseModel<Field> {
     }
 
     // To avoid any errors we upper case all
-    this.cleanEnums();
+    if (this.type === FieldValueKind.ENUM) {
+      this.enumValues = Field.getCleanedEnumValues(this.enumValues);
+    }
 
     this.subfields.forEach((s) => {
       s.app = this.app;
@@ -155,33 +157,29 @@ export class Field extends BaseModel<Field> {
   /**
    * Processes the enums and cleans them
    */
-  protected cleanEnums() {
-    const model = this.model as SharedModel;
+  public static getCleanedEnumValues(
+    enumValues: string[] | EnumConfigType[]
+  ): EnumConfigType[] {
+    if (enumValues && enumValues.length) {
+      if (typeof enumValues[0] === "string") {
+        return enumValues.map((enumElement) => {
+          return {
+            id: enumElement,
+            value: enumElement,
+            label: _.startCase(_.toLower(enumElement.id)),
+          };
+        });
+      } else {
+        (enumValues as EnumConfigType[]).forEach((enumElement) => {
+          if (!enumElement.value) {
+            enumElement.value = enumElement.id;
+          }
+          if (!enumElement.label) {
+            enumElement.label = _.startCase(_.toLower(enumElement.id));
+          }
+        });
 
-    if (this.type === FieldValueKind.ENUM) {
-      if (model) {
-        this.enumValues = model.enumValues;
-      }
-
-      if (this.enumValues && this.enumValues.length) {
-        if (typeof this.enumValues[0] === "string") {
-          this.enumValues = this.enumValues.map((enumElement) => {
-            return {
-              id: enumElement,
-              value: enumElement,
-              label: _.startCase(_.toLower(enumElement.id)),
-            };
-          });
-        } else {
-          (this.enumValues as EnumConfigType[]).forEach((enumElement) => {
-            if (!enumElement.value) {
-              enumElement.value = enumElement.id;
-            }
-            if (!enumElement.label) {
-              enumElement.label = _.startCase(_.toLower(enumElement.id));
-            }
-          });
-        }
+        return enumValues as EnumConfigType[];
       }
     }
   }

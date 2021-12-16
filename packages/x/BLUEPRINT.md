@@ -399,7 +399,7 @@ relation({
 });
 ```
 
-## Shared Models
+## Shared Models & Enums
 
 Shared models are very useful especially when you have the same type of data in multiple collections. A very common use case is `Address`:
 
@@ -412,6 +412,10 @@ app({
         // Normal field configuration as you're used to
       ],
     }),
+    sharedModel({
+      id: "GenericStatus",
+      enumValues: ["TO_DO", "IN_PROGRESS"], // same as enum
+    }),
   ],
   collections: [
     collection({
@@ -421,6 +425,9 @@ app({
           id: "customerAddress",
           type: field.types.OBJECT,
           model: "Address", // you can also use a reference to an actual sharedModel or a function that returns it (useful for file splitting)
+        }),
+        field.enum("status", {
+          model: "GenericStatus", // or () => GenericStatus if you separated it in another file
         }),
       ],
     }),

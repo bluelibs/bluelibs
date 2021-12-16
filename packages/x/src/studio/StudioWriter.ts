@@ -588,8 +588,8 @@ export class StudioWriter {
           },
           session
         );
-
         const fsOperator = new FSOperator(session, model);
+
         fsOperator.sessionAppendFile(
           path.join(sharedModelsPath, "index.ts"),
           `export * from "./${model.id}"`
