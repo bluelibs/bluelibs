@@ -374,7 +374,7 @@ ${field.description}
       });
   }
 
-  get enums() {
+  get enums(): EnumConfigExtractResult[] {
     const result = [] as EnumConfigExtractResult[];
 
     // First level enums

@@ -82,8 +82,7 @@ export class Field extends BaseModel<Field> {
   enableGraphQL: boolean = true;
 
   /**
-   * This refers to an Studio Model, that is designed to work as a piece of re-usable code in your app
-   * Model will translate as subfields when rendering the generated code.
+   * This refers to an Studio Model or Enum, that is designed to work as a piece of re-usable code in your app
    */
   model?: Resolvable<SharedModel>;
 
@@ -157,24 +156,32 @@ export class Field extends BaseModel<Field> {
    * Processes the enums and cleans them
    */
   protected cleanEnums() {
-    if (this.enumValues && this.enumValues.length) {
-      if (typeof this.enumValues[0] === "string") {
-        this.enumValues = this.enumValues.map((enumElement) => {
-          return {
-            id: enumElement,
-            value: enumElement,
-            label: _.startCase(_.toLower(enumElement.id)),
-          };
-        });
-      } else {
-        (this.enumValues as EnumConfigType[]).forEach((enumElement) => {
-          if (!enumElement.value) {
-            enumElement.value = enumElement.id;
-          }
-          if (!enumElement.label) {
-            enumElement.label = _.startCase(_.toLower(enumElement.id));
-          }
-        });
+    const model = this.model as SharedModel;
+
+    if (this.type === FieldValueKind.ENUM) {
+      if (model) {
+        this.enumValues = model.enumValues;
+      }
+
+      if (this.enumValues && this.enumValues.length) {
+        if (typeof this.enumValues[0] === "string") {
+          this.enumValues = this.enumValues.map((enumElement) => {
+            return {
+              id: enumElement,
+              value: enumElement,
+              label: _.startCase(_.toLower(enumElement.id)),
+            };
+          });
+        } else {
+          (this.enumValues as EnumConfigType[]).forEach((enumElement) => {
+            if (!enumElement.value) {
+              enumElement.value = enumElement.id;
+            }
+            if (!enumElement.label) {
+              enumElement.label = _.startCase(_.toLower(enumElement.id));
+            }
+          });
+        }
       }
     }
   }
@@ -253,9 +260,12 @@ export class Field extends BaseModel<Field> {
     const fields: Field[] = [this];
 
     if (this.model) {
-      this.cleaned.model.fields.forEach((field) => {
-        fields.push(...field.getSelfAndAllNestedFields());
-      });
+      const model = this.model as SharedModel;
+      if (!model.isEnum()) {
+        this.cleaned.model.fields.forEach((field) => {
+          fields.push(...field.getSelfAndAllNestedFields());
+        });
+      }
     } else if (this.subfields.length) {
       this.subfields.forEach((field) => {
         fields.push(...field.getSelfAndAllNestedFields());

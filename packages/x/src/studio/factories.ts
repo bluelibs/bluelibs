@@ -58,9 +58,7 @@ export const relation: FactoryFunction<Relation, ["id", "to"]> = (config) => {
   return model;
 };
 
-export const sharedModel: FactoryFunction<SharedModel, ["id", "fields"]> = (
-  config
-) => {
+export const sharedModel: FactoryFunction<SharedModel, ["id"]> = (config) => {
   const model = new SharedModel();
   model.blend(config);
 

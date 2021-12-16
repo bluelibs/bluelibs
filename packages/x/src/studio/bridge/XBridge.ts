@@ -6,6 +6,7 @@ import { UIModeType } from "../defs";
 import { ModelUtils } from "../../utils/ModelUtils";
 import * as Inflected from "inflected";
 import { EnumConfigType } from "../../models/defs";
+import { SharedModel } from "../models/SharedModel";
 
 export type ToGenericModelOptions = {
   graphql?: boolean;
@@ -13,6 +14,10 @@ export type ToGenericModelOptions = {
   skipRelations?: boolean;
   isInput?: boolean;
 };
+
+/**
+ * The XBridge connects Studio to the Writers of 'X'.
+ */
 export class XBridge {
   static collectionToGenericModel(
     collection: Studio.Collection,
@@ -166,17 +171,31 @@ export class XBridge {
       field.model = studioField.genericFieldSubmodel;
     } else if (studioField.model) {
       // SHARED MODELS
-      field.type = Models.GenericFieldTypeEnum.MODEL;
-      let modelName = studioField.cleaned.model.id;
+      const sharedModel = studioField.model as SharedModel;
+      if (sharedModel.isEnum()) {
+        field.type = Models.GenericFieldTypeEnum.MODEL;
+        field.model = {
+          name: sharedModel.id,
+          storage: "outside",
+          local: false,
+          isEnumAlias: true,
+          absoluteImport: isInput
+            ? `${pathsInfo.fromInputToModels}`
+            : `${pathsInfo.fromModelToSharedModel}/${sharedModel.id}`,
+        };
+      } else {
+        field.type = Models.GenericFieldTypeEnum.MODEL;
+        let modelName = studioField.cleaned.model.id;
 
-      field.model = {
-        name: modelName + (isInput ? "Input" : ""),
-        storage: "outside",
-        local: false,
-        absoluteImport: isInput
-          ? `./${modelName}.input`
-          : `${pathsInfo.fromModelToSharedModel}/${modelName}`,
-      };
+        field.model = {
+          name: modelName + (isInput ? "Input" : ""),
+          storage: "outside",
+          local: false,
+          absoluteImport: isInput
+            ? `./${modelName}.input`
+            : `${pathsInfo.fromModelToSharedModel}/${modelName}`,
+        };
+      }
     } else if (studioField.subfields.length > 0) {
       // STASNDARD NEXTED STRUCTURES
       field.type = Models.GenericFieldTypeEnum.MODEL;

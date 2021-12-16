@@ -24,8 +24,14 @@ import {
   StudioWritersType,
 } from "./defs";
 import { ContainerInstance } from "@bluelibs/core";
-import { FrontendReactMicroserviceModel, ModelRaceEnum } from "../models";
+import {
+  EnumConfigType,
+  FrontendReactMicroserviceModel,
+  ModelRaceEnum,
+} from "../models";
 import { execSync, spawnSync } from "child_process";
+import { GenericModelEnumWriter } from "../writers/GenericModelEnumWriter";
+import { GraphQLEnumWriter } from "../writers/GraphQLEnumWriter";
 
 const ADMIN_FOLDER = "admin";
 const API_FOLDER = "api";
@@ -560,7 +566,53 @@ export class StudioWriter {
     const genericModelWriter = this.writers.genericModel;
     const graphqlEntityWriter = this.writers.graphQLEntity;
     const graphqlInputWriter = this.writers.graphQLInput;
+    const genericModelEnumWriter = this.container.get(GenericModelEnumWriter);
+
+    const bundleDir = FSUtils.bundlePath(
+      session.getMicroservicePath(),
+      "AppBundle"
+    );
+
+    const sharedModelsPath = path.join(
+      bundleDir,
+      ...pathsInfo.sharedModelPathInBundle.split("/")
+    );
+
     for (const model of studioApp.sharedModels) {
+      if (model.isEnum()) {
+        genericModelEnumWriter.write(
+          {
+            className: model.id,
+            elements: model.enumValues as EnumConfigType[],
+            targetPath: sharedModelsPath,
+          },
+          session
+        );
+
+        const fsOperator = new FSOperator(session, model);
+        fsOperator.sessionAppendFile(
+          path.join(sharedModelsPath, "index.ts"),
+          `export * from "./${model.id}"`
+        );
+        fsOperator.sessionAppendFile(
+          path.join(bundleDir, "collections", "index.ts"),
+          `export * from "./shared"`
+        );
+        const graphqlEnumWriter = this.container.get(GraphQLEnumWriter);
+        graphqlEnumWriter.write(
+          {
+            className: model.id,
+            description: model.description,
+            elements: model.enumValues as EnumConfigType[],
+            targetPath: path.join(bundleDir, "graphql", "entities", model.id),
+          },
+          session
+        );
+
+        // STOP AND CONTINUE
+        continue;
+      }
+
       const genericModel = new Models.GenericModel(model.id);
 
       genericModel.name = model.id;
@@ -569,16 +621,6 @@ export class StudioWriter {
       model.fields.forEach((field) => {
         genericModel.addField(XBridge.fieldToGenericField(field));
       });
-
-      const bundleDir = FSUtils.bundlePath(
-        session.getMicroservicePath(),
-        "AppBundle"
-      );
-
-      const sharedModelsPath = path.join(
-        bundleDir,
-        ...pathsInfo.sharedModelPathInBundle.split("/")
-      );
 
       genericModel.targetPath = path.join(sharedModelsPath, `${model.id}.ts`);
       genericModelWriter.write(genericModel, session);
