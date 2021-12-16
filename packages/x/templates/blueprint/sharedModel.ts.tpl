@@ -8,7 +8,14 @@ import {
 
 export const {{ name }} = sharedModel({
   id: "{{ name }}",
-  fields: [
-    field.string("example"),
-  ],
+  {{# if isEnum }}
+    enumValues: [
+      "VALUE_ONE",
+      "VALUE_TWO"
+    ],
+  {{ else }}
+    fields: [
+      field.string("example"),
+    ],
+  {{/ if }}
 });

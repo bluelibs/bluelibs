@@ -107,7 +107,7 @@ export class App extends BaseModel<App> {
    */
   id: string;
   collections: Collection[] = [];
-  sharedModels: SharedModel[] = [];
+  sharedModels: Array<SharedModel> = [];
 
   clean() {
     this.app = this;

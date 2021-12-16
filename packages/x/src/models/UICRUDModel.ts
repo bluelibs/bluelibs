@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import * as Studio from "../studio";
-import { Field, UIModeType } from "../studio";
+import { Field, SharedModel, UIModeType } from "../studio";
 import { XBridge } from "../studio/bridge/XBridge";
 import { FieldValueKind } from "../studio/models/FieldValueKind";
 import { Relation } from "../studio/models/Relation";
@@ -141,7 +141,8 @@ export class UICRUDModel {
    */
   recursiveBodyExpand(mode: UIModeType, body: object, fields: Field[]) {
     fields.forEach((field) => {
-      if (field.model) {
+      const model = field.model as SharedModel;
+      if (model && !model.isEnum()) {
         body[field.id] = {};
         this.recursiveBodyExpand(
           mode,
@@ -390,6 +391,9 @@ export class UICRUDModel {
     }
 
     let subfields = field.model ? field.cleaned.model.fields : field.subfields;
+    if (!subfields) {
+      subfields = [];
+    }
 
     // TODO: maybe run the check against it being an object
     if (subfields.length > 0) {

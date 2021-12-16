@@ -8,6 +8,7 @@ import * as path from "path";
 import { FSOperator } from "../utils/FSOperator";
 import { CollectionModel } from "../models/CollectionModel";
 import { XSession } from "../utils/XSession";
+import { GenericModelEnumWriter } from "./GenericModelEnumWriter";
 
 export class GenericModelWriter extends BlueprintWriter {
   write(model: GenericModel, session: XSession) {
@@ -20,16 +21,20 @@ export class GenericModelWriter extends BlueprintWriter {
       );
     }
 
+    const enumWriter = this.getWriter(GenericModelEnumWriter);
+
     const modelDir = path.dirname(model.targetPath);
     // Inputs reflect other models enums should already be created
     // In input mode enums are re-used, so we do not have to rewrite them
     if (!model.reuseEnums) {
       model.enums.forEach((myEnum) => {
-        const enumOperator = new FSOperator(session, myEnum);
-
-        enumOperator.sessionCopy(
-          modelTpls("ts/enum.ts.tpl"),
-          path.join(modelDir, "enums", `${myEnum.className}.enum.ts`)
+        enumWriter.write(
+          {
+            ...myEnum,
+            enumFileSuffix: true,
+            targetPath: path.join(modelDir, "enums"),
+          },
+          session
         );
       });
     }

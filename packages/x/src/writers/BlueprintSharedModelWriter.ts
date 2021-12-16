@@ -19,6 +19,7 @@ export class BlueprintSharedModelWriter extends BlueprintWriter {
     model.formattedNames.forEach((sharedModel) => {
       const localFsOperator = new FSOperator(session, {
         name: sharedModel,
+        isEnum: model.isEnum,
       });
       localFsOperator.sessionCopy(
         blueprintTpls("sharedModel.ts.tpl"),
