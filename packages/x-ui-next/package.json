@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-next",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "private": false,
   "description": "X-Framework UI Implementation for Next",
   "main": "dist/index.js",
