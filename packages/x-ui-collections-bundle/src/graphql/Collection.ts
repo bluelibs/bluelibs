@@ -37,7 +37,7 @@ export type CollectionInputsConfig = {
 };
 
 @Service()
-export abstract class Collection<T = any> {
+export abstract class Collection<T = null> {
   compiled = new Map<CompiledQueriesTypes, DocumentNode>();
 
   constructor(
@@ -409,6 +409,95 @@ export abstract class Collection<T = any> {
         return result.data[`${this.getName()}${compiledQuery}`];
       });
   }
+
+  /**
+   * Used for creating an customisable insertion query with type-safe fetching.
+   *
+   * @param body
+   * @returns
+   */
+  createInsertMutation(body?: QueryBodyType<T>): DocumentNode {
+    const insertType = this.getInputs().insert || "EJSON!";
+    const operationName = `${this.getName()}InsertOne`;
+
+    const graphQLQuery = {
+      mutation: {
+        __name: operationName,
+        __variables: {
+          document: insertType,
+        },
+        [operationName]: Object.assign({}, body, {
+          __args: {
+            document: new VariableType("document"),
+          },
+        }),
+      },
+    };
+
+    return gql(jsonToGraphQLQuery(graphQLQuery));
+  }
+
+  /**
+   * Used for creating an customisable insertion query with type-safe fetching.
+   *
+   * @param body
+   * @returns
+   */
+  createUpdateMutation(body?: QueryBodyType<T>): DocumentNode {
+    const updateType = this.getInputs().update || "EJSON!";
+    const operationName = `${this.getName()}UpdateOne`;
+
+    const updateTypeVariable =
+      updateType === "EJSON!" ? "modifier" : "document";
+
+    const graphQLQuery = {
+      mutation: {
+        __name: operationName,
+        __variables: {
+          _id: "ObjectId!",
+          [updateTypeVariable]: updateType,
+        },
+        [operationName]: Object.assign({}, body, {
+          __args: {
+            _id: new VariableType("_id"),
+            [updateTypeVariable]: new VariableType(updateTypeVariable),
+          },
+        }),
+      },
+    };
+
+    return gql(jsonToGraphQLQuery(graphQLQuery));
+  }
+
+  /**
+   * Provides the DocumentNode to use with variable: "_id"
+   *
+   * @param body
+   * @returns
+   */
+  createDeleteMutation(): DocumentNode {
+    const operationName = `${this.getName()}DeleteOne`;
+
+    const graphQLQuery = {
+      mutation: {
+        __name: operationName,
+        __variables: {
+          _id: "ObjectId!",
+        },
+        [operationName]: {
+          __args: {
+            _id: new VariableType("_id"),
+          },
+        },
+      },
+    };
+
+    return gql(jsonToGraphQLQuery(graphQLQuery));
+  }
+
+  // createFindQuery(): [DocumentNode, prepareQueryVariables] {
+
+  // }
 
   /**
    * This compiles the queries so they aren't created each time.
