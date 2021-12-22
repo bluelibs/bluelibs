@@ -139,6 +139,10 @@ export class Field extends BaseModel<Field> {
 
     if (this.model) {
       this.model = this.resolve(this.model, (id) => this.find.model(id));
+      // Shared Model Enum Type
+      if (this.type === FieldValueKind.ENUM) {
+        this.enumValues = this.model.enumValues;
+      }
     }
 
     // To avoid any errors we upper case all
