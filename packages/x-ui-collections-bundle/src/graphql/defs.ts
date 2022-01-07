@@ -1,3 +1,5 @@
+import { IEventsMap } from "@bluelibs/ui-apollo-bundle";
+
 type Filter<T = any> = {
   [key: string]: any;
 };
@@ -64,3 +66,32 @@ export type QueryBodyType<T = null> = BodyCustomise<T> &
 
 export type QuerySubBodyType<T = null> = BodyCustomise<T> &
   (T extends null ? AnyBody : RootSpecificBody<T>);
+
+export interface IQueryInput<T = null> {
+  /**
+   * MongoDB Filters
+   * @url https://docs.mongodb.com/manual/reference/operator/query/
+   */
+  filters?: T extends null
+    ? {
+        [key: string]: any;
+      }
+    : Filter<T>;
+  /**
+   * MongoDB Options
+   */
+  options?: IQueryOptionsInput;
+}
+
+export interface ISubscriptionOptions extends IEventsMap {
+  subscription?: string;
+}
+
+export interface IQueryOptionsInput {
+  sort?: {
+    [key: string]: any;
+  };
+  limit?: number;
+  skip?: number;
+  sideBody?: QueryBodyType;
+}

@@ -7,10 +7,10 @@ import {
 import { jsonToGraphQLQuery, VariableType } from "json-to-graphql-query";
 import { gql, DocumentNode, FetchPolicy } from "@apollo/client/core";
 import { EJSON, ObjectId } from "@bluelibs/ejson";
-import { MongoFilterQuery, QueryBodyType } from "./defs";
+import { IQueryInput, ISubscriptionOptions, QueryBodyType } from "./defs";
 import { getSideBody } from "./utils/getSideBody";
 import { cleanTypename } from "./utils/cleanTypename";
-import { ApolloClient, IEventsMap } from "@bluelibs/ui-apollo-bundle";
+import { ApolloClient } from "@bluelibs/ui-apollo-bundle";
 
 type CompiledQueriesTypes = "Count" | "InsertOne" | "UpdateOne" | "DeleteOne";
 
@@ -495,9 +495,56 @@ export abstract class Collection<T = null> {
     return gql(jsonToGraphQLQuery(graphQLQuery));
   }
 
-  // createFindQuery(): [DocumentNode, prepareQueryVariables] {
+  /**
+   * This is used by find() and findOne() to fetch the query
+   * @param single
+   * @param query
+   * @param body
+   */
+  public createFindQuery<T = null>(
+    single: boolean,
+    body: QueryBodyType<T>
+  ): [DocumentNode, Function] {
+    const operationName = this.getName() + (single ? "FindOne" : "Find");
 
-  // }
+    const graphQLQuery = {
+      query: {
+        __variables: {
+          query: "QueryInput!",
+        },
+        [operationName]: Object.assign({}, body, {
+          __args: {
+            query: new VariableType("query"),
+          },
+        }),
+      },
+    };
+
+    const prepare = (queryInput: IQueryInput) => {
+      const options = Object.assign({}, queryInput.options);
+      const filters = Object.assign({}, queryInput.filters);
+
+      if (options) {
+        const sideBody = getSideBody(body);
+        if (Object.keys(sideBody).length > 0) {
+          options.sideBody = EJSON.stringify(sideBody);
+        }
+      }
+
+      return {
+        filters: filters ? EJSON.stringify(filters) : "{}",
+        options: options ?? {},
+      };
+    };
+
+    const QUERY = gql`
+      ${jsonToGraphQLQuery(graphQLQuery, {
+        ignoreFields: ["$"],
+      })}
+    `;
+
+    return [QUERY, prepare];
+  }
 
   /**
    * This compiles the queries so they aren't created each time.
@@ -556,33 +603,4 @@ export abstract class Collection<T = null> {
   protected isUpdateModifier(element: any): element is UpdateFilter<T> {
     return element["$set"];
   }
-}
-
-export interface IQueryInput<T = null> {
-  /**
-   * MongoDB Filters
-   * @url https://docs.mongodb.com/manual/reference/operator/query/
-   */
-  filters?: T extends null
-    ? {
-        [key: string]: any;
-      }
-    : MongoFilterQuery<T>;
-  /**
-   * MongoDB Options
-   */
-  options?: IQueryOptionsInput;
-}
-
-export interface ISubscriptionOptions extends IEventsMap {
-  subscription?: string;
-}
-
-export interface IQueryOptionsInput {
-  sort?: {
-    [key: string]: any;
-  };
-  limit?: number;
-  skip?: number;
-  sideBody?: QueryBodyType;
 }

@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import Observable from "zen-observable";
 import { Constructor } from "@bluelibs/core";
 import { Collection } from "../../graphql/Collection";
-import { ISubscriptionOptions } from "../..//graphql/Collection";
-import { QueryBodyType } from "../../graphql/defs";
+import { ISubscriptionOptions, QueryBodyType } from "../../graphql/defs";
 import { XSubscription } from "@bluelibs/ui-apollo-bundle";
 import { use } from "@bluelibs/x-ui-react-bundle";
 

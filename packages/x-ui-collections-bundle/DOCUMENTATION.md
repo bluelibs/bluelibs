@@ -446,6 +446,14 @@ useLiveData(collectionClass, options, body, {
 });
 ```
 
+## Using Apollo
+
+Sometimes if you want to benefit of the Apollo caching, our suggestion is to use the following approach:
+
+```ts
+
+```
+
 :::caution
 When using live data and relations, it is by design to not have reactivity at nested levels. Instead you will have to create separate component that subscribes to that related object via `useLiveData()`.
 :::

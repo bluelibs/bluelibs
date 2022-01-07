@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Constructor } from "@bluelibs/core";
-import { Collection, IQueryInput } from "../../graphql/Collection";
-import { QueryBodyType } from "../../graphql/defs";
+import { Collection } from "../../graphql/Collection";
+import { IQueryInput, QueryBodyType } from "../../graphql/defs";
 
 import { use } from "@bluelibs/x-ui-react-bundle";
+import { QueryHookOptions } from "@apollo/client";
 
 type RefetchType = () => Promise<void>;
 
