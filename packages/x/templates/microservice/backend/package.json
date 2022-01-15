@@ -41,6 +41,7 @@
     "@bluelibs/validator-bundle": "^1.0.0",
     "@bluelibs/x-bundle": "^1.0.0",
     "@bluelibs/x-password-bundle": "^1.0.0",
+    "mongodb": "4.2.2",
     "class-transformer": "^0.3.1",
     "dotenv": "^8.2.0",
     "graphql": "^15.5.0",
