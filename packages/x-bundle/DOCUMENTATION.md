@@ -9,7 +9,7 @@ It provides developers the ability to code rapidly and skip through a lot of con
 - A defined way for standard CRUD interfaces
 - Validator Transformers (Date, ObjectId, UniqueDatabaseField)
 - API and Web App Routers
-- LiveData Support for [MongoBundle](package-mongo)
+- LiveData Support for [MongoBundle](/docs/package-mongo)
 
 ## Install
 
@@ -64,11 +64,11 @@ class AppBundle extends BaseBundle {
 
 ## Executors
 
-Because our [resolvers can be chains of functions](package-graphql#resolvers), we have created a set of them that allow us to easily operate within X-Framework and do things from fetching stuff from database to securing the request and even delegating to other services.
+Because our [resolvers can be chains of functions](/docs/package-graphql#resolvers), we have created a set of them that allow us to easily operate within X-Framework and do things from fetching stuff from database to securing the request and even delegating to other services.
 
 ### Database Queries
 
-We use MongoDB Nova for fetching relational data. The [Nova](package-nova) package has a way to transform a GraphQL request into a Nova request automatically fetching relations without any additional code.
+We use MongoDB Nova for fetching relational data. The [Nova](/docs/package-nova) package has a way to transform a GraphQL request into a Nova request automatically fetching relations without any additional code.
 
 ```ts
 import * as X from "@bluelibs/x-bundle";
@@ -94,7 +94,7 @@ export default {
 };
 ```
 
-We can also pass an additional resolver function which [returns an object](package-nova#graphql-integration) containing optiosn for securing your request. More details can be [found here](package-nova#graphql-integration).
+We can also pass an additional resolver function which [returns an object](/docs/package-nova#graphql-integration) containing optiosn for securing your request. More details can be [found here](/docs/package-nova#graphql-integration).
 
 ```ts
 import { IAstToQueryOptions } from "@bluelibs/nova";
@@ -256,7 +256,7 @@ Whether you have mission critical queries/mutations in which you need logs for t
 ```
 
 :::note
-These executors make use of the [LoggerBundle](package-logger) to send out the logs, meaning you can even send them to your central log management service without changing a line in the future.
+These executors make use of the [LoggerBundle](/docs/package-logger) to send out the logs, meaning you can even send them to your central log management service without changing a line in the future.
 :::
 
 ### Models & Validation
@@ -308,7 +308,7 @@ type User {
 ]
 ```
 
-The `ToModel` is a bit primitive, because it uses `toModel()` from [EJSON](package-ejson#models). Meaning it will not work with transforming nested models into instances of their class, but it will work with validating nested models.
+The `ToModel` is a bit primitive, because it uses `toModel()` from [EJSON](/docs/package-ejson#models). Meaning it will not work with transforming nested models into instances of their class, but it will work with validating nested models.
 
 If you are looking to something more advanced you can look at: [class-transformer](https://github.com/typestack/class-transformer), [@deepkit/type](https://deepkit.io/documentation/type/schema).
 
@@ -322,7 +322,7 @@ const AppToModel: GraphQLResolverType = async (_, args, ctx) => {
 };
 ```
 
-Validation uses [ValidatorBundle](package-validator-bundle) to do its magic. You are also able to pass additional options to validation:
+Validation uses [ValidatorBundle](/docs/package-validator-bundle) to do its magic. You are also able to pass additional options to validation:
 
 ```ts
 [
@@ -714,7 +714,7 @@ export default {
 };
 ```
 
-Now you have exposed a CRUD that the [Client Side Collections](package-x-ui) can communicate with the API giving you the capability of working with the database on the client.
+Now you have exposed a CRUD that the [Client Side Collections](/docs/package-x-ui) can communicate with the API giving you the capability of working with the database on the client.
 
 As long as you respect the GraphQL Schema feel free to create and juggle with the executors how you wish, most of the times as your application evolves they will delegate to services after input validation has passed.
 
@@ -758,13 +758,13 @@ When subscribing for the first time, I will get `added` events with all the docu
 
 The job of the client (whatever it may be iOS, Web, React Native, etc) is to update its own store then notify the client to ensure the UI gets rerendered with fresh data.
 
-Behind the scenes what happens is that when a change happens in the system through [MongoBundle](package-mongo) Collection updates, is sent out to the `messenger` and delivered to all instances listening for that change.
+Behind the scenes what happens is that when a change happens in the system through [MongoBundle](/docs/package-mongo) Collection updates, is sent out to the `messenger` and delivered to all instances listening for that change.
 
 The system is very advanced as it can support fetching relational data through Nova and doing complex searches such as finding the last 5 invoices who have `status = paid` and sorted by `paidAt`. The live data is not limited to a document, but rather an actual mongodb query you would normally do filtering and sorting included.
 
 ### Data Flow
 
-The client updates something in the database through a GraphQL mutation, this change is caught through [MongoBundle](package-mongo) Collection events and they are translated and submitted to specific channels in your network pubsub system.
+The client updates something in the database through a GraphQL mutation, this change is caught through [MongoBundle](/docs/package-mongo) Collection events and they are translated and submitted to specific channels in your network pubsub system.
 
 At the same time, besides sending messages, your server also listens for messages, whenever a client subscribes to a reactive data set, the server opens the path to incoming events on special channels relevant to the subscription.
 
@@ -913,7 +913,7 @@ const subscription = {
 ```
 
 :::warning
-Subscriptions without [secureBody()](package-nova#secure-the-body) from [Nova](package-nova) subscriptions are inherently insecure. Run `secureBody()` to perform at least an intersection as you construct your subscription.
+Subscriptions without [secureBody()](/docs/package-nova#secure-the-body) from [Nova](/docs/package-nova) subscriptions are inherently insecure. Run `secureBody()` to perform at least an intersection as you construct your subscription.
 :::
 
 You also have the ability to have a counter subscription:
@@ -1058,7 +1058,7 @@ Be careful with live-data, use it sparingly and only when you need it, this will
 
 ### Summary
 
-The X-Framework Server is a powerhouse of insightful ways to use Foundation enhancing Developer Experience for the rudimentary things. It is complemented perfectly our [React Client](package-x-ui) which allows you to use client-side collections, authentication through guardian, live data support, and so much more.
+The X-Framework Server is a powerhouse of insightful ways to use Foundation enhancing Developer Experience for the rudimentary things. It is complemented perfectly our [React Client](/docs/package-x-ui) which allows you to use client-side collections, authentication through guardian, live data support, and so much more.
 
 ### Boilerplates
 
@@ -1077,6 +1077,6 @@ x
 ### Challenges
 
 - What executor would I use if I want to apply 2 different security rules depending on wether the user is `Admin` or `Manager` role? (1p)
-- Make use of [XPasswordBundle](package-x-password-bundle) to enhance your server with authentication and create a user (3p)
+- Make use of [XPasswordBundle](/docs/package-x-password-bundle) to enhance your server with authentication and create a user (3p)
 - Can I use Apache Kafka or any other pubsub system for my live data? (1p)
 - What function should we use when we receive a Nova body from the client to secure it? (2p)

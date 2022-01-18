@@ -1,4 +1,4 @@
-With the React bundle we hook the [Foundation Core](package-core) into React giving us ability to have Dependency Injection and a common ecosystem of module administration on the frontend.
+With the React bundle we hook the [Foundation Core](/docs/package-core) into React giving us ability to have Dependency Injection and a common ecosystem of module administration on the frontend.
 
 ## Usage
 
@@ -36,7 +36,7 @@ ReactDOM.render(
 
 ## Dependency Injection
 
-We brough [Dependency Injection](package-core#dependency-injection) into React and it's great. While it feels a little bit of over-engineering at first, the advantages are immediately seen:
+We brough [Dependency Injection](/docs/package-core#dependency-injection) into React and it's great. While it feels a little bit of over-engineering at first, the advantages are immediately seen:
 
 ```ts
 import { Service, Inject } from "@bluelibs/core";
@@ -182,7 +182,7 @@ We use this strategy for example when we integrate `Apollo` as a separate bundle
 
 ## Smart
 
-[Smart](package-smart) is a very small library which allows you to merge logic and state together in a separated class, integrated with the `container`.
+[Smart](/docs/package-smart) is a very small library which allows you to merge logic and state together in a separated class, integrated with the `container`.
 
 ```ts
 import { EventManager } from "@bluelibs/core";

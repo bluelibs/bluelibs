@@ -1,4 +1,4 @@
-Collections can be regarded as an interface to your remote database via `GraphQL` as long as the remote queries and mutations respect a specific interface described in [X-Framework Server Core](package-x-bundle). You can generate compatible CRUD interfaces via `x` command line.
+Collections can be regarded as an interface to your remote database via `GraphQL` as long as the remote queries and mutations respect a specific interface described in [X-Framework Server Core](/docs/package-x-bundle). You can generate compatible CRUD interfaces via `x` command line.
 
 ## Definition
 
@@ -321,7 +321,7 @@ If you want to refetch the data simply call the `refetch()` function from your e
 
 ### Lists
 
-We have created a [Smart](package-smart) that allows you to easily work with lists:
+We have created a [Smart](/docs/package-smart) that allows you to easily work with lists:
 
 ```ts title="PostListSmart.ts"
 import { ListSmart } from "@bluelibs/x-ui-collections-bundle";

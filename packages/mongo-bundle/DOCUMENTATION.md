@@ -14,7 +14,7 @@ npm install --save @bluelibs/mongo-bundle @bluelibs/nova
 
 At BlueLibs, we love MongoDB. So easy to develop on it, their query language makes a lot of sense, and it is close to us, JS developers, we can even write JS code that gets executed even at database-level. We like it for a lot of things, however, the database on itself doesn't have a reliable relationship fetching mechanism ([`$lookup`](https://docs.mongodb.com/manual/reference/operator/aggregation/lookup/) is very slow), forcing developers to denormalize data and putting them to face other issue with this.
 
-The problem with relational data has been solved by [Nova](package-nova), and we have [achieved speeds faster than RAW SQL](https://docs.google.com/spreadsheets/d/1cA2c6e9YvE-fA8LEaDwukgrvYNOIo8RmNjy8cPWby1g/edit#gid=0), test [code can be found here](https://github.com/bluelibs/bluelibs/tree/main/packages/nova/benchmarks/sql).
+The problem with relational data has been solved by [Nova](/docs/package-nova), and we have [achieved speeds faster than RAW SQL](https://docs.google.com/spreadsheets/d/1cA2c6e9YvE-fA8LEaDwukgrvYNOIo8RmNjy8cPWby1g/edit#gid=0), test [code can be found here](https://github.com/bluelibs/bluelibs/tree/main/packages/nova/benchmarks/sql).
 
 `Nova` will not make everything perfect, but it makes fetching relational data a breeze. This bundle offers beautiful integration with Nova so we can use it in our collections.
 
@@ -162,7 +162,7 @@ eventManager.addListener(BeforeInsertEvent, (e) => {
 
 If you want to perform certain actions for elements once they have been updated or removed (events: `AfterUpdateEvent` and `AfterDeleteEvent`) the solution is to get the filter and extract the `_id` from there.
 
-If you want to use the [Listener](package-core/#listeners) pattern it will look something like:
+If you want to use the [Listener](/docs/package-core/#listeners) pattern it will look something like:
 
 ```ts
 import { PostsCollection, Post } from "./posts.collection";
@@ -211,7 +211,7 @@ postsCollection.insertOne(document, {
 
 ## Nova Integration
 
-We need a way to link collections and fetch data with blazing fast speeds. For this purpose, [Nova](package-nova) comes to the rescue and we strongly recommend you read through it first to get all the concepts clarified.
+We need a way to link collections and fetch data with blazing fast speeds. For this purpose, [Nova](/docs/package-nova) comes to the rescue and we strongly recommend you read through it first to get all the concepts clarified.
 
 Nova is extremely fast and gives us the freedom to think relational in NoSQL, enhancing our developer experience.
 
@@ -358,10 +358,10 @@ class PostsCollection extends Collection {
 
 ### GraphQL
 
-[Nova Query](package-nova#graphql-integration) has an intuitive GraphQL transformation, which allows you to transform the `AbstractSourceTree`, which is the "query" transformed in a OOP-model, to a `Nova` query body so you can return only what is requested + collection-linked. This is the magical part.
+[Nova Query](/docs/package-nova#graphql-integration) has an intuitive GraphQL transformation, which allows you to transform the `AbstractSourceTree`, which is the "query" transformed in a OOP-model, to a `Nova` query body so you can return only what is requested + collection-linked. This is the magical part.
 
 :::note
-This part is related to [GraphQL Bundle](package-graphql). Ensure that you are comfortable with it first.
+This part is related to [GraphQL Bundle](/docs/package-graphql). Ensure that you are comfortable with it first.
 :::
 
 ```ts
@@ -413,7 +413,7 @@ query {
 
 Behind the scenes, Nova will transform the request into its own "request-fetching language", and if you keep the same name in GraphQL API for the defined `links` in the `Collection` classes, then it will work as magic.
 
-Ofcourse, you would need to secure this and restrict these behaviors, to do so take a look at `intersect` option inside [Nova's documentation for GraphQL](package-nova#graphql-integration).
+Ofcourse, you would need to secure this and restrict these behaviors, to do so take a look at `intersect` option inside [Nova's documentation for GraphQL](/docs/package-nova#graphql-integration).
 
 ## Behaviors
 
