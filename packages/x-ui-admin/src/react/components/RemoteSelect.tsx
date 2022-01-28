@@ -47,16 +47,25 @@ export function RemoteSelect(props: RemoteSelectProps) {
   return (
     <Select
       value={value}
+      allowClear
+      onClear={() => {
+        if (onchange) {
+          onChange(undefined, { id: undefined, label: " " });
+        }
+      }}
       onChange={(value, option) => {
         if (Array.isArray(value)) {
           onChange &&
             onChange(
-              !idAsString ? value.map((v) => new ObjectId(v)) : value,
+              !idAsString && value ? value.map((v) => new ObjectId(v)) : value,
               option
             );
         } else {
           onChange &&
-            onChange(!idAsString ? new ObjectId(value) : value, option);
+            onChange(
+              !idAsString && value ? new ObjectId(value) : value,
+              option
+            );
         }
       }}
       {...rest}
