@@ -42,11 +42,12 @@ export default function processDirectNode(childCollectionNode: CollectionNode) {
       parentResult[childCollectionNode.name] = [];
       const value = _.get(parentResult, linkStorageField);
 
-      if (!value) {
+      if (!Array.isArray(value)) {
         return;
       }
 
       const data = [];
+
       value.forEach((_id) => {
         const result = resultsByKeyId[_id];
         if (result) {
