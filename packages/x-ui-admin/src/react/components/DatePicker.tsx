@@ -7,6 +7,7 @@ import * as moment from "moment";
 
 export type DatePickerProps = AntDatePickerProps & {
   onChange?(date: Date);
+  required?: boolean;
 };
 
 /**
@@ -14,12 +15,15 @@ export type DatePickerProps = AntDatePickerProps & {
  * @param props
  */
 export function DatePicker(props?: DatePickerProps) {
-  const { onChange, value, ...rest } = props;
+  const { onChange, value, required, ...rest } = props;
 
   return (
     <AntDatePicker
-      onChange={(date) => onChange(date.toDate())}
-      value={value ? moment(value) : moment()}
+      allowClear={!required}
+      onChange={(date) =>
+        onChange(date && date.toDate() ? date.toDate() : null)
+      }
+      value={value ? moment(value) : required ? moment() : null}
       {...rest}
     />
   );

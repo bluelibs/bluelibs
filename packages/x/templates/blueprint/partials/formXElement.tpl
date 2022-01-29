@@ -70,7 +70,14 @@
         component: Ant.Input,
       {{/ if }}
       {{# if (@root.typeIs rendererType "date") }}
-        component: UIComponents.DatePicker,
+        render: (props) => (
+        <Ant.Form.Item {...props}>
+          <UIComponents.DatePicker
+              required={ {{ required }} }
+              
+          />
+        </Ant.Form.Item>
+      ),
       {{/ if }}
       {{# if (@root.typeIs rendererType "boolean") }}
         render: (props) => (
