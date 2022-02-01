@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/nova",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "Nova is a relational query layer over MongoDB Node Drivers",
   "main": "dist/index.js",
   "repository": {
