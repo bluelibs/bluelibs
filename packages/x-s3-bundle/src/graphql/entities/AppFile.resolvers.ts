@@ -32,5 +32,8 @@ export default {
 
       return service.getUrl(appFileThumb.path);
     },
+    type(appFileThumb: Partial<AppFileThumb>) {
+      return appFileThumb.id;
+    },
   },
 } as IResolverMap;

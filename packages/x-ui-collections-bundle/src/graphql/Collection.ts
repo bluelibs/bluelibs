@@ -192,13 +192,22 @@ export abstract class Collection<T = null> {
     options?: MutationOptions
   ): Promise<Partial<T>> {
     const mutation = this.createInsertMutation(refetchBody);
+    const insertInput = this.getInputs().insert || "EJSON!";
+
+    let mutationDocument: string | Partial<T>;
+    if (insertInput === "EJSON!") {
+      mutationDocument = EJSON.stringify(document);
+    } else {
+      mutationDocument = Object.assign({}, document);
+      this.serialize(mutationDocument);
+    }
 
     return this.apolloClient
       .mutate({
         ...options,
         mutation,
         variables: {
-          document,
+          document: mutationDocument,
         },
       })
       .then((response) => {
@@ -225,8 +234,22 @@ export abstract class Collection<T = null> {
     const mutation = this.createUpdateMutation(refetchBody);
 
     const updateType = this.getInputs().update || "EJSON!";
-    const updateTypeVariable =
-      updateType === "EJSON!" ? "modifier" : "document";
+    const isEJSON = updateType === "EJSON!";
+    const updateTypeVariable = isEJSON ? "modifier" : "document";
+
+    let updateDocument: TransformPartial<T>;
+    if (isEJSON) {
+      updateDocument = EJSON.stringify(update);
+    } else {
+      if (this.isUpdateModifier(update)) {
+        updateDocument = update["$set"];
+      } else {
+        updateDocument = update as TransformPartial<T>;
+      }
+
+      updateDocument = Object.assign({}, updateDocument);
+      this.serialize(updateDocument);
+    }
 
     return this.apolloClient
       .mutate({
@@ -234,7 +257,7 @@ export abstract class Collection<T = null> {
         mutation,
         variables: {
           _id,
-          [updateTypeVariable]: update,
+          [updateTypeVariable]: updateDocument,
         },
       })
       .then((response) => {

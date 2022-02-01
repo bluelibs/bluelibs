@@ -20,6 +20,10 @@ export default /* GraphQL */ `
 
   type AppFileThumb {
     id: String!
+      @deprecated(
+        reason: "Use 'type' instead, due to cache mismatch with Apollo"
+      )
+    type: String!
     path: String!
     downloadUrl: String!
   }

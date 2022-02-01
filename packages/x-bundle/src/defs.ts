@@ -1,6 +1,8 @@
 import { Constructor, ContainerInstance } from "@bluelibs/core";
 import { IAstToQueryOptions } from "@bluelibs/nova";
+import { type } from "os";
 import { ClientOpts } from "redis";
+import { ICacheManagerConfig } from "./cache/defs";
 import { DocumentMutationType } from "./constants";
 import { SubscriptionHandler } from "./models/SubscriptionHandler";
 export interface IXBundleConfig {
@@ -22,6 +24,8 @@ export interface IXBundleConfig {
     debug?: boolean;
     messengerClass?: Constructor<IMessenger>;
   };
+  //cache config
+  cacheConfig: ICacheManagerConfig;
 }
 
 export type MessageHandleType = (data: any) => Promise<void>;

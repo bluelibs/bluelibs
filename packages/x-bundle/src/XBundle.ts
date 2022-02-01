@@ -17,6 +17,8 @@ import {
   IS_LIVE_DEBUG,
   MESSENGER,
   REDIS_OPTIONS,
+  CACHE_CONFIG,
+  CACHE_SERVICE,
 } from "./constants";
 import { IXBundleConfig, IMessenger } from "./defs";
 import * as chalk from "chalk";
@@ -26,7 +28,7 @@ import { RedisMessenger } from "./services/RedisMessenger";
 import { Messenger as LocalMessenger } from "./services/Messenger";
 import SubscriptionGraphQLModule from "./graphql/subscriptions.graphql-module";
 import { RedisListener } from "./listeners/RedisListener";
-
+import { CacheService } from "./cache/CacheService";
 export class XBundle extends Bundle<IXBundleConfig> {
   dependencies = [MongoBundle, LoggerBundle];
 
@@ -36,6 +38,22 @@ export class XBundle extends Bundle<IXBundleConfig> {
     rootUrl: "http://localhost:4000",
     live: {
       debug: false,
+    },
+    cacheConfig: {
+      store: "memory",
+      storeConfig: {
+        memory: 100,
+        ttl: 60,
+      },
+      ttl: 60 /*seconds*/,
+      isCacheableValue: () => true,
+      refreshThreshold: 1,
+      userBoundness: true,
+      userBoundnessFields: ["userId"],
+      expirationBoundness: true,
+      expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
+      isGlobal: false,
+      refresh: false,
     },
   };
 
@@ -74,6 +92,9 @@ export class XBundle extends Bundle<IXBundleConfig> {
     if (this.kernel.isDevelopment() && !this.kernel.isTesting()) {
       this.displayWelcomeMessage();
     }
+
+    this.container.set(CACHE_CONFIG, this.config.cacheConfig);
+    this.container.set({ id: CACHE_SERVICE, type: CacheService });
   }
 
   async init() {
