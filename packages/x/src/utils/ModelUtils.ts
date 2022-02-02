@@ -154,7 +154,7 @@ export class ModelUtils {
         modelClass,
         reuseEnums
       );
-      typeSuffix = `.oneOf(Object.values(${enumClassName}))`;
+      typeSuffix = `.oneOf(Object.values(${enumClassName}).concat(null))`;
     }
 
     // We do this because sometimes you want to update an id and want it nullifiable
