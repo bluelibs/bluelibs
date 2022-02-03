@@ -508,3 +508,27 @@ const UPDATE_MUTATION = collection.createUpdateMutation(refetchBody);
 
 // useMutation({ mutation: MUTATION })
 ```
+
+:::note
+Delete doesn't have a refetch body option because we assume you will treat this case separately. You can use Mutation options argument in `deleteOne()` to clear the cache of the deleted document manually.
+:::
+
+### Blueprint
+
+Swapping to Apollo cached solution in the "View", "Edit" layers can be done as simple as:
+
+```ts
+const {
+  data: document,
+  loading: isLoading,
+  error,
+} = collection.useQueryOne(EntityViewer.getRequestBody(), {
+  filters: {
+    _id: new ObjectId(props.id),
+  },
+});
+```
+
+Inside table view, the data is fetched inside the ListSmart or AntTableSmart in `x-ui-admin`, which makes it hard to use `useQuery` hook to benefit of data caching.
+
+To solve that, you can either call `tableSmart.load()` after you perform a mutation operation, or fetch the data via `useQuery()` and render your own table. Table smart reacts to page changes, filters, sorting, it smartly refetches every time data changes, doing this via `useQuery()` would mean implying a middleware Component which reads `filters, options` and figure out whether to recall `useQuery()` so you benefit of caching.
