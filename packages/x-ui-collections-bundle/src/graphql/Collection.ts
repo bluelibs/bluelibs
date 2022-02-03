@@ -5,12 +5,23 @@ import {
   Constructor,
 } from "@bluelibs/core";
 import { jsonToGraphQLQuery, VariableType } from "json-to-graphql-query";
-import { gql, DocumentNode, FetchPolicy } from "@apollo/client/core";
+import {
+  gql,
+  FetchPolicy,
+  MutationOptions,
+  DocumentNode,
+} from "@apollo/client/core";
 import { EJSON, ObjectId } from "@bluelibs/ejson";
-import { MongoFilterQuery, QueryBodyType } from "./defs";
+import { IQueryInput, ISubscriptionOptions, QueryBodyType } from "./defs";
 import { getSideBody } from "./utils/getSideBody";
 import { cleanTypename } from "./utils/cleanTypename";
-import { ApolloClient, IEventsMap } from "@bluelibs/ui-apollo-bundle";
+import { ApolloClient } from "@bluelibs/ui-apollo-bundle";
+import {
+  OperationVariables,
+  QueryOptions as ApolloQueryOptions,
+  QueryResult as ApolloQueryResult,
+  useQuery as baseUseQuery,
+} from "@apollo/client";
 
 type CompiledQueriesTypes = "Count" | "InsertOne" | "UpdateOne" | "DeleteOne";
 
@@ -25,7 +36,7 @@ export type CollectionTransformMap<T> = Partial<{
 }>;
 
 export type CollectionLinkConfig<T> = {
-  collection: (container) => Constructor<Collection>;
+  collection: (container) => Constructor<Collection<T>>;
   name: keyof T;
   many?: boolean;
   field?: keyof T;
@@ -37,7 +48,7 @@ export type CollectionInputsConfig = {
 };
 
 @Service()
-export abstract class Collection<T = any> {
+export abstract class Collection<T = null> {
   compiled = new Map<CompiledQueriesTypes, DocumentNode>();
 
   constructor(
@@ -163,21 +174,24 @@ export abstract class Collection<T = any> {
    * Insert a single document into the remote database
    * @param document
    */
-  async insertOne(document: Partial<T>): Promise<Partial<T>> {
-    const insertInput = this.getInputs().insert || "EJSON!";
+  async insertOne(
+    document: Partial<T>,
+    refetchBody?: QueryBodyType<T>,
+    options?: MutationOptions
+  ): Promise<Partial<T>> {
+    const mutation = this.createInsertMutation(refetchBody);
 
-    if (insertInput === "EJSON!") {
-      return this.runCompiledQuery("InsertOne", {
-        document: EJSON.stringify(document),
+    return this.apolloClient
+      .mutate({
+        ...options,
+        mutation,
+        variables: {
+          document,
+        },
+      })
+      .then((response) => {
+        return response.data[`${this.getName()}InsertOne`];
       });
-    } else {
-      const newDocument = Object.assign({}, document);
-      this.serialize(newDocument);
-
-      return this.runCompiledQuery("InsertOne", {
-        document: newDocument,
-      });
-    }
   }
 
   /**
@@ -187,40 +201,57 @@ export abstract class Collection<T = any> {
    */
   async updateOne(
     _id: ObjectId | string,
-    modifier: UpdateFilter<T> | TransformPartial<T>
+    update: UpdateFilter<T> | TransformPartial<T>,
+    refetchBody?: QueryBodyType<T>,
+    options?: MutationOptions
   ): Promise<Partial<T>> {
-    const updateInput = this.getInputs().update || "EJSON!";
-
-    if (updateInput === "EJSON!") {
-      return this.runCompiledQuery("UpdateOne", {
-        _id,
-        modifier: EJSON.stringify(modifier),
-      });
-    } else {
-      let document: TransformPartial<T>;
-      if (this.isUpdateModifier(modifier)) {
-        document = modifier["$set"];
-      } else {
-        document = modifier;
-      }
-      const newDocument = Object.assign({}, document);
-      this.serialize(newDocument);
-
-      return this.runCompiledQuery("UpdateOne", {
-        _id,
-        document: newDocument,
-      });
+    // @ts-ignore
+    if (refetchBody && !refetchBody._id) {
+      // @ts-ignore
+      refetchBody._id = 1;
     }
+    const mutation = this.createUpdateMutation(refetchBody);
+
+    const updateType = this.getInputs().update || "EJSON!";
+    const updateTypeVariable =
+      updateType === "EJSON!" ? "modifier" : "document";
+
+    return this.apolloClient
+      .mutate({
+        ...options,
+        mutation,
+        variables: {
+          _id,
+          [updateTypeVariable]: update,
+        },
+      })
+      .then((response) => {
+        return response.data[`${this.getName()}UpdateOne`];
+      });
   }
 
   /**
    * Delete a single element by _id from database
    * @param _id
    */
-  async deleteOne(_id: ObjectId | string): Promise<boolean> {
-    return this.runCompiledQuery("DeleteOne", {
-      _id,
-    });
+  async deleteOne(
+    _id: ObjectId | string,
+    options?: MutationOptions
+  ): Promise<boolean> {
+    const mutation = this.createDeleteMutation();
+
+    return this.apolloClient
+      .mutate({
+        ...options,
+        mutation,
+        variables: {
+          _id,
+          document,
+        },
+      })
+      .then((response) => {
+        return response.data[`${this.getName()}DeleteOne`];
+      });
   }
 
   /**
@@ -333,6 +364,8 @@ export abstract class Collection<T = any> {
       },
     };
 
+    // Side body is a way to pass nested collection filters, options
+    // Gets merged back on the server
     if (queryInput?.options) {
       const sideBody = getSideBody(body);
       if (Object.keys(sideBody).length > 0) {
@@ -386,10 +419,12 @@ export abstract class Collection<T = any> {
       compiledQuery
     );
 
+    const graphqlExecutor = this.compiled.get(compiledQuery);
+
     if (isMutation) {
       return this.apolloClient
         .mutate({
-          mutation: this.compiled.get(compiledQuery),
+          mutation: graphqlExecutor,
           variables,
           ...options,
         })
@@ -400,7 +435,7 @@ export abstract class Collection<T = any> {
 
     return this.apolloClient
       .query({
-        query: this.compiled.get(compiledQuery),
+        query: graphqlExecutor,
         variables,
         fetchPolicy: this.getFetchPolicy(),
         ...options,
@@ -408,6 +443,218 @@ export abstract class Collection<T = any> {
       .then((result) => {
         return result.data[`${this.getName()}${compiledQuery}`];
       });
+  }
+
+  /**
+   * Used for creating an customisable insertion query with type-safe fetching.
+   *
+   * @param body
+   * @returns
+   */
+  createInsertMutation(body?: QueryBodyType<T>): DocumentNode {
+    if (!body) {
+      return this.compiled.get("InsertOne");
+    }
+
+    const insertType = this.getInputs().insert || "EJSON!";
+    const operationName = `${this.getName()}InsertOne`;
+
+    const graphQLQuery = {
+      mutation: {
+        __name: operationName,
+        __variables: {
+          document: insertType,
+        },
+        [operationName]: Object.assign({}, body, {
+          __args: {
+            document: new VariableType("document"),
+          },
+        }),
+      },
+    };
+
+    return gql(jsonToGraphQLQuery(graphQLQuery));
+  }
+
+  /**
+   * Used for creating an customisable insertion query with type-safe fetching.
+   *
+   * @param body
+   * @returns
+   */
+  createUpdateMutation(body?: QueryBodyType<T>): DocumentNode {
+    if (!body) {
+      return this.compiled.get("UpdateOne");
+    }
+
+    const updateType = this.getInputs().update || "EJSON!";
+    const operationName = `${this.getName()}UpdateOne`;
+
+    const updateTypeVariable =
+      updateType === "EJSON!" ? "modifier" : "document";
+
+    const graphQLQuery = {
+      mutation: {
+        __name: operationName,
+        __variables: {
+          _id: "ObjectId!",
+          [updateTypeVariable]: updateType,
+        },
+        [operationName]: Object.assign({}, body, {
+          __args: {
+            _id: new VariableType("_id"),
+            [updateTypeVariable]: new VariableType(updateTypeVariable),
+          },
+        }),
+      },
+    };
+
+    return gql(jsonToGraphQLQuery(graphQLQuery));
+  }
+
+  /**
+   * Provides the DocumentNode to use with variable: "_id"
+   *
+   * @param body
+   * @returns
+   */
+  createDeleteMutation(): DocumentNode {
+    return this.compiled.get("DeleteOne");
+
+    // In case we'll need custom things later
+    // const operationName = `${this.getName()}DeleteOne`;
+
+    // const graphQLQuery = {
+    //   mutation: {
+    //     __name: operationName,
+    //     __variables: {
+    //       _id: "ObjectId!",
+    //     },
+    //     [operationName]: {
+    //       __args: {
+    //         _id: new VariableType("_id"),
+    //       },
+    //     },
+    //   },
+    // };
+
+    // return gql(jsonToGraphQLQuery(graphQLQuery));
+  }
+
+  /**
+   * Integration with native `useQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   * Please note that we also return as data the actual documents and not the main data object.
+   *
+   * For finding a single element, refer to useQueryOne.
+   */
+  public useQuery<TVariables = OperationVariables>(
+    body: QueryBodyType<T>,
+    queryInput: IQueryInput<T>,
+    options?: ApolloQueryOptions
+  ): ApolloQueryResult<T[], TVariables> {
+    // This is done on every re-render, maybe we could useMemo() some
+
+    const [QUERY, prepareSideBody] = this.createFindQuery(false, body);
+
+    // side body used for nested collections filtering
+    queryInput = prepareSideBody(queryInput);
+    const operation = this.getName() + "Find";
+
+    const result = baseUseQuery<T[], any>(QUERY, {
+      ...options,
+      query: QUERY,
+      variables: {
+        query: queryInput,
+      },
+    });
+
+    if (result?.data) {
+      result.data = result.data[operation] || [];
+    }
+
+    return result;
+  }
+
+  /**
+   * Integration with native `useQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   */
+  public useQueryOne<TVariables = OperationVariables>(
+    body: QueryBodyType<T>,
+    queryInput: IQueryInput<T>,
+    options?: ApolloQueryOptions
+  ): ApolloQueryResult<T, TVariables> {
+    // This is done on every re-render, maybe we could useMemo() some
+
+    const [QUERY, prepareSideBody] = this.createFindQuery(true, body);
+
+    // side body used for nested collections filtering
+    queryInput = prepareSideBody(queryInput);
+    const operation = this.getName() + "FindOne";
+
+    const result = baseUseQuery<T, any>(QUERY, {
+      ...options,
+      query: QUERY,
+      variables: {
+        query: queryInput,
+      },
+    });
+
+    if (result?.data) {
+      result.data = result.data[operation] || [];
+    }
+
+    return result;
+  }
+
+  /**
+   * This is used by find() and findOne() to fetch the query
+   * @param single
+   * @param query
+   * @param body
+   */
+  public createFindQuery<T = null>(
+    single: boolean,
+    body: QueryBodyType<T>
+  ): [DocumentNode, (queryInput: IQueryInput<T>) => IQueryInput<T>] {
+    const operationName = this.getName() + (single ? "FindOne" : "Find");
+
+    const graphQLQuery = {
+      query: {
+        __variables: {
+          query: "QueryInput!",
+        },
+        [operationName]: Object.assign({}, body, {
+          __args: {
+            query: new VariableType("query"),
+          },
+        }),
+      },
+    };
+
+    const prepare = (queryInput: IQueryInput<T>) => {
+      const options = Object.assign({}, queryInput.options);
+      const filters = Object.assign({}, queryInput.filters);
+
+      if (options) {
+        const sideBody = getSideBody(body);
+        if (Object.keys(sideBody).length > 0) {
+          options.sideBody = EJSON.stringify(sideBody);
+        }
+      }
+
+      return {
+        filters: filters ? EJSON.stringify(filters) : "{}",
+        options: options ?? {},
+      };
+    };
+
+    const QUERY = gql`
+      ${jsonToGraphQLQuery(graphQLQuery, {
+        ignoreFields: ["$"],
+      })}
+    `;
+
+    return [QUERY, prepare];
   }
 
   /**
@@ -467,33 +714,4 @@ export abstract class Collection<T = any> {
   protected isUpdateModifier(element: any): element is UpdateFilter<T> {
     return element["$set"];
   }
-}
-
-export interface IQueryInput<T = null> {
-  /**
-   * MongoDB Filters
-   * @url https://docs.mongodb.com/manual/reference/operator/query/
-   */
-  filters?: T extends null
-    ? {
-        [key: string]: any;
-      }
-    : MongoFilterQuery<T>;
-  /**
-   * MongoDB Options
-   */
-  options?: IQueryOptionsInput;
-}
-
-export interface ISubscriptionOptions extends IEventsMap {
-  subscription?: string;
-}
-
-export interface IQueryOptionsInput {
-  sort?: {
-    [key: string]: any;
-  };
-  limit?: number;
-  skip?: number;
-  sideBody?: QueryBodyType;
 }

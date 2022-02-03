@@ -449,3 +449,86 @@ useLiveData(collectionClass, options, body, {
 :::caution
 When using live data and relations, it is by design to not have reactivity at nested levels. Instead you will have to create separate component that subscribes to that related object via `useLiveData()`.
 :::
+
+## Apollo React Integration
+
+Apollo has a neat way of using `useQuery` and after doing a mutation for a specific type and returns the values, lists get re-rendered.
+
+By default we offer a light-weight approach to data using `useData()`, but depending on your application you might need this caching functions in some places,
+therefore we wanted to offer a seamless solution for this.
+
+```ts
+function Posts() {
+  const collection = use(PostsCollection);
+  const { data, loading, errors } = collection.useQuery(
+    {
+      _id: 1,
+      title: 1,
+      comments: {
+        text: 1,
+      },
+    },
+    {
+      filters: { status: "approved" },
+      options: {
+        // limit, skip, sort
+      },
+    }
+  );
+
+  // data will be Post[] directly
+}
+```
+
+For working with single data relations please use `collection.useQueryOne()` having the exact same api, except `data` is going to be `Post` instead of `Post[]`.
+
+When you perform a mutation, you can now trigger the cache, by doing so:
+
+```ts
+collection.updateOne(
+  post._id,
+  {
+    title: "My New Title",
+  },
+  // Refetch Body:
+  {
+    // _id: 1 is auto-populated
+    title: 1,
+  }
+);
+
+// Same concept applies to insertOne.
+```
+
+If you want to use `useMutation()` from Apollo for various reasons we expose the following helper functions:
+
+```ts
+const INSERT_MUTATION = collection.createInsertMutation(refetchBody);
+const UPDATE_MUTATION = collection.createUpdateMutation(refetchBody);
+
+// useMutation({ mutation: MUTATION })
+```
+
+:::note
+Delete doesn't have a refetch body option because we assume you will treat this case separately. You can use Mutation options argument in `deleteOne()` to clear the cache of the deleted document manually.
+:::
+
+### Blueprint
+
+Swapping to Apollo cached solution in the "View", "Edit" layers can be done as simple as:
+
+```ts
+const {
+  data: document,
+  loading: isLoading,
+  error,
+} = collection.useQueryOne(EntityViewer.getRequestBody(), {
+  filters: {
+    _id: new ObjectId(props.id),
+  },
+});
+```
+
+Inside table view, the data is fetched inside the ListSmart or AntTableSmart in `x-ui-admin`, which makes it hard to use `useQuery` hook to benefit of data caching.
+
+To solve that, you can either call `tableSmart.load()` after you perform a mutation operation, or fetch the data via `useQuery()` and render your own table. Table smart reacts to page changes, filters, sorting, it smartly refetches every time data changes, doing this via `useQuery()` would mean implying a middleware Component which reads `filters, options` and figure out whether to recall `useQuery()` so you benefit of caching.
