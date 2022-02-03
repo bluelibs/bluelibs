@@ -1,10 +1,10 @@
-import { parse, ScheduleData } from "later";
+import { ParseStatic, ScheduleData } from "later";
 import { ContainerInstance } from "@bluelibs/core";
 import { ObjectID } from "@bluelibs/mongo-bundle";
 
 export interface ICronConfig {
   name: string;
-  schedule: (parser) => ScheduleData;
+  schedule: (parser: ParseStatic) => ScheduleData;
   job: (container: ContainerInstance) => void | Promise<void>;
   persist?: boolean;
   _timer?: any;
