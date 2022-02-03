@@ -1,6 +1,9 @@
 import { Collection } from "..";
 import { container } from "./ecosystem";
-import { CollectionTransformMap } from "../graphql/Collection";
+import {
+  CollectionTransformMap,
+  CollectionLinkConfig,
+} from "../graphql/Collection";
 import { EJSON } from "@bluelibs/ejson";
 import { richResponse, richResponseBody } from "./samples/richResponse";
 import { cleanTypename } from "../graphql/utils/cleanTypename";
@@ -38,7 +41,7 @@ describe("XUICollectionsBundle", () => {
         };
       }
 
-      getLinks() {
+      getLinks(): CollectionLinkConfig<any>[] {
         return [
           {
             collection: () => AppFileGroupsCollection,

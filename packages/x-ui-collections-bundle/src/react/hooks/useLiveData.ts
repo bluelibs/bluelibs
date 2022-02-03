@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { Constructor } from "@bluelibs/core";
-import { Collection, IQueryInput } from "../../graphql/Collection";
-import { ISubscriptionOptions } from "../../graphql/Collection";
-import { QueryBodyType } from "../../graphql/defs";
+import { Collection } from "../../graphql/Collection";
+import {
+  IQueryInput,
+  ISubscriptionOptions,
+  QueryBodyType,
+} from "../../graphql/defs";
 import { use } from "@bluelibs/x-ui-react-bundle";
 import { XSubscription } from "@bluelibs/ui-apollo-bundle";
 
