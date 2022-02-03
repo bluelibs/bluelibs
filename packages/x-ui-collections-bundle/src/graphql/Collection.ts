@@ -36,9 +36,21 @@ export type CollectionTransformMap<T> = Partial<{
 }>;
 
 export type CollectionLinkConfig<T> = {
-  collection: (container) => Constructor<Collection<T>>;
+  /**
+   * Collection you are related to
+   */
+  collection: (container) => Constructor<Collection<any>>;
+  /**
+   * How is this link identified, provide a name that describes the relation
+   */
   name: keyof T;
+  /**
+   * Are you relating to one or many?
+   */
   many?: boolean;
+  /**
+   * Where is the relational data stored?
+   */
   field?: keyof T;
 };
 
