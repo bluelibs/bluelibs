@@ -48,7 +48,7 @@ export class {{ collectionName }}Collection extends Collection<{{ entityName }}>
   getTransformMap(): CollectionTransformMap<{{ entityName }}> {
     return {
       {{# each dateFields }}
-        {{this}}: (v) => new Date(v),
+        {{this}}: (v) => v && new Date(v) ? new Date(v) : v,
       {{/ each }}
     }
   }
