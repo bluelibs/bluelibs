@@ -57,9 +57,10 @@ export function RemoteSelect(props: RemoteSelectProps) {
       value={value}
       allowClear={!required}
       onClear={() => {
-        if (onchange) {
-          onChange(undefined, { id: undefined, label: " " });
-        }
+        const isArray = Array.isArray(value);
+        onChange(isArray ? [] : null, {
+          value: undefined,
+        });
       }}
       onChange={(value, option) => {
         if (Array.isArray(value)) {
