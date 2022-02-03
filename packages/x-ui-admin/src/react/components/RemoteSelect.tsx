@@ -8,10 +8,19 @@ export type RemoteSelectProps = SelectProps<any> & {
   collectionClass: Constructor<Collection<any>>;
   field: string;
   idAsString?: boolean;
+  required?: boolean;
 };
 
 export function RemoteSelect(props: RemoteSelectProps) {
-  let { field, collectionClass, idAsString, onChange, value, ...rest } = props;
+  let {
+    field,
+    collectionClass,
+    idAsString,
+    onChange,
+    value,
+    required,
+    ...rest
+  } = props;
 
   if (value) {
     if (Array.isArray(value)) {
@@ -33,7 +42,6 @@ export function RemoteSelect(props: RemoteSelectProps) {
   if (isLoading) {
     return <Spin />;
   }
-
   if (error) {
     return <Alert message="Error loading data" type="error" />;
   }
@@ -47,16 +55,26 @@ export function RemoteSelect(props: RemoteSelectProps) {
   return (
     <Select
       value={value}
+      allowClear={!required}
+      onClear={() => {
+        const isArray = Array.isArray(value);
+        onChange(isArray ? [] : null, {
+          value: undefined,
+        });
+      }}
       onChange={(value, option) => {
         if (Array.isArray(value)) {
           onChange &&
             onChange(
-              !idAsString ? value.map((v) => new ObjectId(v)) : value,
+              !idAsString && value ? value.map((v) => new ObjectId(v)) : value,
               option
             );
         } else {
           onChange &&
-            onChange(!idAsString ? new ObjectId(value) : value, option);
+            onChange(
+              !idAsString && value ? new ObjectId(value) : value,
+              option
+            );
         }
       }}
       {...rest}

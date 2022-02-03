@@ -39,6 +39,7 @@
           <UIComponents.RemoteSelect
               collectionClass={ {{ remoteCollectionClass }} }
               field="{{ remoteField }}"
+              required={ {{ required }} }
               {{# if isMany }}
                 mode="multiple"
               {{/ if }}
