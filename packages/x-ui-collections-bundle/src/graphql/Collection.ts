@@ -192,13 +192,22 @@ export abstract class Collection<T = null> {
     options?: MutationOptions
   ): Promise<Partial<T>> {
     const mutation = this.createInsertMutation(refetchBody);
+    const insertInput = this.getInputs().insert || "EJSON!";
+
+    let mutationDocument: string | Partial<T>;
+    if (insertInput === "EJSON!") {
+      mutationDocument = EJSON.stringify(document);
+    } else {
+      mutationDocument = Object.assign({}, document);
+      this.serialize(mutationDocument);
+    }
 
     return this.apolloClient
       .mutate({
         ...options,
         mutation,
         variables: {
-          document,
+          document: mutationDocument,
         },
       })
       .then((response) => {
@@ -228,20 +237,19 @@ export abstract class Collection<T = null> {
     const isEJSON = updateType === "EJSON!";
     const updateTypeVariable = isEJSON ? "modifier" : "document";
 
-    let document: TransformPartial<T>;
-
-    // if it's not EJSON and we send a modifier, we allow
-    // easy to use by transforming that $set into the document itself
-    // and we do set-back on the server
-    if (!isEJSON && this.isUpdateModifier(update)) {
-      document = update["$set"];
+    let updateDocument: TransformPartial<T>;
+    if (isEJSON) {
+      updateDocument = EJSON.stringify(update);
     } else {
-      document = update as TransformPartial<T>;
-    }
+      if (this.isUpdateModifier(update)) {
+        updateDocument = update["$set"];
+      } else {
+        updateDocument = update as TransformPartial<T>;
+      }
 
-    // serialize
-    const newDocument = Object.assign({}, document);
-    this.serialize(newDocument);
+      updateDocument = Object.assign({}, updateDocument);
+      this.serialize(updateDocument);
+    }
 
     return this.apolloClient
       .mutate({
@@ -249,7 +257,7 @@ export abstract class Collection<T = null> {
         mutation,
         variables: {
           _id,
-          [updateTypeVariable]: document,
+          [updateTypeVariable]: updateDocument,
         },
       })
       .then((response) => {
