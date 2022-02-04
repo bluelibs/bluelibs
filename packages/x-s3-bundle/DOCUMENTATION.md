@@ -319,6 +319,10 @@ const appFile = await s3UploadService.upload(file, {
 });
 ```
 
+:::note
+When fetching with GraphQL you'll receive a deprecation notice on thumbs.id, that is because you should use `type` instead of `id` on your frontend. To ensure you don't mess with Apollo Client cache.
+:::
+
 ## Events
 
 We expose two events: `AfterFileUploadEvent` and `BeforeFileUploadEvent`, each contains data relevant to its processing, you could opt-out completely of custom image processing by doing:

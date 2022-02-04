@@ -11,7 +11,8 @@ export const downloadUrl: IReducerOption = {
     resourceId: 1,
   },
   reduce(upload, params) {
-    const container: ContainerInstance = params.context.container;
+    // To fix TS later, interface extension from mongo-bundle to nova is not taken into account for some reason
+    const container: ContainerInstance = (params.context as any).container;
     const service = container.get(S3UploadService);
 
     return service.getUrl(upload.path);
