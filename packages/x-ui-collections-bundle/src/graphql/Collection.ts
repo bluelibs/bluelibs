@@ -899,12 +899,16 @@ export abstract class Collection<T = null> {
   /**
    * Provide a Apollo.OptimisticResponse object based on the provided _id and document
    */
-  public optimistic(_id: ObjectId | string, document: T) {
+  public optimistic(
+    _id: ObjectId | string,
+    document: T,
+    operationName?: string
+  ) {
     const stringId = _id instanceof ObjectId ? _id.toString() : _id;
-    const operationName = ""; // ! how do we determine this here ?
+    // const operationName = ""; // ! how do we determine this here ?
 
     // We can't be optimistic if we do no know the operationName
-    if (!operationName) return undefined;
+    // if (!operationName) return undefined;
 
     const collectionName = this.getName?.();
 
@@ -912,7 +916,7 @@ export abstract class Collection<T = null> {
     if (!collectionName) return undefined;
 
     return {
-      [operationName]: {
+      [operationName || `${this.getName()}UpdateOne`]: {
         _id: stringId,
         __typename:
           collectionName[collectionName.length - 1] === "s"
