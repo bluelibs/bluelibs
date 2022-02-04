@@ -895,4 +895,31 @@ export abstract class Collection<T = null> {
   protected isUpdateModifier(element: any): element is UpdateFilter<T> {
     return element["$set"];
   }
+
+  /**
+   * Provide a Apollo.OptimisticResponse object based on the provided _id and document
+   */
+  public optimistic(_id: ObjectId | string, document: T) {
+    const stringId = _id instanceof ObjectId ? _id.toString() : _id;
+    const operationName = ""; // ! how do we determine this here ?
+
+    // We can't be optimistic if we do no know the operationName
+    if (!operationName) return undefined;
+
+    const collectionName = this.getName?.();
+
+    // We can't be optimistic if we do no know the __typename
+    if (!collectionName) return undefined;
+
+    return {
+      [operationName]: {
+        _id: stringId,
+        __typename:
+          collectionName[collectionName.length - 1] === "s"
+            ? collectionName.slice(0, -1)
+            : collectionName, // we could use https://www.npmjs.com/package/pluralize
+        ...document, // should we deepclone here just in case ?
+      },
+    };
+  }
 }
