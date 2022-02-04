@@ -21,6 +21,8 @@ import {
   QueryOptions as ApolloQueryOptions,
   QueryResult as ApolloQueryResult,
   useQuery as baseUseQuery,
+  useLazyQuery as baseUseLazyQuery,
+  QueryTuple,
 } from "@apollo/client";
 
 type CompiledQueriesTypes = "Count" | "InsertOne" | "UpdateOne" | "DeleteOne";
@@ -633,6 +635,42 @@ export abstract class Collection<T = null> {
   }
 
   /**
+   * Integration with native `useLazyQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   * Please note that we also return as data the actual documents and not the main data object.
+   *
+   * For finding a single element, refer to useLazyQueryOne.
+   */
+  public useLazyQuery<TVariables = OperationVariables>({
+    body = { _id: 1 },
+    queryInput,
+    options,
+  }: {
+    body?: QueryBodyType<T> | { _id: number }; // Might be more elegant
+    queryInput: IQueryInput<T>;
+    options?: UseQueryOptions;
+  }): QueryTuple<T[], TVariables> {
+    // This is done on every re-render, maybe we could useMemo() some
+
+    const [QUERY, prepareSideBody] = this.createFindQuery(
+      false,
+      body as QueryBodyType<T>
+    );
+
+    // side body used for nested collections filtering
+    queryInput = prepareSideBody(queryInput);
+
+    const lazyQueryTuple = baseUseLazyQuery<T[], any>(QUERY, {
+      ...options,
+      query: QUERY,
+      variables: {
+        query: queryInput,
+      },
+    });
+
+    return lazyQueryTuple;
+  }
+
+  /**
    * Integration with native `useQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
    */
   public useQueryOne<TVariables = OperationVariables>({
@@ -668,6 +706,42 @@ export abstract class Collection<T = null> {
     }
 
     return result;
+  }
+
+  /**
+   * Integration with native `useLazyQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   * Please note that we also return as data the actual documents and not the main data object.
+   *
+   * For finding a single element, refer to useLazyQueryOne.
+   */
+  public useLazyQueryOne<TVariables = OperationVariables>({
+    body = { _id: 1 },
+    queryInput,
+    options,
+  }: {
+    body?: QueryBodyType<T> | { _id: number }; // Might be more elegant
+    queryInput: IQueryInput<T>;
+    options?: UseQueryOptions;
+  }): QueryTuple<T[], TVariables> {
+    // This is done on every re-render, maybe we could useMemo() some
+
+    const [QUERY, prepareSideBody] = this.createFindQuery(
+      true,
+      body as QueryBodyType<T>
+    );
+
+    // side body used for nested collections filtering
+    queryInput = prepareSideBody(queryInput);
+
+    const lazyQueryTuple = baseUseLazyQuery<T[], any>(QUERY, {
+      ...options,
+      query: QUERY,
+      variables: {
+        query: queryInput,
+      },
+    });
+
+    return lazyQueryTuple;
   }
 
   /**
