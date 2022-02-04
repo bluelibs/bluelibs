@@ -225,8 +225,23 @@ export abstract class Collection<T = null> {
     const mutation = this.createUpdateMutation(refetchBody);
 
     const updateType = this.getInputs().update || "EJSON!";
-    const updateTypeVariable =
-      updateType === "EJSON!" ? "modifier" : "document";
+    const isEJSON = updateType === "EJSON!";
+    const updateTypeVariable = isEJSON ? "modifier" : "document";
+
+    let document: TransformPartial<T>;
+
+    // if it's not EJSON and we send a modifier, we allow
+    // easy to use by transforming that $set into the document itself
+    // and we do set-back on the server
+    if (!isEJSON && this.isUpdateModifier(update)) {
+      document = update["$set"];
+    } else {
+      document = update as TransformPartial<T>;
+    }
+
+    // serialize
+    const newDocument = Object.assign({}, document);
+    this.serialize(newDocument);
 
     return this.apolloClient
       .mutate({
@@ -234,7 +249,7 @@ export abstract class Collection<T = null> {
         mutation,
         variables: {
           _id,
-          [updateTypeVariable]: update,
+          [updateTypeVariable]: document,
         },
       })
       .then((response) => {
