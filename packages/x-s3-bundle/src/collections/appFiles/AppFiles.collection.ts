@@ -17,13 +17,16 @@ export class AppFilesCollection extends Collection<AppFile> {
   static expanders = {
     path: {
       thumbs: 1,
+      path: 1,
     },
     downloadUrl: {
       thumbs: 1,
       path: 1,
+      downloadUrl: 1,
     },
     _id: {
       thumbs: 1,
+      _id: 1,
     },
   };
 }
