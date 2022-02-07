@@ -21,10 +21,10 @@ declare module "yup" {
      */
     uniqueField(config?: IUniqueFieldValidationConfig): NumberSchema;
   }
-
+  //@ts-ignore
   export type ObjectIdSchemaConstructor = {
     new (...args: any[]): ObjectIdSchema;
   };
-
+  //@ts-ignore
   export const objectId: () => ObjectIdSchema;
 }

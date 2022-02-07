@@ -20,7 +20,7 @@ export class CacheService {
   }
 
   async set(key: string, data: any, options: CacheOptions) {
-    const storedset = this.cacheManager.set(
+    await this.cacheManager.set(
       key,
       {
         data,
@@ -29,26 +29,21 @@ export class CacheService {
         refresh:
           options.refresh === undefined ? this.defaultRefresh : options.refresh,
       },
-      options.ttl > 0 ? options.ttl : this.defaultTtl
+      { ttl: options.ttl === undefined ? this.defaultTtl : options.ttl }
     );
-    return storedset;
   }
 
   async get(key: string) {
     const cachedData = await this.cacheManager.get(key);
     if (!cachedData) return { found: false, data: undefined };
-    console.log("this.defaultTtl", this.defaultTtl);
-    console.log("this.defaultRefresh", this.defaultRefresh);
-    console.log("cachedData.refresh", cachedData.refresh);
-    console.log("cachedData.ttl", cachedData.ttl);
-    console.log("cachedData.syncedAt", cachedData.syncedAt);
-    console.log("cachedData.data", cachedData.data ? "kayna" : "makinach ");
-    if (cachedData && cachedData.refresh) {
-      this.set(key, cachedData.data, {
-        ttl: cachedData.ttl,
-        refresh: true,
-      });
+    else {
+      if (cachedData && cachedData.refresh) {
+        await this.set(key, cachedData.data, {
+          ttl: cachedData.ttl,
+          refresh: true,
+        });
+      }
+      return { found: true, data: cachedData.data };
     }
-    return { found: true, data: cachedData.data };
   }
 }

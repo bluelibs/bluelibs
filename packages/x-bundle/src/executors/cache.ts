@@ -31,7 +31,10 @@ export function Cache<T>(
   actions: ((_: any, args: any, ctx: any, ast: any) => Promise<any>)[]
 ) {
   return async function (_, args, ctx, ast) {
-    options = { ...ctx.container.get(CACHE_CONFIG), ...(options || {}) };
+    options = {
+      ...(await ctx.container.get(CACHE_CONFIG)),
+      ...(options || {}),
+    };
     let keyBody: any = (({
       fieldName,
       fieldNodes,
@@ -55,7 +58,7 @@ export function Cache<T>(
       options.ttl = calculateTtlWithExpirationBoundness(options, ctx);
 
     const cacheKey = Hasher.hash(keyBody);
-    const cache = ctx.container.get(CACHE_SERVICE);
+    const cache = await ctx.container.get(CACHE_SERVICE);
 
     let result = await cache.get(cacheKey);
     if (result && result.found) return result.data;
@@ -63,7 +66,7 @@ export function Cache<T>(
       result = await action(_, args, ctx, ast);
     }
 
-    cache.set(cacheKey, result, options);
+    await cache.set(cacheKey, result, options);
     return result;
   };
 }
