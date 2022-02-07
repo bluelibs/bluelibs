@@ -8,7 +8,10 @@ import "@bluelibs/mongo-bundle";
 
 declare module "@bluelibs/mongo-bundle" {
   interface IExecutionContext {
-    fileDeletionProcessed: boolean;
+    /**
+     * This should only be used when removing files, if true, the system won't automatically delete the files
+     */
+    fileDeletionProcessed?: boolean;
   }
 }
 

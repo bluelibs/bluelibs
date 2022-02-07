@@ -578,6 +578,58 @@ describe("Main tests", function () {
     assert.isUndefined(result.b.profile.number);
   });
 
+  it("[Expanders] Should contain the element if it was self-specified", async () => {
+    manyToOne(A, B, {
+      linkName: "b",
+      inversedLinkName: "as",
+    });
+
+    addExpanders(A, {
+      firstName: {
+        firstName: 1,
+        lastName: 1,
+      },
+    });
+
+    const b1 = await A.insertOne({
+      firstName: "John",
+      lastName: "Smith",
+    });
+
+    const result: any = await query(A, {
+      _id: 1,
+      firstName: 1,
+    }).fetchOne();
+
+    assert.isDefined(result.firstName);
+    assert.isDefined(result.lastName);
+  });
+
+  it("[Expanders] Should contain the element if it was self-specified and is nested", async () => {
+    addExpanders(A, {
+      thumbs: {
+        thumbs: {
+          id: 1,
+        },
+      },
+    });
+
+    const b1 = await A.insertOne({
+      thumbs: [{ id: "123", type: "123" }, { id: "100" }],
+    });
+
+    const result: any = await query(A, {
+      _id: 1,
+      thumbs: {
+        type: 1,
+      },
+    }).fetchOne();
+
+    assert.isDefined(result.thumbs);
+    assert.isDefined(result.thumbs[0].id);
+    assert.isDefined(result.thumbs[0].id);
+  });
+
   it("[Reducers] Should work with simple field level expansion", async () => {
     addReducers(A, {
       fullName: {

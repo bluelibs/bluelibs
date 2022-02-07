@@ -703,6 +703,17 @@ query(Users, {
 }).fetchOne();
 ```
 
+Expanders can self-reference themselves:
+
+```ts
+addExpanders(Users, {
+  _id: {
+    _id: 1,
+    // some other field you want to request when _id: 1 is requested
+  },
+});
+```
+
 ## Limitations
 
 #### Limit/Skip in the nested collections

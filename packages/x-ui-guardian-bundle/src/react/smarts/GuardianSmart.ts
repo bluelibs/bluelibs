@@ -270,10 +270,10 @@ export class GuardianSmart<
           input: user,
         },
       })
-      .then((response) => {
+      .then(async (response) => {
         const { token } = response.data.register;
         if (token) {
-          this.storeToken(token);
+          await this.storeToken(token);
         }
 
         return token;
@@ -345,9 +345,9 @@ export class GuardianSmart<
           },
         },
       })
-      .then((response) => {
+      .then(async (response) => {
         const { token } = response.data.resetPassword;
-        this.storeToken(token);
+        await this.storeToken(token);
 
         return token;
       });

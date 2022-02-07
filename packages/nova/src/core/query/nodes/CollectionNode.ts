@@ -97,6 +97,11 @@ export default class CollectionNode implements INode {
 
   public results: any = [];
 
+  /**
+   * This is used for self-referencing expanders
+   */
+  protected processedExpanders: string[] = [];
+
   constructor(
     options: CollectionNodeOptions,
     public readonly context: IQueryContext
@@ -586,9 +591,22 @@ export default class CollectionNode implements INode {
 
           break;
         case NodeLinkType.EXPANDER:
+          // We want to see if this is a self-referencing expander
+          // If so we add it to the body
+          if (this.processedExpanders.includes(fieldName)) {
+            this.addField(fieldName, 1, false);
+            break;
+          }
+
           const expanderConfig = this.getExpanderConfig(fieldName);
           _.merge(this.body, expanderConfig);
-          delete this.body[fieldName];
+          if (expanderConfig[fieldName]) {
+            // If it contains itself we don't delete it from the body
+          } else {
+            delete this.body[fieldName];
+          }
+
+          this.processedExpanders.push(fieldName);
 
           this.spread(expanderConfig);
           break;
