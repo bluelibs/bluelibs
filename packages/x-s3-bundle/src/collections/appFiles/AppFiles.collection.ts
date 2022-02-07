@@ -13,20 +13,12 @@ export class AppFilesCollection extends Collection<AppFile> {
 
   static behaviors = [Behaviors.Timestampable()];
 
-  // Ensuring thumbs are always requested fully
+  // Ensuring thumbs are always requested with _id present.
   static expanders = {
-    path: {
-      thumbs: 1,
-      path: 1,
-    },
-    downloadUrl: {
-      thumbs: 1,
-      path: 1,
-      downloadUrl: 1,
-    },
-    _id: {
-      thumbs: 1,
-      _id: 1,
+    thumbs: {
+      thumbs: {
+        id: 1,
+      },
     },
   };
 }
