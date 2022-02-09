@@ -21,6 +21,8 @@ import {
   QueryOptions as ApolloQueryOptions,
   QueryResult as ApolloQueryResult,
   useQuery as baseUseQuery,
+  useLazyQuery as baseUseLazyQuery,
+  QueryTuple,
 } from "@apollo/client";
 
 type CompiledQueriesTypes = "Count" | "InsertOne" | "UpdateOne" | "DeleteOne";
@@ -58,6 +60,20 @@ export type CollectionInputsConfig = {
   insert?: string;
   update?: string;
 };
+
+export interface UseQueryOptions {
+  apollo: Omit<ApolloQueryOptions, "query">;
+}
+
+export interface InsertOneOptions<T> {
+  refetchBody?: QueryBodyType<T>;
+  apollo: Omit<MutationOptions, "mutation">;
+}
+
+export interface UpdateOneOptions<T> {
+  refetchBody?: QueryBodyType<T>;
+  apollo: Omit<MutationOptions, "mutation">;
+}
 
 @Service()
 export abstract class Collection<T = null> {
@@ -188,9 +204,9 @@ export abstract class Collection<T = null> {
    */
   async insertOne(
     document: Partial<T>,
-    refetchBody?: QueryBodyType<T>,
-    options?: MutationOptions
+    options?: InsertOneOptions<T>
   ): Promise<Partial<T>> {
+    const { apollo, refetchBody } = options;
     const mutation = this.createInsertMutation(refetchBody);
     const insertInput = this.getInputs().insert || "EJSON!";
 
@@ -204,7 +220,7 @@ export abstract class Collection<T = null> {
 
     return this.apolloClient
       .mutate({
-        ...options,
+        ...apollo,
         mutation,
         variables: {
           document: mutationDocument,
@@ -223,9 +239,10 @@ export abstract class Collection<T = null> {
   async updateOne(
     _id: ObjectId | string,
     update: UpdateFilter<T> | TransformPartial<T>,
-    refetchBody?: QueryBodyType<T>,
-    options?: MutationOptions
+    options?: UpdateOneOptions<T>
   ): Promise<Partial<T>> {
+    const { apollo, refetchBody } = options;
+
     // @ts-ignore
     if (refetchBody && !refetchBody._id) {
       // @ts-ignore
@@ -253,7 +270,7 @@ export abstract class Collection<T = null> {
 
     return this.apolloClient
       .mutate({
-        ...options,
+        ...apollo,
         mutation,
         variables: {
           _id,
@@ -582,14 +599,21 @@ export abstract class Collection<T = null> {
    *
    * For finding a single element, refer to useQueryOne.
    */
-  public useQuery<TVariables = OperationVariables>(
-    body: QueryBodyType<T>,
-    queryInput: IQueryInput<T>,
-    options?: ApolloQueryOptions
-  ): ApolloQueryResult<T[], TVariables> {
+  public useQuery<TVariables = OperationVariables>({
+    body = { _id: 1 },
+    queryInput,
+    options,
+  }: {
+    body?: QueryBodyType<T> | { _id: number }; // Might be more elegant
+    queryInput: IQueryInput<T>;
+    options?: UseQueryOptions;
+  }): ApolloQueryResult<T[], TVariables> {
     // This is done on every re-render, maybe we could useMemo() some
 
-    const [QUERY, prepareSideBody] = this.createFindQuery(false, body);
+    const [QUERY, prepareSideBody] = this.createFindQuery(
+      false,
+      body as QueryBodyType<T>
+    );
 
     // side body used for nested collections filtering
     queryInput = prepareSideBody(queryInput);
@@ -611,16 +635,59 @@ export abstract class Collection<T = null> {
   }
 
   /**
-   * Integration with native `useQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   * Integration with native `useLazyQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   * Please note that we also return as data the actual documents and not the main data object.
+   *
+   * For finding a single element, refer to useLazyQueryOne.
    */
-  public useQueryOne<TVariables = OperationVariables>(
-    body: QueryBodyType<T>,
-    queryInput: IQueryInput<T>,
-    options?: ApolloQueryOptions
-  ): ApolloQueryResult<T, TVariables> {
+  public useLazyQuery<TVariables = OperationVariables>({
+    body = { _id: 1 },
+    queryInput,
+    options,
+  }: {
+    body?: QueryBodyType<T> | { _id: number }; // Might be more elegant
+    queryInput: IQueryInput<T>;
+    options?: UseQueryOptions;
+  }): QueryTuple<T[], TVariables> {
     // This is done on every re-render, maybe we could useMemo() some
 
-    const [QUERY, prepareSideBody] = this.createFindQuery(true, body);
+    const [QUERY, prepareSideBody] = this.createFindQuery(
+      false,
+      body as QueryBodyType<T>
+    );
+
+    // side body used for nested collections filtering
+    queryInput = prepareSideBody(queryInput);
+
+    const lazyQueryTuple = baseUseLazyQuery<T[], any>(QUERY, {
+      ...options,
+      query: QUERY,
+      variables: {
+        query: queryInput,
+      },
+    });
+
+    return lazyQueryTuple;
+  }
+
+  /**
+   * Integration with native `useQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   */
+  public useQueryOne<TVariables = OperationVariables>({
+    body = { _id: 1 },
+    queryInput,
+    options,
+  }: {
+    body?: QueryBodyType<T> | { _id: number }; // Might be more elegant
+    queryInput: IQueryInput<T>;
+    options?: UseQueryOptions;
+  }): ApolloQueryResult<T, TVariables> {
+    // This is done on every re-render, maybe we could useMemo() some
+
+    const [QUERY, prepareSideBody] = this.createFindQuery(
+      true,
+      body as QueryBodyType<T>
+    );
 
     // side body used for nested collections filtering
     queryInput = prepareSideBody(queryInput);
@@ -642,6 +709,42 @@ export abstract class Collection<T = null> {
   }
 
   /**
+   * Integration with native `useLazyQuery` from Apollo, offering a hybrid approach so apollo re-uses your cache.
+   * Please note that we also return as data the actual documents and not the main data object.
+   *
+   * For finding a single element, refer to useLazyQueryOne.
+   */
+  public useLazyQueryOne<TVariables = OperationVariables>({
+    body = { _id: 1 },
+    queryInput,
+    options,
+  }: {
+    body?: QueryBodyType<T> | { _id: number }; // Might be more elegant
+    queryInput: IQueryInput<T>;
+    options?: UseQueryOptions;
+  }): QueryTuple<T[], TVariables> {
+    // This is done on every re-render, maybe we could useMemo() some
+
+    const [QUERY, prepareSideBody] = this.createFindQuery(
+      true,
+      body as QueryBodyType<T>
+    );
+
+    // side body used for nested collections filtering
+    queryInput = prepareSideBody(queryInput);
+
+    const lazyQueryTuple = baseUseLazyQuery<T[], any>(QUERY, {
+      ...options,
+      query: QUERY,
+      variables: {
+        query: queryInput,
+      },
+    });
+
+    return lazyQueryTuple;
+  }
+
+  /**
    * This is used by find() and findOne() to fetch the query
    * @param single
    * @param query
@@ -655,6 +758,7 @@ export abstract class Collection<T = null> {
 
     const graphQLQuery = {
       query: {
+        __name: operationName,
         __variables: {
           query: "QueryInput!",
         },
