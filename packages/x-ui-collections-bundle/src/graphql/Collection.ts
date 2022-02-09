@@ -360,6 +360,12 @@ export abstract class Collection<T = null> {
     return this.hybridFind(false, query, body);
   }
 
+  protected optimisticUpdates = true;
+
+  public enableOptimisticUpdates(option: boolean) {
+    this.optimisticUpdates = option;
+  }
+
   /**
    * Finds and returns a single element
    * @param query
