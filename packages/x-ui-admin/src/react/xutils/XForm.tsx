@@ -201,7 +201,7 @@ export abstract class XForm<T = null> extends Consumer<XFormElementType> {
     const tooltip = item.tooltip || undefined;
     const rules = item.rules || [];
     const UIComponents = this.UIComponents;
-    let initialValue = item.initialValue || undefined;
+    let initialValue = item.initialValue;
 
     if (options.isFromList) {
       // List elements should have initial value stored at the top as per ant docs
