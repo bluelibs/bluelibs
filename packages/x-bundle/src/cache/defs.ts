@@ -4,15 +4,9 @@ export type CacheStore = {/* prettier-ignore */} | Store | "memory";
 export type ICacheManagerConfig = {
   store: CacheStore;
   storeConfig: StoreConfig;
-  ttl: number; //seconds,
-  isCacheableValue?: (value: any) => boolean;
-  memory?: number;
-  refreshThreshold: number;
-  isGlobal?: boolean;
-  userBoundness?: boolean;
-  refresh?: boolean;
+  resolverDefaultConfig?: CacheOptions;
 };
-export type StoreConfig =
+export type StoreConfig = (
   | BasicStoreConfig
   | MemcachedStoreConfig
   | HazelcastStoreConfig
@@ -21,7 +15,12 @@ export type StoreConfig =
   | MongoDbStoreConfig
   | MongooseStoreConfig
   | FsHashStoreConfig
-  | FsBinaryStoreConfig;
+  | FsBinaryStoreConfig
+) & {
+  ttl?: number;
+  isCacheableValue?: (value: any) => boolean;
+  refreshThreshold?: number;
+};
 
 export type RedisStoreConfig = {
   host: string;

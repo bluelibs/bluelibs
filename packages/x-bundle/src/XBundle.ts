@@ -42,18 +42,18 @@ export class XBundle extends Bundle<IXBundleConfig> {
     cacheConfig: {
       store: "memory",
       storeConfig: {
-        memory: 100,
+        max: 100,
         ttl: 60,
+        refreshThreshold: 1,
       },
-      ttl: 60 /*seconds*/,
-      isCacheableValue: () => true,
-      refreshThreshold: 1,
-      userBoundness: true,
-      userBoundnessFields: ["userId"],
-      expirationBoundness: true,
-      expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
-      isGlobal: false,
-      refresh: false,
+      resolverDefaultConfig: {
+        ttl: 30,
+        userBoundness: true,
+        userBoundnessFields: ["userId"],
+        expirationBoundness: true,
+        expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
+        refresh: false,
+      },
     },
   };
 

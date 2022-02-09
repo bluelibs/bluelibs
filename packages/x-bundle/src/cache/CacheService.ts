@@ -6,17 +6,12 @@ import * as CacheManager from "cache-manager";
 @Service()
 export class CacheService {
   private cacheManager;
-  private defaultTtl;
-  private defaultRefresh;
 
   constructor(@Inject(CACHE_CONFIG) private config) {
     this.cacheManager = CacheManager.caching({
       store: this.config.store,
-      ...this.config,
       ...this.config.storeConfig,
     });
-    this.defaultRefresh = this.config.refresh;
-    this.defaultTtl = this.config.ttl;
   }
 
   async set(key: string, data: any, options: CacheOptions) {
@@ -25,11 +20,10 @@ export class CacheService {
       {
         data,
         syncedAt: Date.now(),
-        ttl: options.ttl === undefined ? this.defaultTtl : options.ttl,
-        refresh:
-          options.refresh === undefined ? this.defaultRefresh : options.refresh,
+        ttl: options.ttl,
+        refresh: options.refresh,
       },
-      { ttl: options.ttl === undefined ? this.defaultTtl : options.ttl }
+      { ttl: options.ttl }
     );
   }
 
@@ -43,7 +37,17 @@ export class CacheService {
           refresh: true,
         });
       }
+      console.log("cachedData:---------------------------------");
+      console.log({
+        syncedAt: cachedData.syncedAt,
+        ttl: cachedData.ttl,
+        refresh: cachedData.refresh,
+        key: cachedData,
+      });
       return { found: true, data: cachedData.data };
     }
+  }
+  async keys() {
+    return await this.cacheManager.keys();
   }
 }

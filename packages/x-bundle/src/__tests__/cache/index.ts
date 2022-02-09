@@ -1,22 +1,27 @@
 import { createEcosystem } from "./createEcosystem";
 import { ContainerInstance, Kernel } from "@bluelibs/core";
-import { Cache } from "./../../executors/cache";
-import { CACHE_CONFIG, CACHE_SERVICE } from "./../..";
+import {
+  Cache,
+  configureOptions,
+  generateCacheKey,
+  addUserBoundnessFieldsToKeyObject,
+  calculateTtlWithExpirationBoundness,
+} from "./../../executors/cache";
+import { CACHE_SERVICE } from "./../..";
 import { CacheService } from "./../../cache/CacheService";
+import { CACHE_CONFIG } from "../../constants";
 
 describe("cache manager tests get/set", () => {
   let container: ContainerInstance;
   let cacheService: CacheService;
 
   beforeAll(async () => {
-    jest.setTimeout(6000);
     container = await createEcosystem();
-    cacheService = await container.get(CACHE_SERVICE);
+    cacheService = container.get(CACHE_SERVICE);
   });
 
   afterAll(async () => {
     await container.get(Kernel).shutdown();
-    jest.setTimeout(5000);
   });
   const sleep = (sleepTime) =>
     new Promise((resolve) => setTimeout(resolve, sleepTime));
@@ -25,27 +30,29 @@ describe("cache manager tests get/set", () => {
     let data = { a: 1, b: 2 },
       key = "key",
       refresh = true,
-      ttl = 2;
+      ttl = 1;
 
     beforeAll(async () => {
       await cacheService.set(key, data, { ttl, refresh });
     });
 
     it("should get cache before ttl expires", async () => {
-      await sleep(0.2 * 1000);
-      let result = await cacheService.get(key);
+      await sleep(0.5 * ttl * 1000);
+      const result = await cacheService.get(key);
       expect(result.data).toEqual(data);
       expect(result.found).toEqual(true);
     });
     it("it should get refreshed by the previous cache get", async () => {
-      await sleep((ttl + 0.2) * 1000);
-      let result = await cacheService.get(key);
-      //expect(result.data).toEqual(data);
-      //expect(result.found).toEqual(true);
+      await sleep(0.9 * ttl * 1000);
+      await cacheService.get(key);
+      await sleep(0.5 * ttl * 1000);
+      const result = await cacheService.get(key);
+      expect(result.data).toEqual(data);
+      expect(result.found).toEqual(true);
     });
     it("it shouldn't get cache after ttl expires", async () => {
-      await sleep(2 * ttl * 1000);
-      let result = await cacheService.get(key);
+      await sleep(1.2 * ttl * 1000);
+      const result = await cacheService.get(key);
       expect(result.data).toEqual(undefined);
       expect(result.found).toEqual(false);
       return;
@@ -53,27 +60,130 @@ describe("cache manager tests get/set", () => {
   });
 
   describe("cach executor methods", () => {
-    let result = { title: "Count", count: 0 };
-    async function incrementCount(_: any, args: any, ctx: any, ast: any) {
-      result.count++;
-      return result;
-    }
-    const ast = {
-      fieldName: "test",
-      fieldNodes: [],
-      returnType: "any",
-      parentType: [],
-      variableValues: {},
-    };
-    const ctx = {
-      userId: 1,
-      expiredAt: 5,
-    };
-    test("XCACHE should rely on the function not the cache", async () => {
-      jest.setTimeout(6000);
-      const XCACHE = Cache({}, [incrementCount]);
-      const data = await XCACHE(undefined, {}, { ...ctx, container }, ast);
-      //expect(res).toEqual(result);
+    let count, ctx, ast, defaultResolverOptions, options, expiredAt, userId;
+    beforeEach(async () => {
+      defaultResolverOptions =
+        container.get(CACHE_CONFIG).resolverDefaultConfig;
+      ast = {
+        fieldName: "test",
+        fieldNodes: [],
+        returnType: "any",
+        parentType: [],
+        variableValues: {},
+      };
+      ctx = { userId, expiredAt, container };
+      count = 0;
+    });
+
+    describe("configureOptions: method that responsible of ttl refresh and expiration boundness ", () => {
+      it("should return default options in case of undefined options", () => {
+        expect(configureOptions(ctx)).toEqual(defaultResolverOptions);
+      });
+      it("shoudl prioritize options fields over default one", () => {
+        expect(
+          configureOptions(ctx, { ttl: defaultResolverOptions + 1 })
+        ).toEqual({
+          ...defaultResolverOptions,
+          ttl: defaultResolverOptions + 1,
+        });
+      });
+      it("shouldchange ttl if expirationboundness is inferior", () => {
+        ctx.expiredAt = defaultResolverOptions.ttl - 1;
+        expect(
+          configureOptions(ctx, {
+            expirationBoundness: true,
+            expirationBoundnessField: "expiredAt",
+          }).ttl
+        ).toEqual(defaultResolverOptions.ttl - 1);
+      });
+    });
+    describe("generateCacheKey", () => {
+      it("test with default options", () => {
+        expect(generateCacheKey(ctx, ast)).toEqual(generateCacheKey(ctx, ast));
+      });
+      it("test if fields fields order affect key generation", () => {
+        expect(generateCacheKey(ctx, { a: 1, b: { c: 1, d: 2 } })).toEqual(
+          generateCacheKey(ctx, { b: { d: 2, c: 1 }, a: 1 })
+        );
+      });
+      it("test with userBoundnessFields in options", () => {
+        expect(
+          addUserBoundnessFieldsToKeyObject(
+            ["c", "d"],
+            { a: 1, b: 2 },
+            { c: 3, d: 4 }
+          )
+        ).toEqual({ a: 1, b: 2, c: 3, d: 4 });
+        expect(
+          generateCacheKey(ctx, ast) !==
+            generateCacheKey(ctx, ast, {
+              userBoundness: true,
+              userBoundnessFields: ["userId"],
+            })
+        ).toEqual(true);
+      });
+    });
+    describe("calculateTtlWithExpirationBoundness", () => {
+      let testOptions;
+      beforeEach(async () => {
+        testOptions = {
+          expirationBoundnessField: "expiredAt",
+          ttl: defaultResolverOptions.ttl,
+        };
+        delete ctx.expiredAt;
+      });
+      it("when expiredAt null or not date or number return ttl", () => {
+        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
+          defaultResolverOptions.ttl
+        );
+        ctx.expiredAt = "";
+        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
+          defaultResolverOptions.ttl
+        );
+      });
+      it("when ttl <expiredAt", () => {
+        ctx.expiredAt = defaultResolverOptions.ttl + 1;
+        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
+          defaultResolverOptions.ttl
+        );
+        ctx.expiredAt = Date.now() + 2 * defaultResolverOptions.ttl;
+        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
+          defaultResolverOptions.ttl
+        );
+      });
+      it("when ttl >expiredAt", () => {
+        ctx.expiredAt = defaultResolverOptions.ttl - 1;
+        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
+          ctx.expiredAt
+        );
+        ctx.expiredAt = new Date(Date.now() + 3000);
+        expect(
+          calculateTtlWithExpirationBoundness(testOptions, ctx) !==
+            defaultResolverOptions.ttl
+        ).toEqual(true);
+      });
+    });
+    describe("test X.cache", () => {
+      test("test", async () => {
+        const mockedFunction = jest.fn().mockImplementation(() => {
+          count++;
+          return count;
+        });
+        const mainAction = async (_: any, args: any, ctx: any, ast: any) => {
+          return await mockedFunction();
+        };
+        const actions = [mainAction, mainAction];
+        const XCACHE = Cache(actions, defaultResolverOptions);
+        let data = await XCACHE(undefined, {}, ctx, ast);
+        // the 2 actions will increment count by 2
+        expect(data).toEqual(actions.length);
+        expect(mockedFunction).toBeCalledTimes(2);
+        //the second run shoudl activate the cache
+        data = await XCACHE(undefined, {}, ctx, ast);
+        // the results is the previous 2 but the actions are not called
+        expect(data).toEqual(actions.length);
+        expect(mockedFunction).toBeCalledTimes(2);
+      });
     });
   });
 });
