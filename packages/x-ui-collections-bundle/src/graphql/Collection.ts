@@ -15,6 +15,7 @@ import { EJSON, ObjectId } from "@bluelibs/ejson";
 import { IQueryInput, ISubscriptionOptions, QueryBodyType } from "./defs";
 import { getSideBody } from "./utils/getSideBody";
 import { cleanTypename } from "./utils/cleanTypename";
+import { toQueryBody } from "./utils/toQueryBody";
 import { ApolloClient } from "@bluelibs/ui-apollo-bundle";
 import {
   OperationVariables,
@@ -73,6 +74,11 @@ export interface InsertOneOptions<T> {
 export interface UpdateOneOptions<T> {
   refetchBody?: QueryBodyType<T>;
   apollo: Omit<MutationOptions, "mutation">;
+}
+
+export interface AutoRefetchMutatedFieldsOptions {
+  onUpdate: boolean;
+  onInsert: boolean;
 }
 
 @Service()
@@ -198,6 +204,22 @@ export abstract class Collection<T = null> {
     }
   }
 
+  protected autoRefetchMutatedFields = {
+    onUpdate: true,
+    onInsert: true,
+  };
+
+  public setAutoRefetchMutatedFields(
+    option: boolean | Partial<AutoRefetchMutatedFieldsOptions>
+  ) {
+    if (typeof option === "boolean") {
+      this.autoRefetchMutatedFields.onUpdate = option;
+      this.autoRefetchMutatedFields.onInsert = option;
+    } else {
+      Object.assign(this.autoRefetchMutatedFields, option);
+    }
+  }
+
   /**
    * Insert a single document into the remote database
    * @param document
@@ -207,6 +229,18 @@ export abstract class Collection<T = null> {
     options?: InsertOneOptions<T>
   ): Promise<Partial<T>> {
     const { apollo, refetchBody } = options;
+
+    // If no refetchBody is provided, then infer it from the mutated fields
+    if (!refetchBody && this.autoRefetchMutatedFields.onInsert) {
+      Object.assign(refetchBody, { ...toQueryBody(document) });
+    }
+
+    // @ts-ignore
+    if (!refetchBody._id) {
+      // @ts-ignore
+      refetchBody._id = 1;
+    }
+
     const mutation = this.createInsertMutation(refetchBody);
     const insertInput = this.getInputs().insert || "EJSON!";
 
@@ -241,13 +275,19 @@ export abstract class Collection<T = null> {
     update: UpdateFilter<T> | TransformPartial<T>,
     options?: UpdateOneOptions<T>
   ): Promise<Partial<T>> {
-    const { apollo, refetchBody } = options;
+    const { apollo, refetchBody = {} as QueryBodyType<T> } = options;
+
+    // If no refetchBody is provided, then infer it from the mutated fields
+    if (!refetchBody && this.autoRefetchMutatedFields.onUpdate) {
+      Object.assign(refetchBody, { ...toQueryBody(update) });
+    }
 
     // @ts-ignore
-    if (refetchBody && !refetchBody._id) {
+    if (!refetchBody._id) {
       // @ts-ignore
       refetchBody._id = 1;
     }
+
     const mutation = this.createUpdateMutation(refetchBody);
 
     const updateType = this.getInputs().update || "EJSON!";

@@ -492,7 +492,89 @@ function Posts() {
 
 For working with single data relations please use `collection.useQueryOne()` having the exact same api, except `data` is going to be `Post` instead of `Post[]`.
 
-When you perform a mutation, you can now trigger the cache, by doing so:
+##### Refetching fields
+
+When you perform a mutation, the modified fields will be automatically inferred based on the ones in the mutation input :
+
+```ts
+collection.updateOne(post._id, {
+  title: "My New Title",
+  text: "My new Text",
+});
+```
+
+Is exactly the same as :
+
+```ts
+collection.updateOne(
+  post._id,
+  {
+    title: "My New Title",
+    text: "My new Text",
+  },
+  {
+    refetchBody: {
+      _id: 1,
+      title: 1,
+      text: 1,
+    },
+  }
+);
+```
+
+Of course, you're free to specify your own refetch body instead, which will fully override the inferred one. Even better : let's say you actually want to refetch the updated field plus an additional one. For this case, we expose the internal function `toQueryBody`, such as :
+
+```ts
+import { toQueryBody } from "@bluelibs/x-ui-collections-bundle";
+
+const input = {
+  text: "My new Text",
+};
+
+collection.updateOne(post._id, input, {
+  refetchBody: {
+    ...toQueryBody(input), // Will provide { text: 1 } based on the input
+
+    textExcerpt: 1,
+  },
+});
+```
+
+`toQueryBody` is recursive and therefore works well with deeply nested fields :
+
+```ts
+toQueryBody({
+    userName: "XxTheoxX",
+    profile: {
+        firstName: "Theodor"
+    }
+})
+
+// will return
+{
+    userName: 1,
+    profile: {
+        firstName: 1
+    }
+}
+```
+
+Finally, if you wish to disable this automatic refetching of fields based on your input, you can simply do :
+
+```ts
+// Disable automatic field refetching
+collection.setAutoRefetchMutatedFields(false);
+
+// Enable automatic field refetching on update
+collection.setAutoRefetchMutatedFields({ onUpdate: true });
+
+// Enable automatic field refetching on insert
+collection.setAutoRefetchMutatedFields({ onInsert: true });
+```
+
+##### Apollo options
+
+Additionally, you can pass any valid Apollo Mutation option to the `collection.updateOne` with the `apollo` key. Same goes for `collection.insertOne`
 
 ```ts
 collection.updateOne(
@@ -501,11 +583,6 @@ collection.updateOne(
     title: "My New Title",
   },
   {
-    refetchBody: {
-      title: 1,
-      // _id: 1 is auto-populated
-    },
-
     apollo: {
       // This is an optional argument
       // Pass here any additional Apollo mutation option you may need
