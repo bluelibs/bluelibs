@@ -96,6 +96,14 @@ export abstract class Collection<T = null> {
 
   abstract getName(): string;
 
+  getTypeName() {
+    const collectionName = this.getName();
+
+    return collectionName[collectionName.length - 1] === "s"
+    ? collectionName.slice(0, -1)
+    : collectionName, // we could use https://www.npmjs.com/package/pluralize
+  }
+
   getInputs(): CollectionInputsConfig {
     return {};
   }
@@ -291,7 +299,7 @@ export abstract class Collection<T = null> {
     }
 
     if (!apollo.optimisticResponse && this.optimisticUpdates) {
-      apollo.optimisticResponse = this.optimistic(
+      apollo.optimisticResponse = this.createOptimisticResponse(
         _id,
 
         // ? Not sure if thas "as" is very useful
@@ -916,7 +924,7 @@ export abstract class Collection<T = null> {
   /**
    * Provide a Apollo.OptimisticResponse object based on the provided _id and document
    */
-  public optimistic(
+  public createOptimisticResponse(
     _id: ObjectId | string,
     document: Partial<T>,
     operationName?: string
@@ -926,7 +934,7 @@ export abstract class Collection<T = null> {
     // We can't be optimistic if we do not know the operationName
     if (!operationName) return undefined;
 
-    const collectionName = this.getName?.();
+    const collectionName = this.getName();
 
     // We can't be optimistic if we do not know the __typename
     if (!collectionName) return undefined;
@@ -935,10 +943,7 @@ export abstract class Collection<T = null> {
       // `${this.getName()}UpdateOne`
       [operationName]: {
         _id: stringId,
-        __typename:
-          collectionName[collectionName.length - 1] === "s"
-            ? collectionName.slice(0, -1)
-            : collectionName, // we could use https://www.npmjs.com/package/pluralize
+        __typename: this.getTypeName(),
         ...document, // ? shouldn't we deepclone here instead, just in case ?
       },
     };
