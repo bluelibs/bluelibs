@@ -290,6 +290,17 @@ export abstract class Collection<T = null> {
       refetchBody._id = 1;
     }
 
+    if (!apollo.optimisticResponse && this.optimisticUpdates) {
+      apollo.optimisticResponse = this.optimistic(
+        _id,
+
+        // ? Not sure if thas "as" is very useful
+        // ? what's the actual differente between UpdateFilter<T> and TransformPartial<T>?
+        update as TransformPartial<T>,
+        `${this.getName()}UpdateOne`
+      );
+    }
+
     const mutation = this.createUpdateMutation(refetchBody);
 
     const updateType = this.getInputs().update || "EJSON!";
@@ -907,28 +918,28 @@ export abstract class Collection<T = null> {
    */
   public optimistic(
     _id: ObjectId | string,
-    document: T,
+    document: Partial<T>,
     operationName?: string
   ) {
     const stringId = _id instanceof ObjectId ? _id.toString() : _id;
-    // const operationName = ""; // ! how do we determine this here ?
 
-    // We can't be optimistic if we do no know the operationName
-    // if (!operationName) return undefined;
+    // We can't be optimistic if we do not know the operationName
+    if (!operationName) return undefined;
 
     const collectionName = this.getName?.();
 
-    // We can't be optimistic if we do no know the __typename
+    // We can't be optimistic if we do not know the __typename
     if (!collectionName) return undefined;
 
     return {
-      [operationName || `${this.getName()}UpdateOne`]: {
+      // `${this.getName()}UpdateOne`
+      [operationName]: {
         _id: stringId,
         __typename:
           collectionName[collectionName.length - 1] === "s"
             ? collectionName.slice(0, -1)
             : collectionName, // we could use https://www.npmjs.com/package/pluralize
-        ...document, // should we deepclone here just in case ?
+        ...document, // ? shouldn't we deepclone here instead, just in case ?
       },
     };
   }
