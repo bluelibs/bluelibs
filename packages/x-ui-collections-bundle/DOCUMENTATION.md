@@ -525,6 +525,7 @@ collection.updateOne(
 Of course, you're free to specify your own refetch body instead, which will fully override the inferred one. Even better : let's say you actually want to refetch the updated field plus an additional one. For this case, we expose the internal function `toQueryBody`, such as :
 
 ```ts
+// You may either use `collection.toQueryBody` of import the standalone version
 import { toQueryBody } from "@bluelibs/x-ui-collections-bundle";
 
 const input = {
@@ -533,7 +534,7 @@ const input = {
 
 collection.updateOne(post._id, input, {
   refetchBody: {
-    ...toQueryBody(input), // Will provide { text: 1 } based on the input
+    ...collection.toQueryBody(input), // Will provide { text: 1 } based on the input
 
     textExcerpt: 1,
   },
