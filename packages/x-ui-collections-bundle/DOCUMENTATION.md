@@ -473,10 +473,20 @@ function Posts() {
       options: {
         // limit, skip, sort
       },
+    },
+    {
+      // This is an optional argument
+      apollo: {
+        // Pass here any additional Apollo query option you may need
+        // https://www.apollographql.com/docs/react/data/queries/#usequery-api
+        fetchPolicy: "network-only",
+      },
     }
   );
 
   // data will be Post[] directly
+
+  // Same concept applies to useQueryOne, useLazyQuery and useLazyQueryOne.
 }
 ```
 
@@ -490,10 +500,18 @@ collection.updateOne(
   {
     title: "My New Title",
   },
-  // Refetch Body:
   {
-    // _id: 1 is auto-populated
-    title: 1,
+    refetchBody: {
+      title: 1,
+      // _id: 1 is auto-populated
+    },
+
+    apollo: {
+      // This is an optional argument
+      // Pass here any additional Apollo mutation option you may need
+      // https://www.apollographql.com/docs/react/data/mutations/#usemutation-api
+      refetchQueries: ["PostsFind"],
+    },
   }
 );
 
