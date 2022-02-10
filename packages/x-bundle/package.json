@@ -33,7 +33,6 @@
     "graphql-type-json": "^0.3.2",
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.2",
-    "node-cache": "^5.1.2",
     "node-object-hash": "^2.3.10",
     "queue": "^6.0.2",
     "redis": "^3.0.2",
