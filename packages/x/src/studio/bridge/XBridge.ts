@@ -109,6 +109,7 @@ export class XBridge {
         name: relation.id,
         description: relation.description,
         type: relation.to.entityName,
+        isOptional: !relation.isRequired,
         isMany,
         model: {
           name: relation.to.entityName,
