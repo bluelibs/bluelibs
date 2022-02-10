@@ -68,12 +68,12 @@ export interface UseQueryOptions {
 
 export interface InsertOneOptions<T> {
   refetchBody?: QueryBodyType<T>;
-  apollo: Omit<MutationOptions, "mutation">;
+  apollo?: Omit<MutationOptions, "mutation">;
 }
 
 export interface UpdateOneOptions<T> {
   refetchBody?: QueryBodyType<T>;
-  apollo: Omit<MutationOptions, "mutation">;
+  apollo?: Omit<MutationOptions, "mutation">;
 }
 
 export interface AutoRefetchMutatedFieldsOptions {
@@ -204,6 +204,8 @@ export abstract class Collection<T = null> {
     }
   }
 
+  public toQueryBody = toQueryBody;
+
   protected autoRefetchMutatedFields = {
     onUpdate: true,
     onInsert: true,
@@ -226,9 +228,9 @@ export abstract class Collection<T = null> {
    */
   async insertOne(
     document: Partial<T>,
-    options?: InsertOneOptions<T>
+    options: InsertOneOptions<T> = {}
   ): Promise<Partial<T>> {
-    const { apollo, refetchBody } = options;
+    const { apollo = {}, refetchBody = {} as QueryBodyType<T> } = options;
 
     // If no refetchBody is provided, then infer it from the mutated fields
     if (!refetchBody && this.autoRefetchMutatedFields.onInsert) {
@@ -273,9 +275,9 @@ export abstract class Collection<T = null> {
   async updateOne(
     _id: ObjectId | string,
     update: UpdateFilter<T> | TransformPartial<T>,
-    options?: UpdateOneOptions<T>
+    options: UpdateOneOptions<T> = {}
   ): Promise<Partial<T>> {
-    const { apollo, refetchBody = {} as QueryBodyType<T> } = options;
+    const { apollo = {}, refetchBody = {} as QueryBodyType<T> } = options;
 
     // If no refetchBody is provided, then infer it from the mutated fields
     if (!refetchBody && this.autoRefetchMutatedFields.onUpdate) {
