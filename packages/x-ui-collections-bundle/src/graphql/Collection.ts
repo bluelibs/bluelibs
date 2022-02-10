@@ -204,6 +204,8 @@ export abstract class Collection<T = null> {
     }
   }
 
+  public toQueryBody = toQueryBody;
+
   protected autoRefetchMutatedFields = {
     onUpdate: true,
     onInsert: true,
