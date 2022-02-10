@@ -525,7 +525,7 @@ collection.updateOne(
 Of course, you're free to specify your own refetch body instead, which will fully override the inferred one. Even better : let's say you actually want to refetch the updated field plus an additional one. For this case, we expose the internal function `toQueryBody`, such as :
 
 ```ts
-// You may either use `collection.toQueryBody` of import the standalone version
+// You may either use `collection.toQueryBody` or import the standalone version
 import { toQueryBody } from "@bluelibs/x-ui-collections-bundle";
 
 const input = {
@@ -545,9 +545,9 @@ collection.updateOne(post._id, input, {
 
 ```ts
 toQueryBody({
-    userName: "XxTheoxX",
+    userName: "XXX",
     profile: {
-        firstName: "Theodor"
+        firstName: "XXX"
     }
 })
 
@@ -573,7 +573,7 @@ collection.setAutoRefetchMutatedFields({ onUpdate: true });
 collection.setAutoRefetchMutatedFields({ onInsert: true });
 ```
 
-##### Apollo options
+##### Apollo Options
 
 Additionally, you can pass any valid Apollo Mutation option to the `collection.updateOne` with the `apollo` key. Same goes for `collection.insertOne`
 
