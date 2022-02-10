@@ -15,10 +15,17 @@
     "emitDecoratorMetadata": true,
     "declaration": true,
     "typeRoots": ["node_modules/@types"],
+    "baseUrl": ".",
     "paths": {
       "@bundles/*": ["./src/bundles/*"],
       "@root/*": ["./src/*"]
-    }
+    },
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths",
+        "exclude": ["**/node_modules/**"]
+      }
+    ]
   },
 
   "include": ["src/**/*.ts"]
