@@ -972,10 +972,11 @@ export default {
 
 ### Caching
 
+In order to improve your app's performance, you can use our caching:
+
 #### Usage
 
-in order to improve your app's performance, you can use our caching:
-inside your resolver, use the cache Executor and feed it the chain of functions as an array,
+Inside your resolver, use the cache Executor and feed it the chain of functions as an array,
 
 ```ts
 {
@@ -989,8 +990,8 @@ inside your resolver, use the cache Executor and feed it the chain of functions 
 }
 ```
 
-you can also use unique caching configuration for every resolver method by pasing object of options,
-the options fields are :
+You can also use unique caching configuration for every resolver method by pasing object of options,
+The options fields are :
 | field | type | default | description |
 |--------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------|
 | ttl | number | 30 | expiration time of cached Data in seconds |
@@ -1022,32 +1023,32 @@ the options fields are :
 
 #### Configuration
 
-the integrated default configuration of the caching is:
+The integrated default configuration of the caching is:
 
 ```ts
-cacheConfig:{
-      store: "memory",
-      storeConfig: {
-        max: 100,
-        ttl: 60,
-        refreshThreshold: 1,
-      },
-      resolverDefaultConfig: {
-        ttl: 30,
-        userBoundness: true,
-        userBoundnessFields: ["userId"],
-        expirationBoundness: true,
-        expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
-        refresh: false,
-      },
-    }
+const cacheConfig = {
+  store: "memory",
+  storeConfig: {
+    max: 100,
+    ttl: 60,
+    refreshThreshold: 1,
+  },
+  resolverDefaultConfig: {
+    ttl: 30,
+    userBoundness: true,
+    userBoundnessFields: ["userId"],
+    expirationBoundness: true,
+    expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
+    refresh: false,
+  },
+};
 ```
 
-the "resolverDefaultConfig" is the default configuration for the caching options, that you can override in specific resolvers by passing other values in options,
+The "resolverDefaultConfig" is the default configuration for the caching options, that you can override in specific resolvers by passing other values in options,
 
-our caching is built on top of the [node-cache-manager package](https://github.com/BryanDonovan/node-cache-manager), that presents a number of store engines options and also the possibility to use your custom store,
+Our caching is built on top of the [node-cache-manager package](https://github.com/BryanDonovan/node-cache-manager), that presents a number of store engines options and also the possibility to use your custom store,
 
-example of usage:
+Example of usage:
 
 ```ts
 import * as RedisStore from "cache-manager-redis";
