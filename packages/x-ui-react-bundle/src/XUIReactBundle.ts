@@ -1,6 +1,6 @@
 import { Bundle } from "@bluelibs/core";
 import { OrderedList } from "@bluelibs/ordered-lists";
-import React from "react";
+import { setDefaults } from "@bluelibs/smart";
 import {
   Components,
   IXUIReactBundleConfigType,
@@ -41,6 +41,14 @@ export class XUIReactBundle extends Bundle<IXUIReactBundleConfigType> {
       XUI_COMPONENTS_TOKEN,
       Object.assign({}, Components, this.config.components)
     );
+
+    const container = this.container;
+
+    setDefaults({
+      factory(targetType) {
+        return container.get(targetType);
+      },
+    });
   }
 
   /**
