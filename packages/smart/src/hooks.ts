@@ -123,6 +123,12 @@ export const useSmart = <T extends Smart>(
 ): T => {
   const model = useContext<T>((modelClass as any).getContext());
 
+  if (!model) {
+    throw new Error(
+      `Couldn't use the context for ${modelClass.name}. Are you sure the component that is using this smart is wrapped in the right provider?`
+    );
+  }
+
   if (options?.isolated) {
     // If it's isolated it will not react (re-render) when the state changes.
   } else {
