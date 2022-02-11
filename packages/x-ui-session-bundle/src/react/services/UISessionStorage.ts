@@ -31,22 +31,26 @@ export class UISessionStorage {
   }
 
   setItem(key: string, value: any) {
-    this.storage.setItem(key, value);
+    this.storage.setItem(key, EJSON.stringify(value));
   }
 
   getItem(key: string) {
     const value = this.storage.getItem(key);
 
-    if (typeof value === "string") {
+    try {
       return EJSON.parse(value);
+    } catch (_) {
+      return value;
     }
-
-    return value;
   }
 
   all() {
     if (this.executionContext === ExecutionContext.WEB) {
-      return { ...this.storage };
+      const store = { ...localStorage };
+
+      Object.keys(store).forEach((key) => (store[key] = this.getItem(key)));
+
+      return store;
     } else {
       return (this.storage as DummyLocalStorage).all();
     }
