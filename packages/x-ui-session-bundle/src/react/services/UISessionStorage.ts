@@ -31,7 +31,7 @@ export class UISessionStorage {
   }
 
   setItem(key: string, value: any) {
-    this.storage.setItem(key, EJSON.stringify(value));
+    this.storage.setItem(key, value);
   }
 
   getItem(key: string) {
