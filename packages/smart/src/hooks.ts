@@ -125,7 +125,7 @@ export const useSmart = <T extends Smart>(
 
   if (!model) {
     throw new Error(
-      `Couldn't use the context for ${modelClass.name}. Are you sure you are sure the component is wrapped in the right provider?`
+      `Couldn't use the context for ${modelClass.name}. Are you sure the component that is using this smart is wrapped in the right provider?`
     );
   }
 
