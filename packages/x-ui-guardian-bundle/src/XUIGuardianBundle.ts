@@ -9,7 +9,6 @@ import { XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { GuardianSmart } from "./react/smarts/GuardianSmart";
 import { GUARDIAN_SMART_TOKEN, LOCAL_STORAGE_TOKEN_KEY } from "./constants";
 import { IXUIGuardianBundleConfigType } from "./defs";
-import { setDefaults } from "@bluelibs/smart";
 import { Protect } from "./react/components/Protect";
 import { UserLoggedInEvent, UserLoggedOutEvent } from "./events";
 import { XUIGuardianProvider } from "./react/provider/XUIGuardianProvider";
@@ -84,13 +83,5 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
 
   async init() {
     this.container.set(GUARDIAN_SMART_TOKEN, this.config.guardianClass);
-
-    const container = this.container;
-
-    setDefaults({
-      factory(targetType) {
-        return container.get(targetType);
-      },
-    });
   }
 }
