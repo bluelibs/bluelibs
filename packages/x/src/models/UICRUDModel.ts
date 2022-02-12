@@ -104,10 +104,19 @@ export class UICRUDModel {
     this.recursiveBodyExpand(mode, body, this.studioCollection.fields);
 
     this.studioCollection.getRelationshipsByUIMode(mode).forEach((r) => {
-      body[r.id] = {
-        _id: 1,
-        [r.cleaned.representedBy.id]: 1,
-      };
+      if (Array.isArray(r.cleaned.representedBy)) {
+        body[r.id] = _.set(
+          { _id: 1 },
+          r.cleaned.representedBy.map((x) => x.id),
+          1
+        );
+      } else {
+        body[r.id] = {
+          _id: 1,
+          [r.cleaned.representedBy.id]: 1,
+        };
+      }
+
       if (r.isDirect) {
         body[r.cleaned.field.id] = 1;
       }
@@ -337,7 +346,9 @@ export class UICRUDModel {
       key: relation.id,
       isMany: relation.isMany,
       sorter: true,
-      remoteField: relation.representedBy.id,
+      remoteField: Array.isArray(relation.representedBy)
+        ? relation.representedBy.map((x) => x.id).join(".")
+        : relation.representedBy.id,
       routeName: this.generateRouteNameForCollection(relation.to.id, "view"),
       relational: true,
       remoteCollectionClass: relation.to.id + "Collection",
