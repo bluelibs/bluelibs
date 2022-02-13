@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "blueprint:generate": "ts-node blueprint/index.ts",
-    "start:api": "cd microservices/api ; npm run start:dev",
-    "start:admin": "npm run generate:types; cd microservices/admin ; npm run start:dev",
-    "generate:types": "cd microservices/admin ; npm run generate"
+    "start:api": "{{ startApiScript }}",
+    "start:admin": "{{ startAdminScript }}",
+    "generate:types": "{{ generateTypesScript }}"
   },
   "dependencies": {},
   "bluelibs": {
