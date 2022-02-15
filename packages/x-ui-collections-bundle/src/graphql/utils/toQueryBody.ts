@@ -1,3 +1,9 @@
+// StackOverflow : https://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object
+export const isEmptyObject = (obj: object) =>
+  obj && // 👈 null and undefined check
+  Object.keys(obj).length === 0 &&
+  isObjectPrototype(obj);
+
 export const isObjectPrototype = (value) =>
   Object.getPrototypeOf(value) === Object.prototype;
 

@@ -15,7 +15,7 @@ import { EJSON, ObjectId } from "@bluelibs/ejson";
 import { IQueryInput, ISubscriptionOptions, QueryBodyType } from "./defs";
 import { getSideBody } from "./utils/getSideBody";
 import { cleanTypename } from "./utils/cleanTypename";
-import { toQueryBody } from "./utils/toQueryBody";
+import { isEmptyObject, toQueryBody } from "./utils/toQueryBody";
 import { ApolloClient } from "@bluelibs/ui-apollo-bundle";
 import {
   OperationVariables,
@@ -233,7 +233,7 @@ export abstract class Collection<T = null> {
     const { apollo = {}, refetchBody = {} as QueryBodyType<T> } = options;
 
     // If no refetchBody is provided, then infer it from the mutated fields
-    if (!refetchBody && this.autoRefetchMutatedFields.onInsert) {
+    if (!isEmptyObject(refetchBody) && this.autoRefetchMutatedFields.onInsert) {
       Object.assign(refetchBody, { ...toQueryBody(document) });
     }
 
@@ -280,7 +280,7 @@ export abstract class Collection<T = null> {
     const { apollo = {}, refetchBody = {} as QueryBodyType<T> } = options;
 
     // If no refetchBody is provided, then infer it from the mutated fields
-    if (!refetchBody && this.autoRefetchMutatedFields.onUpdate) {
+    if (isEmptyObject(refetchBody) && this.autoRefetchMutatedFields.onUpdate) {
       Object.assign(refetchBody, { ...toQueryBody(update) });
     }
 
