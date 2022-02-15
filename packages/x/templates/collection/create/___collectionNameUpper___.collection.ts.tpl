@@ -34,7 +34,7 @@ import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectio
     Behaviors.Softdeletable(),
     {{/ if }}
 
-    {{# if validationModel }}
+    {{# if validateAgainstModel }}
     Behaviors.Validate({ model: {{ collectionModelClass }} }),
     {{/ if }}
 
