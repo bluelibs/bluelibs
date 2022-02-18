@@ -123,6 +123,7 @@ export class MicroserviceWriter extends BlueprintWriter {
     collectionModel.isTimestampable = true;
     collectionModel.createEntity = true;
     collectionModel.isSoftdeletable = true;
+    collectionModel.validateAgainstModel = false;
     collectionModel.isEntitySameAsModel = true;
     collectionModel.entityDefinition = genericModel;
     collectionModel.collectionName = "users";
