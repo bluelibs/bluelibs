@@ -97,7 +97,7 @@ export class XElements {
   }
 
   static importPath(fromFilePath, toImportablePath) {
-    return path.relative(fromFilePath, toImportablePath);
+    return path.relative(fromFilePath, toImportablePath).replace(/\\/g, "/");
   }
 }
 
