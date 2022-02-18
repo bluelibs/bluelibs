@@ -135,7 +135,9 @@ export class ModelUtils {
       if (field.isMany) {
         return `@Is(() => an.array().of(Schema.from(${field.model.name})))`;
       } else {
-        return `@Is(() => Schema.from(${field.model.name}))`;
+        return `@Is(() => Schema.from(${field.model.name})${
+          field.isOptional ? ".nullable()" : ""
+        })`;
       }
     }
 
