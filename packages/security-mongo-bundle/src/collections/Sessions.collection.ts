@@ -8,10 +8,10 @@ import {
   UserId,
 } from "@bluelibs/security-bundle";
 import { Collection, ObjectID, Behaviors } from "@bluelibs/mongo-bundle";
-
 export class SessionsCollection<T extends ISession>
   extends Collection<ISession>
-  implements ISessionPersistance {
+  implements ISessionPersistance
+{
   static collectionName = "sessions";
 
   static indexes = [
@@ -34,12 +34,13 @@ export class SessionsCollection<T extends ISession>
     data?: any
   ): Promise<string> {
     const session = {
-      token: generateToken(64),
+      token: data?.token ? data.token : generateToken(64),
       userId,
       expiresAt,
     };
 
     if (data) {
+      delete data.token;
       Object.assign(session, { data });
     }
 
@@ -73,11 +74,23 @@ export class SessionsCollection<T extends ISession>
       },
     });
   }
+
+  async getConfirmationSessionByUserId(
+    userId: UserId,
+    type: string
+  ): Promise<ISession> {
+    return this.findOne({
+      userId,
+      expiresAt: {
+        $gte: new Date(),
+      },
+      "data.type": type,
+    });
+  }
 }
 
-const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split(
-  ""
-);
+const ALLOWED_CHARS =
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
 function generateToken(length) {
   var b = [];
   for (var i = 0; i < length; i++) {

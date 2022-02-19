@@ -31,3 +31,11 @@ export class SessionExpiredException extends Exception {
     return "Session has expired";
   }
 }
+
+export class SubmissionCountExceeded extends Exception {
+  static code = "SUBMISSION_COUNT_EXCEEDED";
+
+  getMessage() {
+    return "the user exceeded the submission count";
+  }
+}

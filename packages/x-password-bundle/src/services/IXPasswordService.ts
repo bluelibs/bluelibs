@@ -5,6 +5,10 @@ import { ResetPasswordInput } from "../inputs/ResetPasswordInput";
 import { ForgotPasswordInput } from "../inputs/ForgotPasswordInput";
 import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
 import { UserId } from "@bluelibs/security-bundle";
+import {
+  RequestLoginLinkInput,
+  VerifyMagicLinkInput,
+} from "../inputs/RequestMagicLinkInput";
 
 export interface IXPasswordService {
   /**
@@ -37,4 +41,11 @@ export interface IXPasswordService {
    * @param length
    */
   generateToken(length): any;
+  requestLoginLink(input: RequestLoginLinkInput): any;
+  verifyMagicCode(input: VerifyMagicLinkInput): any;
+  sendEmailMagicLink(
+    userId: UserId,
+    name: string,
+    input: RequestLoginLinkInput
+  ): {};
 }

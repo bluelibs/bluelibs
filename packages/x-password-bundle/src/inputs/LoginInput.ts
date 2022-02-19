@@ -7,4 +7,7 @@ export class LoginInput {
 
   @Is(a.string().required())
   password: string;
+
+  @Is(a.string().nullable())
+  sessionToken?: string;
 }

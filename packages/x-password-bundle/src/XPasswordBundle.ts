@@ -2,9 +2,16 @@ import { Bundle } from "@bluelibs/core";
 import { Loader } from "@bluelibs/graphql-bundle";
 import { SecurityBundle } from "@bluelibs/security-bundle";
 import { PasswordBundle } from "@bluelibs/password-bundle";
+import { HTTPBundle } from "@bluelibs/http-bundle";
 
 import { IXPasswordBundleConfig } from "./defs";
-import { X_PASSWORD_SETTINGS } from "./constants";
+import {
+  MAGIC_AUTH_STRATEGY,
+  MULTIPLE_FACTORS_AUTH,
+  PASSWORD_STRATEGY,
+  SOCIAL_AUTH_SERVICE_TOKEN,
+  X_PASSWORD_SETTINGS,
+} from "./constants";
 import { createGraphQLModule } from "./graphql";
 import { XPasswordService } from "./services/XPasswordService";
 import { VerifyEmail } from "./emails/VerifyEmail";
@@ -13,13 +20,19 @@ import {
   ResetPasswordConfirmationEmail,
   WelcomeEmail,
 } from "./emails";
+import { RequestMagicLink } from "./emails/RequestMagicLink";
+import { injectRestAuthRoutes } from "./restApis";
+import { SocialLoginService } from "./social-passport/SocialLoginService";
+import { MultipleFactorService } from "./multipleAuthFactor/MultipleFactorService";
 
 export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
-  dependencies = [PasswordBundle, SecurityBundle];
+  dependencies = [PasswordBundle, SecurityBundle, HTTPBundle];
 
   protected defaultConfig: Partial<IXPasswordBundleConfig> = {
     services: {
       XPasswordService,
+      SocialLoginService,
+      MultipleFactorService,
     },
     emails: {
       templates: {
@@ -27,11 +40,13 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
         resetPasswordConfirmation: ResetPasswordConfirmationEmail,
         welcome: WelcomeEmail,
         verifyEmail: VerifyEmail,
+        requestMagicLink: RequestMagicLink,
       },
       paths: {
         welcomePath: "/login",
         resetPasswordPath: "/reset-password/:token",
         verifyEmailPath: "/verify-email/:token",
+        submitMagicCode: "/submit-magic-link",
       },
       applicationName: "BlueLibs",
       regardsName: "BlueLibs Team",
@@ -48,16 +63,112 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
         resetPassword: true,
         forgotPassword: true,
         verifyEmail: true,
+        requestLoginLink: true,
+        verifyMagicCode: true,
       },
       queries: {
         me: true,
       },
     },
+    rest: {
+      login: true,
+      logout: true,
+      register: true,
+      changePassword: true,
+      resetPassword: true,
+      forgotPassword: true,
+      verifyEmail: true,
+      requestLoginLink: true,
+      verifyMagicCode: true,
+      me: true,
+    },
+    socialAuth: {
+      services: {
+        facebook: {
+          settings: {
+            clientID: "YOUR_API_KEY",
+            clientSecret: "YOUR_API_SECRET",
+            authParameters: {
+              profileFields: [
+                "id",
+                "displayName",
+                "photos",
+                "email",
+                "gender",
+                "name",
+              ],
+              scope: ["email"],
+            },
+          },
+          url: {
+            auth: "/auth/facebook",
+            callback: "/auth/facebook/callback",
+            success: "http://127.0.0.1:8080/auth/social/",
+            fail: "http://127.0.0.1:8080/login",
+          },
+        },
+        google: {
+          settings: {
+            clientID:
+              "592668739298-48heqacbgvlbljgtkvougkdqa6d7uccp.apps.googleusercontent.com",
+            clientSecret: "5GFY5V104cnx7-dl6Qi8wqNP",
+            authParameters: {
+              scope: ["profile", "email"],
+            },
+          },
+          url: {
+            auth: "/auth/google",
+            callback: "/auth/google/callback",
+            success: "http://127.0.0.1:8080/auth/social/",
+            fail: "http://127.0.0.1:8080/login",
+          },
+        },
+        github: {
+          settings: {
+            clientID: "8be0633f1d4533782fd9",
+            clientSecret: "73cb9e12f92fac4b527a9360b3b87a4e7b118385",
+            authParameters: {
+              scope: ["user:email"],
+            },
+          },
+          url: {
+            auth: "/auth/github",
+            callback: "/auth/github/callback",
+            success: "http://127.0.0.1:8080/auth/social/",
+            fail: "http://127.0.0.1:8080/login",
+          },
+        },
+      },
+
+      url: "http://127.0.0.1:5000",
+    },
+    multipleFactorAuth: {
+      factors: [
+        {
+          strategy: PASSWORD_STRATEGY,
+          redirectUrl: "http://localhost:8080/login",
+        },
+        {
+          strategy: MAGIC_AUTH_STRATEGY,
+          redirectUrl: "http://localhost:8080/request-magic-link",
+        },
+      ],
+    },
+    magicCodeLifeDuration: "5m",
+    magicAuthFormat: "code",
+    leftSubmissionsCount: 3,
   };
 
   async prepare() {
     this.container.set(X_PASSWORD_SETTINGS, this.config);
 
+    if (this.defaultConfig.services?.MultipleFactorService) {
+      this.container.set({
+        id: MULTIPLE_FACTORS_AUTH,
+        type: MultipleFactorService,
+      });
+      this.container.get(MULTIPLE_FACTORS_AUTH);
+    }
     // Override password service if necessary
     if (this.config.services?.XPasswordService) {
       this.container.set({
@@ -71,8 +182,18 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
     const graphqlModule = createGraphQLModule(this.config);
     const loader = this.container.get<Loader>(Loader);
     loader.load(graphqlModule);
+    const httpBundle = this.container.get<HTTPBundle>(HTTPBundle);
+    injectRestAuthRoutes(this.config, httpBundle);
 
     // Ensure it's initialised and ready to serve
     this.container.get(XPasswordService);
+    //social login
+    if (this.config.socialAuth && this.config.services?.SocialLoginService) {
+      this.container.set({
+        id: SOCIAL_AUTH_SERVICE_TOKEN,
+        type: SocialLoginService,
+      });
+      this.container.get(SOCIAL_AUTH_SERVICE_TOKEN);
+    }
   }
 }

@@ -7,6 +7,10 @@ import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
 import { XPasswordService } from "../services/XPasswordService";
 import { ChangePasswordInput } from "../inputs/ChangePasswordInput";
 import { IXPasswordBundleConfig } from "../defs";
+import {
+  RequestLoginLinkInput,
+  VerifyMagicLinkInput,
+} from "../inputs/RequestMagicLinkInput";
 
 export default (config: IXPasswordBundleConfig) => {
   const {
@@ -70,6 +74,21 @@ export default (config: IXPasswordBundleConfig) => {
       X.ToModel(VerifyEmailInput),
       X.Validate(),
       X.ToService(XPasswordService, "verifyEmail"),
+    ];
+  }
+
+  if (mutations.requestLoginLink) {
+    resolvers.requestLoginLink = [
+      X.ToModel(RequestLoginLinkInput),
+      X.Validate(),
+      X.ToService(XPasswordService, "requestLoginLink"),
+    ];
+  }
+  if (mutations.verifyMagicCode) {
+    resolvers.verifyMagicCode = [
+      X.ToModel(VerifyMagicLinkInput),
+      X.Validate(),
+      X.ToService(XPasswordService, "verifyMagicCode"),
     ];
   }
 

@@ -13,13 +13,23 @@ import { ForgotPasswordInput } from "../inputs/ForgotPasswordInput";
 import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
 import { Router, APP_ROUTER } from "@bluelibs/x-bundle";
 import { IXPasswordBundleConfig } from "../defs";
-import { X_PASSWORD_SETTINGS } from "../constants";
+import {
+  MAGIC_AUTH_STRATEGY,
+  PASSWORD_STRATEGY,
+  X_PASSWORD_SETTINGS,
+} from "../constants";
 import { InvalidUsernameException } from "../exceptions/InvalidUsernameException";
 import { UsernameAlreadyExistsException } from "../exceptions";
+import {
+  RequestLoginLinkInput,
+  VerifyMagicLinkInput,
+} from "../inputs/RequestMagicLinkInput";
+import { ObjectId } from "mongodb";
+import { MultipleFcatorRedirect } from "../multipleAuthFactor/defs";
+import { MultipleFactorService } from "../multipleAuthFactor/MultipleFactorService";
 
-const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split(
-  ""
-);
+const ALLOWED_CHARS =
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -35,7 +45,8 @@ export class XPasswordService implements IXPasswordService {
     protected readonly passwordService: PasswordService,
     protected readonly emailService: EmailService,
     @Inject(X_PASSWORD_SETTINGS)
-    protected readonly config: IXPasswordBundleConfig
+    protected readonly config: IXPasswordBundleConfig,
+    protected readonly multipleFactorService: MultipleFactorService
   ) {}
 
   /**
@@ -91,7 +102,7 @@ export class XPasswordService implements IXPasswordService {
     let token = null;
     if (!requiresEmailVerificationBeforeLoggingIn) {
       token = await this.securityService.login(userId, {
-        authenticationStrategy: this.passwordService.method,
+        authenticationStrategy: PASSWORD_STRATEGY,
       });
     }
 
@@ -117,7 +128,9 @@ export class XPasswordService implements IXPasswordService {
     await this.passwordService.setPassword(userId, input.newPassword);
   }
 
-  async login(input: LoginInput): Promise<{ token: string }> {
+  async login(
+    input: LoginInput
+  ): Promise<{ token: string } | MultipleFcatorRedirect> {
     const userId = await this.passwordService.findUserIdByUsername(
       input.username
     );
@@ -132,11 +145,10 @@ export class XPasswordService implements IXPasswordService {
     );
 
     if (isValid) {
-      return {
-        token: await this.securityService.login(userId, {
-          authenticationStrategy: this.passwordService.method,
-        }),
-      };
+      return await this.multipleFactorService.login(userId, {
+        authenticationStrategy: PASSWORD_STRATEGY,
+        data: { sessionToken: input.sessionToken },
+      });
     } else {
       throw new InvalidPasswordException();
     }
@@ -159,7 +171,7 @@ export class XPasswordService implements IXPasswordService {
 
     return {
       token: await this.securityService.login(userId, {
-        authenticationStrategy: this.passwordService.method,
+        authenticationStrategy: PASSWORD_STRATEGY,
       }),
     };
   }
@@ -229,7 +241,7 @@ export class XPasswordService implements IXPasswordService {
     }
 
     const result = await this.securityService.findThroughAuthenticationStrategy(
-      this.passwordService.method,
+      PASSWORD_STRATEGY,
       {
         emailVerificationToken: input.token,
       }
@@ -273,7 +285,7 @@ export class XPasswordService implements IXPasswordService {
 
     return {
       token: await this.securityService.login(result.userId, {
-        authenticationStrategy: this.passwordService.method,
+        authenticationStrategy: PASSWORD_STRATEGY,
       }),
     };
   }
@@ -342,12 +354,110 @@ export class XPasswordService implements IXPasswordService {
    * Generates the token for email validation and maybe others
    * @param length
    */
-  generateToken(length) {
+  generateToken(length, chars?: string[]) {
     const b = [];
+    if (!chars) {
+      chars = ALLOWED_CHARS;
+    }
     for (let i = 0; i < length; i++) {
-      const j = (Math.random() * (ALLOWED_CHARS.length - 1)).toFixed(0);
-      b[i] = ALLOWED_CHARS[j];
+      const j = (Math.random() * (chars.length - 1)).toFixed(0);
+      b[i] = chars[j];
     }
     return b.join("");
+  }
+
+  async requestLoginLink(input: RequestLoginLinkInput): Promise<any> {
+    const userId = ObjectId(input.userId)
+      ? ObjectId(input.userId)
+      : await this.passwordService.findUserIdByUsername(input.username);
+    const user = await this.securityService.findUserById(userId, {
+      profile: 1,
+    });
+    if (!userId || !user) {
+      throw new InvalidUsernameException({ username: input.username });
+    }
+
+    if (input.type === "sms") {
+      //sms implementation
+      await this.sendEmailMagicLink(userId, user.profile.firstName, input);
+    } else if (input.type === "email") {
+      //sms call implementation
+      await this.sendEmailMagicLink(userId, user.profile.firstName, input);
+    } else {
+      await this.sendEmailMagicLink(userId, user.profile.firstName, input);
+    }
+    return {
+      magicCodeSent: true,
+      userId,
+      method: input.type,
+      confirmationFormat: this.config.magicAuthFormat,
+      sessionToken: input.sessionToken,
+    };
+  }
+
+  async verifyMagicCode(
+    input: VerifyMagicLinkInput
+  ): Promise<{ token: string } | MultipleFcatorRedirect> {
+    const magicCode: string = input.magicCode,
+      userId: UserId = ObjectId(input.userId);
+    const session = await this.securityService.getConfirmationSession(
+      magicCode,
+      userId,
+      MAGIC_AUTH_STRATEGY
+    );
+
+    if (!session) throw new Error("invalid-magic-code");
+
+    //delete the session after usage
+    await this.securityService.logout(magicCode);
+
+    return await this.multipleFactorService.login(userId, {
+      authenticationStrategy: MAGIC_AUTH_STRATEGY,
+      data: { sessionToken: input?.sessionToken },
+    });
+  }
+
+  async sendEmailMagicLink(
+    userId: UserId,
+    name: string,
+    input: RequestLoginLinkInput
+  ) {
+    const magicCode =
+      this.config.magicAuthFormat === "code"
+        ? this.generateToken(6, "0123456789".split(""))
+        : this.generateToken(24);
+
+    await this.securityService.createConfirmationSession(userId, {
+      data: {
+        token: magicCode,
+        type: MAGIC_AUTH_STRATEGY,
+        leftSubmissionsCount: this.config.leftSubmissionsCount,
+      },
+      expiresIn: this.config.magicCodeLifeDuration,
+    });
+
+    const {
+      emails: { regardsName, paths, templates },
+    } = this.config;
+
+    // This will run in the background
+    this.emailService.send(
+      {
+        component: templates.requestMagicLink,
+        props: {
+          name: name,
+          regardsName: regardsName,
+          username: input.username,
+          magicLink: this.router.path(
+            paths.submitMagicCode +
+              `?userId=${userId}&code=${magicCode}&sessionToken=${input.sessionToken}`
+          ),
+          code: this.config.magicAuthFormat === "code" ? magicCode : undefined,
+        },
+      },
+      {
+        to: input.username,
+      }
+    );
   }
 }

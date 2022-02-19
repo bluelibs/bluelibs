@@ -25,6 +25,7 @@
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/email-bundle": "^1.0.0",
     "@bluelibs/graphql-bundle": "^1.0.0",
+    "@bluelibs/http-bundle": "^1.0.2",
     "@bluelibs/mongo-bundle": "^1.0.0",
     "@bluelibs/password-bundle": "^1.0.0",
     "@bluelibs/security-bundle": "^1.0.0",
@@ -36,6 +37,7 @@
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/email-bundle": "^1.0.0",
     "@bluelibs/graphql-bundle": "^1.0.0",
+    "@bluelibs/http-bundle": "^1.0.2",
     "@bluelibs/mongo-bundle": "^1.0.0",
     "@bluelibs/nova": "^1.0.0",
     "@bluelibs/password-bundle": "^1.0.0",
@@ -67,5 +69,8 @@
   "typescript": {
     "definition": "dist/index.d.ts"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "passport": "^0.5.2"
+  }
 }

@@ -56,7 +56,6 @@ export type GuardianUserRegistrationType = {
   email: string;
   password: string;
 };
-
 export class GuardianSmart<
   TUserType extends IUserMandatory = GuardianUserType,
   TUserRegistrationType = GuardianUserRegistrationType
@@ -230,6 +229,7 @@ export class GuardianSmart<
           mutation login($input: LoginInput!) {
             login(input: $input) {
               token
+              redirectUrl
             }
           }
         `,
@@ -241,7 +241,12 @@ export class GuardianSmart<
         },
       })
       .then(async (response) => {
-        const { token } = response.data.login;
+        const { token, redirectUrl } = response.data.login;
+        if (redirectUrl) {
+          window.location.replace(redirectUrl);
+          return;
+        }
+
         await this.eventManager.emit(new UserLoggedInEvent({ token }));
 
         // We await this as storing the token might be blocking
@@ -407,6 +412,88 @@ export class GuardianSmart<
           fetchingUserData: false,
         });
         return;
+      });
+  }
+
+  /**
+   * request Magic Link
+   * @param username
+   * @param method
+   */
+  async requestLoginLink(input: {
+    username?: string;
+    method?: string;
+    userId: string;
+    sessionToken: string;
+  }): Promise<any> {
+    return this.apolloClient
+      .mutate({
+        mutation: gql`
+          mutation requestLoginLink($input: RequestLoginLinkInput!) {
+            requestLoginLink(input: $input) {
+              magicCodeSent
+              userId
+              method
+              confirmationFormat
+            }
+          }
+        `,
+        variables: {
+          input: {
+            username: input.username,
+            type: input.method,
+            userId: input.userId,
+            sessionToken: input.sessionToken,
+          },
+        },
+      })
+      .then((response: any) => {
+        return response.data.requestLoginLink;
+      });
+  }
+
+  /**
+   * verify Magic Link
+   * @param userId
+   * @param code
+   */
+  async verifyMagicCode(
+    userId: string,
+    code: string,
+    sessionToken?: string
+  ): Promise<string> {
+    this.updateState({
+      hasInvalidToken: false,
+    });
+    await this.storeToken(null);
+
+    return this.apolloClient
+      .mutate({
+        mutation: gql`
+          mutation verifyMagicCode($input: VerifyMagicLinkInput!) {
+            verifyMagicCode(input: $input) {
+              token
+              redirectUrl
+            }
+          }
+        `,
+        variables: {
+          input: {
+            userId,
+            magicCode: code,
+            sessionToken,
+          },
+        },
+      })
+      .then(async (response: any) => {
+        const { token } = response.data.verifyMagicCode;
+        await this.eventManager.emit(new UserLoggedInEvent({ token }));
+
+        // We await this as storing the token might be blocking
+        await this.storeToken(token);
+        await this.load();
+
+        return token;
       });
   }
 

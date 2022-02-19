@@ -8,6 +8,9 @@ import { VerifyEmail } from "./VerifyEmail/VerifyEmail";
 import { ForgotPassword } from "./ForgotPassword/ForgotPassword";
 import { ResetPassword } from "./ResetPassword/ResetPassword";
 import { ChangePassword } from "./ChangePassword/ChangePassword";
+import { RequestMagicLink } from "./MagicLink/RequestMagicLink";
+import { SubmitMagicLink } from "./MagicLink/SubmitMagicLink";
+import { SocialAuth } from "./SocialAutth/SocialAuth";
 
 i18n.push(AuthenticationMessages);
 
@@ -39,4 +42,17 @@ export const RESET_PASSWORD: IRoute<{ token: string }> = {
 export const CHANGE_PASSWORD: IRoute = {
   path: "/change-password",
   component: ChangePassword,
+};
+
+export const REQUEST_MAGIC_LINK: IRoute = {
+  path: "/request-magic-link",
+  component: RequestMagicLink,
+};
+export const SUBMIT_MAGIC_LINK: IRoute = {
+  path: "/submit-magic-link",
+  component: SubmitMagicLink,
+};
+export const SOCIAL_AUTH_LINK: IRoute = {
+  path: "/auth/social",
+  component: SocialAuth,
 };

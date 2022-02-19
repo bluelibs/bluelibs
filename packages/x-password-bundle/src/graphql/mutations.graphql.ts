@@ -54,9 +54,11 @@ export default (config: IXPasswordBundleConfig) => {
         input LoginInput {
           username: String!
           password: String!
+          sessionToken: String
         }
         type LoginResponse {
-          token: String!
+          token: String
+          redirectUrl: String
         }
       `
     );
@@ -104,6 +106,44 @@ export default (config: IXPasswordBundleConfig) => {
 
         type VerifyEmailResponse {
           token: String!
+        }
+      `
+    );
+  }
+  if (mutations.requestLoginLink) {
+    output = mutation(
+      output,
+      /* GraphQL */ `requestLoginLink(input: RequestLoginLinkInput!): RequestLoginLinkInputResponse!`,
+      /* GraphQL */ `
+        input RequestLoginLinkInput {
+          username: String
+          type: String
+          userId: String
+          sessionToken: String
+        }
+        type RequestLoginLinkInputResponse {
+          magicCodeSent: Boolean!
+          userId: String!
+          method: String
+          confirmationFormat: String
+        }
+      `
+    );
+  }
+
+  if (mutations.verifyMagicCode) {
+    output = mutation(
+      output,
+      /* GraphQL */ `verifyMagicCode(input: VerifyMagicLinkInput!): VerifyMagicLinkResponse!`,
+      /* GraphQL */ `
+        input VerifyMagicLinkInput {
+          userId: String!
+          magicCode: String!
+          sessionToken: String
+        }
+        type VerifyMagicLinkResponse {
+          token: String
+          redirectUrl: String
         }
       `
     );

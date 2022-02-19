@@ -28,5 +28,6 @@ export default /* GraphQL */ `
   input LoginInput {
     username: String!
     password: String!
+    sessionToken: String
   }
 `;

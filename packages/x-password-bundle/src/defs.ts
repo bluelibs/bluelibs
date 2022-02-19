@@ -8,6 +8,18 @@ import { IVerifyEmailProps } from "./emails/VerifyEmail";
 import "@bluelibs/security-bundle";
 import "@bluelibs/password-bundle";
 import { IPasswordAuthenticationStrategy } from "@bluelibs/password-bundle";
+import { IRequestMagicLinkProps } from "./emails/RequestMagicLink";
+import {
+  socialArrayPropsTypes,
+  socialCustomConfigMapType,
+  socialPropsTypes,
+  SocialServiceConfigType,
+  SOCIAL_LOGIN_TYPE,
+} from "./social-passport/defs";
+import { SocialLoginService } from "./social-passport/SocialLoginService";
+import { UserId } from "@bluelibs/security-bundle";
+import { MultipleFactorService } from "./multipleAuthFactor/MultipleFactorService";
+import { IMultipleFactorService } from "./multipleAuthFactor/IMultipleFactorService";
 
 declare module "@bluelibs/security-bundle" {
   export interface IUser {
@@ -23,6 +35,8 @@ declare module "@bluelibs/security-bundle" {
 export interface IXPasswordBundleConfig {
   services: {
     XPasswordService: Constructor<IXPasswordService>;
+    SocialLoginService: Constructor<SocialLoginService>;
+    MultipleFactorService: Constructor<IMultipleFactorService>;
   };
   emails: {
     templates: {
@@ -30,11 +44,13 @@ export interface IXPasswordBundleConfig {
       forgotPassword: IReactEmailTemplate<IForgotPasswordEmailProps>;
       resetPasswordConfirmation: IReactEmailTemplate<IResetPasswordConfirmationEmailProps>;
       verifyEmail: IReactEmailTemplate<IVerifyEmailProps>;
+      requestMagicLink?: IReactEmailTemplate<IRequestMagicLinkProps>;
     };
     paths: {
       welcomePath: string;
       resetPasswordPath: string;
       verifyEmailPath: string;
+      submitMagicCode?: string;
     };
     applicationName: string;
     regardsName: string;
@@ -51,9 +67,55 @@ export interface IXPasswordBundleConfig {
       resetPassword: boolean;
       forgotPassword: boolean;
       verifyEmail: boolean;
+      requestLoginLink: boolean;
+      verifyMagicCode: boolean;
     };
     queries: {
       me: boolean;
     };
   };
+  rest?: {
+    register?: boolean;
+    changePassword?: boolean;
+    login?: boolean;
+    logout?: boolean;
+    resetPassword?: boolean;
+    forgotPassword?: boolean;
+    verifyEmail?: boolean;
+    requestLoginLink?: boolean;
+    verifyMagicCode?: boolean;
+    me?: boolean;
+  };
+  socialAuth?: {
+    services?: {
+      [key: SOCIAL_LOGIN_TYPE]: SocialServiceConfigType;
+    };
+    onSocialAuth?: (
+      req,
+      type,
+      uniqueProperty,
+      accessToken,
+      refreshToken,
+      profile,
+      done
+    ) => any;
+    url: string;
+    socialUniqueIds?: socialPropsTypes;
+    strategyNameMap?: socialPropsTypes;
+    socialCustomConfig?: socialCustomConfigMapType;
+    importStrategyMap?: {
+      [key: string]: string;
+    };
+    fieldsValues?: socialArrayPropsTypes;
+    profileObjectPath?: socialArrayPropsTypes;
+  };
+
+  multipleFactorAuth?: {
+    factors: { strategy: string; redirectUrl: string }[];
+    userHaveToMultipleFactorAuth?: (userId: UserId) => Promise<boolean>;
+  };
+
+  magicCodeLifeDuration?: string;
+  magicAuthFormat?: "token" | "code" | "qrCode";
+  leftSubmissionsCount?: number;
 }
