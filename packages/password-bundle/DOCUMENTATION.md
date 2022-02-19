@@ -192,7 +192,7 @@ class AppBundle extends Bundle {
 
 ### Summary
 
-This is the raw functionality of handling passwords. A complete integration for this is done inside [XPasswordBundle](/docs/package-x-password-bundle) that is X-Framework compatible.
+This is the raw functionality of handling passwords. A complete integration for this is done inside [XAuthBundle](/docs/packx-auth-bundlendle) that is X-Framework compatible.
 
 ### Boilerplates
 

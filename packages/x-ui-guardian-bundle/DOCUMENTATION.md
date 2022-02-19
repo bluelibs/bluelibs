@@ -1,6 +1,6 @@
 We use `Guardian` for authentication & authorisation. The logic is built around a [smart](/docs/package-smart) class which communicates with the server via GraphQL, providing authentication methods for `register`, `login`, `logout`, `changePassword`, `forgotPassword`, `resetPassword` or `verifyEmail`.
 
-The guardian is designed to be compatible with [XPasswordBundle](/docs/package-x-password-bundle) on the server.
+The guardian is designed to be compatible with [XAuthBundle](/docs/package-x-auth-bundle) on the server.
 
 It also handles fetching the user data using the `me` standard query, but this behavior can be later changed.
 
@@ -83,7 +83,7 @@ function TopBar() {
 }
 ```
 
-The user type is the default one from `XPasswordBundle`:
+The user type is the default one from `XAuthBundle`:
 
 ```ts
 type GuardianUserType = {
@@ -145,7 +145,7 @@ new XUIGuardianBundle({
 
 And voila!
 
-The `register` calls the `registration` mutation with the GraphQL input: `RegistrationInput`. It's enough to change the input on the server-side by overriding `registration` mutation in [XPasswordBundle](/docs/package-x-password-bundle).
+The `register` calls the `registration` mutation with the GraphQL input: `RegistrationInput`. It's enough to change the input on the server-side by overriding `registration` mutation in [XAuthBundle](/docs/package-x-auth-bundle).
 
 However if you want to extend the interface of `Guardian`, meaning you add other methods or add other variables to the existing methods, then besides overriding the `guardianClass` you need to create your own hook, to benefit of autocompletion.
 

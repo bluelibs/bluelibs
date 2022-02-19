@@ -25,10 +25,34 @@
           "password": "Password"
         },
         "forgotPassword_btn": "Forgot Password?",
+        "request_magic_link_btn": "Login by magic link instead ?",
         "login": "Login",
         "or": "Or",
         "register_action": "Register Now!",
         "invalid_credentials": "Invalid credentials"
+      },
+      "requestMagicLink": {
+        "header": "Request magic Link",
+        "fields": {
+          "email": "Your Email",
+          "phoneNumber": "Your PhoneNumber"
+        },
+        "already_have_code": "Already have a magic code ?",
+        "simple_login_btn": "Login with password",
+        "send_magic_link": "Send Code",
+        "or": "Or",
+        "register_action": "Register Now!",
+        "invalid_credentials": "Invalid username"
+      },
+      "submitMagicLink": {
+        "header": "Submit magic code",
+        "magic_code_field": "received Code",
+        "send_link_again": "Send Another code",
+        "simple_login_btn": "Login with password",
+        "submit_magic_link": "Submit Code",
+        "or": "Or",
+        "register_action": "Register Now!",
+        "invalid_credentials": "Invalid code"
       },
       "register": {
         "header": "Register",

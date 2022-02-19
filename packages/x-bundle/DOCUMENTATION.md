@@ -1194,6 +1194,6 @@ x
 ### Challenges
 
 - What executor would I use if I want to apply 2 different security rules depending on wether the user is `Admin` or `Manager` role? (1p)
-- Make use of [XPasswordBundle](/docs/package-x-password-bundle) to enhance your server with authentication and create a user (3p)
+- Make use of [XAuthBundle](/docs/package-x-auth-bundle) to enhance your server with authentication and create a user (3p)
 - Can I use Apache Kafka or any other pubsub system for my live data? (1p)
 - What function should we use when we receive a Nova body from the client to secure it? (2p)

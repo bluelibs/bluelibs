@@ -7,7 +7,7 @@ import { LoggerBundle } from "@bluelibs/logger-bundle";
 import { XBundle } from "@bluelibs/x-bundle";
 import { ApolloSecurityBundle } from "@bluelibs/apollo-security-bundle";
 import { PasswordBundle } from "@bluelibs/password-bundle";
-import { XPasswordBundle } from "@bluelibs/x-password-bundle";
+import { XAuthBundle } from "@bluelibs/x-auth-bundle";
 import { GraphQLBundle } from "@bluelibs/graphql-bundle";
 import { EmailBundle } from "@bluelibs/email-bundle";
 import { ValidatorBundle } from "@bluelibs/validator-bundle";
@@ -51,7 +51,7 @@ export const kernel = new Kernel({
     }),
     new EmailBundle(),
     new PasswordBundle(),
-    new XPasswordBundle(),
+    new XAuthBundle(),
     {{# if hasUploads }}
       new XS3Bundle({
         accessKeyId: env.AWS_ACCESS_KEY_ID,

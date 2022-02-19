@@ -20,6 +20,7 @@ export interface IUser {
   createdAt: Date;
   lastLoginAt?: Date;
   roles?: string[];
+  socialAccounts?: { service: string; id: string }[];
 }
 
 export interface IFieldMap {
@@ -111,6 +112,7 @@ export interface ISessionPersistance {
   getSession(token: string): Promise<ISession>;
   deleteSession(token: string): Promise<void>;
   deleteAllSessionsForUser(userId: UserId): Promise<void>;
+  findSession(userId: UserId, data: any): Promise<ISession>;
   /**
    * Cleanup old, no longer available, expired tokens
    */
