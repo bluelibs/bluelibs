@@ -233,7 +233,7 @@ export abstract class Collection<T = null> {
     const { apollo = {}, refetchBody = {} as QueryBodyType<T> } = options;
 
     // If no refetchBody is provided, then infer it from the mutated fields
-    if (!isEmptyObject(refetchBody) && this.autoRefetchMutatedFields.onInsert) {
+    if (isEmptyObject(refetchBody) && this.autoRefetchMutatedFields.onInsert) {
       Object.assign(refetchBody, { ...toQueryBody(document) });
     }
 
