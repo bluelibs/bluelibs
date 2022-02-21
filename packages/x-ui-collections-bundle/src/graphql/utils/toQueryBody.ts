@@ -5,6 +5,8 @@ export const isEmptyObject = (obj: object) =>
   isObjectPrototype(obj);
 
 export const isObjectPrototype = (value) =>
+  value !== null &&
+  value !== undefined &&
   Object.getPrototypeOf(value) === Object.prototype;
 
 /**
