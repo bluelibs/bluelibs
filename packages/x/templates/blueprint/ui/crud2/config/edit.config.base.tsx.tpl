@@ -5,12 +5,16 @@ import { Service, Inject } from "@bluelibs/core";
 import { SmileOutlined } from '@ant-design/icons';
 import { Routes } from "@bundles/{{ bundleName }}";
 import * as Ant from "antd";
+{{# if typesToImport.edit }}
+import { {{ typesToImport.edit }} } from "@root/api.types";
+{{/ if }}
 import {
   {{ entityName }},
   {{# each collectionClassNamesOfInterest }}
     {{ this }},
   {{/ each }}
 } from "@bundles/{{ bundleName }}/collections";
+
 
 @Service({ transient: true })
 export class {{ entityName }}EditForm extends XForm {
