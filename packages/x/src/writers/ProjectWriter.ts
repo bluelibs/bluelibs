@@ -11,9 +11,8 @@ import * as os from "os";
 
 export class ProjectWriter extends BlueprintWriter {
   write(model: ProjectModel, session: XSession) {
-    model.platform = os.platform();
-    //prepare the scripte of packagesjson depending on the platform
-    model.prepareScripts();
+    const platform = os.platform();
+
     const fsOperator = new FSOperator(session, model);
     const tpl = fsOperator.getTemplatePathCreator("/project");
 
@@ -26,7 +25,7 @@ export class ProjectWriter extends BlueprintWriter {
         `${chalk.redBright("♦")} Installing project npm dependencies...`
       );
       execSync(
-        `cd ${model.name} ${model.platform == "win32" ? "&&" : ";"} npm install`
+        `cd ${model.name} ${platform == "win32" ? "&&" : ";"} npm install`
       );
       console.log("");
       console.log("Next step, generate the blueprint!");
