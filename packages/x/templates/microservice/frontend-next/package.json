@@ -6,9 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "@graphql-codegen/cli": "^1.20.1",
+    "@graphql-codegen/introspection": "^1.8.3",
+    "@graphql-codegen/typescript": "^1.21.0",
+    "@graphql-codegen/typescript-operations": "^1.17.14",
     "@apollo/client": "^3.4.16",
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
@@ -16,7 +21,6 @@
     "@bluelibs/smart": "^1.0.0",
     "@bluelibs/x-ui-next": "^1.0.3",
     "@bluelibs/ui-apollo-bundle": "^1.0.2",
-    "@bluelibs/x-ui-admin": "^1.4.6",
     "@bluelibs/x-ui-collections-bundle": "^1.0.3",
     "@bluelibs/x-ui-guardian-bundle": "^1.0.4",
     "@bluelibs/x-ui-i18n-bundle": "^1.0.7",

@@ -1,0 +1,10 @@
+overwrite: true
+schema: "http://localhost:4000/graphql"
+generates:
+  ./src/api.types.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+    config:
+      maybeValue: T
+      namingConvention: "keep"
