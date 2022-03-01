@@ -209,6 +209,9 @@ export class UICRUDModel {
       if (i18nSignature.description) {
         obj[i18nSignature.key + "_description"] = i18nSignature.description;
       }
+      if (i18nSignature.enums) {
+        obj[i18nSignature.key + "_enums"] = i18nSignature.enums;
+      }
     });
 
     return JSON.stringify(obj);

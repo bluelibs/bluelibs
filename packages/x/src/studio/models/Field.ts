@@ -282,9 +282,16 @@ export class Field extends BaseModel<Field> {
    *
    * @returns
    */
-  getI18NSignature(): { key: string; label: string; description?: string } {
+  getI18NSignature(): {
+    key: string;
+    label: string;
+    description?: string;
+    enums?: any;
+  } {
     const parents: Field[] = [];
     let current: Field = this;
+    //in case of enums
+    let enums: any;
 
     while (current.parent) {
       parents.push(current.parent);
@@ -294,10 +301,16 @@ export class Field extends BaseModel<Field> {
         current = current.parent;
       }
     }
-
+    if (current.type === "enum" && current.enumValues.length > 0) {
+      enums = {};
+      for (let enum_value of current.enumValues) {
+        enums[typeof enum_value === "string" ? enum_value : enum_value.label] =
+          typeof enum_value === "string" ? enum_value : enum_value.label;
+      }
+    }
     const label = this.ui ? this.ui.label : this.id;
     if (parents.length === 0) {
-      return { key: this.id, label, description: this.description };
+      return { key: this.id, label, description: this.description, enums };
     }
 
     let keySignature = "";
@@ -311,6 +324,7 @@ export class Field extends BaseModel<Field> {
       key: keySignature + this.id,
       label: labelSignature + label,
       description: this.description,
+      enums,
     };
   }
 

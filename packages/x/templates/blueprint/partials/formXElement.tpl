@@ -96,7 +96,9 @@
     {{/ if }}
     {{!-- ENUM HANDLING --}}
     {{# if (@root.typeIs rendererType "enum") }}
-      render: (props) => (
+      render: (props) => {
+        const options=[{{# each enumValues }} {value:"{{ value }}" ,label:"{{ label }}" },{{/ each }}];
+        return (
         <Ant.Form.Item {...props}>
           <Ant.Select
             {{# if isMany }}
@@ -104,12 +106,10 @@
             {{/ if }}
             placeholder={t('{{ title }}')}
           >
-            {{# each enumValues }}
-              <Ant.Select.Option value="{{ value }}" key="{{ value }}">{{ label }}</Ant.Select.Option>
-            {{/ each }}
+          {options.map((option)=>(<Ant.Select.Option value={option.value} key={option.value} >{t(`{{ title }}_enums.${option.label}`)| option.label}</Ant.Select.Option>))}
           </Ant.Select>
         </Ant.Form.Item>
-      ),
+      )},
     {{/ if }}
   {{/ if }}
 },
