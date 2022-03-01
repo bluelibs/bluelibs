@@ -106,7 +106,7 @@
             {{/ if }}
             placeholder={t('{{ title }}')}
           >
-          {options.map((option)=>(<Ant.Select.Option value={option.value} key={option.value} >{t(`{{ title }}_enums.${option.label}`)| option.label}</Ant.Select.Option>))}
+          {options.map((option)=>(<Ant.Select.Option value={option.value} key={option.value} >{t(`{{ title }}_enums.${option.label}`)?t(`{{ title }}_enums.${option.label}`): option.label}</Ant.Select.Option>))}
           </Ant.Select>
         </Ant.Form.Item>
       )},
