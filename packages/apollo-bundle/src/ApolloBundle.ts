@@ -38,6 +38,16 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     },
     jit: true,
     useJSONMiddleware: true,
+    serverless: true,
+    serverlessConfig: {
+      apolloServer: require("apollo-server-lambda"),
+      handlerConfig: {
+        cors: {
+          origin: true,
+          credentials: true,
+        },
+      },
+    },
   };
 
   public httpServer: http.Server;
@@ -91,6 +101,18 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     const apolloServerConfig = this.getApolloConfig();
     await this.initialiseServer(apolloServerConfig);
     await this.startServer();
+  }
+
+  public async servelesslHandler() {
+    if (this.config.serverless && this.config.serverlessConfig.apolloServer) {
+      const servelessApollorServer =
+        this.config.serverlessConfig.apolloServer.ApolloServer;
+
+      return new servelessApollorServer({
+        typeDefs: this.currentSchema.typeDefs,
+        resolvers: this.currentSchema.resolvers,
+      }).createHandler(this.config.serverlessConfig.handlerConfig);
+    }
   }
 
   protected storeSchema() {
