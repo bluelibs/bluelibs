@@ -55,12 +55,32 @@ export class UICRUDModel {
     | {
         [key in CRUDFeatureType]?: boolean;
       } = true;
+  typesToImport: { create?: string; edit?: string } = {};
 
   hasFeature(feature: CRUDFeatureType) {
     if (this.features === true) {
       return true;
     }
     return this.features[feature];
+  }
+
+  generateApiTypesImports(feature: string): string | null {
+    let types = [];
+    //enums types needed when we have intial default value
+    types = types.concat(
+      this.studioCollection.fields
+        .filter(
+          (field: Field) =>
+            field.defaultValue &&
+            field.type === "enum" &&
+            field.model &&
+            field.ui &&
+            !(field.ui[feature] === false)
+        )
+        .map((field: Field) => field.model.id)
+    );
+    if (types && types.length > 0) return types.join(", ");
+    return null;
   }
 
   get sheetName() {

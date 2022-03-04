@@ -6,13 +6,17 @@ import { XFormElementType, XForm } from "@bluelibs/x-ui-admin";
 import { Routes } from "@bundles/{{ bundleName }}";
 import { Service, Inject } from "@bluelibs/core";
 import { features } from "./features";
-
+{{# if typesToImport.create }}
+import { {{ typesToImport.create }} } from "@root/api.types";
+{{/ if }}
 import {
+
   {{ entityName }}, 
   {{# each collectionClassNamesOfInterest }}
     {{ this }},
   {{/ each }}
 } from "@bundles/{{ bundleName }}/collections";
+
 
 @Service({ transient: true })
 export class {{ entityName }}CreateForm extends XForm {
