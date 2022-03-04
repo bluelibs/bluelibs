@@ -301,11 +301,11 @@ export class Field extends BaseModel<Field> {
         current = current.parent;
       }
     }
-    if (current.type === "enum" && current.enumValues.length > 0) {
+    if (current.type === FieldValueKind.ENUM && current.enumValues.length > 0) {
       enums = {};
       for (let enum_value of current.enumValues) {
-        enums[typeof enum_value === "string" ? enum_value : enum_value.label] =
-          typeof enum_value === "string" ? enum_value : enum_value.label;
+        const enum_key=typeof enum_value === "string" ? enum_value : enum_value.label];
+        enums[enum_key.toLowerCase()] =enum_key;
       }
     }
     const label = this.ui ? this.ui.label : this.id;
