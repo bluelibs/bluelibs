@@ -77,7 +77,7 @@ export class UICRUDModel {
             field.ui &&
             !(field.ui[feature] === false)
         )
-        .map((field: Field) => field.model.id)
+        .map((field: Field) => field.cleaned.model.id)
     );
     if (types && types.length > 0) return types.join(", ");
     return null;
