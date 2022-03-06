@@ -20,7 +20,7 @@ export type ApolloBundleConfigType = {
   //serverless
   serverless?: boolean;
   serverlessConfig?: {
-    apolloServer: any;
+    serverlessProvider: any;
     handlerConfig: any;
   };
 };

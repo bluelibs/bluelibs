@@ -2,10 +2,9 @@ import {
   Bundle,
   KernelAfterInitEvent,
   EventManager,
-  Kernel,
   Exception,
 } from "@bluelibs/core";
-import { Loader, IResolverMap, ISchemaResult } from "@bluelibs/graphql-bundle";
+import { Loader, ISchemaResult } from "@bluelibs/graphql-bundle";
 import * as http from "http";
 import * as express from "express";
 import * as cookieParser from "cookie-parser";
@@ -25,6 +24,9 @@ import { GraphQLError, execute, subscribe } from "graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
+import * as ServerlessApolloServer from "apollo-server-lambda";
+import { APOLLO_BUNDLE } from "./constants";
+
 export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
     port: 4000,
@@ -40,7 +42,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     useJSONMiddleware: true,
     serverless: true,
     serverlessConfig: {
-      apolloServer: require("apollo-server-lambda"),
+      serverlessProvider: ServerlessApolloServer,
       handlerConfig: {
         cors: {
           origin: true,
@@ -76,7 +78,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     // As loading should be done in initial phase and we have the container as the first reducer
     const loader = this.get<Loader>(Loader);
     this.logger = this.get<LoggerService>(LoggerService);
-
     await this.instantiateExpress();
   }
 
@@ -86,6 +87,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     manager.addListener(KernelAfterInitEvent, async () => {
       this.storeSchema();
       await this.setupApolloServer();
+      this.container.set(APOLLO_BUNDLE, this);
       const logger = this.container.get(LoggerService);
       logger.info(`HTTP Server listening on port: ${this.config.port}`);
       let url = this.config.url;
@@ -103,15 +105,15 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     await this.startServer();
   }
 
-  public async servelesslHandler() {
-    if (this.config.serverless && this.config.serverlessConfig.apolloServer) {
-      const servelessApollorServer =
-        this.config.serverlessConfig.apolloServer.ApolloServer;
-
-      return new servelessApollorServer({
-        typeDefs: this.currentSchema.typeDefs,
-        resolvers: this.currentSchema.resolvers,
-      }).createHandler(this.config.serverlessConfig.handlerConfig);
+  async createServerlessHandler() {
+    if (this.config.serverless && this.config.serverlessConfig) {
+      const apolloConfig = await this.getApolloConfig();
+      const server =
+        new this.config.serverlessConfig.serverlessProvider.ApolloServer({
+          typeDefs: apolloConfig.typeDefs,
+          resolvers: apolloConfig.resolvers,
+        });
+      return server.createHandler(this.config.serverlessConfig.handlerConfig);
     }
   }
 
@@ -261,6 +263,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    * Returns the ApolloConfiguration for ApolloServer
    */
   protected getApolloConfig(): ApolloServerExpressConfig {
+    console.log("currentSchema", this.currentSchema);
     const schema = makeExecutableSchema({
       typeDefs: this.currentSchema.typeDefs,
       resolvers: this.currentSchema.resolvers,
