@@ -76,7 +76,7 @@ export class CollectionLinkWriter extends BlueprintWriter {
 
   alreadyExportsLink(filePath, name): boolean {
     const fileContent = fs.readFileSync(filePath).toString();
-    const exportLineIndex = fileContent.indexOf(`export const ${name}`);
+    const exportLineIndex = fileContent.indexOf(`export const ${name}:`);
 
     if (exportLineIndex === -1) {
       return false;
@@ -84,7 +84,7 @@ export class CollectionLinkWriter extends BlueprintWriter {
 
     // If by any chance we have the link commented out, we take it as if it doesn't exist.
     // Later, we should do this by statically analysing the file.
-    const isComment = fileContent.indexOf(`// export const ${name}`) > -1;
+    const isComment = fileContent.indexOf(`// export const ${name}:`) > -1;
 
     if (isComment) {
       return false;
