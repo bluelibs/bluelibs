@@ -107,9 +107,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
   async createServerlessHandler() {
     if (this.config.serverless && this.config.serverlessConfig) {
-      const apolloConfig = await this.getApolloConfig();
+      const apolloConfig = this.getApolloConfig();
       const server =
-        new this.config.serverlessConfig.serverlessProvider.ApolloServer({
+        await new this.config.serverlessConfig.serverlessProvider.ApolloServer({
           typeDefs: apolloConfig.typeDefs,
           resolvers: apolloConfig.resolvers,
         });
