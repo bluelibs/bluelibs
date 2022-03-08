@@ -573,7 +573,7 @@ collection.setAutoRefetchMutatedFields({ onUpdate: true });
 collection.setAutoRefetchMutatedFields({ onInsert: true });
 ```
 
-##### Apollo Options
+### Apollo options
 
 Additionally, you can pass any valid Apollo Mutation option to the `collection.updateOne` with the `apollo` key. Same goes for `collection.insertOne`
 
@@ -595,6 +595,65 @@ collection.updateOne(
 
 // Same concept applies to insertOne.
 ```
+
+<br />
+
+##### Optimistic UI
+
+One very intesrting feature of our client-side collections is that, when performing a `updateOne`, the colllection will take the modified fields from your input and use them to build an apollo's `optimisticResponse` (unless you provide your own). In most cases, it is enough to enable Optimistic UI and substantially improve your software UX and feel.
+
+```ts
+collection.updateOne(post._id, {
+  title: "My New Title",
+  text: "My new Text",
+});
+```
+
+Is exactly the same as :
+
+```ts
+collection.updateOne(
+  post._id,
+  {
+    title: "My New Title",
+    text: "My new Text",
+  },
+  {
+    apollo: {
+      optimisticResponse: {
+        PostUpdateOne: {
+          __typename: "Post",
+          title: "My New Title",
+          text: "My new Text",
+        },
+      },
+    },
+  }
+);
+```
+
+Of course, you can override this behavior by providing your own `optimisticResponse`, or disable it at collection level like so :
+
+```ts
+// Disable automatic optimistic UI
+collection.enableOptimisticUpdates(false);
+```
+
+Finally, you can easily create optimistic responses for your own specific cases like so:
+
+```ts
+const operationName = "MyVeryCustomOperation";
+
+const optimisticResponse = collection.createOptimisticResponse(
+  _id,
+  document,
+  operationName
+);
+```
+
+<br/>
+
+##### Standalone mutation
 
 If you want to use `useMutation()` from Apollo for various reasons we expose the following helper functions:
 

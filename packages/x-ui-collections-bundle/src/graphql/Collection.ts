@@ -96,6 +96,14 @@ export abstract class Collection<T = null> {
 
   abstract getName(): string;
 
+  getTypeName() {
+    const collectionName = this.getName();
+
+    return collectionName[collectionName.length - 1] === "s"
+    ? collectionName.slice(0, -1)
+    : collectionName, // we could use https://www.npmjs.com/package/pluralize
+  }
+
   getInputs(): CollectionInputsConfig {
     return {};
   }
@@ -290,6 +298,17 @@ export abstract class Collection<T = null> {
       refetchBody._id = 1;
     }
 
+    if (!apollo.optimisticResponse && this.optimisticUpdates) {
+      apollo.optimisticResponse = this.createOptimisticResponse(
+        _id,
+
+        // ? Not sure if thas "as" is very useful
+        // ? what's the actual differente between UpdateFilter<T> and TransformPartial<T>?
+        update as TransformPartial<T>,
+        `${this.getName()}UpdateOne`
+      );
+    }
+
     const mutation = this.createUpdateMutation(refetchBody);
 
     const updateType = this.getInputs().update || "EJSON!";
@@ -358,6 +377,12 @@ export abstract class Collection<T = null> {
     body: QueryBodyType<T>
   ): Promise<Partial<T[]>> {
     return this.hybridFind(false, query, body);
+  }
+
+  protected optimisticUpdates = true;
+
+  public enableOptimisticUpdates(option: boolean) {
+    this.optimisticUpdates = option;
   }
 
   /**
@@ -894,5 +919,33 @@ export abstract class Collection<T = null> {
 
   protected isUpdateModifier(element: any): element is UpdateFilter<T> {
     return element["$set"];
+  }
+
+  /**
+   * Provide a Apollo.OptimisticResponse object based on the provided _id and document
+   */
+  public createOptimisticResponse(
+    _id: ObjectId | string,
+    document: Partial<T>,
+    operationName?: string
+  ) {
+    const stringId = _id instanceof ObjectId ? _id.toString() : _id;
+
+    // We can't be optimistic if we do not know the operationName
+    if (!operationName) return undefined;
+
+    const collectionName = this.getName();
+
+    // We can't be optimistic if we do not know the __typename
+    if (!collectionName) return undefined;
+
+    return {
+      // `${this.getName()}UpdateOne`
+      [operationName]: {
+        _id: stringId,
+        __typename: this.getTypeName(),
+        ...document, // ? shouldn't we deepclone here instead, just in case ?
+      },
+    };
   }
 }
