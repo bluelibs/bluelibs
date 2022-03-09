@@ -13,7 +13,7 @@ export const X_SETTINGS = new Token<IXBundleConfig>();
 export const APP_ROUTER = new Token<Router>();
 export const ROOT_ROUTER = new Token<Router>();
 export const CACHE_CONFIG = new Token<ICacheManagerConfig>();
-export const CACHE_SERVICE = new Token<CacheService>();
+export const CACHE_SERVICE_TOKEN = new Token<CacheService>();
 
 export const X_FRAMEWORK_LOGO = String.raw`
 xxxxxxx      xxxxxxx

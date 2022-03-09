@@ -1,15 +1,9 @@
 import { createEcosystem } from "./createEcosystem";
 import { ContainerInstance, Kernel } from "@bluelibs/core";
-import {
-  Cache,
-  configureOptions,
-  generateCacheKey,
-  addUserBoundnessFieldsToKeyObject,
-  calculateTtlWithExpirationBoundness,
-} from "./../../executors/cache";
-import { CACHE_SERVICE } from "./../..";
+import { CACHE_SERVICE_TOKEN } from "./../..";
 import { CacheService } from "./../../cache/CacheService";
 import { CACHE_CONFIG } from "../../constants";
+import { Cache } from "./../../executors/cache";
 
 describe("cache manager tests get/set", () => {
   let container: ContainerInstance;
@@ -17,7 +11,7 @@ describe("cache manager tests get/set", () => {
 
   beforeAll(async () => {
     container = await createEcosystem();
-    cacheService = container.get(CACHE_SERVICE);
+    cacheService = container.get(CACHE_SERVICE_TOKEN);
   });
 
   afterAll(async () => {
@@ -77,11 +71,15 @@ describe("cache manager tests get/set", () => {
 
     describe("configureOptions: method that responsible of ttl refresh and expiration boundness ", () => {
       it("should return default options in case of undefined options", () => {
-        expect(configureOptions(ctx)).toEqual(defaultResolverOptions);
+        expect(cacheService.configureOptions(ctx)).toEqual(
+          defaultResolverOptions
+        );
       });
       it("shoudl prioritize options fields over default one", () => {
         expect(
-          configureOptions(ctx, { ttl: defaultResolverOptions + 1 })
+          cacheService.configureOptions(ctx, {
+            ttl: defaultResolverOptions + 1,
+          })
         ).toEqual({
           ...defaultResolverOptions,
           ttl: defaultResolverOptions + 1,
@@ -90,7 +88,7 @@ describe("cache manager tests get/set", () => {
       it("shouldchange ttl if expirationboundness is inferior", () => {
         ctx.expiredAt = defaultResolverOptions.ttl - 1;
         expect(
-          configureOptions(ctx, {
+          cacheService.configureOptions(ctx, {
             expirationBoundness: true,
             expirationBoundnessField: "expiredAt",
           }).ttl
@@ -99,25 +97,29 @@ describe("cache manager tests get/set", () => {
     });
     describe("generateCacheKey", () => {
       it("test with default options", () => {
-        expect(generateCacheKey(ctx, ast)).toEqual(generateCacheKey(ctx, ast));
+        expect(cacheService.generateCacheKey(ctx, ast)).toEqual(
+          cacheService.generateCacheKey(ctx, ast)
+        );
       });
       it("test if fields fields order affect key generation", () => {
-        expect(generateCacheKey(ctx, { a: 1, b: { c: 1, d: 2 } })).toEqual(
-          generateCacheKey(ctx, { b: { d: 2, c: 1 }, a: 1 })
+        expect(
+          cacheService.generateCacheKey(ctx, { a: 1, b: { c: 1, d: 2 } })
+        ).toEqual(
+          cacheService.generateCacheKey(ctx, { b: { d: 2, c: 1 }, a: 1 })
         );
       });
       it("test with userBoundnessFields in options", () => {
         expect(
-          addUserBoundnessFieldsToKeyObject(
+          cacheService.addUserBoundnessFieldsToKeyObject(
             ["c", "d"],
             { a: 1, b: 2 },
             { c: 3, d: 4 }
           )
         ).toEqual({ a: 1, b: 2, c: 3, d: 4 });
         expect(
-          generateCacheKey(ctx, ast) !==
-            generateCacheKey(ctx, ast, {
-              userBoundness: true,
+          cacheService.generateCacheKey(ctx, ast) !==
+            cacheService.generateCacheKey(ctx, ast, {
+              contextBoundness: true,
               userBoundnessFields: ["userId"],
             })
         ).toEqual(true);
@@ -133,32 +135,32 @@ describe("cache manager tests get/set", () => {
         delete ctx.expiredAt;
       });
       it("when expiredAt null or not date or number return ttl", () => {
-        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
-          defaultResolverOptions.ttl
-        );
+        expect(
+          cacheService.calculateTtlWithExpirationBoundness(testOptions, ctx)
+        ).toEqual(defaultResolverOptions.ttl);
         ctx.expiredAt = "";
-        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
-          defaultResolverOptions.ttl
-        );
+        expect(
+          cacheService.calculateTtlWithExpirationBoundness(testOptions, ctx)
+        ).toEqual(defaultResolverOptions.ttl);
       });
       it("when ttl <expiredAt", () => {
         ctx.expiredAt = defaultResolverOptions.ttl + 1;
-        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
-          defaultResolverOptions.ttl
-        );
+        expect(
+          cacheService.calculateTtlWithExpirationBoundness(testOptions, ctx)
+        ).toEqual(defaultResolverOptions.ttl);
         ctx.expiredAt = Date.now() + 2 * defaultResolverOptions.ttl;
-        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
-          defaultResolverOptions.ttl
-        );
+        expect(
+          cacheService.calculateTtlWithExpirationBoundness(testOptions, ctx)
+        ).toEqual(defaultResolverOptions.ttl);
       });
       it("when ttl >expiredAt", () => {
         ctx.expiredAt = defaultResolverOptions.ttl - 1;
-        expect(calculateTtlWithExpirationBoundness(testOptions, ctx)).toEqual(
-          ctx.expiredAt
-        );
+        expect(
+          cacheService.calculateTtlWithExpirationBoundness(testOptions, ctx)
+        ).toEqual(ctx.expiredAt);
         ctx.expiredAt = new Date(Date.now() + 3000);
         expect(
-          calculateTtlWithExpirationBoundness(testOptions, ctx) !==
+          cacheService.calculateTtlWithExpirationBoundness(testOptions, ctx) !==
             defaultResolverOptions.ttl
         ).toEqual(true);
       });

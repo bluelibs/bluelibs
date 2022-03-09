@@ -996,8 +996,8 @@ The options fields are :
 |--------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------|
 | ttl | number | 30 | expiration time of cached Data in seconds |
 | refresh | boolean | false | if true :reset ttl count of a cached data, every time this data is consumed from the cache |
-| userBoundness | boolean | true | if true: takes into account other fields in order to personalize cache usage for every user/role.. |
-| userBoundnessFields | string[] | ["userId"] | if userBoundness is true: the fields we want to build on the user boundness. those fields expected to be in ctx |
+| contextBoundness | boolean | true | if true: takes into account other fields in order to personalize cache usage for every user/role.. |
+| contextBoundnessFields | string[] | ["userId"] | if contextBoundness is true: the fields we want to build on the user boundness. those fields expected to be in ctx |
 | expirationBoundness | boolean | true | if true: takes into account the expiration time of the data |
 | expirationBoundnessField | string | "expiredAt" | if expirationBoundness is true: the field of the expiration date or duration in seconds, Date or number |
 
@@ -1010,8 +1010,8 @@ The options fields are :
         X.Cache([X.ToNova(UsersCollection)], {
           ttl: 30,
           refresh: false,
-          userBoundness: true,
-          userBoundnessFields: ["userId"],
+          contextBoundness: true,
+          contextBoundnessFields: ["userId"],
           expirationBoundness: true,
           expirationBoundnessField: "expiredAt",
         }),
@@ -1035,8 +1035,8 @@ const cacheConfig = {
   },
   resolverDefaultConfig: {
     ttl: 30,
-    userBoundness: true,
-    userBoundnessFields: ["userId"],
+    contextBoundness: true,
+    contextBoundnessFields: ["userId"],
     expirationBoundness: true,
     expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
     refresh: false,
@@ -1070,8 +1070,8 @@ export const kernel = new Kernel({
         resolverDefaultConfig: {
           ttl: 30,
           refresh: false,
-          userBoundness: true,
-          userBoundnessFields: ["userId"],
+          contextBoundness: true,
+          contextBoundnessFields: ["userId"],
           expirationBoundness: true,
           expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
         },

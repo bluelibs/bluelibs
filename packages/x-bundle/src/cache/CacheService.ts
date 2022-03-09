@@ -3,6 +3,8 @@ import { CACHE_CONFIG } from "../constants";
 import { CacheOptions } from "./defs";
 import * as CacheManager from "cache-manager";
 import { LoggerService } from "@bluelibs/logger-bundle";
+import * as Hash from "node-object-hash";
+const Hasher = Hash({ sort: true, coerce: true });
 
 @Service()
 export class CacheService {
@@ -50,7 +52,65 @@ export class CacheService {
 
     return { found: true, data: cachedData.data };
   }
+
   async keys() {
     return await this.cacheManager.keys();
+  }
+
+  generateCacheKey(ctx, ast, options?: CacheOptions): string {
+    let keyBody: any = (({
+      fieldName,
+      fieldNodes,
+      returnType,
+      parentType,
+      variableValues,
+    }) => ({
+      fieldName,
+      fieldNodes,
+      returnType,
+      parentType,
+      variableValues,
+    }))(ast);
+    if (options && options.contextBoundness)
+      keyBody = this.addUserBoundnessFieldsToKeyObject(
+        options.userBoundnessFields,
+        keyBody,
+        ctx
+      );
+
+    return Hasher.hash(keyBody);
+  }
+
+  configureOptions(ctx, options?): CacheOptions {
+    options = {
+      ...this.config.resolverDefaultConfig,
+      ...options,
+    };
+    if (options.expirationBoundness)
+      options.ttl = this.calculateTtlWithExpirationBoundness(options, ctx);
+    return options;
+  }
+
+  calculateTtlWithExpirationBoundness(options: CacheOptions, ctx): number {
+    let expirationTtl;
+    if (typeof ctx[options.expirationBoundnessField] === "number")
+      expirationTtl = ctx[options.expirationBoundnessField];
+    else if (ctx[options.expirationBoundnessField] instanceof Date) {
+      expirationTtl =
+        (new Date(ctx[options.expirationBoundnessField]).getTime() -
+          Date.now()) /
+        1000;
+    }
+    if (!expirationTtl) return options.ttl;
+    return Math.min(options.ttl, expirationTtl);
+  }
+
+  addUserBoundnessFieldsToKeyObject(
+    userBoundnessFields: string[],
+    objectBody,
+    ctx
+  ) {
+    userBoundnessFields.map((key) => (objectBody[key] = ctx[key]));
+    return objectBody;
   }
 }

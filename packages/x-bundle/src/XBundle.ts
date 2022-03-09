@@ -18,7 +18,7 @@ import {
   MESSENGER,
   REDIS_OPTIONS,
   CACHE_CONFIG,
-  CACHE_SERVICE,
+  CACHE_SERVICE_TOKEN,
 } from "./constants";
 import { IXBundleConfig, IMessenger } from "./defs";
 import * as chalk from "chalk";
@@ -48,8 +48,8 @@ export class XBundle extends Bundle<IXBundleConfig> {
       },
       resolverDefaultConfig: {
         ttl: 30,
-        userBoundness: true,
-        userBoundnessFields: ["userId"],
+        contextBoundness: true,
+        contextBoundnessFields: ["userId"],
         expirationBoundness: true,
         expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
         refresh: false,
@@ -94,7 +94,7 @@ export class XBundle extends Bundle<IXBundleConfig> {
     }
 
     this.container.set(CACHE_CONFIG, this.config.cacheConfig);
-    this.container.set({ id: CACHE_SERVICE, type: CacheService });
+    this.container.set({ id: CACHE_SERVICE_TOKEN, type: CacheService });
   }
 
   async init() {

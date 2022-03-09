@@ -97,7 +97,7 @@ export type BasicStoreConfig = {
 export type CacheOptions = {
   ttl?: number;
   refresh?: boolean;
-  userBoundness?: boolean;
+  contextBoundness?: boolean;
   userBoundnessFields?: string[];
   expirationBoundness?: boolean;
   expirationBoundnessField?: string;

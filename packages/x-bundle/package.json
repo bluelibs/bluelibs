@@ -23,7 +23,6 @@
     "package:generate": "ts-node package.ts"
   },
   "dependencies": {
-    "@types/cache-manager": "^3.4.2",
     "cache-manager": "^3.6.0",
     "chalk": "^4.1.0",
     "date-fns": "^2.14.0",
@@ -66,6 +65,7 @@
     "@bluelibs/security-bundle": "^1.0.0",
     "@bluelibs/security-mongo-bundle": "^1.0.0",
     "@bluelibs/validator-bundle": "^1.0.0",
+    "@types/cache-manager": "^3.4.3",
     "@types/chai": "^4.2.3",
     "@types/chai-as-promised": "^7.1.2",
     "@types/dot-object": "^2.1.2",
