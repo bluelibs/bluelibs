@@ -1,4 +1,4 @@
-import { IRoute } from "@bluelibs/x-ui";
+import { I18NService, IRoute, useContainer } from "@bluelibs/x-ui";
 import { Button, Tag, Tooltip } from "antd";
 import * as React from "react";
 import { Link } from "react-router-dom";
@@ -45,7 +45,7 @@ export function DownloadButton({ name, downloadUrl }) {
  */
 export function AdminListItemRenderer(props: AdminListItemRendererProps) {
   let value;
-
+  const container = useContainer();
   if (props.type === "string" || props.type === "number") {
     value = <span>{props.value}</span>;
   }
@@ -59,11 +59,12 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
   }
 
   if (props.type === "date") {
+    const local = container.get(I18NService)?.getCurrentPolyglot();
     if (props.value instanceof Date) {
-      value = props.value.toLocaleDateString();
+      value = props.value.toLocaleDateString(local);
     } else {
       if (typeof props.value === "number") {
-        value = new Date(props.value as number).toLocaleDateString();
+        value = new Date(props.value as number).toLocaleDateString(local);
       }
     }
   }
