@@ -311,8 +311,8 @@ export class EJSON {
       return v;
     }
 
-    if (ObjectId.isValid(v)) {
-      return v;
+    if (ObjectId.isValid(v) || v._bsontype === "ObjectID") {
+      return new ObjectId(v.toString());
     }
 
     if (EJSON.isBinary(v)) {
