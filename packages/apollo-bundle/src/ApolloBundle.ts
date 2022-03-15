@@ -158,8 +158,8 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       app.use(express.json());
     }
 
-    if (this.config.middlewares.length) {
-      app.use(...this.config.middlewares);
+    for (const middleware of this.config.middlewares) {
+      app.use.apply(app, Array.isArray(middleware) ? middleware : [middleware]);
     }
 
     this.app = app;
