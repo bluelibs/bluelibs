@@ -67,12 +67,16 @@ export interface UseQueryOptions {
 }
 
 export interface InsertOneOptions<T> {
-  refetchBody?: QueryBodyType<T>;
+  refetchBody?:
+    | QueryBodyType<T>
+    | ((defaultQueryBody: QueryBodyType<T>) => QueryBodyType<T>);
   apollo?: Omit<MutationOptions, "mutation">;
 }
 
 export interface UpdateOneOptions<T> {
-  refetchBody?: QueryBodyType<T>;
+  refetchBody?:
+    | QueryBodyType<T>
+    | ((defaultQueryBody: QueryBodyType<T>) => QueryBodyType<T>);
   apollo?: Omit<MutationOptions, "mutation">;
 }
 
@@ -231,19 +235,28 @@ export abstract class Collection<T = null> {
     options: InsertOneOptions<T> = {}
   ): Promise<Partial<T>> {
     const { apollo = {}, refetchBody = {} as QueryBodyType<T> } = options;
+    const computedRefetchBody = {} as QueryBodyType<T>;
 
-    // If no refetchBody is provided, then infer it from the mutated fields
-    if (isEmptyObject(refetchBody) && this.autoRefetchMutatedFields.onInsert) {
-      Object.assign(refetchBody, { ...toQueryBody(document) });
+    /* This code is adding the refetchBody to the computedRefetchBody. */
+    if (typeof refetchBody === "function") {
+      Object.assign(computedRefetchBody, refetchBody(toQueryBody(document)));
+    } else if (
+      isEmptyObject(refetchBody) &&
+      this.autoRefetchMutatedFields.onInsert
+    ) {
+      // If no refetchBody is provided, then infer it from the mutated fields
+      Object.assign(computedRefetchBody, toQueryBody(document));
+    } else {
+      Object.assign(computedRefetchBody, refetchBody);
     }
 
     // @ts-ignore
-    if (!refetchBody._id) {
+    if (!computedRefetchBody._id) {
       // @ts-ignore
-      refetchBody._id = 1;
+      computedRefetchBody._id = 1;
     }
 
-    const mutation = this.createInsertMutation(refetchBody);
+    const mutation = this.createInsertMutation(computedRefetchBody);
     const insertInput = this.getInputs().insert || "EJSON!";
 
     let mutationDocument: string | Partial<T>;
@@ -278,19 +291,28 @@ export abstract class Collection<T = null> {
     options: UpdateOneOptions<T> = {}
   ): Promise<Partial<T>> {
     const { apollo = {}, refetchBody = {} as QueryBodyType<T> } = options;
+    const computedRefetchBody = {} as QueryBodyType<T>;
 
-    // If no refetchBody is provided, then infer it from the mutated fields
-    if (isEmptyObject(refetchBody) && this.autoRefetchMutatedFields.onUpdate) {
-      Object.assign(refetchBody, { ...toQueryBody(update) });
+    /* This code is adding the refetchBody to the computedRefetchBody. */
+    if (typeof refetchBody === "function") {
+      Object.assign(computedRefetchBody, refetchBody(toQueryBody(document)));
+    } else if (
+      isEmptyObject(refetchBody) &&
+      this.autoRefetchMutatedFields.onInsert
+    ) {
+      // If no refetchBody is provided, then infer it from the mutated fields
+      Object.assign(computedRefetchBody, toQueryBody(document));
+    } else {
+      Object.assign(computedRefetchBody, refetchBody);
     }
 
     // @ts-ignore
-    if (!refetchBody._id) {
+    if (!computedRefetchBody._id) {
       // @ts-ignore
-      refetchBody._id = 1;
+      computedRefetchBody._id = 1;
     }
 
-    const mutation = this.createUpdateMutation(refetchBody);
+    const mutation = this.createUpdateMutation(computedRefetchBody);
 
     const updateType = this.getInputs().update || "EJSON!";
     const isEJSON = updateType === "EJSON!";
