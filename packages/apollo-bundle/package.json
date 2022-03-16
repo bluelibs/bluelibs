@@ -25,6 +25,7 @@
   "dependencies": {
     "@graphql-tools/schema": "^8.3.0",
     "apollo-server-express": "^3.5.0",
+    "apollo-server-core": "^3.0.0",
     "apollo-server-lambda": "^3.6.3",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
