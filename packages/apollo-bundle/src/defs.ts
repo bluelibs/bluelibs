@@ -3,13 +3,14 @@ import * as express from "express";
 import { ExecutionParams } from "subscriptions-transport-ws";
 import { ContainerInstance } from "@bluelibs/core";
 import { UploadOptions } from "graphql-upload";
+import { RequestHandler } from "express";
 
 export type ApolloBundleConfigType = {
   port?: number;
   url?: string;
   apollo?: ApolloServerExpressConfig;
   enableSubscriptions?: boolean;
-  middlewares?: any[];
+  middlewares?: RequestHandler[];
   routes?: IRouteType[];
   uploads?: false | UploadOptions;
   /**
