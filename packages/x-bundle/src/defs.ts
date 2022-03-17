@@ -1,3 +1,5 @@
+export * from "./behaviors/defs";
+
 import { Constructor, ContainerInstance } from "@bluelibs/core";
 import { IAstToQueryOptions } from "@bluelibs/nova";
 import { ClientOpts } from "redis";
