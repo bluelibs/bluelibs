@@ -23,6 +23,7 @@
     "package:generate": "ts-node package.ts"
   },
   "dependencies": {
+    "cache-manager": "^3.6.0",
     "chalk": "^4.1.0",
     "date-fns": "^2.14.0",
     "dot-object": "^2.1.4",
@@ -31,6 +32,7 @@
     "graphql-type-json": "^0.3.2",
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.2",
+    "node-object-hash": "^2.3.10",
     "queue": "^6.0.2",
     "redis": "^3.0.2",
     "uuid": "^8.3.2"
@@ -63,6 +65,7 @@
     "@bluelibs/security-bundle": "^1.0.0",
     "@bluelibs/security-mongo-bundle": "^1.0.0",
     "@bluelibs/validator-bundle": "^1.0.0",
+    "@types/cache-manager": "^3.4.3",
     "@types/chai": "^4.2.3",
     "@types/chai-as-promised": "^7.1.2",
     "@types/dot-object": "^2.1.2",
