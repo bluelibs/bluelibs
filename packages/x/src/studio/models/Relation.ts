@@ -53,7 +53,7 @@ export class Relation extends BaseModel<Relation> {
    * For example, if I have Post relating to User, user is represented by "fullName"
    * @cleanable
    */
-  representedBy?: Resolvable<Field | Field[]>;
+  representedBy?: Resolvable<Field>;
 
   /**
    * Mocking information, how many should we generate?

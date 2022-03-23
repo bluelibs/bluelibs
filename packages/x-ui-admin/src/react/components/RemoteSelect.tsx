@@ -3,7 +3,6 @@ import { Constructor } from "@bluelibs/core";
 import { Collection, use, useData } from "@bluelibs/x-ui";
 import { Alert, Select, SelectProps, Spin } from "antd";
 import { ObjectId } from "@bluelibs/ejson";
-import * as _ from "lodash";
 
 export type RemoteSelectProps = SelectProps<any> & {
   collectionClass: Constructor<Collection<any>>;
@@ -34,7 +33,10 @@ export function RemoteSelect(props: RemoteSelectProps) {
   const { data, isLoading, error } = useData(
     props.collectionClass,
     {},
-    _.set({ _id: 1 }, field.split("."), 1)
+    {
+      _id: 1,
+      [props.field]: 1,
+    }
   );
 
   if (isLoading) {
@@ -46,7 +48,7 @@ export function RemoteSelect(props: RemoteSelectProps) {
 
   const options = data.map((d) => (
     <Select.Option key={d._id.toString()} value={d._id.toString()}>
-      {_.get(d, field.split("."), "N/A").toString()}
+      {d[props.field] ? d[props.field].toString() : "N/A"}
     </Select.Option>
   ));
 
