@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-admin",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "public": true,
   "description": "The administration interface built for speed.",
   "main": "dist/index.js",
@@ -31,6 +31,7 @@
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/x-ui": "^1.0.0",
+    "@bluelibs/x-ui-i18n-bundle": "^1.2.0",
     "@bluelibs/x-ui-react-router-bundle": "^1.0.4",
     "antd": "^4.12.3",
     "moment": "^2.25.3",
