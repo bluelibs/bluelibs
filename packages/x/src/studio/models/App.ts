@@ -22,11 +22,28 @@ export class BaseModel<T = null> {
       return this.app.collections.find((c) => c.id === id);
     },
 
-    field: (collectionId: string, id: string): Field => {
+    //return field or array of fields in case the id was nested path as 'key1.key2.key3'=>[field1,field2,field3]
+    field: (collectionId: string, id: string): Field | Field[] => {
       const collection = this.find.collection(collectionId);
-      const f = collection.fields.find((f) => f.id === id);
-
-      return f;
+      let fieldsPathIds = id.split(".");
+      if (fieldsPathIds.length === 1) {
+        return collection.fields.find((f) => f.id === id);
+      } else {
+        //we wanna return all the fields that represent the path to the nested attribut field1:{subfield:[field2:{}]}
+        let headField = collection.fields.find(
+          (f) => f.id === fieldsPathIds[0]
+        );
+        let arrayFields = [headField];
+        fieldsPathIds = fieldsPathIds.slice(1);
+        for (let fieldId of fieldsPathIds) {
+          if (headField?.subfields && headField?.subfields.length > 0) {
+            let subField = headField.subfields.find((sf) => sf.id == fieldId);
+            arrayFields.push(subField);
+            headField = subField;
+          } else break;
+        }
+        return arrayFields;
+      }
     },
 
     model: (id: string): SharedModel => {

@@ -47,7 +47,7 @@ export class Collection extends BaseModel<Collection> {
    * When other collections relate to this, we need a toString() version of this collection document.
    * This can be a field reducer or an actual field, like "fullName" for `User`, or "name" for `Project`
    */
-  representedBy: Resolvable<Field>;
+  representedBy: Resolvable<Field | Field[]>;
 
   /**
    * Collections which have an external package are not written, they exist only to be able to properly link with them.

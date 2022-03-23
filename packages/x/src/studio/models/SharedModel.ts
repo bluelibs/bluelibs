@@ -27,7 +27,7 @@ export class SharedModel extends BaseModel<SharedModel> {
   /**
    * By which field it's going to be represented?
    */
-  representedBy?: Resolvable<Field>;
+  representedBy?: Resolvable<Field | Field[]>;
 
   /**
    * Whether this collection is something users can see
