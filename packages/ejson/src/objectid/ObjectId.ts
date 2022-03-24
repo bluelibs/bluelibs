@@ -27,7 +27,7 @@ const kId = Symbol("id");
  * @public
  */
 export class ObjectId {
-  _bsontype!: "ObjectId";
+  _bsontype?: any;
 
   /** @internal */
   static index = Math.floor(Math.random() * 0xffffff);
