@@ -295,13 +295,13 @@ export abstract class Collection<T = null> {
 
     /* This code is adding the refetchBody to the computedRefetchBody. */
     if (typeof refetchBody === "function") {
-      Object.assign(computedRefetchBody, refetchBody(toQueryBody(document)));
+      Object.assign(computedRefetchBody, refetchBody(toQueryBody(update)));
     } else if (
       isEmptyObject(refetchBody) &&
-      this.autoRefetchMutatedFields.onInsert
+      this.autoRefetchMutatedFields.onUpdate
     ) {
       // If no refetchBody is provided, then infer it from the mutated fields
-      Object.assign(computedRefetchBody, toQueryBody(document));
+      Object.assign(computedRefetchBody, toQueryBody(update));
     } else {
       Object.assign(computedRefetchBody, refetchBody);
     }
