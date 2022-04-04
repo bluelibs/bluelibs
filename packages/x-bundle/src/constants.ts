@@ -3,6 +3,8 @@ import { IMessenger, IXBundleConfig } from "./defs";
 import * as chalk from "chalk";
 import { Router } from "./services/Router";
 import type { ClientOpts } from "redis";
+import { ICacheManagerConfig } from "./cache/defs";
+import { CacheService } from "./cache/CacheService";
 
 export const MESSENGER = new Token<IMessenger>("MESSENGER");
 export const IS_LIVE_DEBUG = new Token<boolean>("IS_LIVE_DEBUG");
@@ -10,6 +12,8 @@ export const REDIS_OPTIONS = new Token<ClientOpts>("REDIS_OPTIONS");
 export const X_SETTINGS = new Token<IXBundleConfig>();
 export const APP_ROUTER = new Token<Router>();
 export const ROOT_ROUTER = new Token<Router>();
+export const CACHE_CONFIG = new Token<ICacheManagerConfig>();
+export const CACHE_SERVICE_TOKEN = new Token<CacheService>();
 
 export const X_FRAMEWORK_LOGO = String.raw`
 xxxxxxx      xxxxxxx

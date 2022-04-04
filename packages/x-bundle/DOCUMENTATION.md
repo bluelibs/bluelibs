@@ -970,6 +970,117 @@ export default {
 };
 ```
 
+### Caching
+
+In order to improve your app's performance, you can use our caching:
+
+#### Usage
+
+Inside your resolver, use the cache Executor and feed it the chain of functions as an array,
+
+```ts
+{
+  Query: [
+    [],
+    {
+      UsersFind: [X.Cache([X.ToNova(UsersCollection)])],
+      UsersCount: [X.ToCollectionCount(UsersCollection)],
+    },
+  ];
+}
+```
+
+You can also use unique caching configuration for every resolver method by pasing object of options,
+The options fields are :
+| field | type | default | description |
+|--------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------|
+| ttl | number | 30 | expiration time of cached Data in seconds |
+| refresh | boolean | false | if true :reset ttl count of a cached data, every time this data is consumed from the cache |
+| contextBoundness | boolean | true | if true: takes into account other fields in order to personalize cache usage for every user/role.. |
+| contextBoundnessFields | string[] | ["userId"] | if contextBoundness is true: the fields we want to build on the user boundness. those fields expected to be in ctx |
+| expirationBoundness | boolean | true | if true: takes into account the expiration time of the data |
+| expirationBoundnessField | string | "expiredAt" | if expirationBoundness is true: the field of the expiration date or duration in seconds, Date or number |
+
+```ts
+{
+  Query: [
+    [],
+    {
+      UsersFind: [
+        X.Cache([X.ToNova(UsersCollection)], {
+          ttl: 30,
+          refresh: false,
+          contextBoundness: true,
+          contextBoundnessFields: ["userId"],
+          expirationBoundness: true,
+          expirationBoundnessField: "expiredAt",
+        }),
+      ],
+    },
+  ];
+}
+```
+
+#### Configuration
+
+The integrated default configuration of the caching is:
+
+```ts
+const cacheConfig = {
+  store: "memory",
+  storeConfig: {
+    max: 100,
+    ttl: 60,
+    refreshThreshold: 1,
+  },
+  resolverDefaultConfig: {
+    ttl: 30,
+    contextBoundness: true,
+    contextBoundnessFields: ["userId"],
+    expirationBoundness: true,
+    expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
+    refresh: false,
+  },
+};
+```
+
+The "resolverDefaultConfig" is the default configuration for the caching options, that you can override in specific resolvers by passing other values in options,
+
+Our caching is built on top of the [node-cache-manager package](https://github.com/BryanDonovan/node-cache-manager), that presents a number of store engines options and also the possibility to use your custom store,
+
+Example of usage:
+
+```ts
+import * as RedisStore from "cache-manager-redis";
+
+export const kernel = new Kernel({
+  bundles: [
+    new XBundle({
+      appUrl: env.APP_URL,
+      rootUrl: env.ROOT_URL,
+      cacheConfig: {
+        store: redisStore,
+        storeConfig: {
+          host: "localhost",
+          port: 6379,
+          auth_pass: "XXXXX",
+          db: 0,
+          ttl: 600,
+        },
+        resolverDefaultConfig: {
+          ttl: 30,
+          refresh: false,
+          contextBoundness: true,
+          contextBoundnessFields: ["userId"],
+          expirationBoundness: true,
+          expirationBoundnessField: "expiredAt", //secondsCount or DateTime,
+        },
+      },
+    }),
+  ],
+});
+```
+
 ### Deployment & Customisation
 
 When you deploy on more than one server, you need a way to communicate for live data. You have the built-in redis tool:

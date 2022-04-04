@@ -1,7 +1,6 @@
 export default /* GraphQL */`
   type Query {
     {{ crudName }}FindOne(query: QueryInput): {{ entityType }}
-    {{ crudName }}FindOneByID(_id: ObjectId!): {{ entityType }}
     {{ crudName }}Find(query: QueryInput): [{{ entityType }}]!
     {{ crudName }}Count(query: QueryInput): Int!
   }
