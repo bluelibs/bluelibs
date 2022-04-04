@@ -157,7 +157,13 @@ export class PermissionService implements IPermissionService {
    */
   protected transformToFilters(object: any): IPermissionSearchFilters {
     const newObject = {};
-    ["userId", "permission", "domain", "domainIdentifier"].forEach((key) => {
+    [
+      "userId",
+      "permission",
+      "domain",
+      "domainIdentifier",
+      "createdById",
+    ].forEach((key) => {
       if (object[key]) {
         newObject[key] = Array.isArray(object[key])
           ? object[key]
