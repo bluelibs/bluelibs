@@ -79,8 +79,20 @@ export class PermissionsPersistanceService implements IPermissionPersistance {
       includesUser = Boolean(search.userId.includes(permission.userId));
     }
 
+    let includesCreatedById = true;
+
+    if (search.createdById) {
+      includesCreatedById = Boolean(
+        search.createdById.includes(permission.createdById)
+      );
+    }
+
     return (
-      includesUser && includesPermission && domainCheck && domainIdentifierCheck
+      includesUser &&
+      includesCreatedById &&
+      includesPermission &&
+      domainCheck &&
+      domainIdentifierCheck
     );
   }
 }
