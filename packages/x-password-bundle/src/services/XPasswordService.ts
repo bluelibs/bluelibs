@@ -367,8 +367,8 @@ export class XPasswordService implements IXPasswordService {
   }
 
   async requestLoginLink(input: RequestLoginLinkInput): Promise<any> {
-    const userId = ObjectId(input.userId)
-      ? ObjectId(input.userId)
+    const userId = input.userId
+      ? new ObjectId(input.userId)
       : await this.passwordService.findUserIdByUsername(input.username);
     const user = await this.securityService.findUserById(userId, {
       profile: 1,

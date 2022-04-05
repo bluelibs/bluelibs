@@ -82,66 +82,6 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
       verifyMagicCode: true,
       me: true,
     },
-    socialAuth: {
-      services: {
-        facebook: {
-          settings: {
-            clientID: "YOUR_API_KEY",
-            clientSecret: "YOUR_API_SECRET",
-            authParameters: {
-              profileFields: [
-                "id",
-                "displayName",
-                "photos",
-                "email",
-                "gender",
-                "name",
-              ],
-              scope: ["email"],
-            },
-          },
-          url: {
-            auth: "/auth/facebook",
-            callback: "/auth/facebook/callback",
-            success: "http://127.0.0.1:8080/auth/social/",
-            fail: "http://127.0.0.1:8080/login",
-          },
-        },
-        google: {
-          settings: {
-            clientID:
-              "592668739298-48heqacbgvlbljgtkvougkdqa6d7uccp.apps.googleusercontent.com",
-            clientSecret: "5GFY5V104cnx7-dl6Qi8wqNP",
-            authParameters: {
-              scope: ["profile", "email"],
-            },
-          },
-          url: {
-            auth: "/auth/google",
-            callback: "/auth/google/callback",
-            success: "http://127.0.0.1:8080/auth/social/",
-            fail: "http://127.0.0.1:8080/login",
-          },
-        },
-        github: {
-          settings: {
-            clientID: "8be0633f1d4533782fd9",
-            clientSecret: "73cb9e12f92fac4b527a9360b3b87a4e7b118385",
-            authParameters: {
-              scope: ["user:email"],
-            },
-          },
-          url: {
-            auth: "/auth/github",
-            callback: "/auth/github/callback",
-            success: "http://127.0.0.1:8080/auth/social/",
-            fail: "http://127.0.0.1:8080/login",
-          },
-        },
-      },
-
-      url: "http://127.0.0.1:5000",
-    },
     multipleFactorAuth: {
       factors: [
         {
@@ -162,7 +102,7 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
   async prepare() {
     this.container.set(X_PASSWORD_SETTINGS, this.config);
 
-    if (this.defaultConfig.services?.MultipleFactorService) {
+    if (this.config.services?.MultipleFactorService) {
       this.container.set({
         id: MULTIPLE_FACTORS_AUTH,
         type: MultipleFactorService,

@@ -44,12 +44,12 @@ export class MultipleFactorService {
   async defaultUserHaveToMultipleFactorAuth(userId: UserId): Promise<boolean> {
     const user = await this.securityService.findUserById(userId, {
       profile: 1,
+      lastLoginAt: 1,
     });
-    return true;
+
     if (
-      new Date(user.lasrLoginAt).getTime() -
-        new Date(user.lastLoginAt).getTime() >
-      24 * 60 * 60 * 1000
+      new Date().getTime() >
+      new Date(user.lastLoginAt).getTime() + 7 * 24 * 60 * 60 * 1000 //week
     )
       return true;
     else return false;
@@ -62,7 +62,7 @@ export class MultipleFactorService {
     if (
       !this.isMultipleFactorRequired() ||
       (this.isMultipleFactorRequired() &&
-        !this.userHaveToMultipleFactorAuth(userId))
+        !(await this.userHaveToMultipleFactorAuth(userId)))
     ) {
       return { token: await this.securityService.login(userId, options) };
     }
@@ -112,12 +112,6 @@ export class MultipleFactorService {
           )?.redirectUrl + `?userId=${userId}&sessionToken=${sessionToken}`,
         strategy: nextUnauthrozedStrategy,
       };
-      /*return {
-        token:
-          this.config.multipleFactorAuth.factors.find(
-            (f) => f.strategy === nextUnauthrozedStrategy
-          )?.redirectUrl + `?userId=${userId}&sessionToken=${sessionToken}`,
-      };*/
     }
   }
 

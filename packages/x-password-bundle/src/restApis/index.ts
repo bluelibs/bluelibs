@@ -32,7 +32,7 @@ export function injectRestAuthRoutes(
             } catch (err) {
               console.log(err);
               res.json({
-                message: `something wen wrong! with route${api.name}`,
+                message: `something wen wrong! with route ${api.name}`,
               });
             }
           }

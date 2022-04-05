@@ -11,6 +11,7 @@ import {
   VerifyMagicLinkInput,
 } from "../inputs/RequestMagicLinkInput";
 import * as X from "@bluelibs/x-bundle";
+import { SecurityService } from "@bluelibs/security-bundle";
 
 export const REST_APIS: {
   name: string;
@@ -88,7 +89,6 @@ export const REST_APIS: {
     path: "/me",
     handler: async (container, req, res, next) => {
       try {
-        await X.CheckLoggedIn();
       } catch (err) {
         console.log(err);
         res.json({ message: `something wen wrong! with route me` });
