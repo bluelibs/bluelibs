@@ -142,6 +142,26 @@ export interface IXPasswordBundleConfig {
 }
 ```
 
+you can also get REST apis versions of those mutation in addition to me Query, if you toggled on/off the rest attribute :
+
+```ts
+// The configuration is:
+export interface IXPasswordBundleConfig {
+  rest: {
+    login: true;
+    logout: true;
+    register: true;
+    changePassword: true;
+    resetPassword: true;
+    forgotPassword: true;
+    verifyEmail: true;
+    requestLoginLink: true;
+    verifyMagicCode: true;
+    me: true;
+  };
+}
+```
+
 ## Custom Registration
 
 By default registration accepts `firstName`, `lastName`, `email` and `password`. If you have a more complex registration, we recommend disabling `register` mutation as shown above and implement your own:
@@ -190,12 +210,28 @@ function register(_, args: InputType<RegisterInput>, context: IGraphQLContext) {
 }
 ```
 
+## Magic Link/Code Authentication
+
+We provide in addition to password authentication option, an option to lgoin by sending a magic code/token to the user email, and you can implement the sms, phonecall too,
+
+```ts
+// The configuration is:
+export interface IXPasswordBundleConfig {
+  magicCodeLifeDuration: "5m"; //how long the sent code would stay valid
+  magicAuthFormat: "code"; // the format of the validation: code,token or qrCode
+  leftSubmissionsCount: 3; // how many submissions before we blokc the user from using this method
+}
+```
+
 ## Override Logic
 
 You can modify behavior of your mutation resolvers by creating your own `XPasswordService`:
 
 ```ts
-import { RegistrationInput, XPasswordService } from "@bluelibs/x-password-bundle";
+import {
+  RegistrationInput,
+  XPasswordService,
+} from "@bluelibs/x-password-bundle";
 
 class MyXPasswordService extends XPasswordService {
   register(input: RegistrationInput) {
@@ -210,4 +246,115 @@ new XPasswordBundle({
     XPasswordService: MyXPasswordService,
   },
 });
+```
+
+## Multiple Factor Authentication
+
+The multiple factor strategy, is configured like this:
+
+```ts
+// The configuration is:
+export interface IXPasswordBundleConfig {
+  multipleFactorAuth: {
+    //an array of the auth strategies that the multiple will be based on, with theire redirect links that will be configured in front end, the name of strategy is imported from constants
+      factors: [
+        {
+          strategy: PASSWORD_STRATEGY,
+          redirectUrl: "http://localhost:8080/login",
+        },
+        {
+          strategy: MAGIC_AUTH_STRATEGY,
+          redirectUrl: "http://localhost:8080/request-magic-link",
+        },
+      ],
+
+      //this Optionnal method decide if the user have to multiple factor or not, the default methdo right now is judging based on last loginAt,
+      userHaveToMultipleFactorAuth: (userId: UserId):Promise<boolean> => {
+        ...
+      };
+    }
+}
+```
+
+and how it's working, is if the `userHaveToMultipleFactorAuth` return true for a user, it will create a session and check just the method he just login using for example password, and instead of returning the token, it redirect to the next un-checked auth method with the session id,
+
+if you decide to override logic and extend from `IMultipleFactorService`, you can implement what ever auth strategy, just give a strategy name and a redirect link, and dont forget to use the session id
+
+## Social Auth - Passport
+
+Bluelibs contains a feature that allows you to use what ever passport strategy, with simple user data control logic valid for all strategies:
+
+```ts
+// The configuration is:
+export interface IXPasswordBundleConfig {
+  socialAuth: {
+    //decide what to do with user Data after social login
+    onSocialAuth?: (
+      req,
+      type,
+      uniqueProperty,
+      accessToken,
+      refreshToken,
+      profile,
+      done
+    ) => any;
+    services: {
+      facebook: {
+        settings: {
+          clientID: "";
+          clientSecret: "";
+          authParameters: {
+            profileFields: [
+              "id",
+              "displayName",
+              "photos",
+              "email",
+              "gender",
+              "name"
+            ];
+            scope: ["email"];
+          };
+        };
+        url: {
+          auth: "/auth/facebook";
+          callback: "/auth/facebook/callback";
+          success: "http://localhost:8080/auth/social/";
+          fail: "http://localhost:8080/login";
+        };
+      };
+      google: {
+        settings: {
+          clientID: "";
+          clientSecret: "";
+          authParameters: {
+            scope: ["profile", "email"];
+          };
+        };
+        url: {
+          auth: "/auth/google";
+          callback: "/auth/google/callback";
+          success: "http://localhost:8080/auth/social/";
+          fail: "http://localhost:8080/login";
+        };
+      };
+      github: {
+        settings: {
+          clientID: "";
+          clientSecret: "";
+          authParameters: {
+            scope: ["user:email"];
+          };
+        };
+        url: {
+          auth: "/auth/github";
+          callback: "/auth/github/callback";
+          success: "http://localhost:8080/auth/social/";
+          fail: "http://localhost:8080/login";
+        };
+      };
+    };
+
+    url: "http://loclahost:5000"; // this will be the express app  url
+  };
+}
 ```
