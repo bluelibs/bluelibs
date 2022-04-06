@@ -54,7 +54,7 @@ export class PasswordService implements IPasswordService {
       await this.securityService.findThroughAuthenticationStrategy<IPasswordAuthenticationStrategy>(
         this.method,
         {
-          username,
+          username: username.toLowerCase(),
         },
         fields
       );
