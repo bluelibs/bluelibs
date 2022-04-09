@@ -214,13 +214,30 @@ export class UICRUDModel {
    * The list for i18n fields for forms, lists, and everything
    */
   generateI18NFieldsAsJSON(): string {
+    const fields = [];
+    //this is not the cleanest way, but its making sure we get the current data
+    this.studioCollection.fields.map((field) => {
+      fields.push(...field.getSelfAndAllNestedFields());
+    });
+    const relations = this.studioCollection.relations;
     const i18nSignatures = [
-      ...this.studioCollection
-        .getFlattenedFields()
-        .map((field) => field.getI18NSignature()),
-      ...this.studioCollection.relations.map((relation) =>
-        relation.getI18NSignature()
-      ),
+      ...fields.map((field, index) => {
+        if (
+          field?.parent?.model &&
+          !(field?.parent?.model as SharedModel).isEnum()
+        ) {
+          //force the previous sharedmodel field to be the parent
+          return field.getI18NSignature(
+            fields
+              .slice(0, index)
+              .reverse()
+              .find((x) => x?.model?.id === field?.parent?.model?.id)
+          );
+        } else {
+          return field.getI18NSignature();
+        }
+      }),
+      ...relations.map((relation) => relation.getI18NSignature()),
     ];
 
     const obj = {};
