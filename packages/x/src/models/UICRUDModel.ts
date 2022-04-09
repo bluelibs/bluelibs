@@ -446,8 +446,8 @@ export class UICRUDModel {
                 Object.assign({}, base, {
                   id: `${field.id}.${subfield.id}`,
                   isMany: subfield.isArray,
-                  title: this.getI18NKey(subfield),
-                  description: this.getI18NKey(subfield, true),
+                  title: this.getI18NKey(subfield, undefined, field),
+                  description: this.getI18NKey(subfield, true, field),
                   required: subfield.isRequired,
                   order: subfield.ui && subfield.ui.order,
                   dataIndexStr: `["${field.id}", "${subfield.id}"]`,
@@ -470,8 +470,8 @@ export class UICRUDModel {
                 isMany: subfield.isArray,
                 required: subfield.isRequired,
                 order: subfield.ui && subfield.ui.order,
-                title: this.getI18NKey(subfield),
-                description: this.getI18NKey(subfield, true),
+                title: this.getI18NKey(subfield, undefined, field),
+                description: this.getI18NKey(subfield, true, field),
                 dataIndexStr: `["${field.id}", "${subfield.id}"]`,
                 rendererType: this.getRendererType(subfield),
                 enumValues: this.getEnumValuesLabels(
@@ -496,9 +496,14 @@ export class UICRUDModel {
     }
   }
 
-  getI18NKey(element: Field | Relation, isDescription = false): string | null {
+  getI18NKey(
+    element: Field | Relation,
+    isDescription = false,
+    forceParent?: Field
+  ): string | null {
     let label = `management.${this.generateI18NName()}.fields.`;
-    label += element.getI18NSignature().key;
+
+    label += element.getI18NSignature(forceParent).key;
 
     if (!element.description && isDescription) {
       return null;
