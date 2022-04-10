@@ -522,7 +522,7 @@ collection.updateOne(
 );
 ```
 
-Of course, you're free to specify your own refetch body instead, which will fully override the inferred one. Even better : let's say you actually want to refetch the updated field plus an additional one. For this case, we expose the internal function `toQueryBody`, such as :
+Of course, you're free to specify your own refetch body instead, either by passing a QueryBody object. This will fully override the inferred one. Even better : let's say you actually want to refetch the updated field plus an additional one. For this case, we expose the internal function `toQueryBody`, such as :
 
 ```ts
 // You may either use `collection.toQueryBody` or import the standalone version
@@ -538,6 +538,30 @@ collection.updateOne(post._id, input, {
 
     textExcerpt: 1,
   },
+});
+```
+
+A better approach though is to pass a function that takes as parameter the QueryBody inferred from the input and allow you to extend it.
+
+For example, if you are submitting a form that contains a nullable `Address` object, with `address: null`, `toQueryBody` won't be able to infer the subfields of `Address` on its own. In which case, you could simply do :
+
+```ts
+// You may either use `collection.toQueryBody` or import the standalone version
+import { toQueryBody } from "@bluelibs/x-ui-collections-bundle";
+
+const input = {
+  text: "My new Text",
+  address: null,
+};
+
+collection.updateOne(post._id, input, {
+  refetchBody: (inferredQueryBody) => ({
+    ...inferredQueryBody,
+    address: {
+      street: 1,
+      city: 1,
+    },
+  }),
 });
 ```
 

@@ -224,7 +224,9 @@ export class ModelUtils {
     } else {
       // This is because when in input mode, enums are outside, and we have engine of hooking it via model
       if (field.model && field.model.isEnumAlias) {
-        defaultValue = `${field.model.name}.${field.defaultValue}`;
+        defaultValue = field.defaultValue
+          ? `${field.model.name}.${field.defaultValue}`
+          : `${field.defaultValue}`;
       } else if (typeof field.defaultValue === "string") {
         defaultValue = `"${field.defaultValue}"`;
       } else if (field.defaultValue instanceof Date) {

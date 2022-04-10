@@ -6,7 +6,7 @@
   "main": "dist/startup/index.js",
   "scripts": {
     "build": "ttsc",
-    "start": "node dist/startup/index.js",
+    "start": "TS_NODE_BASEURL=./dist node -r tsconfig-paths/register dist/startup/index.js",
     "start:dev": "tsnd --respawn -r tsconfig-paths/register src/startup/index.ts",
     "start:watch:debug": "nodemon --watch 'dist' dist/startup/index.js --inspect",
     "watch": "tsc -w",

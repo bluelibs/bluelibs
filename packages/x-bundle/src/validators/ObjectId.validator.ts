@@ -18,7 +18,7 @@ export class ObjectIdSchema extends yup.BaseSchema<any> {
 
   protected _typeCheck(_value: any): _value is NonNullable<any> {
     try {
-      return ObjectId.isValid(_value);
+      return ObjectId.isValid(_value) || ObjectId.isValid(_value.toString());
     } catch (e) {
       return false;
     }

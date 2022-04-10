@@ -101,6 +101,10 @@
         return (
         <Ant.Form.Item {...props}>
           <Ant.Select
+          {{# if required }}
+            {{ else }}
+            allowClear
+          {{/ if }}
             {{# if isMany }}
               mode="multiple"
             {{/ if }}

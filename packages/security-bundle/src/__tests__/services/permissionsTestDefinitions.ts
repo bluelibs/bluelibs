@@ -251,6 +251,8 @@ export const permissionServiceTestDefinitions = [
       const userId = "userId";
       const createdById = "createdById";
 
+      const unusedCreatedById = "abc";
+
       await service.add({
         userId,
         createdById,
@@ -258,11 +260,17 @@ export const permissionServiceTestDefinitions = [
         domain: PERMISSION_DEFAULT_DOMAIN,
       });
 
-      const permissions = await service.findPermissions({
+      let permissions = await service.findPermissions({
         createdById,
       });
 
       expect(permissions).toHaveLength(1);
+
+      permissions = await service.findPermissions({
+        createdById: unusedCreatedById,
+      });
+
+      expect(permissions).toHaveLength(0);
     },
   },
 ];
