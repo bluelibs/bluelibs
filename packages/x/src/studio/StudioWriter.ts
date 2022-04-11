@@ -335,7 +335,7 @@ export class StudioWriter {
   ) {
     const writer = this.writers.uiCollectionCRUD;
 
-    studioApp.collections.forEach((collection) => {
+    studioApp.collectionsToWrite.forEach((collection) => {
       if (collection.ui === false) {
         return;
       }
@@ -362,7 +362,7 @@ export class StudioWriter {
   ) {
     const writer = this.writers.uiCollection;
 
-    studioApp.collections
+    studioApp.collectionsToWrite
       .filter((c) => c.hasGraphQL("entity"))
       .forEach((collection) => {
         if (collection.isExternal()) {
@@ -411,7 +411,7 @@ export class StudioWriter {
   ) {
     const microservicePath = session.getMicroservicePath();
     const crudWriter = this.writers.graphQLCRUD;
-    for (const collection of studioApp.collections) {
+    for (const collection of studioApp.collectionsToWrite) {
       if (!collection.hasGraphQL("crud")) {
         continue;
       }
@@ -475,7 +475,7 @@ export class StudioWriter {
     const microservicePath = session.getMicroservicePath();
     const linkWriter = this.writers.collectionLink;
 
-    for (const collection of studioApp.collections) {
+    for (const collection of studioApp.collectionsToWrite) {
       for (const _relation of collection.relations) {
         const relation = _relation.cleaned;
 
@@ -540,7 +540,7 @@ export class StudioWriter {
     const microservicePath = session.getMicroservicePath();
     const reducerWriter = this.container.get(CollectionReducerWriter);
 
-    for (const collection of studioApp.collections) {
+    for (const collection of studioApp.collectionsToWrite) {
       collection.fields
         .filter((f) => f.isReducer)
         .forEach((field) => {
@@ -684,7 +684,7 @@ export class StudioWriter {
   ) {
     const collectionWriter = this.writers.collection;
     // Create collections on the backend.
-    for (const collection of studioApp.collections) {
+    for (const collection of studioApp.collectionsToWrite) {
       // Ignore external collections
       if (collection.isExternal()) {
         continue;

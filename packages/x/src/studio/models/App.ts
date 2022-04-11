@@ -107,10 +107,14 @@ export class App extends BaseModel<App> {
    */
   id: string;
   collections: Collection[] = [];
+  collectionsToWrite: Collection[] = [];
   sharedModels: Array<SharedModel> = [];
+  skip: string[];
+  only: string[];
 
   clean() {
     this.app = this;
+
     // this.collections = this.instanceify(this.collections, Collection);
     // this.sharedModels = this.instanceify(this.sharedModels, SharedModel);
 
@@ -127,6 +131,21 @@ export class App extends BaseModel<App> {
       c.app = this;
       c.clean();
     });
+
+    this.collectionsToWrite = this.collections;
+
+    //skip and only strategies
+    if (this.app.skip?.length) {
+      this.collectionsToWrite = this.collectionsToWrite.filter(
+        (c) => !this.skip.some((s) => s === c.id)
+      );
+    }
+
+    if (this.app.only?.length) {
+      this.collectionsToWrite = this.collectionsToWrite.filter((c) =>
+        this.only.some((s) => s === c.id)
+      );
+    }
   }
 
   /**
