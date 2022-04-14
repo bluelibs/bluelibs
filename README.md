@@ -42,8 +42,6 @@ npm run start:api
 npm run start:admin # Start after API has started
 ```
 
-
-
 ## Learning BlueLibs
 
 We have designed a custom [documentation](https://www.bluelibs.com/docs) experience with custom code snippets and challenges.
@@ -87,3 +85,31 @@ npm run test:dev
 ```
 
 To run tests in C.I, we have the command `npm run test` which compiles the code and runs the final tests.
+
+## Branching & Commits
+
+**Names**
+
+- feature/{package}/{issueNumber}-short-summary (feature/mongo-bundle/143-solve-the-bug-with-blablbla)
+- fix/{package}/{issueNumber}-short-summary
+- fix/{package1}-{package2}/{issueNumber}-short-summary
+
+**Commits**
+
+- fix({package}): {message} (#143)
+- Example: fix(mongo-bundle): Solved the issue with async (#143))
+- feat({package}): {message} (#143)
+- deps({package}): {version}
+- docs({package}): {message}
+
+- fix({package1}, {package2}): {message}
+
+**PRs**
+
+- Checkout from `main`
+- `git checkout -b feature/{package}/{issueNumber}-short-summary`
+- an initial empty commit: git commit -m "fix({ package }): do that (#143)" --allow-empty
+- Create the PR prefixed with `[WIP] Title of the branch`
+- Ensure that inside the branch there's a link to the issue
+- Create for yourself a list of tasks for the issue (Implementation, Testing, Documentation) using GitHub Task's markdown
+- Once the task is ready prefix it with `[R]`.

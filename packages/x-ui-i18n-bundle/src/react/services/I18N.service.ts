@@ -96,4 +96,8 @@ export class I18NService {
 
     return polyglot;
   }
+
+  getCurrentPolyglot(): string {
+    return this.activePolyglot["currentLocale"] || this.config?.defaultLocale;
+  }
 }

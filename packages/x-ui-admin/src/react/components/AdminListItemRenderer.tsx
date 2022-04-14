@@ -1,10 +1,11 @@
-import { IRoute } from "@bluelibs/x-ui";
+import { I18NService, IRoute, use } from "@bluelibs/x-ui";
 import { Button, Tag, Tooltip } from "antd";
 import * as React from "react";
 import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 import * as startCase from "lodash.startcase";
 import { ObjectId } from "@bluelibs/ejson";
+import * as _ from "lodash";
 
 const emptyValue = "N/A";
 
@@ -45,6 +46,7 @@ export function DownloadButton({ name, downloadUrl }) {
  */
 export function AdminListItemRenderer(props: AdminListItemRendererProps) {
   let value;
+  const i18n = use(I18NService);
 
   if (props.type === "string" || props.type === "number") {
     value = <span>{props.value}</span>;
@@ -59,11 +61,12 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
   }
 
   if (props.type === "date") {
+    const local = i18n?.getCurrentPolyglot();
     if (props.value instanceof Date) {
-      value = props.value.toLocaleDateString();
+      value = props.value.toLocaleDateString(local);
     } else {
       if (typeof props.value === "number") {
-        value = new Date(props.value as number).toLocaleDateString();
+        value = new Date(props.value as number).toLocaleDateString(local);
       }
     }
   }
@@ -121,7 +124,9 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
 
     value = (
       <Link to={props.relation.path}>
-        <Tag>{props.value[props.relation.dataIndex]}</Tag>
+        <Tag>
+          {_.get(props.value, props.relation.dataIndex.split("."), emptyValue)}
+        </Tag>
       </Link>
     );
   }

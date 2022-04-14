@@ -62,6 +62,7 @@ export class UICollectionCRUDWriter extends BlueprintWriter {
 
     ["create", "edit", "view", "list"].forEach((feature: CRUDFeatureType) => {
       if (model.hasFeature(feature)) {
+        model.typesToImport[feature] = model.generateApiTypesImports(feature);
         const upperedFeature = _.upperFirst(feature);
         fsOperator.sessionCopy(
           tpl("ui/crud2/components/" + upperedFeature),

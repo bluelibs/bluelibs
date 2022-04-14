@@ -12,7 +12,7 @@ export type LiveOptionsType = {
 };
 
 declare module "@bluelibs/mongo-bundle" {
-  interface IExecutionContext {
+  export interface IExecutionContext {
     live?: LiveOptionsType;
   }
 }

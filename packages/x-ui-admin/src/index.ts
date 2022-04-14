@@ -7,3 +7,4 @@ export { XUIAdminBundle } from "./XUIAdminBundle";
 export * from "./constants";
 export * from "./defs";
 export * from "./react";
+export * from "./services";
