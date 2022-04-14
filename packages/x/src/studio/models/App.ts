@@ -24,7 +24,11 @@ export class BaseModel<T = null> {
 
     field: (collectionId: string, id: string): Field => {
       const collection = this.find.collection(collectionId);
-      const f = collection.fields.find((f) => f.id === id);
+      const ids = id.split(".");
+      let f: Field;
+      for (let fieldId of ids) {
+        f = (f ? f.subfields : collection.fields).find((f) => f.id === fieldId);
+      }
 
       return f;
     },
