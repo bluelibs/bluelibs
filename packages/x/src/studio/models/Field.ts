@@ -150,6 +150,11 @@ export class Field extends BaseModel<Field> {
       this.enumValues = Field.getCleanedEnumValues(this.enumValues);
     }
 
+    //disable ui for disabled graphql fields
+    if (!this.enableGraphQL) {
+      this.ui = false;
+    }
+
     this.subfields.forEach((s) => {
       s.app = this.app;
       s.collection = this.collection;

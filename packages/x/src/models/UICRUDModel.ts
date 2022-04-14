@@ -160,34 +160,36 @@ export class UICRUDModel {
    * TODO: move to own function separated from here
    */
   recursiveBodyExpand(mode: UIModeType, body: object, fields: Field[]) {
-    fields.forEach((field) => {
-      const model = field.model as SharedModel;
-      if (model && !model.isEnum()) {
-        body[field.id] = {};
-        this.recursiveBodyExpand(
-          mode,
-          body[field.id],
-          field.cleaned.model.fields
-        );
+    fields
+      .filter((f) => f.enableGraphQL)
+      .forEach((field) => {
+        const model = field.model as SharedModel;
+        if (model && !model.isEnum()) {
+          body[field.id] = {};
+          this.recursiveBodyExpand(
+            mode,
+            body[field.id],
+            field.cleaned.model.fields
+          );
 
-        // If the subfields haven't been found
-        if (Object.keys(body).length === 0) {
-          delete body[field.id];
-        }
-      } else if (field.subfields.length) {
-        body[field.id] = {};
-        this.recursiveBodyExpand(mode, body[field.id], field.subfields);
+          // If the subfields haven't been found
+          if (Object.keys(body).length === 0) {
+            delete body[field.id];
+          }
+        } else if (field.subfields.length) {
+          body[field.id] = {};
+          this.recursiveBodyExpand(mode, body[field.id], field.subfields);
 
-        // If the subfields haven't been found
-        if (Object.keys(body).length === 0) {
-          delete body[field.id];
+          // If the subfields haven't been found
+          if (Object.keys(body).length === 0) {
+            delete body[field.id];
+          }
+        } else {
+          if (field.ui && field.ui[mode]) {
+            body[field.id] = 1;
+          }
         }
-      } else {
-        if (field.ui && field.ui[mode]) {
-          body[field.id] = 1;
-        }
-      }
-    });
+      });
   }
 
   collectionRoutePath() {
