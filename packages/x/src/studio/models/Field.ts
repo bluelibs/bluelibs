@@ -269,7 +269,8 @@ export class Field extends BaseModel<Field> {
     if (this.model) {
       const model = this.model as SharedModel;
       if (!model.isEnum()) {
-        this.cleaned.model.fields.forEach((field) => {
+        this.cleaned.model.cleaned.fields.forEach((field: Field) => {
+          field.parent = this;
           fields.push(...field.getSelfAndAllNestedFields());
         });
       }
@@ -287,9 +288,17 @@ export class Field extends BaseModel<Field> {
    *
    * @returns
    */
-  getI18NSignature(): { key: string; label: string; description?: string } {
+  getI18NSignature(forceParent?: Field): {
+    key: string;
+    label: string;
+    description?: string;
+  } {
     const parents: Field[] = [];
     let current: Field = this;
+
+    if (forceParent) {
+      current.parent = forceParent;
+    }
 
     while (current.parent) {
       parents.push(current.parent);

@@ -216,13 +216,30 @@ export class UICRUDModel {
    * The list for i18n fields for forms, lists, and everything
    */
   generateI18NFieldsAsJSON(): string {
+    const fields = [];
+    //this is not the cleanest way, but its making sure we get the current data
+    this.studioCollection.fields.map((field) => {
+      fields.push(...field.getSelfAndAllNestedFields());
+    });
+    const relations = this.studioCollection.relations;
     const i18nSignatures = [
-      ...this.studioCollection
-        .getFlattenedFields()
-        .map((field) => field.getI18NSignature()),
-      ...this.studioCollection.relations.map((relation) =>
-        relation.getI18NSignature()
-      ),
+      ...fields.map((field, index) => {
+        if (
+          field?.parent?.model &&
+          !(field?.parent?.model as SharedModel).isEnum()
+        ) {
+          //force the previous sharedmodel field to be the parent
+          return field.getI18NSignature(
+            fields
+              .slice(0, index)
+              .reverse()
+              .find((x) => x?.model?.id === field?.parent?.model?.id)
+          );
+        } else {
+          return field.getI18NSignature();
+        }
+      }),
+      ...relations.map((relation) => relation.getI18NSignature()),
     ];
 
     const obj = {};
@@ -431,8 +448,8 @@ export class UICRUDModel {
                 Object.assign({}, base, {
                   id: `${field.id}.${subfield.id}`,
                   isMany: subfield.isArray,
-                  title: this.getI18NKey(subfield),
-                  description: this.getI18NKey(subfield, true),
+                  title: this.getI18NKey(subfield, undefined, field),
+                  description: this.getI18NKey(subfield, true, field),
                   required: subfield.isRequired,
                   order: subfield.ui && subfield.ui.order,
                   dataIndexStr: `["${field.id}", "${subfield.id}"]`,
@@ -455,8 +472,8 @@ export class UICRUDModel {
                 isMany: subfield.isArray,
                 required: subfield.isRequired,
                 order: subfield.ui && subfield.ui.order,
-                title: this.getI18NKey(subfield),
-                description: this.getI18NKey(subfield, true),
+                title: this.getI18NKey(subfield, undefined, field),
+                description: this.getI18NKey(subfield, true, field),
                 dataIndexStr: `["${field.id}", "${subfield.id}"]`,
                 rendererType: this.getRendererType(subfield),
                 enumValues: this.getEnumValuesLabels(
@@ -481,9 +498,14 @@ export class UICRUDModel {
     }
   }
 
-  getI18NKey(element: Field | Relation, isDescription = false): string | null {
+  getI18NKey(
+    element: Field | Relation,
+    isDescription = false,
+    forceParent?: Field
+  ): string | null {
     let label = `management.${this.generateI18NName()}.fields.`;
-    label += element.getI18NSignature().key;
+
+    label += element.getI18NSignature(forceParent).key;
 
     if (!element.description && isDescription) {
       return null;
