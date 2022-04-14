@@ -65,6 +65,7 @@ export class PermissionsCollection<T extends IPermission>
     if (!permissionToInsert.domain) {
       permissionToInsert.domain = null;
     }
+
     if (!permissionToInsert.domainIdentifier) {
       permissionToInsert.domainIdentifier = null;
     }
@@ -79,7 +80,7 @@ export class PermissionsCollection<T extends IPermission>
    */
   protected createMongoFilters(filters: IPermissionSearchFilters) {
     let mongoFilters: any = {};
-    const { userId, domain, domainIdentifier, permission } = filters;
+    const { userId, domain, domainIdentifier, permission, createdById } = filters;
 
     if (userId) {
       Object.assign(mongoFilters, { userId: { $in: userId } });
@@ -93,6 +94,12 @@ export class PermissionsCollection<T extends IPermission>
       Object.assign(mongoFilters, {
         domainIdentifier: { $in: domainIdentifier },
       });
+    }
+
+    if (createdById) {
+      Object.assign(mongoFilters, {
+        createdById: { $in: createdById }
+      })
     }
 
     if (permission) {
