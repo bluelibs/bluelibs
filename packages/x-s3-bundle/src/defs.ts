@@ -23,7 +23,8 @@ export type File = {
 };
 
 export type XS3BundleConfigType = {
-  s3: AWSS3Config;
+  stores?: Store[];
+  defaultStore?: Store;
   /**
    * Please use the s3 config variable
    * @deprecated
@@ -83,3 +84,25 @@ export type AWSS3Config = {
   endpoint: string;
   bucket: string;
 };
+
+export type LocalStorageConfig = {
+  localStoragePath: string;
+  downloadUrl: string;
+};
+
+export type UploadCredentials = AWSS3Config | LocalStorageConfig;
+
+export type Store = {
+  id: string;
+  type: string;
+  credentials: UploadCredentials;
+  service: any;
+  serviceInstance: any;
+  default?: boolean;
+};
+
+export enum StoreTypes {
+  S3 = "S3",
+  LOCAL = "LOCAL",
+  CUSTOM = "CUSTOM",
+}

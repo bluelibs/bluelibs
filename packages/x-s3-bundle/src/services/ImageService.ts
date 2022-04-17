@@ -1,6 +1,6 @@
 import * as os from "os";
 import * as sharp from "sharp";
-import { X_S3_CONFIG_TOKEN } from "../constants";
+import { UPLOAD_CONFIG } from "../constants";
 import { Inject } from "@bluelibs/core";
 import { XS3BundleConfigType } from "../defs";
 
@@ -8,7 +8,7 @@ const uploadDir = os.tmpdir();
 
 export class ImageService {
   constructor(
-    @Inject(X_S3_CONFIG_TOKEN)
+    @Inject(UPLOAD_CONFIG)
     protected readonly config: XS3BundleConfigType
   ) {}
 

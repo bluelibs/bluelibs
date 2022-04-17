@@ -9,6 +9,8 @@ export class AppFile {
   size: number;
   mimeType: string;
 
+  store?: string;
+
   metadata: object;
   thumbs: AppFileThumb[] = [];
 

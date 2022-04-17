@@ -8,12 +8,13 @@ import GraphQLAppFileGroup from "./graphql/entities/AppFileGroup.graphql";
 import { AppFileListener } from "./listeners/AppFileListener";
 import {
   APP_FILES_COLLECTION_TOKEN,
-  X_S3_CONFIG_TOKEN as X_S3_CONFIG_TOKEN,
+  UPLOAD_CONFIG,
   APP_FILE_GROUPS_COLLECTION_TOKEN,
 } from "./constants";
 import { ApolloBundle } from "@bluelibs/apollo-bundle";
 import { AppFilesCollection } from "./collections/appFiles/AppFiles.collection";
 import { AppFileGroupsCollection } from "./collections/appFileGroups/AppFileGroups.collection";
+import { prepareUploadStoresInstances } from "./services/prepareUploadStoresInstances";
 
 export class XS3Bundle extends Bundle<XS3BundleConfigType> {
   dependencies = [ApolloBundle, GraphQLBundle];
@@ -45,7 +46,9 @@ export class XS3Bundle extends Bundle<XS3BundleConfigType> {
   };
 
   async prepare() {
-    this.container.set(X_S3_CONFIG_TOKEN, this.config);
+    this.config = prepareUploadStoresInstances(this.config, this.container);
+
+    this.container.set(UPLOAD_CONFIG, this.config);
     this.container.set({
       id: APP_FILES_COLLECTION_TOKEN,
       type: this.config.appFilesCollection || AppFilesCollection,
@@ -60,7 +63,7 @@ export class XS3Bundle extends Bundle<XS3BundleConfigType> {
     const loader = this.container.get(Loader);
     loader.load({
       typeDefs: [GraphQLAppFile, GraphQLAppFileGroup],
-      resolvers: [GraphQLAppFileResolvers]
+      resolvers: [GraphQLAppFileResolvers],
     });
 
     this.warmup([AppFileListener, S3UploadService]);
