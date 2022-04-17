@@ -2,10 +2,9 @@ import {
   Bundle,
   KernelAfterInitEvent,
   EventManager,
-  Kernel,
   Exception,
 } from "@bluelibs/core";
-import { Loader, IResolverMap, ISchemaResult } from "@bluelibs/graphql-bundle";
+import { Loader, ISchemaResult } from "@bluelibs/graphql-bundle";
 import * as http from "http";
 import * as express from "express";
 import * as cookieParser from "cookie-parser";
@@ -25,6 +24,8 @@ import { GraphQLError, execute, subscribe } from "graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
+import { ApolloServer as ApolloServerLambda } from "apollo-server-lambda";
+
 export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
     port: 4000,
@@ -38,12 +39,17 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     },
     jit: true,
     useJSONMiddleware: true,
+    serverless: false,
   };
 
   public httpServer: http.Server;
   public app: express.Application;
-  public server: ApolloServer;
+  public server: ApolloServer | ApolloServerLambda;
   public subscriptionServer: SubscriptionServer;
+  /**
+   * This is used to creating the serverless handler
+   */
+  public serverlessHandler: any;
   protected logger: LoggerService;
   protected currentSchema: ISchemaResult;
 
@@ -65,22 +71,31 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     // We add the container to the context in the preparation phase
     // As loading should be done in initial phase and we have the container as the first reducer
     const loader = this.get<Loader>(Loader);
-    this.logger = this.get<LoggerService>(LoggerService);
 
-    await this.instantiateExpress();
+    // JIT works fine when the same dataset is being loaded, for serverless it just becomes too much
+    if (this.config.serverless) {
+      this.config.jit = false;
+    }
+    this.logger = this.get<LoggerService>(LoggerService);
   }
 
   async init() {
+    await this.instantiateExpress();
+
     const manager = this.get<EventManager>(EventManager);
 
     manager.addListener(KernelAfterInitEvent, async () => {
       this.storeSchema();
       await this.setupApolloServer();
       const logger = this.container.get(LoggerService);
-      logger.info(`HTTP Server listening on port: ${this.config.port}`);
-      let url = this.config.url;
-      url += url.endsWith("/") ? "graphql" : "/graphql";
-      logger.info(`GraphQL endpoint ready: ${url}`);
+      if (this.config.serverless) {
+        logger.info(`Serverless Apollo handler ready.`);
+      } else {
+        logger.info(`HTTP Server listening on port: ${this.config.port}`);
+        let url = this.config.url;
+        url += url.endsWith("/") ? "graphql" : "/graphql";
+        logger.info(`GraphQL endpoint ready: ${url}`);
+      }
     });
   }
 
@@ -89,8 +104,35 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   private async setupApolloServer() {
     const apolloServerConfig = this.getApolloConfig();
-    await this.initialiseServer(apolloServerConfig);
-    await this.startServer();
+    if (this.config.serverless) {
+      await this.createServerlessHandler();
+    } else {
+      this.server = new ApolloServer(apolloServerConfig);
+    }
+
+    await this.prepareApolloServer(apolloServerConfig, this.server);
+
+    if (!this.config.serverless) {
+      await this.startHTTPServer();
+    }
+  }
+
+  async createServerlessHandler() {
+    if (this.serverlessHandler) {
+      return this.serverlessHandler;
+    }
+
+    if (this.config.serverless) {
+      const apolloConfig = this.getApolloConfig();
+
+      this.server = new ApolloServerLambda(apolloConfig);
+      this.serverlessHandler = this.server.createHandler({
+        expressAppFromMiddleware: (middleware) => {
+          this.app.use(middleware);
+          return this.app;
+        },
+      });
+    }
   }
 
   protected storeSchema() {
@@ -124,7 +166,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Starts the http server listening process
    */
-  protected async startServer(): Promise<void> {
+  protected async startHTTPServer(): Promise<void> {
     const { app, httpServer, server } = this;
     const manager = this.get<EventManager>(EventManager);
 
@@ -168,37 +210,32 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * This function purely initialises the server
    */
-  protected async initialiseServer(
-    apolloServerConfig: ApolloServerExpressConfig
+  protected async prepareApolloServer(
+    apolloServerConfig: ApolloServerExpressConfig,
+    apolloServer: ApolloServer | ApolloServerLambda
   ) {
-    const manager = this.get<EventManager>(EventManager);
-
-    const apolloServer = new ApolloServer(apolloServerConfig);
+    const manager = this.container.get(EventManager);
     const { app } = this;
 
     if (this.config.uploads !== false) {
       app.use("/graphql", graphqlUploadExpress(this.config.uploads));
     }
 
-    const httpServer = http.createServer(app);
+    let httpServer: http.Server;
+    if (!this.config.serverless) {
+      httpServer = http.createServer(app);
 
-    if (this.config.enableSubscriptions) {
-      // apolloServer.
-      this.attachSubscriptionService(apolloServerConfig, httpServer);
+      if (this.config.enableSubscriptions) {
+        // apolloServer.
+        this.attachSubscriptionService(apolloServerConfig, httpServer);
+      }
+
+      this.httpServer = httpServer;
+      await apolloServer.start();
+      apolloServer.applyMiddleware({ app });
     }
 
-    this.app = app;
-    this.httpServer = httpServer;
-    this.server = apolloServer;
-
-    if (this.config.routes) {
-      this.config.routes.forEach((route) => {
-        this.addRoute(route);
-      });
-    }
-
-    await apolloServer.start();
-    apolloServer.applyMiddleware({ app });
+    this.addRoutesToExpress();
 
     await manager.emit(
       new ApolloServerBeforeInitEvent({
@@ -207,6 +244,14 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         server: apolloServer,
       })
     );
+  }
+
+  private addRoutesToExpress() {
+    if (this.config.routes) {
+      this.config.routes.forEach((route) => {
+        this.addRoute(route);
+      });
+    }
   }
 
   private attachSubscriptionService(

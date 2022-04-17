@@ -12,7 +12,7 @@ export interface ISecurityBundleConfig {
     cleanupInterval?: string;
   };
 }
-export type UserId = number | string | ObjectId;
+export type UserId = number | string | ObjectId | Partial<ObjectId>;
 
 export interface IUser {
   _id?: UserId;
