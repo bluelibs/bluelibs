@@ -153,6 +153,64 @@ new ApolloBundle({
 });
 ```
 
+## Serverless
+
+There is a wide sea of applications when it comes to serverless. We offer full support for Apollo Lambda Serverless.
+
+Install the following dependencies:
+
+```bash
+npm i -g serverless # In case you haven't installed it
+npm i -D @bluelibs/serverless-plugin-typescript serverless-offline
+```
+
+You have to configure the following, in your handler:
+
+```ts title="src/startup/serverless.ts"
+import "./bundles";
+import { kernel } from "./kernel";
+import { createServerlessHandler } from "@bluelibs/apollo-bundle";
+
+export const graphqlHandler = createServerlessHandler(kernel);
+```
+
+Now let's configure `serverless.yml` file:
+
+```yml
+# serverless.yml
+service: apollo-lambda
+plugins:
+  - "@bluelibs/serverless-plugin-typescript"
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+functions:
+  graphql:
+    # this is formatted as <FILENAME>.<HANDLER>
+    handler: src/startup/serverless.graphqlHandler
+    maximumEventAge: 7200
+    maximumRetryAttempts: 1
+    events:
+      - http:
+          path: /
+          method: post
+          cors: true
+      - http:
+          path: /
+          method: get
+          cors: true
+```
+
+Now you can execute it by following instructions on serverless, to test locally:
+
+```bash
+serverless offline start --noPrependStageInUrl
+```
+
+If you are using `GraphQL Playground`, keep in mind that serverless restarts the Kernel everytime, therefore if you are looking for some logs and less output, you have to stop automatic schema polling (it's next to the URL if you're using the hosted version of Apollo Playground)
+
 ## Meta
 
 ### Summary

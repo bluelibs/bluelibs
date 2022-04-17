@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { DownloadOutlined } from "@ant-design/icons";
 import * as startCase from "lodash.startcase";
 import { ObjectId } from "@bluelibs/ejson";
+import * as _ from "lodash";
 
 const emptyValue = "N/A";
 
@@ -123,7 +124,9 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
 
     value = (
       <Link to={props.relation.path}>
-        <Tag>{props.value[props.relation.dataIndex]}</Tag>
+        <Tag>
+          {_.get(props.value, props.relation.dataIndex.split("."), emptyValue)}
+        </Tag>
       </Link>
     );
   }

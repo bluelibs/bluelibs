@@ -124,10 +124,19 @@ export class UICRUDModel {
     this.recursiveBodyExpand(mode, body, this.studioCollection.fields);
 
     this.studioCollection.getRelationshipsByUIMode(mode).forEach((r) => {
+      let representedByObject = r.cleaned.representedBy;
+      let representedByField: any = { [r.cleaned.representedBy.id]: 1 };
+      while (representedByObject.parent) {
+        representedByField = {
+          [representedByObject.parent.id]: representedByField,
+        };
+        representedByObject = representedByObject.parent;
+      }
       body[r.id] = {
         _id: 1,
-        [r.cleaned.representedBy.id]: 1,
+        ...representedByField,
       };
+
       if (r.isDirect) {
         body[r.cleaned.field.id] = 1;
       }
@@ -160,34 +169,36 @@ export class UICRUDModel {
    * TODO: move to own function separated from here
    */
   recursiveBodyExpand(mode: UIModeType, body: object, fields: Field[]) {
-    fields.forEach((field) => {
-      const model = field.model as SharedModel;
-      if (model && !model.isEnum()) {
-        body[field.id] = {};
-        this.recursiveBodyExpand(
-          mode,
-          body[field.id],
-          field.cleaned.model.fields
-        );
+    fields
+      .filter((f) => f.enableGraphQL)
+      .forEach((field) => {
+        const model = field.model as SharedModel;
+        if (model && !model.isEnum()) {
+          body[field.id] = {};
+          this.recursiveBodyExpand(
+            mode,
+            body[field.id],
+            field.cleaned.model.fields
+          );
 
-        // If the subfields haven't been found
-        if (Object.keys(body).length === 0) {
-          delete body[field.id];
-        }
-      } else if (field.subfields.length) {
-        body[field.id] = {};
-        this.recursiveBodyExpand(mode, body[field.id], field.subfields);
+          // If the subfields haven't been found
+          if (Object.keys(body).length === 0) {
+            delete body[field.id];
+          }
+        } else if (field.subfields.length) {
+          body[field.id] = {};
+          this.recursiveBodyExpand(mode, body[field.id], field.subfields);
 
-        // If the subfields haven't been found
-        if (Object.keys(body).length === 0) {
-          delete body[field.id];
+          // If the subfields haven't been found
+          if (Object.keys(body).length === 0) {
+            delete body[field.id];
+          }
+        } else {
+          if (field.ui && field.ui[mode]) {
+            body[field.id] = 1;
+          }
         }
-      } else {
-        if (field.ui && field.ui[mode]) {
-          body[field.id] = 1;
-        }
-      }
-    });
+      });
   }
 
   collectionRoutePath() {
@@ -214,13 +225,30 @@ export class UICRUDModel {
    * The list for i18n fields for forms, lists, and everything
    */
   generateI18NFieldsAsJSON(): string {
+    const fields = [];
+    //this is not the cleanest way, but its making sure we get the current data
+    this.studioCollection.fields.map((field) => {
+      fields.push(...field.getSelfAndAllNestedFields());
+    });
+    const relations = this.studioCollection.relations;
     const i18nSignatures = [
-      ...this.studioCollection
-        .getFlattenedFields()
-        .map((field) => field.getI18NSignature()),
-      ...this.studioCollection.relations.map((relation) =>
-        relation.getI18NSignature()
-      ),
+      ...fields.map((field, index) => {
+        if (
+          field?.parent?.model &&
+          !(field?.parent?.model as SharedModel).isEnum()
+        ) {
+          //force the previous sharedmodel field to be the parent
+          return field.getI18NSignature(
+            fields
+              .slice(0, index)
+              .reverse()
+              .find((x) => x?.model?.id === field?.parent?.model?.id)
+          );
+        } else {
+          return field.getI18NSignature();
+        }
+      }),
+      ...relations.map((relation) => relation.getI18NSignature()),
     ];
 
     const obj = {};
@@ -347,6 +375,13 @@ export class UICRUDModel {
         );
       }
     }
+    //define remote field path
+    let representedBy = relation.representedBy;
+    let remoteField = representedBy.id;
+    while (representedBy.parent) {
+      remoteField = representedBy.parent.id + "." + remoteField;
+      representedBy = representedBy.parent;
+    }
 
     store.push({
       id: this.isForm(mode) ? relation.field.id : relation.id,
@@ -360,7 +395,7 @@ export class UICRUDModel {
       key: relation.id,
       isMany: relation.isMany,
       sorter: true,
-      remoteField: relation.representedBy.id,
+      remoteField,
       routeName: this.generateRouteNameForCollection(relation.to.id, "view"),
       relational: true,
       remoteCollectionClass: relation.to.id + "Collection",
@@ -432,8 +467,8 @@ export class UICRUDModel {
                 Object.assign({}, base, {
                   id: `${field.id}.${subfield.id}`,
                   isMany: subfield.isArray,
-                  title: this.getI18NKey(subfield),
-                  description: this.getI18NKey(subfield, true),
+                  title: this.getI18NKey(subfield, undefined, field),
+                  description: this.getI18NKey(subfield, true, field),
                   required: subfield.isRequired,
                   order: subfield.ui && subfield.ui.order,
                   dataIndexStr: `["${field.id}", "${subfield.id}"]`,
@@ -456,8 +491,8 @@ export class UICRUDModel {
                 isMany: subfield.isArray,
                 required: subfield.isRequired,
                 order: subfield.ui && subfield.ui.order,
-                title: this.getI18NKey(subfield),
-                description: this.getI18NKey(subfield, true),
+                title: this.getI18NKey(subfield, undefined, field),
+                description: this.getI18NKey(subfield, true, field),
                 dataIndexStr: `["${field.id}", "${subfield.id}"]`,
                 rendererType: this.getRendererType(subfield),
                 enumValues: this.getEnumValuesLabels(
@@ -482,9 +517,14 @@ export class UICRUDModel {
     }
   }
 
-  getI18NKey(element: Field | Relation, isDescription = false): string | null {
+  getI18NKey(
+    element: Field | Relation,
+    isDescription = false,
+    forceParent?: Field
+  ): string | null {
     let label = `management.${this.generateI18NName()}.fields.`;
-    label += element.getI18NSignature().key;
+
+    label += element.getI18NSignature(forceParent).key;
 
     if (!element.description && isDescription) {
       return null;
