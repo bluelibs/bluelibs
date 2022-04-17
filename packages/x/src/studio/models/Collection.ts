@@ -271,6 +271,19 @@ export class Collection extends BaseModel<Collection> {
     }
 
     if (this.ui && this.crud) {
+      const defaultCrud = {
+        findOne: true,
+        find: true,
+        delete: true,
+        count: true,
+        insertOne: true,
+        updateOne: true,
+        deleteOne: true,
+        subscription: true,
+        subscriptionCount: true,
+      };
+      //to work just on input crud variables that user enetered
+      this.crud = { ...defaultCrud, ...this.crud };
       if (!this.crud.findOne) {
         this.ui.view = false;
       }
