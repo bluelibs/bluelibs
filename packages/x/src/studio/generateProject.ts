@@ -18,6 +18,11 @@ export async function generateProject(
   studioApp: Studio.App,
   options?: Partial<GenerateProjectOptionsType>
 ) {
+  //read argvs
+  const newParams = readArgvs(studioApp, options);
+  studioApp = newParams.studioApp;
+  options = newParams.options;
+
   // Warning if git has things to commit, to encourage new stuff
 
   studioApp.clean();
@@ -37,4 +42,26 @@ export async function generateProject(
     console.error(`Something went wrong with the generation:`);
     console.error(e);
   }
+}
+
+function readArgvs(studioApp, options) {
+  const args = process.argv.slice(2);
+  const skip: string[] = args
+    .find((arg) => arg.includes("skip"))
+    ?.split("=")[1]
+    ?.split(",");
+  if (skip?.length) studioApp.skip = skip;
+  const only: string[] = args
+    .find((arg) => arg.includes("only"))
+    ?.split("=")[1]
+    ?.split(",");
+  if (only?.length) studioApp.only = only;
+
+  const override: string = args
+    .find((arg) => arg.includes("skip"))
+    ?.split("=")[1];
+  if (override) {
+    options.override = override.toLocaleLowerCase() === "true";
+  }
+  return { studioApp, options };
 }
