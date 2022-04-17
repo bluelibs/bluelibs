@@ -100,27 +100,25 @@
         const options=[{{# each enumValues }} {value:"{{ value }}" ,label:"{{ label }}" },{{/ each }}];
         return (
         <Ant.Form.Item {...props}>
-          <Ant.Select
-          {{# if required }}
-            {{ else }}
-            allowClear
-          {{/ if }}
-            {{# if isMany }}
+            <Ant.Select
+              {{# if required }}
+              {{ else }}
+              allowClear
+              {{/ if }}
+              {{# if isMany }}
               mode="multiple"
-            {{/ if }}
-            placeholder={t('{{ title }}')}
-          >
-          {
-            options.map(
-              (option)=>(
-              <Ant.Select.Option value={option.value} key={option.value} >
-              { t(`{{ title }}_enums.${option.label.toLowerCase()}`)?t(`{{ title }}_enums.${option.label.toLowerCase()}`): option.label }
-              </Ant.Select.Option>
-              )
-              )
-            }
-          </Ant.Select>
-        </Ant.Form.Item>
+              {{/ if }}
+              placeholder={t("{{ title }}")}
+            >
+              {options.map((option) => (
+                <Ant.Select.Option value={option.value} key={option.value}>
+                  {t(`{{ title }}_enums.${option.label.toLowerCase()}`)
+                    ? t(`{{ title }}_enums.${option.label.toLowerCase()}`)
+                    : option.label}
+                </Ant.Select.Option>
+              ))}
+            </Ant.Select>
+          </Ant.Form.Item>
       )},
     {{/ if }}
   {{/ if }}
