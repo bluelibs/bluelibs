@@ -88,13 +88,13 @@ To run tests in C.I, we have the command `npm run test` which compiles the code 
 
 ## Branching & Commits
 
-**Names:**
+**Names**
 
 - feature/{package}/{issueNumber}-short-summary (feature/mongo-bundle/143-solve-the-bug-with-blablbla)
 - fix/{package}/{issueNumber}-short-summary
 - fix/{package1}-{package2}/{issueNumber}-short-summary
 
-**Commits:**
+**Commits**
 
 - fix({package}): {message} (#143)
 - Example: fix(mongo-bundle): Solved the issue with async (#143))

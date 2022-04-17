@@ -20,3 +20,4 @@ export * from "./ValidatorWriter";
 export * from "./EmailTemplateWriter";
 export * from "./BlueprintCollectionWriter";
 export * from "./BlueprintSharedModelWriter";
+export * from "./ServerlessConfigWriter";

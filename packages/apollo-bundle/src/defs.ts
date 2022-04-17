@@ -18,6 +18,8 @@ export type ApolloBundleConfigType = {
    */
   jit?: boolean;
   useJSONMiddleware?: boolean;
+  //serverless
+  serverless?: boolean;
 };
 
 export interface IRouteType {

@@ -20,3 +20,4 @@ export * from "./ValidatorInquirer";
 export * from "./EmailTemplateInquirer";
 export * from "./BlueprintCollectionInquirer";
 export * from "./BlueprintSharedModelInquirer";
+export * from "./ServerlessConfigInquirer";

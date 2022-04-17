@@ -105,6 +105,11 @@ const commands: ICommand[] = [
     inquirer: Inquirers.BlueprintSharedModelInquirer,
     writer: Writers.BlueprintSharedModelWriter,
   },
+  {
+    id: "x:serverless-config",
+    inquirer: Inquirers.ServerlessConfigInquirer,
+    writer: Writers.ServerlessConfigWriter,
+  },
 ];
 
 commands.map((command) => {
