@@ -169,7 +169,7 @@ export class S3UploadService {
     const fileName = `${id}-${filename}`;
     const fileKey = this.generateKey(fileName);
 
-    await this.getTargetStore(storeId).serviceInstance.writeFile(
+    await this.getTargetStore(storeId).service.writeFile(
       fileKey,
       mimetype,
       buffer
@@ -200,9 +200,7 @@ export class S3UploadService {
       throw new Error(`File with id: ${fileId} was not found`);
     }
 
-    return this.getTargetStore(storeId).serviceInstance.getDownloadUrl(
-      file.path
-    );
+    return this.getTargetStore(storeId).service.getDownloadUrl(file.path);
   }
 
   /**
@@ -231,13 +229,8 @@ export class S3UploadService {
    * @param stream
    * @returns
    */
-  async putObject(
-    fileKey,
-    mimeType,
-    stream,
-    storeId?: string
-  ): Promise<S3.PutObjectOutput> {
-    return this.getTargetStore(storeId).serviceInstance.writeFile(
+  async putObject(fileKey, mimeType, stream, storeId?: string): Promise<any> {
+    return this.getTargetStore(storeId).service.writeFile(
       fileKey,
       mimeType,
       stream
@@ -250,7 +243,7 @@ export class S3UploadService {
    * @returns
    */
   async remove(key, storeId?: string) {
-    return this.getTargetStore(storeId).serviceInstance.deleteFile(key);
+    return this.getTargetStore(storeId).service.deleteFile(key);
   }
 
   /**
@@ -260,7 +253,7 @@ export class S3UploadService {
    * @returns
    */
   getUrl(key: string, storeId?: string): string {
-    return this.getTargetStore(storeId).serviceInstance.getDownloadUrl(key);
+    return this.getTargetStore(storeId).service.getDownloadUrl(key);
   }
 
   /**

@@ -5,6 +5,7 @@ import { AppFilesCollection } from "./collections/appFiles/AppFiles.collection";
 import { AppFileGroupsCollection } from "./collections/appFileGroups/AppFileGroups.collection";
 import { ResizeOptions } from "sharp";
 import "@bluelibs/mongo-bundle";
+import { IStoreUploadService } from "./services/IStoreUploadService";
 
 declare module "@bluelibs/mongo-bundle" {
   interface IExecutionContext {
@@ -96,8 +97,7 @@ export type Store = {
   id: string;
   type: string;
   credentials: UploadCredentials;
-  service: any;
-  serviceInstance: any;
+  service: IStoreUploadService;
   default?: boolean;
 };
 

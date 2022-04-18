@@ -16,11 +16,11 @@ export const prepareUploadStoresInstances = (
     if (!store.service) {
       switch (store.type) {
         case StoreTypes.S3: {
-          store.service = S3Service;
+          store.service = new S3Service(store.id, store.credentials);
           break;
         }
         case StoreTypes.LOCAL: {
-          store.service = LocalService;
+          store.service = new LocalService(store.id, store.credentials);
           const credentials = store.credentials as LocalStorageConfig;
           container.get(ApolloBundle).addRoute({
             type: "get",
@@ -37,12 +37,14 @@ export const prepareUploadStoresInstances = (
           (store.credentials as LocalStorageConfig) = credentials;
           break;
         }
+        case StoreTypes.CUSTOM: {
+          if (!store.service)
+            throw "the service is necessary if you want your own custom upload strategy";
+          break;
+        }
       }
     }
-    return {
-      ...store,
-      serviceInstance: new store.service(store.id, store.credentials),
-    };
+    return store;
   });
   config.defaultStore =
     config.stores.find((store) => store.default) || config.stores[0];

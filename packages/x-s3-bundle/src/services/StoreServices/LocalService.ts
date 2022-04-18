@@ -4,18 +4,14 @@ import { IStoreUploadService } from "../IStoreUploadService";
 import { dirname } from "path";
 import * as mkdirp from "mkdirp";
 
-export class LocalService {
+export class LocalService extends IStoreUploadService {
   protected id: string;
   protected credentials: LocalStorageConfig;
 
   constructor(id: string, credentials: UploadCredentials) {
-    //super(id, credentials);
+    super(id, credentials);
     this.credentials = credentials as LocalStorageConfig;
     this.id = id;
-  }
-
-  public getInstance() {
-    return { localStoragePath: this.credentials.localStoragePath };
   }
 
   /**
@@ -26,8 +22,6 @@ export class LocalService {
    * @returns
    */
   public writeFile(fileKey, mimeType, buffer) {
-    console.log(fileKey, fileKey);
-    console.log(buffer, buffer);
     fileKey = this.credentials.localStoragePath + "/" + fileKey;
     mkdirp(dirname(fileKey), function (err) {
       if (err) {
@@ -48,7 +42,7 @@ export class LocalService {
    * @returns
    */
   public deleteFile(key) {
-    return fs.unlinkSync(key);
+    return fs.unlinkSync(this.credentials.localStoragePath + "/" + key);
   }
 
   /**
