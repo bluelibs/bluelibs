@@ -12,7 +12,8 @@ export const prepareUploadStoresInstances = (
   config: XS3BundleConfigType,
   container: any
 ) => {
-  config.stores = config.stores.map((store: Store) => {
+  config.stores = config.stores.map((store: Store, index: number) => {
+    if (!store.id) store.id = "store_no_" + (index + 1);
     if (!store.service) {
       switch (store.type) {
         case StoreTypes.S3: {

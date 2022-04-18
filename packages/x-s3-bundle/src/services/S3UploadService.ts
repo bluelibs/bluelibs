@@ -144,7 +144,7 @@ export class S3UploadService {
     appFile.name = filename;
     appFile.mimeType = mimetype;
     appFile.size = Buffer.byteLength(buffer);
-    appFile.store = storeId;
+    appFile.store = this.getTargetStore(storeId).id;
 
     const result = await this.appFiles.insertOne(appFile);
     appFile._id = result.insertedId;
@@ -184,8 +184,10 @@ export class S3UploadService {
    * @returns
    */
   async getFileURL(fileId: ObjectID, storeId?: string) {
-    const query: any = { _id: fileId };
-    if (storeId) query.store = storeId;
+    const query: any = {
+      _id: fileId,
+      store: this.getTargetStore(storeId).id,
+    };
 
     const file = await this.appFiles.findOne(
       { _id: fileId },
