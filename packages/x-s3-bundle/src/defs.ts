@@ -6,6 +6,7 @@ import { AppFileGroupsCollection } from "./collections/appFileGroups/AppFileGrou
 import { ResizeOptions } from "sharp";
 import "@bluelibs/mongo-bundle";
 import { IStoreUploadService } from "./services/IStoreUploadService";
+import { IUploadService } from "./services/IUploadService";
 
 declare module "@bluelibs/mongo-bundle" {
   interface IExecutionContext {
@@ -25,6 +26,11 @@ export type File = {
 
 export type XS3BundleConfigType = {
   stores?: Store[];
+  uploadService: Constructor<IUploadService>;
+  prepareStores: (
+    config: XS3BundleConfigType,
+    container: any
+  ) => XS3BundleConfigType;
   defaultStore?: Store;
   /**
    * Please use the s3 config variable
@@ -91,11 +97,19 @@ export type LocalStorageConfig = {
   downloadUrl: string;
 };
 
-export type UploadCredentials = AWSS3Config | LocalStorageConfig;
+export type DBStorageConfig = {
+  //appFiles: AppFilesCollection;
+  downloadUrl: string;
+};
+
+export type UploadCredentials =
+  | AWSS3Config
+  | LocalStorageConfig
+  | DBStorageConfig;
 
 export type Store = {
   id: string;
-  type: string;
+  type: StoreTypes;
   credentials: UploadCredentials;
   service: IStoreUploadService;
   default?: boolean;
@@ -104,5 +118,6 @@ export type Store = {
 export enum StoreTypes {
   S3 = "S3",
   LOCAL = "LOCAL",
+  DB = "DB",
   CUSTOM = "CUSTOM",
 }

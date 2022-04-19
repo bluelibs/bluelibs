@@ -7,7 +7,6 @@ import {
   APP_FILES_COLLECTION_TOKEN,
   APP_FILE_GROUPS_COLLECTION_TOKEN,
 } from "../constants";
-import { S3UploadService } from "../services/S3UploadService";
 import { FileManagementService } from "../services/FileManagementService";
 
 export class AppFileListener extends Listener {

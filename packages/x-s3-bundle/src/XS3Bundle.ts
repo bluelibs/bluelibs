@@ -1,6 +1,6 @@
 import { Bundle } from "@bluelibs/core";
 import { XS3BundleConfigType } from "./defs";
-import { S3UploadService } from "./services/S3UploadService";
+import { UploadService } from "./services/UploadService";
 import { GraphQLBundle, Loader } from "@bluelibs/graphql-bundle";
 import GraphQLAppFile from "./graphql/entities/AppFile.graphql";
 import GraphQLAppFileResolvers from "./graphql/entities/AppFile.resolvers";
@@ -15,12 +15,15 @@ import { ApolloBundle } from "@bluelibs/apollo-bundle";
 import { AppFilesCollection } from "./collections/appFiles/AppFiles.collection";
 import { AppFileGroupsCollection } from "./collections/appFileGroups/AppFileGroups.collection";
 import { prepareUploadStoresInstances } from "./services/prepareUploadStoresInstances";
+import { MongoBundle } from "@bluelibs/mongo-bundle";
 
 export class XS3Bundle extends Bundle<XS3BundleConfigType> {
-  dependencies = [ApolloBundle, GraphQLBundle];
+  dependencies = [ApolloBundle, GraphQLBundle, MongoBundle];
 
   defaultConfig = {
     accessKeyId: "",
+    uploadService: UploadService,
+    prepareStores: prepareUploadStoresInstances,
     secretAccessKey: "",
     endpoint: "",
     region: "",
@@ -46,8 +49,21 @@ export class XS3Bundle extends Bundle<XS3BundleConfigType> {
   };
 
   async prepare() {
-    this.config = prepareUploadStoresInstances(this.config, this.container);
-
+    this.container.set({
+      id: APP_FILES_COLLECTION_TOKEN,
+      type: this.config.appFilesCollection || AppFilesCollection,
+    });
+    this.container.set({
+      id: APP_FILE_GROUPS_COLLECTION_TOKEN,
+      type: this.config.appFileGroupsCollection || AppFileGroupsCollection,
+    });
+    this.config = this.config.prepareStores(this.config, this.container);
+    if (this.config.uploadService) {
+      this.container.set({
+        id: UploadService,
+        type: this.config.uploadService,
+      });
+    }
     this.container.set(UPLOAD_CONFIG, this.config);
     this.container.set({
       id: APP_FILES_COLLECTION_TOKEN,
@@ -65,7 +81,7 @@ export class XS3Bundle extends Bundle<XS3BundleConfigType> {
       typeDefs: [GraphQLAppFile, GraphQLAppFileGroup],
       resolvers: [GraphQLAppFileResolvers],
     });
-
-    this.warmup([AppFileListener, S3UploadService]);
+    this.container.get(UploadService);
+    this.warmup([AppFileListener]);
   }
 }

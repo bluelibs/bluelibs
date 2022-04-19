@@ -2,7 +2,7 @@ import * as shortid from "shortid";
 import { FileUpload } from "graphql-upload";
 import { S3 } from "aws-sdk";
 import * as moment from "moment";
-import { Store, XS3BundleConfigType } from "../defs";
+import { Store, StoreTypes, XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";
 import { Inject, EventManager } from "@bluelibs/core";
 import { AppFilesCollection } from "../collections/appFiles/AppFiles.collection";
@@ -10,8 +10,9 @@ import { UPLOAD_CONFIG, APP_FILES_COLLECTION_TOKEN } from "../constants";
 import { ObjectID } from "@bluelibs/mongo-bundle";
 import { ImageService } from "./ImageService";
 import { BeforeFileUploadEvent, AfterFileUploadEvent } from "../events";
+import { IUploadService } from "./IUploadService";
 
-export class S3UploadService {
+export class UploadService implements IUploadService {
   //protected s3: S3;
   protected stores: Store[];
   protected defaultStore: Store;
@@ -27,8 +28,6 @@ export class S3UploadService {
     protected readonly imageService: ImageService
   ) {
     (this.stores = config.stores), (this.defaultStore = config.defaultStore);
-    //const { s3 } = config;
-    //this.s3 = new S3(s3);
   }
 
   /**
@@ -83,7 +82,7 @@ export class S3UploadService {
     return appFile;
   }
 
-  protected async handleImageUploading(
+  async handleImageUploading(
     buffer: Buffer,
     extension: Partial<AppFile>,
     filename: string,
@@ -106,6 +105,10 @@ export class S3UploadService {
       thumbs.push({
         id,
         path: newFileKey,
+        buffer:
+          this.getTargetStore(storeId).type === StoreTypes.DB
+            ? buffer
+            : undefined,
       });
     }
     Object.assign(extension, { thumbs });
@@ -146,6 +149,10 @@ export class S3UploadService {
     appFile.size = Buffer.byteLength(buffer);
     appFile.store = this.getTargetStore(storeId).id;
 
+    if (this.getTargetStore(storeId).type === StoreTypes.DB) {
+      appFile.buffer = buffer;
+    }
+
     const result = await this.appFiles.insertOne(appFile);
     appFile._id = result.insertedId;
 
@@ -159,7 +166,7 @@ export class S3UploadService {
    * @param buffer
    * @returns
    */
-  protected async uploadBuffer(
+  async uploadBuffer(
     filename: string,
     mimetype: string,
     buffer: Buffer,
@@ -277,7 +284,7 @@ export class S3UploadService {
   /**
    * Transforms /whatever/path/file.png, small -> /whatever/path/file-small.png
    */
-  protected injectFileSuffix(path: string, suffix: string): string {
+  injectFileSuffix(path: string, suffix: string): string {
     const parts = path.split(".");
 
     return [...parts.slice(0, -1), suffix, parts[parts.length - 1]].join(".");
