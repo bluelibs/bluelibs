@@ -333,7 +333,7 @@ describe("Collection", () => {
     });
   });
 
-  test.only("Should work with nova integration", async () => {
+  test("Should work with nova integration", async () => {
     const { container } = await getEcosystem();
 
     const comments = container.get<Comments>(Comments);
@@ -348,10 +348,5 @@ describe("Collection", () => {
       $: { filters: { _id: u1.insertedId } },
       _id: 1,
     });
-
-    console.log(result._id instanceof ObjectId);
-
-    console.log(EJSON.stringify(result));
-    console.log({ result });
   });
 });
