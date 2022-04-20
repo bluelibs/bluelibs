@@ -832,6 +832,19 @@ usersCollection.deepSync({
 
 Therefore, existence of an `_id` merely represents the fact that the element already exists. If there is an `_id` and that element does not exist in the database, the update will have 0 modified elements, it will not create a new one.
 
+If you are looking to bypass event listeners and perform inserts or updates on the native MongoDB collection:
+
+```ts
+usersCollection.deepSync(
+  object,
+  {},
+  {
+    // This does direct operations (inserts, updates) on the raw collection
+    direct: true,
+  }
+);
+```
+
 ### Objects & Circular Deps
 
 Support for complex-like ORM solutions, including recurrent links with circular deps.
