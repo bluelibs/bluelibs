@@ -11,6 +11,7 @@ export default function blameable(
     updatedBy: "updatedById",
   };
   const throwErrorWhenMissing = options.throwErrorWhenMissing || false;
+  const nullishUpdatedByAtInsert = options.nullishUpdatedByAtInsert || false;
 
   const userIdFieldInContext = "userId";
 
@@ -46,7 +47,7 @@ export default function blameable(
 
         Object.assign(document, {
           [fields.createdBy]: userId,
-          [fields.updatedBy]: userId,
+          [fields.updatedBy]: nullishUpdatedByAtInsert ? null : userId,
         });
       }
     );

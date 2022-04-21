@@ -463,7 +463,7 @@ So ultimately, the behavior array is an array of functions.
 
 ### Timestampable
 
-This would enter `createdAt`, `updatedAt`. You can also customise how the fields are named.
+This would enter automatic `createdAt`, `updatedAt`, unless you explicitely provide the information yourself in the input (useful when migrating an existing dataset to a new one and conserving the actual value). You can also customise how the fields are named.
 
 ```typescript
 import { Behaviors, Collection } from "@bluelibs/nova";
@@ -488,7 +488,7 @@ When the document is created for the first time, we also store `updatedAt` to th
 
 ### Blameable
 
-The blameable behavior stores who created or updated the document by reading `userId` from the context passed. `context` is a special option we allow in all mutations (insert/update/delete) that is designed to work well with behaviors or other event listeners.
+The blameable behavior stores who created or updated the document by reading `userId` from the context passed, unless you explicitely provide the information yourself in the input. `context` is a special option we allow in all mutations (insert/update/delete) that is designed to work well with behaviors or other event listeners.
 
 ```ts
 class UsersCollection extends Collection {
@@ -523,7 +523,7 @@ await usersCollection.insertOne(
 ```
 
 :::note
-When the document is created for the first time, we also store `updatedBy` to the same user as `createdBy`. Because in theory `creation` is also an `update`, we understand there can be mixed feelings about this. If you want to identify whether this document has had any changes, we recommend creating an `isTouched` boolean variable and update it after the `BeforeUpdateEvent` from `@bluelibs/mongo-bundle`. And inside the event you can do this for all collections or filter for the ones you need.
+When the document is created for the first time, we also store `updatedBy` to the same user as `createdBy`. Because in theory `creation` is also an `update`, we understand there can be mixed feelings about this. If you want to identify whether this document has had any changes, we recommend creating an `isTouched` boolean variable and update it after the `BeforeUpdateEvent` from `@bluelibs/mongo-bundle`. And inside the event you can do this for all collections or filter for the ones you need.Otherwise, you have the possibility to avoid this behavior by passing `nullishUpdatedAtAtInsert: true` as option in your collection file. If `nullishUpdatedByAtInsert` is set to `true`, then the `updatedAt` field will be set to `null` and updated only on updates.The same goes for the `Timestampable` behavior with the `nullishUpdatedAtAtInsert: true` option.
 :::
 
 ### Validate

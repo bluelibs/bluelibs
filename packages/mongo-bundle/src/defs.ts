@@ -40,6 +40,7 @@ export interface ITimestampableBehaviorOptions {
     createdAt?: string;
     updatedAt?: string;
   };
+  nullishUpdatedAtAtInsert?: boolean;
 }
 
 export interface IValidateBehaviorOptions {
@@ -54,6 +55,7 @@ export interface IBlameableBehaviorOptions {
     updatedBy?: string;
     createdBy?: string;
   };
+  nullishUpdatedByAtInsert?: boolean;
   /**
    * Enabling this will check if `userId` is not undefined, if it is it will throw an error, userId can still be `null` because the system does the operation (in a cronjob for example)
    * You can regard it as a safety net to avoid mistakes.
