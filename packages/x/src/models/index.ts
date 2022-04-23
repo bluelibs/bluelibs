@@ -21,3 +21,4 @@ export * from "./UnitTestModel";
 export * from "./ValidatorModel";
 export * from "./BlueprintCollectionModel";
 export * from "./BlueprintSharedModelModel";
+export * from "./ServerlessConfigModel";
