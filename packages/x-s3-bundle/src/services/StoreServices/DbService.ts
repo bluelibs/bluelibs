@@ -2,6 +2,7 @@ import * as fs from "fs";
 import {
   DBStorageConfig,
   LocalStorageConfig,
+  StoreConfig,
   UploadCredentials,
 } from "../../defs";
 import { IStoreUploadService } from "../IStoreUploadService";
@@ -9,13 +10,8 @@ import { dirname } from "path";
 import * as mkdirp from "mkdirp";
 
 export class DbService extends IStoreUploadService {
-  protected id: string;
-  protected credentials: DBStorageConfig;
-
-  constructor(id: string, credentials: UploadCredentials) {
-    super(id, credentials);
-    this.credentials = credentials as DBStorageConfig;
-    this.id = id;
+  constructor(storeConfig: StoreConfig) {
+    super(storeConfig);
   }
 
   /**

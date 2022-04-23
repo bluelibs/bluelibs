@@ -2,7 +2,7 @@ import * as shortid from "shortid";
 import { FileUpload } from "graphql-upload";
 import { S3 } from "aws-sdk";
 import * as moment from "moment";
-import { Store, StoreTypes, XS3BundleConfigType } from "../defs";
+import { XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";
 import { Inject, EventManager } from "@bluelibs/core";
 import { AppFilesCollection } from "../collections/appFiles/AppFiles.collection";
@@ -11,11 +11,13 @@ import { ObjectID } from "@bluelibs/mongo-bundle";
 import { ImageService } from "./ImageService";
 import { BeforeFileUploadEvent, AfterFileUploadEvent } from "../events";
 import { IUploadService } from "./IUploadService";
+import { IStoreUploadService } from "./IStoreUploadService";
+import { DbService } from "./StoreServices/DbService";
 
 export class UploadService implements IUploadService {
   //protected s3: S3;
-  protected stores: Store[];
-  protected defaultStore: Store;
+  protected stores: IStoreUploadService[];
+  protected defaultStore: IStoreUploadService;
 
   constructor(
     @Inject(UPLOAD_CONFIG)
@@ -91,7 +93,8 @@ export class UploadService implements IUploadService {
   ) {
     const response = await this.imageService.getImageThumbs(
       buffer,
-      extension?.context
+      extension?.context,
+      this.getTargetStore(storeId).id
     );
     const thumbs: AppFileThumb[] = [];
     for (const id in response) {
@@ -106,7 +109,7 @@ export class UploadService implements IUploadService {
         id,
         path: newFileKey,
         buffer:
-          this.getTargetStore(storeId).type === StoreTypes.DB
+          this.getTargetStore(storeId) instanceof DbService
             ? buffer
             : undefined,
       });
@@ -149,8 +152,8 @@ export class UploadService implements IUploadService {
     appFile.size = Buffer.byteLength(buffer);
     appFile.store = this.getTargetStore(storeId).id;
 
-    if (this.getTargetStore(storeId).type === StoreTypes.DB) {
-      appFile.buffer = buffer;
+    if (this.getTargetStore(storeId) instanceof DbService) {
+      appFile.buffer = buffer.toString("base64");
     }
 
     const result = await this.appFiles.insertOne(appFile);
@@ -176,11 +179,7 @@ export class UploadService implements IUploadService {
     const fileName = `${id}-${filename}`;
     const fileKey = this.generateKey(fileName);
 
-    await this.getTargetStore(storeId).service.writeFile(
-      fileKey,
-      mimetype,
-      buffer
-    );
+    await this.getTargetStore(storeId).writeFile(fileKey, mimetype, buffer);
 
     return fileKey;
   }
@@ -209,7 +208,7 @@ export class UploadService implements IUploadService {
       throw new Error(`File with id: ${fileId} was not found`);
     }
 
-    return this.getTargetStore(storeId).service.getDownloadUrl(file.path);
+    return this.getTargetStore(storeId).getDownloadUrl(file.path);
   }
 
   /**
@@ -239,11 +238,7 @@ export class UploadService implements IUploadService {
    * @returns
    */
   async putObject(fileKey, mimeType, stream, storeId?: string): Promise<any> {
-    return this.getTargetStore(storeId).service.writeFile(
-      fileKey,
-      mimeType,
-      stream
-    );
+    return this.getTargetStore(storeId).writeFile(fileKey, mimeType, stream);
   }
 
   /**
@@ -252,7 +247,7 @@ export class UploadService implements IUploadService {
    * @returns
    */
   async remove(key, storeId?: string) {
-    return this.getTargetStore(storeId).service.deleteFile(key);
+    return this.getTargetStore(storeId).deleteFile(key);
   }
 
   /**
@@ -262,7 +257,7 @@ export class UploadService implements IUploadService {
    * @returns
    */
   getUrl(key: string, storeId?: string): string {
-    return this.getTargetStore(storeId).service.getDownloadUrl(key);
+    return this.getTargetStore(storeId).getDownloadUrl(key);
   }
 
   /**
@@ -290,7 +285,7 @@ export class UploadService implements IUploadService {
     return [...parts.slice(0, -1), suffix, parts[parts.length - 1]].join(".");
   }
 
-  getTargetStore(storeId?: string): Store {
+  getTargetStore(storeId?: string): IStoreUploadService {
     if (!storeId) return this.defaultStore;
     const store = this.stores.find((st) => st.id === storeId);
     if (!store) throw "Couldn't find the store with id" + storeId;

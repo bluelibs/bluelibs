@@ -1,7 +1,7 @@
 import { FileUpload } from "graphql-upload";
 import { AppFile } from "../collections/appFiles/AppFile.model";
 import { ObjectID } from "@bluelibs/mongo-bundle";
-import { Store } from "../defs";
+import { IStoreUploadService } from "./IStoreUploadService";
 
 export interface IUploadService {
   /**
@@ -104,5 +104,5 @@ export interface IUploadService {
    */
   injectFileSuffix(path: string, suffix: string): string;
 
-  getTargetStore(storeId?: string): Store;
+  getTargetStore(storeId?: string): IStoreUploadService;
 }

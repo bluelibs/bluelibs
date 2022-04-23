@@ -14,7 +14,7 @@ export class AppFile {
   metadata: object;
   thumbs: AppFileThumb[] = [];
 
-  buffer?: Buffer;
+  buffer?: string;
 
   /**
    * Where does this file come from? What purpose this file serves. It's a good idea to have a context for each file group.

@@ -14,9 +14,11 @@ export class ImageService {
 
   async getImageThumbs(
     buffer: Buffer,
-    context: string
+    context: string,
+    storeId?: string
   ): Promise<{ [id: string]: Buffer }> {
-    const thumbs = this.config.thumbs;
+    const store = this.config.stores.find((st) => st.id === storeId);
+    const thumbs = store && store.thumbs ? store.thumbs : this.config.thumbs;
     const thumbsByContext = thumbs.filter((t) => {
       if (t.contexts) {
         return t.contexts.includes(context);

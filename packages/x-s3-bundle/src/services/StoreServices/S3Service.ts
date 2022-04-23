@@ -1,18 +1,13 @@
 import { S3 } from "aws-sdk";
-import { AWSS3Config, UploadCredentials } from "../../defs";
+import { AWSS3Config, StoreConfig, UploadCredentials } from "../../defs";
 import { IStoreUploadService } from "../IStoreUploadService";
 
 export class S3Service extends IStoreUploadService {
-  protected id: string;
   protected s3: S3;
-  protected credentials: AWSS3Config;
 
-  constructor(id: string, credentials: UploadCredentials) {
-    super(id, credentials);
-    this.credentials = credentials as AWSS3Config;
+  constructor(storeConfig: StoreConfig) {
+    super(storeConfig);
     this.s3 = new S3(this.credentials);
-
-    this.id = id;
   }
 
   /**

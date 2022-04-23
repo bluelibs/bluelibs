@@ -7,6 +7,9 @@ import { ResizeOptions } from "sharp";
 import "@bluelibs/mongo-bundle";
 import { IStoreUploadService } from "./services/IStoreUploadService";
 import { IUploadService } from "./services/IUploadService";
+import { S3Service } from "./services/StoreServices/S3Service";
+import { LocalService } from "./services/StoreServices/LocalService";
+import { DbService } from "./services/StoreServices/DbService";
 
 declare module "@bluelibs/mongo-bundle" {
   interface IExecutionContext {
@@ -25,13 +28,13 @@ export type File = {
 };
 
 export type XS3BundleConfigType = {
-  stores?: Store[];
+  stores?: IStoreUploadService[];
   uploadService: Constructor<IUploadService>;
   prepareStores: (
     config: XS3BundleConfigType,
     container: any
   ) => XS3BundleConfigType;
-  defaultStore?: Store;
+  defaultStore?: IStoreUploadService;
   /**
    * Please use the s3 config variable
    * @deprecated
@@ -95,29 +98,30 @@ export type AWSS3Config = {
 export type LocalStorageConfig = {
   localStoragePath: string;
   downloadUrl: string;
+  downloadHandler?: (container: any, req: any, res: any) => Promise<void>;
 };
 
 export type DBStorageConfig = {
   //appFiles: AppFilesCollection;
   downloadUrl: string;
+  downloadHandler?: (container: any, req: any, res: any) => Promise<void>;
 };
 
 export type UploadCredentials =
   | AWSS3Config
   | LocalStorageConfig
-  | DBStorageConfig;
+  | DBStorageConfig
+  | any;
 
-export type Store = {
+export type StoreConfig = {
   id: string;
-  type: StoreTypes;
   credentials: UploadCredentials;
-  service: IStoreUploadService;
   default?: boolean;
+  thumbs?: ThumbConfigType[];
 };
 
-export enum StoreTypes {
-  S3 = "S3",
-  LOCAL = "LOCAL",
-  DB = "DB",
-  CUSTOM = "CUSTOM",
-}
+export const Stores = {
+  S3: S3Service,
+  Local: LocalService,
+  Database: DbService,
+};
