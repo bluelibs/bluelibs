@@ -39,6 +39,7 @@
     "graphql-upload": "^12.0.0"
   },
   "devDependencies": {
+    "@azure/storage-blob": "^12.9.0",
     "@bluelibs/apollo-bundle": "^1.0.0",
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",

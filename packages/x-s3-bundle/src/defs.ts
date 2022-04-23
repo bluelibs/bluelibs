@@ -10,6 +10,7 @@ import { IUploadService } from "./services/IUploadService";
 import { S3Service } from "./services/StoreServices/S3Service";
 import { LocalService } from "./services/StoreServices/LocalService";
 import { DbService } from "./services/StoreServices/DbService";
+import { AzureStorageService } from "./services/StoreServices/AzureStorageService";
 
 declare module "@bluelibs/mongo-bundle" {
   interface IExecutionContext {
@@ -94,6 +95,11 @@ export type AWSS3Config = {
   endpoint: string;
   bucket: string;
 };
+export type AzureStorageConfig = {
+  connectionId: string;
+  containerName: string;
+  endpoint: string;
+};
 
 export type LocalStorageConfig = {
   localStoragePath: string;
@@ -111,6 +117,7 @@ export type UploadCredentials =
   | AWSS3Config
   | LocalStorageConfig
   | DBStorageConfig
+  | AzureStorageConfig
   | any;
 
 export type StoreConfig = {
@@ -124,4 +131,5 @@ export const Stores = {
   S3: S3Service,
   Local: LocalService,
   Database: DbService,
+  Azure: AzureStorageService,
 };

@@ -1,46 +1,44 @@
-import { S3 } from "aws-sdk";
 import { StoreConfig } from "../../defs";
 import { IStoreUploadService } from "../IStoreUploadService";
+import { BlobServiceClient } from "@azure/storage-blob";
 
-export class S3Service extends IStoreUploadService {
-  protected s3: S3;
+export class AzureStorageService extends IStoreUploadService {
+  protected blobServiceClient: any;
+  protected containerClient: any;
 
   constructor(storeConfig: StoreConfig) {
     super(storeConfig);
-    this.s3 = new S3(this.credentials);
+    this.blobServiceClient = BlobServiceClient.fromConnectionString(
+      this.credentials.connectionId
+    );
+    this.containerClient = this.blobServiceClient.getContainerClient(
+      this.credentials.containerName
+    );
   }
 
   /**
-   * Uploads your buffer/stream to the desired path in S3
+   * Uploads your buffer/stream to the desired path in azure
    * @param fileKey
    * @param mimeType
    * @param stream
    * @returns
    */
   public writeFile(fileKey, mimeType, stream) {
-    const params: S3.PutObjectRequest = {
-      Bucket: this.credentials.bucket,
-      Key: fileKey,
-      Body: stream,
-      ContentType: mimeType,
-      ACL: "public-read",
-    };
-
-    return this.s3.putObject(params).promise();
+    const blockBlobClient = this.containerClient.getBlockBlobClient(fileKey);
+    return blockBlobClient.uploadData(stream, {
+      blobHTTPHeaders: {
+        blobContentType: mimeType,
+      },
+    });
   }
 
   /**
-   * Removes it from S3 deleting it forever
+   * Removes it from azure deleting it forever
    * @param key
    * @returns
    */
   public deleteFile(key) {
-    return this.s3
-      .deleteObject({
-        Bucket: this.credentials.bucket,
-        Key: key,
-      })
-      .promise();
+    return this.containerClient.deleteBlob(key);
   }
 
   /**

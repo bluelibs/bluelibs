@@ -28,6 +28,14 @@ kernel.addBundle(
         //the s3 store will be the default store, if not defined by default the first store of the stores iwll be the default
         default: true,
       }),
+      new Stores.Azure({
+        id: "azure-storage",
+        credentials: {
+          connectionId: env.AZURE_CONNECTION,
+          containerName: env.AZURE_ENDPOINT,
+          endpoint: env.AZURE_ENDPOINT,
+        },
+      }),
       new Stores.Local({
         id: env.LOCAL_STORAGE,
         credentials: {
