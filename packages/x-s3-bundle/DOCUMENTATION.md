@@ -8,21 +8,85 @@ We are using [Apollo Upload scalar](https://www.apollographql.com/docs/apollo-se
 npm i -S graphql-upload aws-sdk @bluelibs/x-s3-bundle
 ```
 
+we can set up multiple stores, witha defined default store
+
 ```ts
 import { XS3Bundle } from "@bluelibs/x-s3-bundle";
 
 kernel.addBundle(
   new XS3Bundle({
-    s3: {
-      accessKeyId: process.env.AWS_S3_KEY_ID,
-      secretAccessKey: process.env.AWS_S3_SECRET,
-      region: process.env.AWS_S3_REGION,
-      bucket: process.env.AWS_S3_BUCKET,
-      // used to generate the downloadable path, example: https://s3.amazonaws.com/my-bucket
-      endpoint: process.env.AWS_S3_ENDPOINT,
-    },
+    stores: [
+      new Stores.S3({
+        id: env.S3_MAIN,
+        credentials: {
+          accessKeyId: env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+          bucket: env.AWS_BUCKET,
+          region: env.AWS_REGION,
+          endpoint: env.AWS_ENDPOINT,
+        },
+        //the s3 store will be the default store, if not defined by default the first store of the stores iwll be the default
+        default: true,
+      }),
+      new Stores.Local({
+        id: env.LOCAL_STORAGE,
+        credentials: {
+          localStoragePath: "./temp",
+          downloadUrl: "/download-local-file",
+        },
+      }),
+
+      new Stores.Database({
+        id: env.DB_STORAGE,
+        credentials: {
+          downloadUrl: "/download-db-file",
+        },
+        // override the thumbs config for this specifiq store
+        thumbs: [
+          {
+            id: "small",
+            width: 128,
+            height: 128,
+          },
+        ],
+      }),
+    ],
   })
 );
+```
+
+### Custom store
+
+you can always implement your own custom store :
+
+```ts
+export class CustomStore extends IStoreUploadService {
+  constructor(storeConfig: StoreConfig) {
+    super(storeConfig);
+    this.thirdPartyInstance=new ThirdParty(storeConfig.credentials);
+  }
+
+  writeFile(fileKey, mimeType, buffer) {
+    return this.thirdPartyInstance.write(...)
+  }
+  deleteFile(key) {
+    return this.thirdPartyInstance.delete(key)
+  }
+  getDownloadUrl(key):string{
+    return this.thirdPartyInstance.generateDownloadUrl(key)
+  }
+}
+```
+
+and in the setup you can just :
+
+```ts
+new XS3Bundle({
+    stores: [
+      ...stores,
+      new CustomStore({id:"main_custom_store",credentials:{..}})
+      ]
+})
 ```
 
 ## Uploading
@@ -85,6 +149,14 @@ const s3UploadService = ctx.container.get(S3UploadService);
 const appFile = s3UploadService.doUpload(filename, mimeType, buffer);
 ```
 
+the previous will target the store by default,
+
+if you want to target the upload to a specifiq store, you can target by the storeId
+
+```ts
+const appFile = s3UploadService.doUpload(filename, mimeType, buffer, storeId);
+```
+
 ## Removing Files
 
 When you remove the file, you would expect that it also gets deleted from the S3 Bucket. You would be correct. If you do:
@@ -112,6 +184,9 @@ export class AppFile {
   mimeType: string;
 
   metadata: object;
+
+  //store Id
+  store: string;
 
   /**
    * To have a generic way of linking data
