@@ -51,7 +51,7 @@ Let's start from scratch with a simple blueprint to walk you through the main co
 
 ```ts title="blueprint/index.ts"
 import { Studio } from "@bluelibs/x";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 const { generateProject, app, collection, field, relation, sharedModel } =
   Studio;

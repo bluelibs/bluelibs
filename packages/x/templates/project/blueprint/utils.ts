@@ -1,5 +1,5 @@
 import { Studio } from "@bluelibs/x";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 
 // Dummy file for easy importing of the things you need for your blueprint
 const {

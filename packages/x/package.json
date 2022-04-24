@@ -28,10 +28,10 @@
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/terminal-bundle": "^1.0.0",
+    "@faker-js/faker": "^6.2.0",
     "@graphql-tools/merge": "^6.0.7",
     "@types/faker": "^5.5.7",
     "chalk": "^2.4.2",
-    "faker": "^5.5.3",
     "fast-glob": "^3.2.2",
     "fs-extra": "^9.0.0",
     "graphql": "^15.3.0",
@@ -42,6 +42,7 @@
     "prettier": "^2.0.5"
   },
   "devDependencies": {
+    "@faker-js/faker": "^6.2.0",
     "@types/chai": "^4.2.3",
     "@types/chai-as-promised": "^7.1.2",
     "@types/fs-extra": "^9.0.1",
