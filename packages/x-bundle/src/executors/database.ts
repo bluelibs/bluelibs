@@ -6,6 +6,7 @@ import { prepareForExecution } from "./utils/prepareForExecution";
 import { GraphQLToNovaOptionsResolverType } from "./utils/GraphQLToNovaOptionsResolverType";
 import { NOVA_AST_TO_QUERY_OPTIONS } from "./security";
 import { IAstToQueryOptions } from "@bluelibs/nova";
+import { InsertUpdateExecutorOptions } from "../defs";
 
 const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<
   any
@@ -155,6 +156,7 @@ export function CheckDocumentExists<T>(
  */
 export function ToDocumentInsert<T>(
   collectionClass: Constructor<Collection<T>>,
+  options?: InsertUpdateExecutorOptions,
   field = "document",
   extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
 ) {
@@ -164,14 +166,17 @@ export function ToDocumentInsert<T>(
     if (extend) {
       await extend(document, ctx);
     }
-
-    const result = await collection.insertOne(args[field], {
-      context: {
-        userId: ctx.userId,
-      },
-    });
-
-    return result.insertedId;
+    if (options?.deepSync) {
+      await collection.deepSync(document, { context: ctx });
+      return document._id;
+    } else {
+      const result = await collection.insertOne(args[field], {
+        context: {
+          userId: ctx.userId,
+        },
+      });
+      return result.insertedId;
+    }
   };
 }
 
@@ -183,7 +188,8 @@ export function ToDocumentInsert<T>(
 export function ToDocumentUpdateByID<T>(
   collectionClass: Constructor<Collection<T>>,
   idArgumentResolver?: (args) => any | Promise<any>,
-  mutateResolver?: (args) => UpdateFilter<T> | Promise<UpdateFilter<T>>
+  mutateResolver?: (args) => UpdateFilter<T> | Promise<UpdateFilter<T>>,
+  options?: InsertUpdateExecutorOptions
 ) {
   if (!idArgumentResolver) {
     idArgumentResolver = (args) => args._id;
@@ -197,14 +203,18 @@ export function ToDocumentUpdateByID<T>(
   return async function (_, args, ctx, ast) {
     const collection: Collection = ctx.container.get(collectionClass);
     const _id = await idArgumentResolver(args);
-
-    await collection.updateOne({ _id }, await mutateResolver(args), {
-      context: {
-        userId: ctx.userId,
-      },
-    });
-
-    return _id;
+    if (options?.deepSync) {
+      const document = { _id, ...args["document"] };
+      await collection.deepSync(document, { context: ctx });
+      return document._id;
+    } else {
+      await collection.updateOne({ _id }, await mutateResolver(args), {
+        context: {
+          userId: ctx.userId,
+        },
+      });
+      return _id;
+    }
   };
 }
 

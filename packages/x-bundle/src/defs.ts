@@ -80,6 +80,10 @@ export interface ISubscriptionHandler<T> {
   stop(): Promise<void>;
 }
 
+export type InsertUpdateExecutorOptions = {
+  deepSync?: boolean;
+};
+
 declare module "@bluelibs/graphql-bundle" {
   export interface IGraphQLContext {
     container: ContainerInstance;
