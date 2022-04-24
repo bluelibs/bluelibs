@@ -1,4 +1,4 @@
-import { StoreConfig } from "../../defs";
+import { AzureStorageConfig, Overwrite, StoreConfig } from "../../defs";
 import { IStoreUploadService } from "../IStoreUploadService";
 import { BlobServiceClient } from "@azure/storage-blob";
 
@@ -6,7 +6,9 @@ export class AzureStorageService extends IStoreUploadService {
   protected blobServiceClient: any;
   protected containerClient: any;
 
-  constructor(storeConfig: StoreConfig) {
+  constructor(
+    storeConfig: Overwrite<StoreConfig, { credentials: AzureStorageConfig }>
+  ) {
     super(storeConfig);
     this.blobServiceClient = BlobServiceClient.fromConnectionString(
       this.credentials.connectionId

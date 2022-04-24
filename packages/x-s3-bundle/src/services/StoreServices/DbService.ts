@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import {
   DBStorageConfig,
-  LocalStorageConfig,
+  Overwrite,
   StoreConfig,
   UploadCredentials,
 } from "../../defs";
@@ -10,7 +10,9 @@ import { dirname } from "path";
 import * as mkdirp from "mkdirp";
 
 export class DbService extends IStoreUploadService {
-  constructor(storeConfig: StoreConfig) {
+  constructor(
+    storeConfig: Overwrite<StoreConfig, { credentials: DBStorageConfig }>
+  ) {
     super(storeConfig);
   }
 

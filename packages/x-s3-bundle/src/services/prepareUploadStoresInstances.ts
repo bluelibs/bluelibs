@@ -114,6 +114,6 @@ export const prepareUploadStoresInstances = (
     return store;
   });
   config.defaultStore =
-    config.stores.find((store) => store.default) || config.stores[0];
+    config.stores.find((store) => store?.default) || config.stores[0];
   return config;
 };

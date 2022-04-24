@@ -1,11 +1,13 @@
 import { S3 } from "aws-sdk";
-import { StoreConfig } from "../../defs";
+import { AWSS3Config, Overwrite, StoreConfig } from "../../defs";
 import { IStoreUploadService } from "../IStoreUploadService";
 
 export class S3Service extends IStoreUploadService {
   protected s3: S3;
 
-  constructor(storeConfig: StoreConfig) {
+  constructor(
+    storeConfig: Overwrite<StoreConfig, { credentials: AWSS3Config }>
+  ) {
     super(storeConfig);
     this.s3 = new S3(this.credentials);
   }

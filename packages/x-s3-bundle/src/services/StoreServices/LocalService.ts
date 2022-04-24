@@ -1,11 +1,18 @@
 import * as fs from "fs";
-import { LocalStorageConfig, StoreConfig, UploadCredentials } from "../../defs";
+import {
+  LocalStorageConfig,
+  Overwrite,
+  StoreConfig,
+  UploadCredentials,
+} from "../../defs";
 import { IStoreUploadService } from "../IStoreUploadService";
 import { dirname } from "path";
 import * as mkdirp from "mkdirp";
 
 export class LocalService extends IStoreUploadService {
-  constructor(storeConfig: StoreConfig) {
+  constructor(
+    storeConfig: Overwrite<StoreConfig, { credentials: LocalStorageConfig }>
+  ) {
     super(storeConfig);
   }
 
