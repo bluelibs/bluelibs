@@ -207,7 +207,9 @@ export class XBridge {
         : studioField.id;
 
       let suffix = _.upperFirst(fieldSuffix);
-      const name = studioField.collection.entityName + suffix;
+      const name =
+        (studioField?.collection?.entityName ||
+          studioField?.sharedCollection?.id) + suffix;
 
       field.model = {
         name,
