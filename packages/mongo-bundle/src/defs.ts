@@ -40,7 +40,10 @@ export interface ITimestampableBehaviorOptions {
     createdAt?: string;
     updatedAt?: string;
   };
-  nullishUpdatedAtAtInsert?: boolean;
+  /**
+   * If this is set to `true`, on insertion updatedAt will be null instead, otherwise it will be kept as the creation date
+   */
+  keepInitialUpdateAsNull?: boolean;
 }
 
 export interface IValidateBehaviorOptions {
@@ -55,7 +58,10 @@ export interface IBlameableBehaviorOptions {
     updatedBy?: string;
     createdBy?: string;
   };
-  nullishUpdatedByAtInsert?: boolean;
+  /**
+   * If this is set to `true`, on insertion updatedBy will be null instead, otherwise it will be kept as the createdBy id
+   */
+  keepInitialUpdateAsNull?: boolean;
   /**
    * Enabling this will check if `userId` is not undefined, if it is it will throw an error, userId can still be `null` because the system does the operation (in a cronjob for example)
    * You can regard it as a safety net to avoid mistakes.

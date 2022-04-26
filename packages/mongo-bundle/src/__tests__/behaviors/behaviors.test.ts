@@ -167,8 +167,8 @@ describe("Behaviors", () => {
 
     class Behaviors extends Collection<any> {
       static behaviors = [
-        timestampable({ nullishUpdatedAtAtInsert: true }),
-        blameable({ nullishUpdatedByAtInsert: true }),
+        timestampable({ keepInitialUpdateAsNull: true }),
+        blameable({ keepInitialUpdateAsNull: true }),
       ];
       static collectionName = "behaviorsTEST";
     }
@@ -203,9 +203,9 @@ describe("Behaviors", () => {
       }
     );
 
-    let b0Object = await behaviors.queryOne(getQueryBody(b1.insertedId));
+    let b0Object = await behaviors.queryOne(getQueryBody(b0.insertedId));
 
-    expect(b0Object.updatedAt).toBeInstanceOf(null);
+    expect(b0Object.updatedAt).toBe(null);
     expect(b0Object.updatedById).toEqual(null);
 
     await behaviors.updateOne(

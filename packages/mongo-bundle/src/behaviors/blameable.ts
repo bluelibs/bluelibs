@@ -11,7 +11,7 @@ export default function blameable(
     updatedBy: "updatedById",
   };
   const throwErrorWhenMissing = options.throwErrorWhenMissing || false;
-  const nullishUpdatedByAtInsert = options.nullishUpdatedByAtInsert || false;
+  const nullishUpdatedByAtInsert = options.keepInitialUpdateAsNull || false;
 
   const userIdFieldInContext = "userId";
 

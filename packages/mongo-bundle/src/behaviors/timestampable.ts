@@ -10,7 +10,7 @@ export default function timestampable(
     createdAt: "createdAt",
     updatedAt: "updatedAt",
   };
-  const nullishUpdatedAtAtInsert = options.nullishUpdatedAtAtInsert || false;
+  const keepInitialUpdateAsNull = options.keepInitialUpdateAsNull || false;
 
   return (collection: Collection<any>) => {
     collection.localEventManager.addListener(
@@ -21,7 +21,7 @@ export default function timestampable(
 
         Object.assign(document, {
           [fields.createdAt]: document[fields.createdAt] || now,
-          [fields.updatedAt]: nullishUpdatedAtAtInsert
+          [fields.updatedAt]: keepInitialUpdateAsNull
             ? null
             : document[fields.updatedAt] || now,
         });
