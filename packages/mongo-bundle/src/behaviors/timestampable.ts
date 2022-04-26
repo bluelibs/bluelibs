@@ -10,6 +10,7 @@ export default function timestampable(
     createdAt: "createdAt",
     updatedAt: "updatedAt",
   };
+  const nullishUpdatedAtAtInsert = options.nullishUpdatedAtAtInsert || false;
 
   return (collection: Collection<any>) => {
     collection.localEventManager.addListener(
@@ -19,8 +20,10 @@ export default function timestampable(
         const now = new Date();
 
         Object.assign(document, {
-          [fields.createdAt]: now,
-          [fields.updatedAt]: now,
+          [fields.createdAt]: document[fields.createdAt] || now,
+          [fields.updatedAt]: nullishUpdatedAtAtInsert
+            ? null
+            : document[fields.updatedAt] || now,
         });
       }
     );
@@ -35,7 +38,7 @@ export default function timestampable(
         }
 
         Object.assign(update.$set, {
-          [fields.updatedAt]: new Date(),
+          [fields.updatedAt]: update.$set[fields.updatedAt] || new Date(),
         });
       }
     );

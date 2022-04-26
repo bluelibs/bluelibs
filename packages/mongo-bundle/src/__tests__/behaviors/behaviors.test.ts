@@ -161,4 +161,74 @@ describe("Behaviors", () => {
       expect(b1s.updatedById).toEqual(userIdToUpdate);
     });
   });
+
+  it("Should set automatic `updatedAt` and `updatedBy` values to null if required to", async () => {
+    const { container } = await getEcosystem();
+
+    class Behaviors extends Collection<any> {
+      static behaviors = [
+        timestampable({ nullishUpdatedAtAtInsert: true }),
+        blameable({ nullishUpdatedByAtInsert: true }),
+      ];
+      static collectionName = "behaviorsTEST";
+    }
+
+    const userIdToUpdate = "123";
+    const userIdToCreate = "XXX";
+    const userIdToCreate2 = "YYY";
+
+    const behaviors = container.get(Behaviors);
+
+    const getQueryBody = (insertedId: any) => ({
+      $: {
+        filters: {
+          _id: insertedId,
+        },
+      },
+      createdAt: 1,
+      updatedAt: 1,
+      createdById: 1,
+      updatedById: 1,
+    });
+
+    const b0 = await behaviors.insertOne(
+      {
+        test: 1,
+        createdById: userIdToCreate2,
+      },
+      {
+        context: {
+          userId: userIdToCreate,
+        },
+      }
+    );
+
+    let b0Object = await behaviors.queryOne(getQueryBody(b1.insertedId));
+
+    expect(b0Object.updatedAt).toBeInstanceOf(null);
+    expect(b0Object.updatedById).toEqual(null);
+
+    await behaviors.updateOne(
+      {
+        _id: b0.insertedId,
+      },
+      {
+        $set: {
+          test: 45,
+        },
+      },
+      {
+        context: {
+          userId: userIdToUpdate,
+        },
+      }
+    );
+
+    b0Object = await behaviors.queryOne(getQueryBody(b0.insertedId));
+
+    expect(b0Object.updatedAt > b0Object.createdAt).toBe(true);
+
+    expect(b0Object.createdById).toEqual(userIdToCreate);
+    expect(b0Object.updatedById).toEqual(userIdToUpdate);
+  });
 });
