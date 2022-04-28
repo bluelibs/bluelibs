@@ -495,6 +495,22 @@ export class UICRUDModel {
                 enumValues: this.getEnumValuesLabels(
                   subfield.enumValues as EnumConfigType[]
                 ),
+                //we can always make this recursive but 3 levels is more than enough I belive
+                subfields: (subfield?.subfields || []).map((sub: Field) => {
+                  return Object.assign({}, base, {
+                    id: sub.id,
+                    isMany: sub.isArray,
+                    required: sub.isRequired,
+                    order: sub.ui && sub.ui.order,
+                    title: this.getI18NKey(sub, undefined, subfield),
+                    description: this.getI18NKey(sub, true, subfield),
+                    dataIndexStr: `["${field.id}","${subfield.id}", "${sub.id}"]`,
+                    rendererType: this.getRendererType(sub),
+                    enumValues: this.getEnumValuesLabels(
+                      sub.enumValues as EnumConfigType[]
+                    ),
+                  });
+                }),
               });
             }),
           })
