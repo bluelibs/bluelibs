@@ -104,3 +104,5 @@ export function getHeaderActions(collection: {{ collectionClass }}, router: XRou
 
   return actions;
 }
+
+export default {{ generateComponentName "view" }};

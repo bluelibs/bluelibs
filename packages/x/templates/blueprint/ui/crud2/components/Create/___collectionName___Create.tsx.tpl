@@ -45,3 +45,5 @@ export function {{ generateComponentName "create" }}() {
     </UIComponents.AdminLayout>
   )
 }
+
+export default {{ generateComponentName "create" }};
