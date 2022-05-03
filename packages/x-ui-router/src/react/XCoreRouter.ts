@@ -12,26 +12,43 @@ export abstract class XCoreRouter<
   RP extends IRouteParams = IRouteParams
 > {
   store: RT[] = [];
+  routePathPrefix: string = "";
 
   /**
    * Add routes in the form of { [name]: config }
    * @param routes
    */
-  add(routes: AddRoutingArguments<RT>) {
+  add(
+    routes: AddRoutingArguments<RT>,
+    i18nConfig: { defaultLocale: string; locales?: any[] } = {
+      defaultLocale: "en",
+      locales: [],
+    }
+  ) {
+    if (i18nConfig?.locales.length) {
+      this.routePathPrefix = `/:locale(${[
+        ...i18nConfig?.locales.map((x) => x.locale),
+        i18nConfig.defaultLocale,
+      ].join("|")})?`;
+    }
+
     for (const routeName in routes) {
+      const newPath = this.routePathPrefix + routes[routeName].path;
       const route = {
         exact: true,
         name: routeName,
         ...routes[routeName],
+        path: newPath,
       };
-
       this.checkRouteConsistency(route);
       this.store.push(route);
     }
   }
 
   find(routeNameOrPath: string): RT | null {
-    const found = this.store.find((r) => r.path === routeNameOrPath);
+    const found = this.store.find(
+      (r) => r.path === this.routePathPrefix + routeNameOrPath
+    );
 
     if (found) {
       return found;
@@ -50,12 +67,33 @@ export abstract class XCoreRouter<
     route: IRoute<T, Q>,
     options?: IRouteGenerationProps<T, Q>
   ): string {
-    let finalPath = route.path;
+    let finalPath = this.find(route.path)?.path;
     let queryPath = "";
+
+    if (this.routePathPrefix.length) {
+      if (!options) options = {};
+      const locale = options?.locale || route?.defaultLocale;
+      if (locale) {
+        options.params = {
+          ...options?.params,
+          locale,
+        };
+      }
+
+      finalPath = finalPath.replace(
+        this.routePathPrefix,
+        (options.params?.locale ? "/" + options.params?.locale : "") as string
+      );
+    }
 
     if (options?.params) {
       for (const key in options.params) {
-        if (finalPath.indexOf(`:${key}`) > -1) {
+        if (key === "locale") continue;
+        console.log("key", key);
+        console.log("options.params", options.params);
+        console.log("finalPath", finalPath);
+        const keyIndex = finalPath.indexOf(`:${key}`);
+        if (keyIndex > -1) {
           finalPath = finalPath.replace(
             `:${key}`,
             options.params[key] as string
@@ -65,6 +103,7 @@ export abstract class XCoreRouter<
             `Parameter "${key}" does not exist in the route path definition.`
           );
         }
+        console.log("final final path", finalPath);
       }
     }
 
@@ -86,7 +125,7 @@ export abstract class XCoreRouter<
   protected checkRouteConsistency(route: RT) {
     // Ensure that there isn't another route with the same path or name
     const found = this.store.find((r) => {
-      if (r.path === route.path) {
+      if (r.path === this.routePathPrefix + route.path) {
         return r;
       }
       // Name can often be null

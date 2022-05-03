@@ -5,6 +5,7 @@ export interface IRoute<T = IRouteParams, Q = IRouteParams> {
    */
   roles?: string[];
   path: string;
+  defaultLocale?: string;
 }
 
 export type RouteMap = {
@@ -12,8 +13,9 @@ export type RouteMap = {
 };
 
 export interface IRouteGenerationProps<T = any, Q = any> {
-  params?: T;
+  params?: T | { locale: string };
   query?: Q;
+  locale?: string;
 }
 
 export interface IRouteParams {
