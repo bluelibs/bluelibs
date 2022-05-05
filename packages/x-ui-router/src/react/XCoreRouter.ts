@@ -89,9 +89,7 @@ export abstract class XCoreRouter<
     if (options?.params) {
       for (const key in options.params) {
         if (key === "locale") continue;
-        console.log("key", key);
-        console.log("options.params", options.params);
-        console.log("finalPath", finalPath);
+
         const keyIndex = finalPath.indexOf(`:${key}`);
         if (keyIndex > -1) {
           finalPath = finalPath.replace(
@@ -103,7 +101,6 @@ export abstract class XCoreRouter<
             `Parameter "${key}" does not exist in the route path definition.`
           );
         }
-        console.log("final final path", finalPath);
       }
     }
 

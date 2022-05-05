@@ -19,6 +19,16 @@ export class XRouter extends XCoreRouter<IRoute> {
   constructor() {
     super();
     this.history = createBrowserHistory();
+    const push = this.history.push;
+    this.history.push = (
+      location: H.LocationDescriptor<unknown>,
+      state?: unknown
+    ) => {
+      if (this.routePathPrefix?.length) {
+        location = location.replace(this.routePathPrefix, "");
+      }
+      push(location, state);
+    };
   }
 
   go<T extends IRouteParams, Q extends IRouteParams>(
