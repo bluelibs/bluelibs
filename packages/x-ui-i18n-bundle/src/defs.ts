@@ -5,7 +5,13 @@ export interface IXUII18NBundleConfig {
   //     /**
   //      * This is used for when you want customly configured polyglots allowing you to customise the options
   //      */
-  polyglots: Array<Polyglot.PolyglotOptions & { locale: string }>;
+  polyglots: Array<
+    Polyglot.PolyglotOptions & {
+      locale: string;
+      domain?: "string";
+      http?: boolean;
+    }
+  >;
 }
 
 /**

@@ -1,4 +1,9 @@
-import { IRoute, IRouteGenerationProps, IRouteParams } from "../defs";
+import {
+  I18nRoutingConfig,
+  IRoute,
+  IRouteGenerationProps,
+  IRouteParams,
+} from "../defs";
 import { Service } from "@bluelibs/core";
 import * as queryString from "query-string";
 
@@ -14,20 +19,22 @@ export abstract class XCoreRouter<
   store: RT[] = [];
   routePathPrefix: string = "";
 
+  i18nConfig: I18nRoutingConfig;
   /**
    * Add routes in the form of { [name]: config }
    * @param routes
    */
   add(
     routes: AddRoutingArguments<RT>,
-    i18nConfig: { defaultLocale: string; locales?: any[] } = {
+    i18nConfig: I18nRoutingConfig = {
       defaultLocale: "en",
-      locales: [],
+      polyglots: [],
     }
   ) {
-    if (i18nConfig?.locales.length) {
+    this.i18nConfig = i18nConfig;
+    if (i18nConfig?.polyglots.length) {
       this.routePathPrefix = `/:locale(${[
-        ...i18nConfig?.locales.map((x) => x.locale),
+        ...i18nConfig?.polyglots.map((x) => x.locale),
         i18nConfig.defaultLocale,
       ].join("|")})?`;
     }
@@ -70,22 +77,6 @@ export abstract class XCoreRouter<
     let finalPath = this.find(route.path)?.path;
     let queryPath = "";
 
-    if (this.routePathPrefix.length) {
-      if (!options) options = {};
-      const locale = options?.locale || route?.defaultLocale;
-      if (locale) {
-        options.params = {
-          ...options?.params,
-          locale,
-        };
-      }
-
-      finalPath = finalPath.replace(
-        this.routePathPrefix,
-        (options.params?.locale ? "/" + options.params?.locale : "") as string
-      );
-    }
-
     if (options?.params) {
       for (const key in options.params) {
         if (key === "locale") continue;
@@ -106,6 +97,22 @@ export abstract class XCoreRouter<
 
     if (options?.query && Object.keys(options.query).length) {
       queryPath = `?${queryString.stringify(options.query)}`;
+    }
+
+    if (this.routePathPrefix.length) {
+      if (!options) options = {};
+      const locale = options?.locale || route?.defaultLocale;
+      if (locale) {
+        options.params = {
+          ...options?.params,
+          locale,
+        };
+      }
+
+      finalPath = finalPath.replace(
+        this.routePathPrefix,
+        (options.params?.locale ? "/" + options.params?.locale : "") as string
+      );
     }
 
     return finalPath + queryPath;

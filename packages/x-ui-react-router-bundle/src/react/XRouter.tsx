@@ -35,6 +35,17 @@ export class XRouter extends XCoreRouter<IRoute> {
     route: IRoute<T, Q>,
     options?: IRouteGenerationProps<T, Q>
   ): void {
-    this.history.push(this.path(route, options));
+    const locale = options?.locale || route?.defaultLocale;
+    const path = this.path(route, options);
+
+    //in case of domain change
+    const polyglot = this.i18nConfig.polyglots.find((p) => p.locale === locale);
+    if (polyglot?.domain) {
+      window.location.assign(
+        (polyglot.http ? "http" : "https") + "://" + polyglot.domain + path
+      );
+    } else {
+      this.history.push(path);
+    }
   }
 }
