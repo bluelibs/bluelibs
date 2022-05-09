@@ -765,7 +765,7 @@ export abstract class Collection<T = null> {
     });
 
     if (result?.data) {
-      result.data = result.data[operation] || [];
+      result.data = result.data || null;
     }
 
     return result;
