@@ -8,6 +8,8 @@ import {
   UIModeType,
   UICollectionConfigType,
   Resolvable,
+  SecuritySchematic,
+  SecuritySchematicRole,
 } from "../defs";
 
 export type BehaviorsConfig = {
@@ -95,6 +97,11 @@ export class Collection extends BaseModel<Collection> {
     count: 0,
   };
 
+  /**
+   * collection crud Security config based on roles
+   */
+  security: SecuritySchematic;
+
   clean() {
     // this.fields = this.instanceify(this.fields, Field);
     // this.relations = this.instanceify(this.relations, Relation);
@@ -131,6 +138,8 @@ export class Collection extends BaseModel<Collection> {
       f.clean();
     });
 
+    //make sure we have defautl security handling
+    this.prepareSecurityDefaultsConfig();
     this.cleanDuplicateFields();
     this.enableGraphQLCleaning();
   }
@@ -244,5 +253,27 @@ export class Collection extends BaseModel<Collection> {
     } else {
       return this.enableGraphQL[type];
     }
+  }
+
+  protected prepareSecurityDefaultsConfig() {
+    const defaultShematics: SecuritySchematicRole = {
+      submitUiAdmin: false,
+      find: true,
+      insertOne: true,
+      updateOne: true,
+      deleteOne: true,
+    };
+    this.security.defaults = { ...defaultShematics, ...this.security.defaults };
+    if (!this.security.roles) this.security.roles = {};
+    ["anonymous", "authenticated"].forEach(
+      (role) => (this.security.roles[role] = { ...this.security.roles[role] })
+    );
+    Object.keys(this.security.roles).map(
+      (role) =>
+        (this.security.roles[role] = {
+          ...this.security.defaults,
+          ...this.security.roles[role],
+        })
+    );
   }
 }
