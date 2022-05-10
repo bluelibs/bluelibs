@@ -10,6 +10,8 @@ import {
   BeforeUpdateEvent,
   AfterUpdateEvent,
 } from "../../events";
+import { EJSON } from "@bluelibs/ejson";
+import { ObjectId } from "mongodb";
 
 describe("Collection", () => {
   test("Should dispatch events properly", async () => {
@@ -328,6 +330,23 @@ describe("Collection", () => {
       );
 
       expect(obj.title).toBe("test2");
+    });
+  });
+
+  test("Should work with nova integration", async () => {
+    const { container } = await getEcosystem();
+
+    const comments = container.get<Comments>(Comments);
+    const posts = container.get<Posts>(Posts);
+    const users = container.get<Users>(Users);
+
+    const u1 = await users.insertOne({
+      name: "John",
+    });
+
+    const result = await users.queryOne({
+      $: { filters: { _id: u1.insertedId } },
+      _id: 1,
     });
   });
 });

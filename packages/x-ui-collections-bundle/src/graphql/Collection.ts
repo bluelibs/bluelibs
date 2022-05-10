@@ -362,7 +362,6 @@ export abstract class Collection<T = null> {
         mutation,
         variables: {
           _id,
-          document,
         },
       })
       .then((response) => {

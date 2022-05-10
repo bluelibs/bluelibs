@@ -27,7 +27,10 @@ import {
   IExecutionContext,
 } from "../defs";
 import { ObjectId, toModel } from "@bluelibs/ejson";
-import { DeepSyncDocumentNode } from "../services/deep-sync/DeepSyncDocumentNode";
+import {
+  DeepSyncDocumentNode,
+  DeepSyncOptionsType,
+} from "../services/deep-sync/DeepSyncDocumentNode";
 import {
   query,
   ILinkOptions,
@@ -676,12 +679,17 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   async deepSync(
     object: DeepPartial<T> | DeepPartial<T>[],
     options: IContextAware &
-      (MongoDB.InsertOneOptions | MongoDB.UpdateOptions) = {}
+      (MongoDB.InsertOneOptions | MongoDB.UpdateOptions) = {},
+    deepSyncOptions: DeepSyncOptionsType = {}
   ): Promise<void> {
     const objects = Array.isArray(object) ? object : [object];
 
     for (const object of objects) {
-      const node = new DeepSyncDocumentNode(this.collection, object);
+      const node = new DeepSyncDocumentNode(
+        this.collection,
+        object,
+        deepSyncOptions
+      );
 
       await node.flush({
         ...options,

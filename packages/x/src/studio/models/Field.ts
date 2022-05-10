@@ -150,6 +150,11 @@ export class Field extends BaseModel<Field> {
       this.enumValues = Field.getCleanedEnumValues(this.enumValues);
     }
 
+    //disable ui for disabled graphql fields
+    if (!this.enableGraphQL) {
+      this.ui = false;
+    }
+
     this.subfields.forEach((s) => {
       s.app = this.app;
       s.collection = this.collection;
@@ -264,7 +269,8 @@ export class Field extends BaseModel<Field> {
     if (this.model) {
       const model = this.model as SharedModel;
       if (!model.isEnum()) {
-        this.cleaned.model.fields.forEach((field) => {
+        this.cleaned.model.cleaned.fields.forEach((field: Field) => {
+          field.parent = this;
           fields.push(...field.getSelfAndAllNestedFields());
         });
       }
@@ -282,9 +288,20 @@ export class Field extends BaseModel<Field> {
    *
    * @returns
    */
-  getI18NSignature(): { key: string; label: string; description?: string } {
+  getI18NSignature(forceParent?: Field): {
+    key: string;
+    label: string;
+    description?: string;
+    enums?: any;
+  } {
     const parents: Field[] = [];
     let current: Field = this;
+    //in case of enums
+    let enums: any;
+
+    if (forceParent) {
+      current.parent = forceParent;
+    }
 
     while (current.parent) {
       parents.push(current.parent);
@@ -294,10 +311,17 @@ export class Field extends BaseModel<Field> {
         current = current.parent;
       }
     }
-
+    if (current.type === FieldValueKind.ENUM && current.enumValues.length > 0) {
+      enums = {};
+      for (let enum_value of current.enumValues) {
+        const enum_key =
+          typeof enum_value === "string" ? enum_value : enum_value?.label;
+        enums[enum_key.toLowerCase()] = enum_key;
+      }
+    }
     const label = this.ui ? this.ui.label : this.id;
     if (parents.length === 0) {
-      return { key: this.id, label, description: this.description };
+      return { key: this.id, label, description: this.description, enums };
     }
 
     let keySignature = "";
@@ -311,6 +335,7 @@ export class Field extends BaseModel<Field> {
       key: keySignature + this.id,
       label: labelSignature + label,
       description: this.description,
+      enums,
     };
   }
 

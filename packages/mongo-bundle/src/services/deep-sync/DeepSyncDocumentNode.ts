@@ -13,6 +13,10 @@ const PERSISTED = Symbol("PERSISTED");
 const IN_FLUSH = Symbol("IN_FLUSH");
 const NODE = Symbol("NODE");
 
+export type DeepSyncOptionsType = {
+  direct?: boolean;
+};
+
 /**
  * Graph-like solution to persist related data to the database
  */
@@ -38,13 +42,20 @@ export class DeepSyncDocumentNode {
 
   _id?: ObjectId | MongoDB.ObjectId;
 
+  options: DeepSyncOptionsType;
+
   inFlush: boolean = false;
 
-  constructor(collection: MongoCollection<any>, data: any) {
+  constructor(
+    collection: MongoCollection<any>,
+    data: any,
+    options?: DeepSyncOptionsType
+  ) {
     this.collection = collection;
     const plain = Object.assign({}, data);
     this.data = data;
     this.data[NODE] = this;
+    this.options = options;
 
     this.storeLinkData(plain);
 
@@ -64,14 +75,24 @@ export class DeepSyncDocumentNode {
             if (element[NODE]) {
               nodes.push(element[NODE]);
             } else {
-              nodes.push(new DeepSyncDocumentNode(linkedCollection, element));
+              nodes.push(
+                new DeepSyncDocumentNode(
+                  linkedCollection,
+                  element,
+                  this.options
+                )
+              );
             }
           });
         } else {
           nodes.push(
             plain[linkName][NODE]
               ? plain[linkName][NODE]
-              : new DeepSyncDocumentNode(linkedCollection, plain[linkName])
+              : new DeepSyncDocumentNode(
+                  linkedCollection,
+                  plain[linkName],
+                  this.options
+                )
           );
         }
 
@@ -162,12 +183,15 @@ export class DeepSyncDocumentNode {
    */
   protected async persist(options: any = {}) {
     const collection = this.collection[MONGO_BUNDLE_COLLECTION] as Collection;
+    const actualCollection = this.options.direct
+      ? collection.collection
+      : collection;
 
     if (this._id) {
       const { _id, ...rest } = this.databaseObject;
       if (Object.keys(rest).length > 0) {
         // sometimes it's just an _id to link with the direct part
-        await collection.updateOne(
+        await actualCollection.updateOne(
           { _id },
           {
             $set: rest,
@@ -176,7 +200,10 @@ export class DeepSyncDocumentNode {
         );
       }
     } else {
-      const result = await collection.insertOne(this.databaseObject, options);
+      const result = await actualCollection.insertOne(
+        this.databaseObject,
+        options
+      );
       this._id = result.insertedId;
     }
 
