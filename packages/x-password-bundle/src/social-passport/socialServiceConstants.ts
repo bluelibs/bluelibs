@@ -6,23 +6,23 @@ import {
 
 export const SOCIAL_CUSTOM_CONFIG: socialCustomConfigMapType = {
   twitter: {
-    varChanges: {
+    credentialsKeys: {
       clientID: "consumerKey",
       clientSecret: "consumerSecret",
     },
   },
   linkedin: {
-    varChanges: {
+    credentialsKeys: {
       clientID: "consumerKey",
       clientSecret: "consumerSecret",
     },
   },
   apple: {
-    varChanges: {
+    credentialsKeys: {
       clientID: "clientID",
       clientSecret: "keyID",
     },
-    varAdd: ["teamID", "privateKeyLocation", "passReqToCallback"],
+    extraCredentialsKeys: ["teamID", "privateKeyLocation", "passReqToCallback"],
   },
 };
 export const SOCIAL_UNIQUE_IDS: socialPropsTypes = {

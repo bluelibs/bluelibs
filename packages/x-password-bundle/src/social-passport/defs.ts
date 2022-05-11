@@ -29,11 +29,13 @@ export type SocialServiceConfigType = {
 
 export type socialCustomConfigMapType = {
   [key: string]: {
-    varChanges: {
+    //here we define the client id and secret keys used in the passport strategy
+    credentialsKeys: {
       clientID: string;
       clientSecret: string;
     };
-    varAdd?: string[];
+    //those are for extra credentials keys used in some strategies
+    extraCredentialsKeys?: string[];
   };
 };
 

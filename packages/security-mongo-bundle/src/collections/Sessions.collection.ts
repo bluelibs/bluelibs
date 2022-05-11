@@ -40,7 +40,6 @@ export class SessionsCollection<T extends ISession>
     };
 
     if (data) {
-      delete data.token;
       Object.assign(session, { data });
     }
 
@@ -75,16 +74,16 @@ export class SessionsCollection<T extends ISession>
     });
   }
 
-  async getConfirmationSessionByUserId(
-    userId: UserId,
-    type: string
-  ): Promise<ISession> {
+  async findSession(userId: UserId, data: any): Promise<ISession> {
     return this.findOne({
       userId,
       expiresAt: {
         $gte: new Date(),
       },
-      "data.type": type,
+      ...Object.keys(data).reduce((prev, key) => {
+        prev["data." + key] = data[key];
+        return prev;
+      }, {}),
     });
   }
 }

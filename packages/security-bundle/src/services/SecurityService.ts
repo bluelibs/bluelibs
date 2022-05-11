@@ -24,7 +24,6 @@ import {
   UserDisabledException,
   SessionExpiredException,
   UserNotFoundException,
-  SubmissionCountExceeded,
 } from "../exceptions";
 import { UserDisabledEvent, UserEnabledEvent } from "../events";
 import {
@@ -276,10 +275,6 @@ export class SecurityService implements ISecurityService {
     if (!this.isUserEnabled(userId)) {
       throw new UserDisabledException();
     }
-
-    if (session?.data?.leftSubmissionsCount === 0) {
-      throw new SubmissionCountExceeded();
-    }
   }
 
   /**
@@ -422,65 +417,7 @@ export class SecurityService implements ISecurityService {
       roles,
     });
   }
-  /**
-   * Creating Authentication Token. This method persists to the database if new verihash needs to be generated
-   *
-   * @param userId
-   * @param options
-   */
-  async createConfirmationSession(
-    userId: UserId,
-    options: ICreateSessionOptions = {}
-  ) {
-    let session: ISession =
-      await this.sessionPersistanceLayer.getConfirmationSessionByUserId(
-        userId,
-        options.data.type
-      );
-    let token;
-    if (session && session.token) token = session.token;
-    if (!token) token = await this.createSession(userId, options);
 
-    return token;
-  }
-
-  async getConfirmationSession(
-    token: string,
-    userId: UserId,
-    type: string
-  ): Promise<ISession | null> {
-    const session =
-      await this.sessionPersistanceLayer.getConfirmationSessionByUserId(
-        userId,
-        type
-      );
-
-    if (!session) {
-      return null;
-    } else if (session.token !== token) {
-      await this.sessionPersistanceLayer.deleteSession(session.token);
-
-      await this.sessionPersistanceLayer.newSession(
-        session.userId,
-        session.expiresAt,
-        {
-          token: session.token,
-          type: session.data.type,
-          leftSubmissionsCount: Math.max(
-            session?.data?.leftSubmissionsCount - 1,
-            0
-          ),
-        }
-      );
-      return null;
-    }
-
-    await this.eventManager.emit(new SessionRetrievedEvent({ session }));
-
-    await this.validateSession(session);
-
-    return session;
-  }
   //maybe we do that in sessionPersistanceLayer, but I thought we dont update for a reason
   async updateSession(newSession: ISession): Promise<void> {
     await this.sessionPersistanceLayer.deleteSession(newSession.token);
@@ -492,5 +429,9 @@ export class SecurityService implements ISecurityService {
         ...newSession.data,
       }
     );
+  }
+
+  async findSession(userId: UserId, data: any): Promise<ISession | null> {
+    return this.sessionPersistanceLayer.findSession(userId, data);
   }
 }

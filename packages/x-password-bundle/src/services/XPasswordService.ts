@@ -1,4 +1,9 @@
-import { SecurityService, UserId } from "@bluelibs/security-bundle";
+import {
+  SecurityService,
+  UserId,
+  ICreateSessionOptions,
+  ISession,
+} from "@bluelibs/security-bundle";
 import { PasswordService } from "@bluelibs/password-bundle";
 import { EmailService } from "@bluelibs/email-bundle";
 import { Service, Inject, ContainerInstance } from "@bluelibs/core";
@@ -19,7 +24,10 @@ import {
   X_PASSWORD_SETTINGS,
 } from "../constants";
 import { InvalidUsernameException } from "../exceptions/InvalidUsernameException";
-import { UsernameAlreadyExistsException } from "../exceptions";
+import {
+  SubmissionCountExceededException,
+  UsernameAlreadyExistsException,
+} from "../exceptions";
 import {
   RequestLoginLinkInput,
   VerifyMagicLinkInput,
@@ -400,7 +408,7 @@ export class XPasswordService implements IXPasswordService {
   ): Promise<{ token: string } | MultipleFcatorRedirect> {
     const magicCode: string = input.magicCode,
       userId: UserId = ObjectId(input.userId);
-    const session = await this.securityService.getConfirmationSession(
+    const session = await this.getConfirmationSession(
       magicCode,
       userId,
       MAGIC_AUTH_STRATEGY
@@ -427,7 +435,7 @@ export class XPasswordService implements IXPasswordService {
         ? this.generateToken(6, "0123456789".split(""))
         : this.generateToken(24);
 
-    await this.securityService.createConfirmationSession(userId, {
+    await this.createConfirmationSession(userId, {
       data: {
         token: magicCode,
         type: MAGIC_AUTH_STRATEGY,
@@ -459,5 +467,50 @@ export class XPasswordService implements IXPasswordService {
         to: input.username,
       }
     );
+  }
+
+  async createConfirmationSession(
+    userId: UserId,
+    options: ICreateSessionOptions = {}
+  ): Promise<string> {
+    let session = await this.securityService.findSession(userId, {
+      type: options.data.type,
+    });
+    let token;
+    if (session && session.token) token = session.token;
+    if (!token)
+      token = await this.securityService.createSession(userId, options);
+
+    return token;
+  }
+
+  async getConfirmationSession(
+    token: string,
+    userId: UserId,
+    type: string
+  ): Promise<ISession | null> {
+    const session: ISession = await this.securityService.findSession(userId, {
+      type,
+    });
+
+    if (!session) {
+      return null;
+    } else if (session.token !== token) {
+      session.data = {
+        ...session.data,
+        leftSubmissionsCount: Math.max(
+          session?.data?.leftSubmissionsCount - 1,
+          0
+        ),
+      };
+      await this.securityService.updateSession(session);
+      return null;
+    }
+    if (session?.data?.leftSubmissionsCount === 0) {
+      throw new SubmissionCountExceededException();
+    }
+    await this.securityService.validateSession(session);
+
+    return session;
   }
 }

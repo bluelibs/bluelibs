@@ -117,12 +117,12 @@ export class SocialLoginService {
     //change the input conifg depends on the stratgy
     if (
       this.socialCustomConfig[service] &&
-      this.socialCustomConfig[service].varChanges
+      this.socialCustomConfig[service].credentialsKeys
     ) {
-      for (let varname in this.socialCustomConfig[service].varChanges) {
+      for (let varname in this.socialCustomConfig[service].credentialsKeys) {
         (function (varname) {
           const buffer = passportSetup[varname];
-          passportSetup[this.socialCustomConfig[service].varChanges[varname]] =
+          passportSetup[this.socialCustomConfig[service].credentials[varname]] =
             buffer;
           delete passportSetup[varname];
         })(varname);
@@ -131,22 +131,23 @@ export class SocialLoginService {
     // if the strategy requires more variables than cleintId and secretId
     if (
       this.socialCustomConfig[service] &&
-      this.socialCustomConfig[service].varAdd
+      this.socialCustomConfig[service].extraCredentialsKeys
     ) {
-      for (let varname in this.socialCustomConfig[service].varAdd) {
+      for (let varname in this.socialCustomConfig[service]
+        .extraCredentialsKeys) {
         (function (varname) {
           passportSetup[varname] =
-            this.socialCustomConfig[service].varAdd[varname](setting);
+            this.socialCustomConfig[service].extraCredentials[varname](setting);
         })(varname);
       }
     }
     if (
       this.socialCustomConfig[service] &&
-      this.socialCustomConfig[service].varAdd
+      this.socialCustomConfig[service].extraCredentialsKeys
     ) {
       passportSetup = {
         ...passportSetup,
-        ...this.socialCustomConfig[service].varAdd,
+        ...this.socialCustomConfig[service].extraCredentialsKeys,
       };
     }
     // Execute the passport strategy
@@ -191,19 +192,15 @@ export class SocialLoginService {
     this.httpBundle.app.get(
       setting.url.callback,
       passport.authenticate(strategyName, {
-        successRedirect: setting.url?.success,
+        //successRedirect: setting.url?.success,
         failureRedirect: setting.url.fail,
         failureFlash: true,
       }),
-      (req, res) => {
+      (req, res, next) => {
         //here in our callback method we return return token of teh user
-        if (req.user.token) res.status(200).json({ token: req.user?.token });
-        else
-          res.status(500).json({
-            error: true,
-            message: "something went wrong with login with your account on: ",
-            service,
-          });
+        if (req.user.token)
+          res.redirect(setting.url?.success + "?token=" + req.user?.token);
+        else res.redirect(setting.url.fail);
       }
     );
   }

@@ -143,21 +143,22 @@ export interface IXPasswordBundleConfig {
 ```
 
 you can also get REST apis versions of those mutation in addition to me Query, if you toggled on/off the rest attribute :
+to use patch/post apis please provide the input types as json body, the inputs for every api can be imported from the bundle as `RegistrationInput,ChangePasswordInput,LoginInput ...`
 
 ```ts
 // The configuration is:
 export interface IXPasswordBundleConfig {
   rest: {
-    login: true;
-    logout: true;
-    register: true;
-    changePassword: true;
-    resetPassword: true;
-    forgotPassword: true;
-    verifyEmail: true;
-    requestLoginLink: true;
-    verifyMagicCode: true;
-    me: true;
+    login: true; //post
+    logout: true; //post
+    register: true; //post
+    changePassword: true; //patch
+    resetPassword: true; //post
+    forgotPassword: true; //post
+    verifyEmail: true; //post
+    requestLoginLink: true; //post
+    verifyMagicCode: true; //post
+    me: true; //get
   };
 }
 ```

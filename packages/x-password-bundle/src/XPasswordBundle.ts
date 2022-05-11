@@ -82,7 +82,7 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
       verifyMagicCode: true,
       me: true,
     },
-    multipleFactorAuth: {
+    /* multipleFactorAuth: {
       factors: [
         {
           strategy: PASSWORD_STRATEGY,
@@ -93,7 +93,7 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
           redirectUrl: "http://localhost:8080/request-magic-link",
         },
       ],
-    },
+    },*/
     magicCodeLifeDuration: "5m",
     magicAuthFormat: "code",
     leftSubmissionsCount: 3,

@@ -28,6 +28,7 @@ export default /* GraphQL */ `
   input LoginInput {
     username: String!
     password: String!
+    #sessionToken is the id of the multiple authentication factor method, to track which method the user has unlocked
     sessionToken: String
   }
 `;
