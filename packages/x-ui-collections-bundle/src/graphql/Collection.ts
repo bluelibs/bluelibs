@@ -697,7 +697,10 @@ export abstract class Collection<T = null> {
       };
     }
 
-    return result;
+    return {
+      ...result,
+      data: [],
+    };
   }
 
   /**
@@ -774,7 +777,10 @@ export abstract class Collection<T = null> {
       };
     }
 
-    return null;
+    return {
+      ...result,
+      data: null,
+    };
   }
 
   /**
