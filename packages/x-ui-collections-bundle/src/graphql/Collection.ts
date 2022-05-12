@@ -691,7 +691,10 @@ export abstract class Collection<T = null> {
     });
 
     if (result?.data) {
-      result.data = result.data[operation] || [];
+      return {
+        ...result,
+        data: result.data[operation] || [],
+      };
     }
 
     return result;
@@ -765,10 +768,13 @@ export abstract class Collection<T = null> {
     });
 
     if (result?.data) {
-      result.data = result.data[operation] || [];
+      return {
+        ...result,
+        data: result.data[operation] || null,
+      };
     }
 
-    return result;
+    return null;
   }
 
   /**
