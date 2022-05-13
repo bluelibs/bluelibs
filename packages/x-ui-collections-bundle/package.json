@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-collections-bundle",
-  "version": "1.4.10",
+  "version": "1.5.0",
   "private": false,
   "description": "XUICollectionsBundle",
   "main": "dist/index.js",
