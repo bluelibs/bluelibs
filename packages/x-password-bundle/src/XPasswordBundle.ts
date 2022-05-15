@@ -105,7 +105,7 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
     if (this.config.services?.MultipleFactorService) {
       this.container.set({
         id: MULTIPLE_FACTORS_AUTH,
-        type: MultipleFactorService,
+        type: this.config.services?.MultipleFactorService,
       });
       this.container.get(MULTIPLE_FACTORS_AUTH);
     }

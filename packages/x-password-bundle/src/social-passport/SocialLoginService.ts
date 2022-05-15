@@ -272,6 +272,7 @@ export class SocialLoginService {
       });
 
       if (
+        //@ts-ignore
         !user.socialAccounts.find(
           (social) =>
             social.id + "" === profile[uniqueProperty] &&
@@ -279,6 +280,7 @@ export class SocialLoginService {
         )
       )
         updateBody.socialAccounts = [
+          //@ts-ignore
           ...user.socialAccounts,
           ...updateBody.socialAccounts,
         ];

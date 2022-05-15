@@ -407,6 +407,7 @@ export class XPasswordService implements IXPasswordService {
     input: VerifyMagicLinkInput
   ): Promise<{ token: string } | MultipleFcatorRedirect> {
     const magicCode: string = input.magicCode,
+      //@ts-ignore
       userId: UserId = ObjectId(input.userId);
     const session = await this.getConfirmationSession(
       magicCode,
@@ -473,6 +474,7 @@ export class XPasswordService implements IXPasswordService {
     userId: UserId,
     options: ICreateSessionOptions = {}
   ): Promise<string> {
+    //@ts-ignore
     let session = await this.securityService.findSession(userId, {
       type: options.data.type,
     });
@@ -489,6 +491,7 @@ export class XPasswordService implements IXPasswordService {
     userId: UserId,
     type: string
   ): Promise<ISession | null> {
+    //@ts-ignore
     const session: ISession = await this.securityService.findSession(userId, {
       type,
     });
@@ -499,16 +502,20 @@ export class XPasswordService implements IXPasswordService {
       session.data = {
         ...session.data,
         leftSubmissionsCount: Math.max(
+          //@ts-ignore
           session?.data?.leftSubmissionsCount - 1,
           0
         ),
       };
+      //@ts-ignore
       await this.securityService.updateSession(session);
       return null;
     }
+    //@ts-ignore
     if (session?.data?.leftSubmissionsCount === 0) {
       throw new SubmissionCountExceededException();
     }
+    //@ts-ignore
     await this.securityService.validateSession(session);
 
     return session;
