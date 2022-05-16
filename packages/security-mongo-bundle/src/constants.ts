@@ -9,3 +9,4 @@ export const PERMISSIONS_COLLECTION_TOKEN = new Token(
 export const SESSIONS_COLLECTION_TOKEN = new Token(
   "SECURITY_MONGO_BUNDLE::SESSIONS_COLLECTION"
 );
+export const USER_ROLES_TOKEN = new Token();

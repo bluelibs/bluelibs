@@ -57,6 +57,8 @@ export class CollectionWriter extends BlueprintWriter {
       `${model.modelDefinition.name}.model.ts`
     );
 
+    model.modelDefinition.securityConfig = JSON.stringify(model.securityConfig);
+
     this.getWriter(GenericModelWriter).write(model.modelDefinition, session);
 
     if (model.createEntity) {

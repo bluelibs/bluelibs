@@ -1,7 +1,7 @@
 import { Models, Writers } from "..";
 import { UICollectionWriter } from "../writers/UICollectionWriter";
 import { UICollectionCRUDWriter } from "../writers/UICollectionCRUDWriter";
-import { QueryBodyType } from "@bluelibs/nova";
+import { IQueryOptions, QueryBodyType } from "@bluelibs/nova";
 import { Filter } from "mongodb";
 
 export type DeepPartial<T> = {
@@ -50,6 +50,20 @@ export type UICollectionConfigType =
        */
       icon?: string;
     } & UIModeConfigType);
+
+export type CrudGenerator =
+  | {
+      findOne?: boolean;
+      find?: boolean;
+      delete?: boolean;
+      count?: boolean;
+      insertOne?: boolean;
+      updateOne?: boolean;
+      deleteOne?: boolean;
+      subscription?: boolean;
+      subscriptionCount?: boolean;
+    }
+  | false;
 
 export type UIFieldConfigType =
   | false
@@ -125,34 +139,37 @@ type FieldSelection<T> = Array<T extends null ? string : keyof T>;
 
 export type SecuritySchematic<T = null> = {
   roles?: {
-    anonymous?: SecuritySchematicRole<T>;
-    authenticated?: SecuritySchematicRole<T>;
-    [key: string]: SecuritySchematicRole<T>;
+    [key: string]: boolean | SecuritySchematicRole<T>;
   };
+  anonymous?: boolean | SecuritySchematicRole<T>;
   /**
    * Options that will be stored as defaults for all the roles.
    */
-  defaults?: SecuritySchematicRole<T>;
+  defaults?: boolean | SecuritySchematicRole<T>;
 };
 
 export type SecuritySchematicRole<T = null> = {
-  submitUiAdmin?: boolean;
   find?: boolean | SecuritySchematicFind<T>;
   insertOne?: boolean | SecuritySchematicInsert<T>;
   updateOne?: boolean | SecuritySchematicUpdate<T>;
   deleteOne?: boolean | SecuritySchematicDelete<T>;
+  //parent ocllection, exmaple : all collection belong to a hospital, and each user have to see once hospital data
+  affiliation?: string[] | string;
+  //relation ownership and other
+  relations?: string[] | string;
 };
 
 export type SecuritySchematicFind<T = null> = {
   filters?: Filter<T>;
   intersect?: QueryBodyType<T>;
-  own?: string;
+  own?: OwnField;
   maxLimit?: number;
   maxDepth?: number;
+  options?: IQueryOptions<T>;
 };
 
 export type SecuritySchematicUpdate<T = null> = {
-  own?: string;
+  own?: OwnField;
   filters?: Filter<T>;
   intersect?: QueryBodyType<T>;
   allow?: FieldSelection<T>;
@@ -160,8 +177,7 @@ export type SecuritySchematicUpdate<T = null> = {
 };
 
 export type SecuritySchematicInsert<T = null> = {
-  own?: string;
-  filters?: Filter<T>;
+  own?: OwnField;
   intersect?: QueryBodyType<T>;
   allow?: FieldSelection<T>;
   deny?: FieldSelection<T>;

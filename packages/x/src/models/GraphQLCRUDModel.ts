@@ -2,6 +2,7 @@ import { GenericModel } from "./GenericModel";
 import { IXElementResult, XElements, XElementType } from "../utils/XElements";
 import { ModelRaceEnum } from "./defs";
 import * as path from "path";
+import { CrudGenerator, SecuritySchematic } from "../studio";
 
 export class GraphQLCRUDModel {
   bundleName: string;
@@ -15,6 +16,8 @@ export class GraphQLCRUDModel {
   insertInputModelDefinition: GenericModel;
   updateInputModelDefinition: GenericModel;
   hasSubscriptions: boolean = false;
+  crudOperations: CrudGenerator;
+  securityConfig?: SecuritySchematic;
 
   get collectionClass() {
     return this.collectionElement.identityName;

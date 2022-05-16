@@ -1,25 +1,46 @@
 export default /* GraphQL */`
+
   type Query {
-    {{ crudName }}FindOne(query: QueryInput): {{ entityType }}
-    {{ crudName }}Find(query: QueryInput): [{{ entityType }}]!
-    {{ crudName }}Count(query: QueryInput): Int!
+     {{# if crudOperations.findOne }}
+      {{ crudName }}FindOne(query: QueryInput): {{ entityType }}
+     {{/ if }}
+     {{# if crudOperations.find }}
+      {{ crudName }}Find(query: QueryInput): [{{ entityType }}]!
+      {{/ if }}
+     {{# if crudOperations.count }}
+      {{ crudName }}Count(query: QueryInput): Int!
+      {{/ if }}
   }
 
   type Mutation {
     {{# if hasCustomInputs }}
-      {{ crudName }}InsertOne(document: {{ insertInputName }}Input!): {{ entityType }}
-      {{ crudName }}UpdateOne(_id: ObjectId!, document: {{ updateInputName }}Input!): {{ entityType }}!
+      {{# if crudOperations.insertOne }}
+        {{ crudName }}InsertOne(document: {{ insertInputName }}Input!): {{ entityType }}
+      {{/ if }}
+      {{# if crudOperations.updateOne }}
+        {{ crudName }}UpdateOne(_id: ObjectId!, document: {{ updateInputName }}Input!): {{ entityType }}!
+      {{/ if }}
     {{ else }}
-      {{ crudName }}InsertOne(document: EJSON!): {{ entityType }}
-      {{ crudName }}UpdateOne(_id: ObjectId!, modifier: EJSON!): {{ entityType }}!
+      {{# if crudOperations.insertOne }}
+        {{ crudName }}InsertOne(document: EJSON!): {{ entityType }}
+      {{/ if }}
+      {{# if crudOperations.updateOne }}
+        {{ crudName }}UpdateOne(_id: ObjectId!, modifier: EJSON!): {{ entityType }}!
+      {{/ if }}
     {{/ if }}
-    {{ crudName }}DeleteOne(_id: ObjectId!): Boolean
+    {{# if crudOperations.deleteOne }}
+      {{ crudName }}DeleteOne(_id: ObjectId!): Boolean
+    {{/ if }}
   }
 
   {{# if hasSubscriptions }}
     type Subscription {
-      {{ crudName }}Subscription(body: EJSON): SubscriptionEvent
-      {{ crudName }}SubscriptionCount(filters: EJSON): SubscriptionCountEvent
+       {{# if crudOperations.subscription }}
+        {{ crudName }}Subscription(body: EJSON): SubscriptionEvent
+      {{/ if }}
+       {{# if crudOperations.subscriptionCount }}
+        {{ crudName }}SubscriptionCount(filters: EJSON): SubscriptionCountEvent
+      {{/ if }}
     }
   {{/ if }}
 `

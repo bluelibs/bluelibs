@@ -25,6 +25,7 @@ export interface ISecurityMongoBundleConfig {
   usersCollection?: Constructor<IUserPersistance>;
   permissionsCollection?: Constructor<IPermissionPersistance>;
   sessionsCollection?: Constructor<ISessionPersistance>;
+  roles?: string[];
 }
 
 export class SecurityMongoBundle extends Bundle<ISecurityMongoBundleConfig> {

@@ -6,7 +6,10 @@ import * as links from './{{ collectionNameUpper }}.links';
 import * as reducers from './{{ collectionNameUpper }}.reducers';
 import { {{ collectionModelClass }} } from "./{{ collectionModelClass }}.model";
 {{# if customCollectionImport }}
-import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectionImport }}";
+import { {{ customCollectionName }} as BaseCollection } from "./{{ collectionModelClass }}.security";
+{{/ if }}
+{{# if securityConfig }}
+import { {{ collectionModelClass }}SecurityConfig } from "{{ customCollectionImport }}";
 {{/ if }}
 
 {{# if customCollectionImport }}
@@ -40,6 +43,10 @@ import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectio
 
     {{# if hasSubscriptions }}
       XBehaviors.Live(),
+    {{/ if }}
+
+    {{# if securityConfig }}
+      static securityConfig = {{ collectionModelClass }}SecurityConfig;
     {{/ if }}
   ]
   {{/ if }}

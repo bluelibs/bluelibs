@@ -19,17 +19,17 @@ export default {
     {
       {{# if crudOperations.findOne }}
       {{ crudName }}FindOne: [
-      X.ToNovaOne({{ collectionClass }})
+        X.SheildsFind([X.ToNovaOne({{ collectionClass }})],{{ collectionClass }})
       ],
       {{/ if }}
       {{# if crudOperations.find }}
       {{ crudName }}Find: [
-      X.ToNova({{ collectionClass }})
+        X.SheildsFind([X.ToNova({{ collectionClass }})],{{ collectionClass }})
       ],
       {{/ if }}
       {{# if crudOperations.count }}
       {{ crudName }}Count: [
-      X.ToCollectionCount({{ collectionClass }})
+         X.SheildsFind([X.ToCollectionCount({{ collectionClass }})],{{ collectionClass }})
       ]
       {{/ if }}
     }
@@ -45,15 +45,15 @@ export default {
     ], {
       {{# if hasCustomInputs }}
       {{# if crudOperations.insertOne }}
-        {{ crudName }}InsertOne: [
+        {{ crudName }}InsertOne: [X.SheildsInsert([
           X.ToModel({{ insertInputName }}Input, { field: "document"}),
           X.Validate({ field: "document"}),
           X.ToDocumentInsert({{ collectionClass }}),
           X.ToNovaByResultID({{ collectionClass }})
-        ],
+        ],{{ collectionClass }})],
         {{/ if }}
         {{# if crudOperations.updateOne }}
-        {{ crudName }}UpdateOne: [
+        {{ crudName }}UpdateOne: [X.SheildsUpdate[
           X.ToModel({{ updateInputName }}Input, { field: "document"}),
           X.Validate({ field: "document"}),
           X.CheckDocumentExists({{ collectionClass }}),
@@ -63,28 +63,28 @@ export default {
             }
           )),
           X.ToNovaByResultID({{ collectionClass }})
-        ],
+        ],{{ collectionClass }}],
         {{/ if }}
       {{ else }}
       {{# if crudOperations.insertOne }}
-        {{ crudName }}InsertOne: [
+        {{ crudName }}InsertOne: [X.SheildsInsert([
           X.ToDocumentInsert({{ collectionClass }}),
           X.ToNovaByResultID({{ collectionClass }})
-        ],
+        ]{{ collectionClass }})],
         {{/ if }}
       {{# if crudOperations.updateOne }}
-        {{ crudName }}UpdateOne: [
+        {{ crudName }}UpdateOne: [X.SheildsUpdate[
           X.CheckDocumentExists({{ collectionClass }}),
           X.ToDocumentUpdateByID({{ collectionClass }}),
           X.ToNovaByResultID({{ collectionClass }})
-        ],
+        ],{{ collectionClass }})],
         {{/ if }}
       {{/ if }}
       {{# if crudOperations.deleteOne }}
-      {{ crudName }}DeleteOne: [
+      {{ crudName }}DeleteOne: [X.SheildsDelete([
         X.CheckDocumentExists({{ collectionClass }}),
         X.ToDocumentDeleteByID({{ collectionClass }})
-      ]
+      ],{{ collectionClass }})]
       {{/ if }}
     }
   ],

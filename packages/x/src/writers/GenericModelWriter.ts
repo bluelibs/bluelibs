@@ -38,7 +38,15 @@ export class GenericModelWriter extends BlueprintWriter {
         );
       });
     }
-
+    if (model.securityConfig) {
+      modelOperator.sessionCopy(
+        modelTpls("security/security.ts.tpl"),
+        model.targetPath.replace("model", "security"),
+        {
+          ignoreIfExists: false,
+        }
+      );
+    }
     if (model.isBaseExtendMode) {
       const parts = model.targetPath.split(".");
       const basePath = parts.slice(0, -1).concat("base", "ts").join(".");

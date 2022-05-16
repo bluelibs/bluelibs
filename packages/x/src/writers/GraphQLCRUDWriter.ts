@@ -52,7 +52,11 @@ export class GraphQLCRUDWriter extends BlueprintWriter {
     model.resolverTargetPath = resolverTargetPath;
 
     fsOperator.sessionCopy(
-      graphqlTpls("crudModule.resolvers.ts.tpl"),
+      graphqlTpls(
+        model.securityConfig
+          ? "crudModuleSecured.resolvers.ts.tpl"
+          : "crudModule.resolvers.ts.tpl"
+      ),
       resolverTargetPath,
       { ignoreIfExists: true }
     );
