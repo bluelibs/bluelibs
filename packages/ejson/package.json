@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/ejson",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "BlueLibs EJSON Typescript from Meteor",
   "main": "dist/index.js",
   "repository": {
