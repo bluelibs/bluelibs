@@ -6,10 +6,10 @@ import * as links from './{{ collectionNameUpper }}.links';
 import * as reducers from './{{ collectionNameUpper }}.reducers';
 import { {{ collectionModelClass }} } from "./{{ collectionModelClass }}.model";
 {{# if customCollectionImport }}
-import { {{ customCollectionName }} as BaseCollection } from "./{{ collectionModelClass }}.security";
+import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectionImport }}";
 {{/ if }}
 {{# if securityConfig }}
-import { {{ collectionModelClass }}SecurityConfig } from "{{ customCollectionImport }}";
+import { {{ collectionModelClass }}SecurityConfig } from "./{{ collectionModelClass }}.security";
 {{/ if }}
 
 {{# if customCollectionImport }}
@@ -22,6 +22,9 @@ import { {{ collectionModelClass }}SecurityConfig } from "{{ customCollectionImp
 
   static links = links;
   static reducers = reducers;
+  {{# if securityConfig }}
+  static securityConfig = {{ collectionModelClass }}SecurityConfig;
+  {{/ if }}
 
   {{# if containsBehaviors }}
   static behaviors = [
@@ -44,12 +47,9 @@ import { {{ collectionModelClass }}SecurityConfig } from "{{ customCollectionImp
     {{# if hasSubscriptions }}
       XBehaviors.Live(),
     {{/ if }}
-
-    {{# if securityConfig }}
-      static securityConfig = {{ collectionModelClass }}SecurityConfig;
-    {{/ if }}
   ]
   {{/ if }}
+  
 
   // Create an array of indexes
   static indexes = [

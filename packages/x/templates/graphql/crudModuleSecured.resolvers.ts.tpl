@@ -53,7 +53,7 @@ export default {
         ],{{ collectionClass }})],
         {{/ if }}
         {{# if crudOperations.updateOne }}
-        {{ crudName }}UpdateOne: [X.SheildsUpdate[
+        {{ crudName }}UpdateOne: [X.SheildsUpdate([
           X.ToModel({{ updateInputName }}Input, { field: "document"}),
           X.Validate({ field: "document"}),
           X.CheckDocumentExists({{ collectionClass }}),
@@ -63,7 +63,7 @@ export default {
             }
           )),
           X.ToNovaByResultID({{ collectionClass }})
-        ],{{ collectionClass }}],
+        ],{{ collectionClass }} )],
         {{/ if }}
       {{ else }}
       {{# if crudOperations.insertOne }}
