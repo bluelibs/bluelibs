@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import { SecuritySchematic } from "../studio";
 import { GenericModel } from "./GenericModel";
 
 export class CollectionModel {
@@ -15,6 +16,8 @@ export class CollectionModel {
   createEntity: boolean;
   isEntitySameAsModel: boolean;
   entityDefinition: GenericModel;
+
+  securityConfig?: SecuritySchematic;
 
   hasSubscriptions: boolean = false;
 

@@ -18,6 +18,7 @@ import {
   USERS_COLLECTION_TOKEN,
   PERMISSIONS_COLLECTION_TOKEN,
   SESSIONS_COLLECTION_TOKEN,
+  USER_ROLES_TOKEN,
 } from "./constants";
 import { Collection, MongoBundle } from "@bluelibs/mongo-bundle";
 
@@ -25,6 +26,7 @@ export interface ISecurityMongoBundleConfig {
   usersCollection?: Constructor<IUserPersistance>;
   permissionsCollection?: Constructor<IPermissionPersistance>;
   sessionsCollection?: Constructor<ISessionPersistance>;
+  roles?: string[];
 }
 
 export class SecurityMongoBundle extends Bundle<ISecurityMongoBundleConfig> {
@@ -34,6 +36,7 @@ export class SecurityMongoBundle extends Bundle<ISecurityMongoBundleConfig> {
     usersCollection: UsersCollection,
     permissionsCollection: PermissionsCollection,
     sessionsCollection: SessionsCollection,
+    roles: [],
   };
 
   async hook() {
@@ -88,5 +91,9 @@ export class SecurityMongoBundle extends Bundle<ISecurityMongoBundleConfig> {
         value: this.container.get(this.config.sessionsCollection),
       });
     }
+    this.container.set({
+      id: USER_ROLES_TOKEN,
+      value: this.config?.roles,
+    });
   }
 }

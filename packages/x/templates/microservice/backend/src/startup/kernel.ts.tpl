@@ -15,7 +15,7 @@ import { ValidatorBundle } from "@bluelibs/validator-bundle";
   import { XS3Bundle } from "@bluelibs/x-s3-bundle";
 {{/ if }}
 {{# if hasUsers }}
-  import { UsersCollection } from "../bundles/AppBundle/collections";
+  import { UsersCollection, UserRole } from "../bundles/AppBundle/collections";
 {{/ if }}
 
 import env from "./env";
@@ -41,7 +41,8 @@ export const kernel = new Kernel({
     new SecurityBundle(),
     new SecurityMongoBundle({
       {{# if hasUsers }}
-        usersCollection: UsersCollection
+        usersCollection: UsersCollection,
+        roles:Object.values(UserRole)
       {{/ if }}
     }),
     new ApolloSecurityBundle(),

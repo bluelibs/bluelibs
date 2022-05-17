@@ -33,6 +33,14 @@ export class PermissionService implements IPermissionService {
   ) {}
 
   async has(filter: IPermissionSearchFilter): Promise<boolean> {
+    if (
+      !filter.userId &&
+      (Array.isArray(filter.permission)
+        ? filter.permission.some((x) => x === undefined)
+        : filter.permission === undefined)
+    )
+      return true;
+
     if (filter.userId === null || filter.userId === undefined) {
       throw new Error(
         `You are required to provide an 'userId' to be able to verify permissions.`

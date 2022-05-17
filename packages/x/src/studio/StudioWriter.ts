@@ -424,6 +424,7 @@ export class StudioWriter {
       model.hasSubscriptions = true;
       model.crudName = collection.id;
       model.crudOperations = collection.crud;
+      if (collection.security) model.securityConfig = collection.security;
       model.collectionElement = XElements.emulateElement(
         microservicePath,
         "AppBundle",
@@ -713,6 +714,8 @@ export class StudioWriter {
       collectionModel.bundleName = "AppBundle";
       collectionModel.createEntity = false;
       collectionModel.overrideCollectionIfExists = false;
+      if (collection.security)
+        collectionModel.securityConfig = collection.security;
 
       if (collection.hasGraphQL("entity")) {
         const graphQLModel = XBridge.collectionToGenericModel(collection, {

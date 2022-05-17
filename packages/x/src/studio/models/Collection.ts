@@ -8,6 +8,8 @@ import {
   UIModeType,
   UICollectionConfigType,
   Resolvable,
+  SecuritySchematic,
+  SecuritySchematicRole,
   CrudGenerator,
 } from "../defs";
 
@@ -111,6 +113,11 @@ export class Collection extends BaseModel<Collection> {
     count: 0,
   };
 
+  /**
+   * collection crud Security config based on roles
+   */
+  security?: SecuritySchematic;
+
   clean() {
     // this.fields = this.instanceify(this.fields, Field);
     // this.relations = this.instanceify(this.relations, Relation);
@@ -149,6 +156,8 @@ export class Collection extends BaseModel<Collection> {
     //override crud booleans on ui booleans
     this.uniteCrudGenerators();
 
+    //make sure we have defautl security handling
+    this.prepareSecurityDefaultsConfig();
     this.cleanDuplicateFields();
     this.enableGraphQLCleaning();
   }
@@ -262,6 +271,35 @@ export class Collection extends BaseModel<Collection> {
     } else {
       return this.enableGraphQL[type];
     }
+  }
+
+  protected prepareSecurityDefaultsConfig() {
+    if (!this.security) return;
+    const defaultShematics: SecuritySchematicRole = {
+      find: true,
+      insertOne: true,
+      updateOne: true,
+      deleteOne: true,
+    };
+    this.security.defaults = {
+      ...defaultShematics,
+      ...this.security?.defaults,
+    };
+    if (!this.security.roles) this.security.roles = {};
+    ["anonymous"].forEach(
+      (role) =>
+        (this.security[role] = {
+          ...this.security.defaults,
+          ...this.security[role],
+        })
+    );
+    Object.keys(this.security.roles).map(
+      (role) =>
+        (this.security.roles[role] = {
+          ...this.security.defaults,
+          ...this.security.roles[role],
+        })
+    );
   }
 
   //ovveride the crud ui to match the graphql crud

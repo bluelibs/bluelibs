@@ -1,6 +1,8 @@
 import { Models, Writers } from "..";
 import { UICollectionWriter } from "../writers/UICollectionWriter";
 import { UICollectionCRUDWriter } from "../writers/UICollectionCRUDWriter";
+import { IQueryOptions, QueryBodyType } from "@bluelibs/nova";
+import { Filter } from "mongodb";
 
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends null ? any : DeepPartial<T[P]>;
@@ -129,4 +131,59 @@ export type GenerateProjectOptionsType = {
    * Writers are what write from models to the file system. You have the flexibility of creating your own. Easiest way to do this is just to look at the source and see what's going on under the hood.
    */
   writers: Partial<StudioWritersType>;
+};
+
+type OwnField = string | [string, string];
+
+type FieldSelection<T> = Array<T extends null ? string : keyof T>;
+
+export type SecuritySchematic<T = null> = {
+  roles?: {
+    [key: string]: boolean | SecuritySchematicRole<T>;
+  };
+  anonymous?: boolean | SecuritySchematicRole<T>;
+  /**
+   * Options that will be stored as defaults for all the roles.
+   */
+  defaults?: boolean | SecuritySchematicRole<T>;
+};
+
+export type SecuritySchematicRole<T = null> = {
+  find?: boolean | SecuritySchematicFind<T>;
+  insertOne?: boolean | SecuritySchematicInsert<T>;
+  updateOne?: boolean | SecuritySchematicUpdate<T>;
+  deleteOne?: boolean | SecuritySchematicDelete<T>;
+  //parent ocllection, exmaple : all collection belong to a hospital, and each user have to see once hospital data
+  affiliation?: string[] | string;
+  //relation ownership and other
+  relations?: string[] | string;
+};
+
+export type SecuritySchematicFind<T = null> = {
+  filters?: Filter<T>;
+  intersect?: QueryBodyType<T>;
+  own?: OwnField;
+  maxLimit?: number;
+  maxDepth?: number;
+  options?: IQueryOptions<T>;
+};
+
+export type SecuritySchematicUpdate<T = null> = {
+  own?: OwnField;
+  filters?: Filter<T>;
+  intersect?: QueryBodyType<T>;
+  allow?: FieldSelection<T>;
+  deny?: FieldSelection<T>;
+};
+
+export type SecuritySchematicInsert<T = null> = {
+  own?: OwnField;
+  intersect?: QueryBodyType<T>;
+  allow?: FieldSelection<T>;
+  deny?: FieldSelection<T>;
+};
+
+export type SecuritySchematicDelete<T = null> = {
+  own?: OwnField;
+  filters?: Filter<T>;
 };

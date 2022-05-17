@@ -8,6 +8,9 @@ import { {{ collectionModelClass }} } from "./{{ collectionModelClass }}.model";
 {{# if customCollectionImport }}
 import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectionImport }}";
 {{/ if }}
+{{# if securityConfig }}
+import { {{ collectionModelClass }}SecurityConfig } from "./{{ collectionModelClass }}.security";
+{{/ if }}
 
 {{# if customCollectionImport }}
   export class {{ collectionClass }} extends BaseCollection<{{ collectionModelClass }}> {
@@ -19,6 +22,9 @@ import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectio
 
   static links = links;
   static reducers = reducers;
+  {{# if securityConfig }}
+  static securityConfig = {{ collectionModelClass }}SecurityConfig;
+  {{/ if }}
 
   {{# if containsBehaviors }}
   static behaviors = [
@@ -43,6 +49,7 @@ import { {{ customCollectionName }} as BaseCollection } from "{{ customCollectio
     {{/ if }}
   ]
   {{/ if }}
+  
 
   // Create an array of indexes
   static indexes = [

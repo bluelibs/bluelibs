@@ -16,6 +16,7 @@ import {
   XGraphQLSecurityService,
 } from "../services/XGraphQLSecurityService";
 import { IAstToQueryOptions, QueryBodyType } from "@bluelibs/nova";
+import { safeIntersectGraphQLBodies } from "./utils/safeIntersectGraphQLBodies";
 
 export const NOVA_AST_TO_QUERY_OPTIONS = Symbol("NOVA_AST_TO_QUERY_OPTIONS");
 export const NOVA_INTERSECTION = Symbol("NOVA_INTERSECTION");
@@ -107,6 +108,41 @@ Secure.Intersect = function <T = null>(
 
     // This function throws
     intersectGraphQLBodies(requestAsJSON, dottedIntersection);
+  };
+};
+
+/**
+ * Use it to intersect the GraphQL request. Will throw when unallowed fields are requested.
+ * @param intersectBody
+ * @param passToNova If you have a subsequent nova request, this will send the intersection to the Nova request.
+ * @returns
+ */
+Secure.SafeIntersect = function <T = null>(
+  intersectBody: QueryBodyType<T>,
+  passToNova: boolean = true
+): SecureGraphQLResolver<void> {
+  // const intersection = intersectGraphQLBodies()
+  const dottedIntersection = dot.dot(intersectBody);
+  return async function (_, args, ctx, ast) {
+    const requestAsJSON = graphqlFields(
+      ast,
+      {},
+      { processArguments: true, excludedFields: ["__typename"] }
+    );
+
+    if (passToNova) {
+      ctx[NOVA_INTERSECTION] = intersectBody;
+    }
+
+    console.log(
+      "safe intresect",
+      safeIntersectGraphQLBodies(intersectBody, dottedIntersection)
+    );
+    /*console.log(ast.fieldNodes[0].selectionSet.selections[0].name);
+
+    ast.fieldNodes[0].selectionSet.selections =
+      ast.fieldNodes[0].selectionSet.selections.slice(1);
+    console.log(ast.fieldNodes[0].selectionSet.selections[0].name);*/
   };
 };
 

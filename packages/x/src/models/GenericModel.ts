@@ -9,6 +9,7 @@ import {
 } from "./defs";
 import * as path from "path";
 import * as Inflected from "inflected";
+import { SecuritySchematic } from "../studio";
 
 // This model can be inquired for asking:
 // GraphQL Types, Inputs, Model Classes
@@ -46,6 +47,8 @@ export class GenericModel {
 
   // Where should it be written
   targetPath?: string;
+
+  securityConfig?: SecuritySchematic;
 
   public _skipModelNameQuestion = false;
 
