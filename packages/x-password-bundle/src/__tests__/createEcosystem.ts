@@ -8,21 +8,24 @@ import { PasswordBundle } from "@bluelibs/password-bundle";
 import { HTTPBundle } from "@bluelibs/http-bundle";
 import { SecurityMongoBundle } from "@bluelibs/security-mongo-bundle";
 import { XPasswordBundle } from "../..";
+import { EmailBundle } from "@bluelibs/email-bundle";
 
-export async function createEcosystem() {
+export async function createEcosystem(configXpasswordBundle = {}) {
   try {
     const kernel = new Kernel({
       bundles: [
         new LoggerBundle(),
         new GraphQLBundle(),
+        new EmailBundle(),
+        new HTTPBundle(),
         new MongoBundle({
           uri: "mongodb://localhost:27017/test",
         }),
         new SecurityMongoBundle(),
         new SecurityBundle(),
         new PasswordBundle(),
-        new HTTPBundle(),
-        new XPasswordBundle(),
+
+        new XPasswordBundle(configXpasswordBundle),
         new XBundle(),
       ],
       parameters: {

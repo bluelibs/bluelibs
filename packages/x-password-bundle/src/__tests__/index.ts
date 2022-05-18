@@ -1,3 +1,3 @@
-import "../index";
-
 import "./xpassword";
+import "./multiplefactor";
+import "./socialAuth";

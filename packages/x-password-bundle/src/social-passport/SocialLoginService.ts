@@ -6,7 +6,7 @@ import {
 import { IXPasswordBundleConfig } from "../defs";
 import { Inject, Service, ContainerInstance } from "@bluelibs/core";
 import { HTTPBundle } from "@bluelibs/http-bundle";
-import * as passport from "passport";
+import * as originalPassport from "passport";
 const bodyParser = require("body-parser");
 import {
   SOCIAL_CUSTOM_CONFIG,
@@ -36,6 +36,7 @@ export class SocialLoginService {
     protected readonly multipleFactorService: MultipleFactorService
   ) {
     this.httpBundle = this.container.get<HTTPBundle>(HTTPBundle);
+    this.passport = this.config.socialAuth.passport || originalPassport;
     this.onSocialAuth =
       this.config.socialAuth.onSocialAuth || this.defaultOnSocialAuth;
     this.url = this.config.socialAuth.url;
@@ -66,6 +67,7 @@ export class SocialLoginService {
 
     this.init();
   }
+  protected passport;
   protected socialCustomConfig: socialCustomConfigMapType =
     SOCIAL_CUSTOM_CONFIG;
   protected socialUniqueIds: socialPropsTypes = SOCIAL_UNIQUE_IDS;
@@ -86,18 +88,18 @@ export class SocialLoginService {
   ) => any;
 
   init() {
-    //prepare the rest app for our passport
+    //prepare the rest app for our this.passport
     this.httpBundle.app.enable("trust proxy");
 
     this.httpBundle.app.use(bodyParser.urlencoded({ extended: false }));
     this.httpBundle.app.use(bodyParser.json());
-    this.httpBundle.app.use(passport.initialize());
-    this.httpBundle.app.use(passport.session());
+    this.httpBundle.app.use(this.passport.initialize());
+    this.httpBundle.app.use(this.passport.session());
 
-    passport.serializeUser(function (user, done) {
+    this.passport.serializeUser(function (user, done) {
       done(null, user);
     });
-    passport.deserializeUser(function (user, done) {
+    this.passport.deserializeUser(function (user, done) {
       done(null, user);
     });
 
@@ -120,12 +122,11 @@ export class SocialLoginService {
       this.socialCustomConfig[service].credentialsKeys
     ) {
       for (let varname in this.socialCustomConfig[service].credentialsKeys) {
-        (function (varname) {
-          const buffer = passportSetup[varname];
-          passportSetup[this.socialCustomConfig[service].credentials[varname]] =
-            buffer;
-          delete passportSetup[varname];
-        })(varname);
+        const buffer = passportSetup[varname];
+        passportSetup[
+          this.socialCustomConfig[service].credentialsKeys[varname]
+        ] = buffer;
+        delete passportSetup[varname];
       }
     }
     // if the strategy requires more variables than cleintId and secretId
@@ -135,10 +136,10 @@ export class SocialLoginService {
     ) {
       for (let varname in this.socialCustomConfig[service]
         .extraCredentialsKeys) {
-        (function (varname) {
-          passportSetup[varname] =
-            this.socialCustomConfig[service].extraCredentials[varname](setting);
-        })(varname);
+        passportSetup[varname] =
+          this.socialCustomConfig[service].extraCredentialsKeys[varname](
+            setting
+          );
       }
     }
     if (
@@ -150,8 +151,9 @@ export class SocialLoginService {
         ...this.socialCustomConfig[service].extraCredentialsKeys,
       };
     }
-    // Execute the passport strategy
-    passport.use(
+    // Execute the this.passport strategy
+    this.passport.use(
+      service,
       new (this.getStrategy(service))(
         passportSetup,
         (req, accessToken, refreshToken, profile, done) => {
@@ -185,13 +187,16 @@ export class SocialLoginService {
     // Setup the enty point (/auth/:service)
     this.httpBundle.app.get(
       setting.url.auth,
-      passport.authenticate(strategyName, setting.settings.authParameters || {})
+      this.passport.authenticate(
+        strategyName,
+        setting.settings.authParameters || {}
+      )
     );
 
     // Setup the callback url (/auth/:service/callback)
     this.httpBundle.app.get(
       setting.url.callback,
-      passport.authenticate(strategyName, {
+      this.passport.authenticate(strategyName, {
         //successRedirect: setting.url?.success,
         failureRedirect: setting.url.fail,
         failureFlash: true,
@@ -212,8 +217,10 @@ export class SocialLoginService {
     return profileData;
   }
 
-  getStrategy(socialServie: string) {
-    return require(this.importStrategyMap[socialServie]).Strategy;
+  getStrategy(socialServie: any) {
+    if (typeof this.importStrategyMap[socialServie] == "string")
+      return require(this.importStrategyMap[socialServie]).Strategy;
+    return this.importStrategyMap[socialServie];
   }
 
   getProfileFields(profile: any) {
@@ -272,7 +279,6 @@ export class SocialLoginService {
       });
 
       if (
-        //@ts-ignore
         !user.socialAccounts.find(
           (social) =>
             social.id + "" === profile[uniqueProperty] &&
@@ -280,7 +286,6 @@ export class SocialLoginService {
         )
       )
         updateBody.socialAccounts = [
-          //@ts-ignore
           ...user.socialAccounts,
           ...updateBody.socialAccounts,
         ];

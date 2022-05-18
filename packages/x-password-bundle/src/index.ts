@@ -1,6 +1,8 @@
 export { IXPasswordService } from "./services/IXPasswordService";
 export { XPasswordService } from "./services/XPasswordService";
 export * from "./constants";
+export * from "./multipleAuthFactor";
+export * from "./social-passport";
 export * from "./inputs";
 export * from "./defs";
 export * from "./exceptions";

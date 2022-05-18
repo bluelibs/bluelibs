@@ -86,9 +86,7 @@ export class MultipleFactorService {
     );
     //if all is authenticated return token to login
     if (
-      //@ts-ignore
       Object.keys(session.data.factors).every(
-        //@ts-ignore
         (k) => session.data.factors[k] === true
       )
     ) {
@@ -101,9 +99,7 @@ export class MultipleFactorService {
     }
     //if not return the next not authenticated strategy andi ts path
     else {
-      //@ts-ignore
       const nextUnauthrozedStrategy = Object.keys(session.data.factors).find(
-        //@ts-ignore
         (k) => session.data.factors[k] === false
       );
 
@@ -128,15 +124,11 @@ export class MultipleFactorService {
     if (!session) throw new SessionNotFound();
     if (session.userId + "" !== userId + "") throw new UserSessionError();
     if (
-      //@ts-ignore
       !session?.data?.factors ||
-      //@ts-ignore
       !Object.keys(session?.data?.factors).find((k) => k === factorStratergy)
     )
       throw new UnValidFactorStrategy();
-    //@ts-ignore
     session.data.factors[factorStratergy] = true;
-    //@ts-ignore
     await this.securityService.updateSession(session);
 
     return session;

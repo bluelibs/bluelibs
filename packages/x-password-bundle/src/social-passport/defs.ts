@@ -18,6 +18,7 @@ export type SocialServiceConfigType = {
       scope?: string | string[];
       profileFields?: string | string[];
     };
+    extraCredentials: any;
   };
   url: {
     auth: string;
@@ -35,11 +36,11 @@ export type socialCustomConfigMapType = {
       clientSecret: string;
     };
     //those are for extra credentials keys used in some strategies
-    extraCredentialsKeys?: string[];
+    extraCredentialsKeys?: any;
   };
 };
 
-export type socialPropsTypes = { [key: string]: string };
+export type socialPropsTypes = { [key: string]: string | any };
 
 export type socialArrayPropsTypes = {
   [key: string]: string[];

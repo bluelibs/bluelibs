@@ -38,7 +38,6 @@ export default (config: IXPasswordBundleConfig) => {
           },
           intersect: {
             _id: 1,
-            // @ts-ignore
             email: 1,
             fullName: 1,
             roles: 1,

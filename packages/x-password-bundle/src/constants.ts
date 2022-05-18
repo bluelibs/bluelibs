@@ -1,6 +1,6 @@
 import { Token } from "@bluelibs/core";
 
-export const X_PASSWORD_SETTINGS = new Token();
+export const X_PASSWORD_SETTINGS = new Token("x-password-settings");
 export const SOCIAL_AUTH_SERVICE_TOKEN = new Token();
 export const MULTIPLE_FACTORS_AUTH = new Token();
 

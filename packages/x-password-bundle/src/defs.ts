@@ -108,6 +108,7 @@ export interface IXPasswordBundleConfig {
     };
     fieldsValues?: socialArrayPropsTypes;
     profileObjectPath?: socialArrayPropsTypes;
+    passport?: any;
   };
 
   multipleFactorAuth?: {

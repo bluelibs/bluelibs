@@ -24,16 +24,13 @@ export function injectRestAuthRoutes(
             try {
               let input;
               if (api.type !== "get") {
-                //@ts-ignore
                 input = req.body;
               }
               const service = await container.get(XPasswordService);
               const data = await service[api.service](input);
-              //@ts-ignore
               return res.json(data);
             } catch (err) {
               console.log(err);
-              //@ts-ignore
               res.json({
                 message: `something wen wrong! with route ${api.name}`,
               });

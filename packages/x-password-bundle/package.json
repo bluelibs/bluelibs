@@ -73,6 +73,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "passport": "^0.5.2"
+    "passport": "^0.5.2",
+    "passport-mock-strategies": "^1.0.0",
+    "superagent": "^7.1.3"
   }
 }
