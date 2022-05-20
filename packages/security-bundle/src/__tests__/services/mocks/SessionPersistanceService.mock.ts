@@ -3,19 +3,18 @@ export class SessionPersistanceService implements ISessionPersistance {
   public db: ISession[] = [];
 
   async newSession(userId, expiresAt, data): Promise<string> {
-    const token = data?.token ? data.token : Math.random().toString();
+    const token = Math.random().toString();
     const session = {
       userId,
       expiresAt,
       token: token,
     };
     if (data) {
-      delete data.token;
       Object.assign(session, { data });
     }
     this.db.push(session);
 
-    return session.token;
+    return token;
   }
 
   async getSession(token: string): Promise<ISession> {

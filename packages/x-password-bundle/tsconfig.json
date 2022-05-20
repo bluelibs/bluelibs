@@ -14,8 +14,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declaration": true,
-    "typeRoots": ["node_modules/@types"],
-    "skipLibCheck": true
+    "typeRoots": ["node_modules/@types"]
   },
 
   "include": ["src/**/*.ts", "src/**/*.tsx"]

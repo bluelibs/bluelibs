@@ -9,9 +9,6 @@ export class RequestLoginLinkInput {
   type?: "email" | "sms" | "phonecall";
 
   @Is(a.string().nullable())
-  sessionToken?: string;
-
-  @Is(a.string().nullable())
   userId: string;
 }
 
@@ -22,7 +19,4 @@ export class VerifyMagicLinkInput {
 
   @Is(a.string().required())
   magicCode: string;
-
-  @Is(a.string().nullable())
-  sessionToken?: string;
 }

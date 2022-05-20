@@ -6,8 +6,8 @@ import {
 import { IXPasswordBundleConfig } from "../defs";
 import { Inject, Service, ContainerInstance } from "@bluelibs/core";
 import { HTTPBundle } from "@bluelibs/http-bundle";
-import * as originalPassport from "passport";
-const bodyParser = require("body-parser");
+import * as passport from "passport";
+import * as bodyParser from "body-parser";
 import {
   SOCIAL_CUSTOM_CONFIG,
   SOCIAL_UNIQUE_IDS,
@@ -36,7 +36,6 @@ export class SocialLoginService {
     protected readonly multipleFactorService: MultipleFactorService
   ) {
     this.httpBundle = this.container.get<HTTPBundle>(HTTPBundle);
-    this.passport = this.config.socialAuth.passport || originalPassport;
     this.onSocialAuth =
       this.config.socialAuth.onSocialAuth || this.defaultOnSocialAuth;
     this.url = this.config.socialAuth.url;
@@ -88,18 +87,18 @@ export class SocialLoginService {
   ) => any;
 
   init() {
-    //prepare the rest app for our this.passport
+    //prepare the rest app for our passport
     this.httpBundle.app.enable("trust proxy");
 
     this.httpBundle.app.use(bodyParser.urlencoded({ extended: false }));
     this.httpBundle.app.use(bodyParser.json());
-    this.httpBundle.app.use(this.passport.initialize());
-    this.httpBundle.app.use(this.passport.session());
+    this.httpBundle.app.use(passport.initialize());
+    this.httpBundle.app.use(passport.session());
 
-    this.passport.serializeUser(function (user, done) {
+    passport.serializeUser(function (user, done) {
       done(null, user);
     });
-    this.passport.deserializeUser(function (user, done) {
+    passport.deserializeUser(function (user, done) {
       done(null, user);
     });
 
@@ -151,8 +150,8 @@ export class SocialLoginService {
         ...this.socialCustomConfig[service].extraCredentialsKeys,
       };
     }
-    // Execute the this.passport strategy
-    this.passport.use(
+    // Execute the passport strategy
+    passport.use(
       service,
       new (this.getStrategy(service))(
         passportSetup,
@@ -187,16 +186,13 @@ export class SocialLoginService {
     // Setup the enty point (/auth/:service)
     this.httpBundle.app.get(
       setting.url.auth,
-      this.passport.authenticate(
-        strategyName,
-        setting.settings.authParameters || {}
-      )
+      passport.authenticate(strategyName, setting.settings.authParameters || {})
     );
 
     // Setup the callback url (/auth/:service/callback)
     this.httpBundle.app.get(
       setting.url.callback,
-      this.passport.authenticate(strategyName, {
+      passport.authenticate(strategyName, {
         //successRedirect: setting.url?.success,
         failureRedirect: setting.url.fail,
         failureFlash: true,
@@ -205,7 +201,9 @@ export class SocialLoginService {
         //here in our callback method we return return token of teh user
         if (req.user.token)
           res.redirect(setting.url?.success + "?token=" + req.user?.token);
-        else res.redirect(setting.url.fail);
+        else if (req.user.redirectUrl) {
+          res.redirect(req.user.redirectUrl);
+        } else res.redirect(setting.url.fail);
       }
     );
   }

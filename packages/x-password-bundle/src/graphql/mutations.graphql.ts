@@ -54,7 +54,6 @@ export default (config: IXPasswordBundleConfig) => {
         input LoginInput {
           username: String!
           password: String!
-          sessionToken: String
         }
         type LoginResponse {
           token: String
@@ -119,7 +118,6 @@ export default (config: IXPasswordBundleConfig) => {
           username: String
           type: String
           userId: String
-          sessionToken: String
         }
         type RequestLoginLinkInputResponse {
           magicCodeSent: Boolean!
@@ -139,7 +137,6 @@ export default (config: IXPasswordBundleConfig) => {
         input VerifyMagicLinkInput {
           userId: String!
           magicCode: String!
-          sessionToken: String
         }
         type VerifyMagicLinkResponse {
           token: String

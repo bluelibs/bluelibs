@@ -34,7 +34,7 @@ export class SessionsCollection<T extends ISession>
     data?: any
   ): Promise<string> {
     const session = {
-      token: data?.token ? data.token : generateToken(64),
+      token: generateToken(64),
       userId,
       expiresAt,
     };

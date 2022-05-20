@@ -27,11 +27,11 @@ export const SubmitMagicLink = (props: {
     code?: string;
     method?: string;
     format?: string;
-    sessionToken?: string;
   };
 }) => {
   const guardian = useGuardian();
-  const { userId, code, sessionToken } = props.queryVariables;
+  console.log(props);
+  const { userId, code } = props.queryVariables;
 
   const tl = useTranslate("authentication.submitMagicLink");
   const router = useRouter();
@@ -48,7 +48,7 @@ export const SubmitMagicLink = (props: {
 
   const onSubmit = (data: FormInput) => {
     guardian
-      .verifyMagicCode(userId, data.code, sessionToken)
+      .verifyMagicCode(userId, data.code)
       .then(() => {
         notification.success({
           message: "Welcome!",

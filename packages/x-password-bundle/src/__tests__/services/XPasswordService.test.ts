@@ -1,6 +1,7 @@
 import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
 import {
+  AUTH_CODE_COLLECTION_TOKEN,
   InvalidPasswordException,
   InvalidUsernameException,
   MAGIC_AUTH_STRATEGY,
@@ -9,10 +10,10 @@ import {
   XPasswordBundle,
   XPasswordService,
   X_PASSWORD_SETTINGS,
-} from "../..";
-import { createEcosystem } from "./createEcosystem";
+} from "../../..";
+import { createEcosystem } from "../createEcosystem";
 
-describe("xpasswordService ", () => {
+describe("XPasswordService.test ", () => {
   let securityService, passwordService, xPasswordService, container;
   let userId;
   const dummyUser = {
@@ -90,26 +91,26 @@ describe("xpasswordService ", () => {
     ).rejects.toThrow(InvalidUsernameException);
   });
 
-  test("requestLoginLink", async () => {
-    await securityService.createSession(userId, {
-      token: "123456",
-      data: {
-        token: "123456",
-        leftSubmissionsCount: 3,
-        type: "magic-link-auth",
-      },
+  test("verifyLoginCode", async () => {
+    await container.get(AUTH_CODE_COLLECTION_TOKEN).insertOne({
+      userId,
+      leftSubmissionsCount: 3,
+      code: "123456",
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     });
     await expect(
       xPasswordService.verifyMagicCode({
         userId,
-        magicCode: "",
+        magicCode: "000000",
       })
     ).rejects.toThrow();
-    const session = await securityService.findSession(userId, {});
-    expect(session.data.leftSubmissionsCount).toEqual(2);
+    const codeAuthSession = await container
+      .get(AUTH_CODE_COLLECTION_TOKEN)
+      .findOne({ userId });
+    expect(codeAuthSession.leftSubmissionsCount).toEqual(2);
     const result = await xPasswordService.verifyMagicCode({
       userId,
-      magicCode: session.token,
+      magicCode: codeAuthSession.code,
     });
     expect((await securityService.getSession(result.token)).userId).toEqual(
       userId

@@ -15,7 +15,6 @@ export interface IMultipleFactorService {
   userHaveToMultipleFactorAuth: (userId: UserId) => Promise<boolean>;
   loginSessionFactor(
     userId: UserId,
-    sessionToken: string,
     factorStratergy: string
   ): Promise<ISession>;
 }

@@ -6,6 +6,7 @@ import { HTTPBundle } from "@bluelibs/http-bundle";
 
 import { IXPasswordBundleConfig } from "./defs";
 import {
+  AUTH_CODE_COLLECTION_TOKEN,
   MAGIC_AUTH_STRATEGY,
   MULTIPLE_FACTORS_AUTH,
   PASSWORD_STRATEGY,
@@ -24,6 +25,7 @@ import { RequestMagicLink } from "./emails/RequestMagicLink";
 import { injectRestAuthRoutes } from "./restApis";
 import { SocialLoginService } from "./social-passport/SocialLoginService";
 import { MultipleFactorService } from "./multipleAuthFactor/MultipleFactorService";
+import { AuthenticationCodesCollection } from "./collections/AuthenticationCodes.collection";
 
 export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
   dependencies = [PasswordBundle, SecurityBundle, HTTPBundle];
@@ -101,7 +103,10 @@ export class XPasswordBundle extends Bundle<IXPasswordBundleConfig> {
 
   async prepare() {
     this.container.set(X_PASSWORD_SETTINGS, this.config);
-
+    this.container.set({
+      id: AUTH_CODE_COLLECTION_TOKEN,
+      type: AuthenticationCodesCollection,
+    });
     if (this.config.services?.MultipleFactorService) {
       this.container.set({
         id: MULTIPLE_FACTORS_AUTH,

@@ -419,19 +419,20 @@ export class SecurityService implements ISecurityService {
   }
 
   //maybe we do that in sessionPersistanceLayer, but I thought we dont update for a reason
-  async updateSession(newSession: ISession): Promise<void> {
+  async updateSession(newSession: ISession): Promise<string> {
     await this.sessionPersistanceLayer.deleteSession(newSession.token);
-    await this.sessionPersistanceLayer.newSession(
+    return await this.sessionPersistanceLayer.newSession(
       newSession.userId,
       newSession.expiresAt,
-      {
-        token: newSession.token,
-        ...newSession.data,
-      }
+      newSession.data
     );
   }
 
   async findSession(userId: UserId, data: any): Promise<ISession | null> {
     return this.sessionPersistanceLayer.findSession(userId, data);
+  }
+
+  async deleteSession(token: string) {
+    await this.sessionPersistanceLayer.deleteSession(token);
   }
 }

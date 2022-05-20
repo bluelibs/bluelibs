@@ -104,11 +104,10 @@ export interface IXPasswordBundleConfig {
     strategyNameMap?: socialPropsTypes;
     socialCustomConfig?: socialCustomConfigMapType;
     importStrategyMap?: {
-      [key: string]: string;
+      [key: string]: any;
     };
     fieldsValues?: socialArrayPropsTypes;
     profileObjectPath?: socialArrayPropsTypes;
-    passport?: any;
   };
 
   multipleFactorAuth?: {

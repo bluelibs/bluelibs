@@ -27,10 +27,10 @@ type FormInput = {
 };
 
 export function RequestMagicLink(props: {
-  queryVariables?: { userId?: string; sessionToken?: string };
+  queryVariables?: { userId?: string };
 }) {
   const guardian = useGuardian();
-  const { userId, sessionToken } = props.queryVariables;
+  const { userId } = props.queryVariables;
 
   const tl = useTranslate("authentication.requestMagicLink");
   const router = useRouter();
@@ -40,7 +40,7 @@ export function RequestMagicLink(props: {
 
   const onSubmit = () => {
     guardian
-      .requestLoginLink({ username, method, userId, sessionToken })
+      .requestLoginLink({ username, method, userId })
       .then((data) => {
         if (data.magicCodeSent) {
           router.go(Routes.SUBMIT_MAGIC_LINK, {
@@ -48,7 +48,6 @@ export function RequestMagicLink(props: {
               userId: data.userId,
               method: data.method,
               format: data.magicAuthFormat,
-              sessionToken: sessionToken,
             },
           });
         }
@@ -102,10 +101,7 @@ export function RequestMagicLink(props: {
             {userId ? (
               <></>
             ) : (
-              <Form.Item
-                name={"username"}
-                rules={[{ required: !userId && !sessionToken }]}
-              >
+              <Form.Item name={"username"} rules={[{ required: !userId }]}>
                 <Input
                   value={username}
                   prefix={

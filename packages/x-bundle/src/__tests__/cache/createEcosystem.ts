@@ -13,7 +13,7 @@ import { PasswordBundle } from "@bluelibs/password-bundle";
 
 import { GraphQLBundle } from "@bluelibs/graphql-bundle";
 
-export async function createEcosystem() {
+export async function createEcosystem(): Promise<ContainerInstance> {
   const kernel = new Kernel({
     bundles: [
       new LoggerBundle({

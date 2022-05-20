@@ -67,21 +67,8 @@ export class MultipleFactorService {
       return { token: await this.securityService.login(userId, options) };
     }
 
-    let sessionToken = options?.data?.sessionToken;
-    if (!sessionToken) {
-      sessionToken = await this.securityService.createSession(userId, {
-        expiresIn: "5m",
-        data: {
-          factors: this.config.multipleFactorAuth.factors.reduce(
-            (acc, curr) => ((acc[curr.strategy] = false), acc),
-            {}
-          ),
-        },
-      });
-    }
     const session = await this.loginSessionFactor(
       userId,
-      sessionToken,
       options.authenticationStrategy
     );
     //if all is authenticated return token to login
@@ -90,6 +77,7 @@ export class MultipleFactorService {
         (k) => session.data.factors[k] === true
       )
     ) {
+      await this.securityService.deleteSession(session.token);
       return {
         token: await this.securityService.login(
           userId /*add multiple factor strategy*/,
@@ -104,12 +92,11 @@ export class MultipleFactorService {
       );
 
       return {
-        sessionToken: sessionToken,
         //we can name this redirect url token
         redirectUrl:
           this.config.multipleFactorAuth.factors.find(
             (f) => f.strategy === nextUnauthrozedStrategy
-          )?.redirectUrl + `?userId=${userId}&sessionToken=${sessionToken}`,
+          )?.redirectUrl + `?userId=${userId}`,
         strategy: nextUnauthrozedStrategy,
       };
     }
@@ -117,10 +104,24 @@ export class MultipleFactorService {
 
   async loginSessionFactor(
     userId: UserId,
-    sessionToken: string,
     factorStratergy: string
   ): Promise<ISession> {
-    const session = await this.securityService.getSession(sessionToken);
+    let session = await this.securityService.findSession(userId, {
+      type: MULTIPLE_FACTOR_STRATEGY,
+    });
+    if (!session) {
+      const token = await this.securityService.createSession(userId, {
+        expiresIn: "5m",
+        data: {
+          type: MULTIPLE_FACTOR_STRATEGY,
+          factors: this.config.multipleFactorAuth.factors.reduce(
+            (acc, curr) => ((acc[curr.strategy] = false), acc),
+            {}
+          ),
+        },
+      });
+      session = await this.securityService.getSession(token);
+    }
     if (!session) throw new SessionNotFound();
     if (session.userId + "" !== userId + "") throw new UserSessionError();
     if (
@@ -129,7 +130,7 @@ export class MultipleFactorService {
     )
       throw new UnValidFactorStrategy();
     session.data.factors[factorStratergy] = true;
-    await this.securityService.updateSession(session);
+    session.token = await this.securityService.updateSession(session);
 
     return session;
   }

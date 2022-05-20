@@ -424,7 +424,6 @@ export class GuardianSmart<
     username?: string;
     method?: string;
     userId: string;
-    sessionToken: string;
   }): Promise<any> {
     return this.apolloClient
       .mutate({
@@ -443,7 +442,6 @@ export class GuardianSmart<
             username: input.username,
             type: input.method,
             userId: input.userId,
-            sessionToken: input.sessionToken,
           },
         },
       })
@@ -457,11 +455,7 @@ export class GuardianSmart<
    * @param userId
    * @param code
    */
-  async verifyMagicCode(
-    userId: string,
-    code: string,
-    sessionToken?: string
-  ): Promise<string> {
+  async verifyMagicCode(userId: string, code: string): Promise<string> {
     this.updateState({
       hasInvalidToken: false,
     });
@@ -481,7 +475,6 @@ export class GuardianSmart<
           input: {
             userId,
             magicCode: code,
-            sessionToken,
           },
         },
       })

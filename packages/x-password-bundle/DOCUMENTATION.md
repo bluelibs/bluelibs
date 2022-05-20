@@ -142,8 +142,9 @@ export interface IXPasswordBundleConfig {
 }
 ```
 
-you can also get REST apis versions of those mutation in addition to me Query, if you toggled on/off the rest attribute :
-to use patch/post apis please provide the input types as json body, the inputs for every api can be imported from the bundle as `RegistrationInput,ChangePasswordInput,LoginInput ...`
+You can also get REST apis versions of those previous mutations, if you toggled on/off the rest attribute :
+
+To use patch/post apis please provide the input types as json body, the inputs for every api can be imported from the bundle as `RegistrationInput,ChangePasswordInput,LoginInput ...`
 
 ```ts
 // The configuration is:
@@ -213,13 +214,13 @@ function register(_, args: InputType<RegisterInput>, context: IGraphQLContext) {
 
 ## Magic Link/Code Authentication
 
-We provide in addition to password authentication option, an option to lgoin by sending a magic code/token to the user email, and you can implement the sms, phonecall too,
+We provide in addition to password authentication option, an option to login by sending a magic code/token to the user email,
 
 ```ts
 // The configuration is:
 export interface IXPasswordBundleConfig {
   magicCodeLifeDuration: "5m"; //how long the sent code would stay valid
-  magicAuthFormat: "code"; // the format of the validation: code,token or qrCode
+  magicAuthFormat: "code"; // the format of the validation: code (of 6 digits),token
   leftSubmissionsCount: 3; // how many submissions before we blokc the user from using this method
 }
 ```

@@ -40,7 +40,7 @@ export type socialCustomConfigMapType = {
   };
 };
 
-export type socialPropsTypes = { [key: string]: string | any };
+export type socialPropsTypes = { [key: string]: any };
 
 export type socialArrayPropsTypes = {
   [key: string]: string[];

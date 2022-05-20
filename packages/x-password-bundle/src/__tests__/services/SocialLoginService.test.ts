@@ -1,14 +1,19 @@
 import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
-import { XPasswordService } from "../..";
-import { createEcosystem } from "./createEcosystem";
+import { XPasswordService } from "../../..";
+import { createEcosystem } from "../createEcosystem";
 import * as superagent from "superagent";
-const userData = require("./mocks/userData");
+import { HTTPBundle } from "@bluelibs/http-bundle";
+import userData from "../mocks/userData";
+import StrategyMock from "../mocks/mockStrategy";
 
-const OAuth2Strategy = require("./mocks").OAuth2Strategy;
-
-describe("social auth testing ", () => {
-  let securityService, passwordService, xPasswordService, container;
+describe("SocialLoginService.test ", () => {
+  let securityService,
+    passwordService,
+    xPasswordService,
+    container,
+    app,
+    userId;
 
   beforeEach(async () => {
     container = await createEcosystem({
@@ -21,7 +26,7 @@ describe("social auth testing ", () => {
         },
 
         importStrategyMap: {
-          "mock-oauth2": OAuth2Strategy,
+          "mock-oauth2": StrategyMock,
         },
         socialCustomConfig: {
           "mock-oauth2": {
@@ -49,16 +54,22 @@ describe("social auth testing ", () => {
         url: "http://127.0.0.1:5000", // this will be the express app  url
       },
     });
+
     securityService = container.get(SecurityService);
     passwordService = container.get(PasswordService);
     xPasswordService = container.get(XPasswordService);
+    app = container.get(HTTPBundle).app;
+  });
 
-    //prepare user sample
+  afterEach(async () => {
+    if (userId) await securityService.deleteUser(userId);
   });
 
   test("test mock passport strategy", async () => {
-    await superagent.get("http://localhost:5000/auth/mock").end();
-    const userId = await passwordService.findUserIdByUsername(userData.email);
+    await superagent
+      .get("http://localhost:5000/auth/mock")
+      .end((res, err) => {});
+    userId = await passwordService.findUserIdByUsername(userData.email);
     expect(userId).toBeDefined();
   });
 });

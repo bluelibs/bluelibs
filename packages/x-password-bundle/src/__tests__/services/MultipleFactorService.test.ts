@@ -10,10 +10,10 @@ import {
   XPasswordService,
   MultipleFactorService,
   X_PASSWORD_SETTINGS,
-} from "../..";
-import { createEcosystem } from "./createEcosystem";
+} from "../../..";
+import { createEcosystem } from "../createEcosystem";
 
-describe("multiple factor testing ", () => {
+describe("MultipleFactorService.test ", () => {
   let securityService,
     passwordService,
     xPasswordService,
@@ -64,17 +64,11 @@ describe("multiple factor testing ", () => {
     const firstLogin = await multipleFactorService.login(userId, {
       authenticationStrategy: MAGIC_AUTH_STRATEGY,
     });
-    expect(firstLogin.sessionToken).toBeDefined();
     expect(firstLogin.redirectUrl.split("?")[0]).toEqual(
       "http://localhost:8080/login"
     );
 
     expect(firstLogin.strategy).toEqual(PASSWORD_STRATEGY);
-
-    const testWithotuSession = await multipleFactorService.login(userId, {
-      authenticationStrategy: PASSWORD_STRATEGY,
-    });
-    expect(testWithotuSession.sessionToken).toBeDefined();
 
     const secondLogin = await multipleFactorService.login(userId, {
       authenticationStrategy: PASSWORD_STRATEGY,

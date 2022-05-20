@@ -19,6 +19,7 @@ import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
 import { Router, APP_ROUTER } from "@bluelibs/x-bundle";
 import { IXPasswordBundleConfig } from "../defs";
 import {
+  AUTH_CODE_COLLECTION_TOKEN,
   MAGIC_AUTH_STRATEGY,
   PASSWORD_STRATEGY,
   X_PASSWORD_SETTINGS,
@@ -35,6 +36,10 @@ import {
 import { ObjectId } from "mongodb";
 import { MultipleFcatorRedirect } from "../multipleAuthFactor/defs";
 import { MultipleFactorService } from "../multipleAuthFactor/MultipleFactorService";
+import { AuthenticationCodesCollection } from "../collections/AuthenticationCodes.collection";
+import * as ms from "ms";
+import { AuthenticationCodes } from "../collections/AuthenticationCodes.model";
+import { CodeSubmissionExceededException } from "../exceptions/CodeSubmissionExceededException";
 
 const ALLOWED_CHARS =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
@@ -54,6 +59,8 @@ export class XPasswordService implements IXPasswordService {
     protected readonly emailService: EmailService,
     @Inject(X_PASSWORD_SETTINGS)
     protected readonly config: IXPasswordBundleConfig,
+    @Inject(AUTH_CODE_COLLECTION_TOKEN)
+    protected readonly authenticationCodeCollection: AuthenticationCodesCollection,
     protected readonly multipleFactorService: MultipleFactorService
   ) {}
 
@@ -155,7 +162,6 @@ export class XPasswordService implements IXPasswordService {
     if (isValid) {
       return await this.multipleFactorService.login(userId, {
         authenticationStrategy: PASSWORD_STRATEGY,
-        data: { sessionToken: input.sessionToken },
       });
     } else {
       throw new InvalidPasswordException();
@@ -399,7 +405,6 @@ export class XPasswordService implements IXPasswordService {
       userId,
       method: input.type,
       confirmationFormat: this.config.magicAuthFormat,
-      sessionToken: input.sessionToken,
     };
   }
 
@@ -408,11 +413,7 @@ export class XPasswordService implements IXPasswordService {
   ): Promise<{ token: string } | MultipleFcatorRedirect> {
     const magicCode: string = input.magicCode,
       userId: UserId = ObjectId(input.userId);
-    const session = await this.getConfirmationSession(
-      magicCode,
-      userId,
-      MAGIC_AUTH_STRATEGY
-    );
+    const session = await this.getConfirmationSession(magicCode, userId);
 
     if (!session) throw new Error("invalid-magic-code");
 
@@ -421,7 +422,6 @@ export class XPasswordService implements IXPasswordService {
 
     return await this.multipleFactorService.login(userId, {
       authenticationStrategy: MAGIC_AUTH_STRATEGY,
-      data: { sessionToken: input?.sessionToken },
     });
   }
 
@@ -435,13 +435,11 @@ export class XPasswordService implements IXPasswordService {
         ? this.generateToken(6, "0123456789".split(""))
         : this.generateToken(24);
 
-    await this.createConfirmationSession(userId, {
-      data: {
-        token: magicCode,
-        type: MAGIC_AUTH_STRATEGY,
-        leftSubmissionsCount: this.config.leftSubmissionsCount,
-      },
-      expiresIn: this.config.magicCodeLifeDuration,
+    await this.createConfirmationSession({
+      userId,
+      code: magicCode,
+      leftSubmissionsCount: this.config.leftSubmissionsCount,
+      expiresAt: new Date(Date.now() + ms(this.config.magicCodeLifeDuration)),
     });
 
     const {
@@ -457,8 +455,7 @@ export class XPasswordService implements IXPasswordService {
           regardsName: regardsName,
           username: input.username,
           magicLink: this.router.path(
-            paths.submitMagicCode +
-              `?userId=${userId}&code=${magicCode}&sessionToken=${input.sessionToken}`
+            paths.submitMagicCode + `?userId=${userId}&code=${magicCode}`
           ),
           code: this.config.magicAuthFormat === "code" ? magicCode : undefined,
         },
@@ -470,47 +467,59 @@ export class XPasswordService implements IXPasswordService {
   }
 
   async createConfirmationSession(
-    userId: UserId,
-    options: ICreateSessionOptions = {}
+    codeAuthSession: AuthenticationCodes
   ): Promise<string> {
-    let session = await this.securityService.findSession(userId, {
-      type: options.data.type,
+    await this.excessiveUse(codeAuthSession.userId);
+    await this.authenticationCodeCollection.deleteMany({
+      userId: codeAuthSession.userId,
     });
-    let token;
-    if (session && session.token) token = session.token;
-    if (!token)
-      token = await this.securityService.createSession(userId, options);
+    await this.authenticationCodeCollection.insertOne(codeAuthSession);
 
-    return token;
+    return codeAuthSession.code;
   }
 
   async getConfirmationSession(
-    token: string,
-    userId: UserId,
-    type: string
-  ): Promise<ISession | null> {
-    const session: ISession = await this.securityService.findSession(userId, {
-      type,
+    code: string,
+    userId: UserId
+  ): Promise<AuthenticationCodes | null> {
+    await this.excessiveUse(userId);
+    const authcodeSession = await this.authenticationCodeCollection.findOne({
+      userId,
+      expiresAt: { $gte: new Date(Date.now()) },
     });
 
-    if (!session) {
+    if (!authcodeSession) {
       return null;
-    } else if (session.token !== token) {
-      session.data = {
-        ...session.data,
-        leftSubmissionsCount: Math.max(
-          session?.data?.leftSubmissionsCount - 1,
-          0
-        ),
-      };
-      await this.securityService.updateSession(session);
+    } else if (authcodeSession.code !== code) {
+      await this.authenticationCodeCollection.updateOne(
+        { userId, code: authcodeSession.code },
+        {
+          $set: {
+            leftSubmissionsCount: Math.max(
+              0,
+              authcodeSession.leftSubmissionsCount - 1
+            ),
+          },
+        }
+      );
       return null;
     }
-    if (session?.data?.leftSubmissionsCount === 0) {
+    if (authcodeSession?.leftSubmissionsCount === 0) {
       throw new SubmissionCountExceededException();
     }
-    await this.securityService.validateSession(session);
+    await this.authenticationCodeCollection.deleteOne({
+      userId,
+      code,
+    });
+    return authcodeSession;
+  }
 
-    return session;
+  async excessiveUse(userId: UserId) {
+    const authcodeSession = await this.authenticationCodeCollection.findOne({
+      userId,
+      leftSubmissionsCount: 0,
+      expiresAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
+    if (authcodeSession) throw new CodeSubmissionExceededException();
   }
 }
