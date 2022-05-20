@@ -5,6 +5,7 @@ import { Users, User } from "./dummy/users";
 import { DatabaseService } from "../../services/DatabaseService";
 import { DeepPartial } from "@bluelibs/core";
 import { Tag, Tags } from "./dummy/tags";
+import { BeforeInsertEvent } from "../../events";
 
 describe("DeepSync", () => {
   test("Should work with deepSync with plain objects", async () => {
@@ -210,5 +211,46 @@ describe("DeepSync", () => {
     // await operator.clean(postId, { delete: true }); // removes tags and delets them
     // await operator.link(postId, [tagId1, tagId2], { override: true }); // overrides
     // await operator.unlink(postId, [tagId1, tagId2], { delete: true }); // (works with many relationships only) adds aditional tags
+  });
+
+  test("It should work linking data", async () => {
+    const { container } = await getEcosystem();
+
+    const dbService = container.get(DatabaseService);
+    const comments = container.get(Comments);
+    const posts = container.get(Posts);
+    const users = container.get(Users);
+
+    posts.localEventManager.addListener(BeforeInsertEvent, () => {
+      throw new Error("shouldn't be here");
+    });
+
+    const data: DeepPartial<User> = {
+      name: "John Smith",
+      posts: [
+        {
+          title: "Post 1",
+          comments: [
+            {
+              title: "Hello 1",
+            },
+            {
+              title: "Hello 2",
+            },
+          ],
+        },
+        {
+          title: "Post 2",
+        },
+      ],
+    };
+
+    await users.deepSync(
+      data,
+      {},
+      {
+        direct: true,
+      }
+    );
   });
 });

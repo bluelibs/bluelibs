@@ -292,9 +292,12 @@ export class Field extends BaseModel<Field> {
     key: string;
     label: string;
     description?: string;
+    enums?: any;
   } {
     const parents: Field[] = [];
     let current: Field = this;
+    //in case of enums
+    let enums: any;
 
     if (forceParent) {
       current.parent = forceParent;
@@ -308,10 +311,17 @@ export class Field extends BaseModel<Field> {
         current = current.parent;
       }
     }
-
+    if (current.type === FieldValueKind.ENUM && current.enumValues.length > 0) {
+      enums = {};
+      for (let enum_value of current.enumValues) {
+        const enum_key =
+          typeof enum_value === "string" ? enum_value : enum_value?.label;
+        enums[enum_key.toLowerCase()] = enum_key;
+      }
+    }
     const label = this.ui ? this.ui.label : this.id;
     if (parents.length === 0) {
-      return { key: this.id, label, description: this.description };
+      return { key: this.id, label, description: this.description, enums };
     }
 
     let keySignature = "";
@@ -325,6 +335,7 @@ export class Field extends BaseModel<Field> {
       key: keySignature + this.id,
       label: labelSignature + label,
       description: this.description,
+      enums,
     };
   }
 

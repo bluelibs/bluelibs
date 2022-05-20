@@ -411,8 +411,8 @@ export class StudioWriter {
   ) {
     const microservicePath = session.getMicroservicePath();
     const crudWriter = this.writers.graphQLCRUD;
-    for (const collection of studioApp.collectionsToWrite) {
-      if (!collection.hasGraphQL("crud")) {
+    for (const collection of studioApp.collections) {
+      if (!collection.hasGraphQL("crud") || !collection.crud) {
         continue;
       }
       if (collection.isExternal()) {
@@ -423,6 +423,7 @@ export class StudioWriter {
       model.checkLoggedIn = false;
       model.hasSubscriptions = true;
       model.crudName = collection.id;
+      model.crudOperations = collection.crud;
       model.collectionElement = XElements.emulateElement(
         microservicePath,
         "AppBundle",
