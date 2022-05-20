@@ -46,12 +46,9 @@ export default class StrategyMock extends Strategy {
       !req.query.__mock_strategies &&
       this._callbackURL
     ) {
-      console.log(this._callbackURL + "?__mock_strategies=true");
       this.redirect(this._callbackURL + "?__mock_strategies=true");
     } else {
       var _user = userData;
-      console.log(this._callbackURL + "?__mock_strategies=true");
-
       const verified = (err, user, info) => {
         if (err) return this.error(err);
         if (!user) return this.fail(info);
