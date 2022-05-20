@@ -32,7 +32,15 @@ export type ListState<T = any> = {
 export type ListConfig<T = any> = {
   collectionClass?: Constructor<Collection<T>>;
   body?: QueryBodyType<T>;
+  /**
+   * These filters are always going to be applied regardless of what you apply later on, use `initialFilters` if you plan on overriding them
+   */
   filters?: MongoFilterQuery<T>;
+  /**
+   * These filters are applied initially on the list, they can be overriden later on.
+   */
+  initialFilters?: MongoFilterQuery<T>;
+  initialOptions?: IQueryOptions<T>;
   sort?: SortOptions;
   perPage?: null | number;
 };
@@ -55,7 +63,7 @@ export abstract class ListSmart<T = any> extends Smart<
   body: QueryBodyType<T>;
   collectionClass: Constructor<Collection<T>>;
   protected collection: Collection<T>;
-  protected initialFilters: MongoFilterQuery<T>;
+  protected alwaysOnFilters: MongoFilterQuery<T>;
 
   state = {
     isLoading: true,
@@ -85,10 +93,17 @@ export abstract class ListSmart<T = any> extends Smart<
       this.body = Object.assign({}, config.body);
     }
 
+    if (config.initialFilters) {
+      this.state.filters = Object.assign({}, config.initialFilters);
+    }
+    if (config.initialOptions) {
+      this.state.options = Object.assign({}, config.initialOptions);
+    }
+
     if (config.filters) {
-      this.initialFilters = Object.assign({}, config.filters);
+      this.alwaysOnFilters = Object.assign({}, config.filters);
     } else {
-      this.initialFilters = Object.assign({}, this.body?.$?.filters || {});
+      this.alwaysOnFilters = Object.assign({}, this.body?.$?.filters || {});
     }
 
     this.config = config;
@@ -119,7 +134,7 @@ export abstract class ListSmart<T = any> extends Smart<
         {
           filters: {
             ...this.state.filters,
-            ...this.initialFilters,
+            ...this.alwaysOnFilters,
           },
           options: {
             ...this.getSortOptions(),
@@ -183,7 +198,7 @@ export abstract class ListSmart<T = any> extends Smart<
     this.collection
       .count({
         ...this.state.filters,
-        ...this.initialFilters,
+        ...this.alwaysOnFilters,
       })
       .then((count) => {
         this.updateState(
@@ -223,7 +238,7 @@ export abstract class ListSmart<T = any> extends Smart<
       filters: {
         ...this.state.filters,
         ...filters,
-        ...this.initialFilters,
+        ...this.alwaysOnFilters,
       },
     });
     this.load({

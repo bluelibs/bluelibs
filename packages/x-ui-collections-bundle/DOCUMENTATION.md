@@ -394,6 +394,37 @@ api.updateSort({
 });
 ```
 
+### Default & Always-On Filters
+
+If you want your list to always have a set of filters applied, for example you're only listing Posts which have `isApproved: true`:
+
+```tsx
+function Component() {
+  const [api, Provider] = newSmart(PostsList, {
+    filters: {
+      isApproved: true,
+    },
+  });
+}
+```
+
+However, if you want a set of default filters or options, that later on can be overriden:
+
+```tsx
+function Component() {
+  const [api, Provider] = newSmart(PostsList, {
+    initialFilters: {
+      isApproved: true,
+    },
+    initialOptions: {
+      sort: {
+        createdAt: -1,
+      },
+    },
+  });
+}
+```
+
 ## Live Data
 
 If you want to use the smart live data, just swap `useData()` with `useLiveData()` and it will magically work, your data will be listening to changes.

@@ -133,15 +133,20 @@ export class XBridge {
 
     const pathsInfo = XBridge.getPathInfos();
 
-    const field: Models.IGenericField = {
-      name: studioField.id,
-      type: XBridge.mapFieldTypeToGenericField(studioField.type),
-      isMany: studioField.isArray,
-      description: studioField.description,
-      isOptional: !studioField.isRequired,
-      enumValues: studioField.enumValues as EnumConfigType[],
-      defaultValue: studioField.defaultValue,
-    };
+    let field: Models.IGenericField;
+    try {
+      field = {
+        name: studioField.id,
+        type: XBridge.mapFieldTypeToGenericField(studioField.type),
+        isMany: studioField.isArray,
+        description: studioField.description,
+        isOptional: !studioField.isRequired,
+        enumValues: studioField.enumValues as EnumConfigType[],
+        defaultValue: studioField.defaultValue,
+      };
+    } catch (e) {
+      console.log(`Errored: `, e, studioField.id, studioField.type);
+    }
 
     // Reducers can't be validated as they are sort of virtual fields
     if (studioField.isReducer) {

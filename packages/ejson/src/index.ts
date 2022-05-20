@@ -1,7 +1,7 @@
 import { ObjectId } from "./objectid";
-import { toModel } from "./toModel";
+import { toModel, ToModelOptions } from "./toModel";
 
 export { EJSON } from "./ejson";
 export { Base64 } from "./base64";
 export { ObjectId };
-export { toModel };
+export { toModel, ToModelOptions };
