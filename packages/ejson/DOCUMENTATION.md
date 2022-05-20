@@ -88,6 +88,7 @@ import { toModel } from "@bluelibs/ejson";
 class Person {
   firstname: string;
   lastname: string;
+  age: number = 25;
 
   get fullname() {
     return `${this.firstname} ${this.lastname}`;
@@ -98,6 +99,20 @@ const person = toModel(Person, {
   firstname: "John",
   lastname: "Smith",
 });
+
+// ignore default values
+const person = toModel(
+  Person,
+  {
+    firstname: "John",
+    lastname: "Smith",
+  },
+  {
+    partial: true,
+  }
+);
+
+// person.age == undefined
 ```
 
 Note that this `toModel` function is very primitive. It won't work with nested functions. For a more robust alternative feel free to use [class-transformer](https://github.com/typestack/class-transformer) as it gives you with a stable and fully-featured way to transform plain objects into models.
