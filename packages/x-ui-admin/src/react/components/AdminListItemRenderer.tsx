@@ -144,7 +144,6 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
     }
     return value;
   } catch (err) {
-    console.error(err);
     return <Components.Error error={"field rendering error"} />;
   }
 }
