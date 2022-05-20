@@ -96,24 +96,30 @@
     {{/ if }}
     {{!-- ENUM HANDLING --}}
     {{# if (@root.typeIs rendererType "enum") }}
-      render: (props) => (
+      render: (props) => {
+        const options=[{{# each enumValues }} {value:"{{ value }}" ,label:"{{ label }}" },{{/ each }}];
+        return (
         <Ant.Form.Item {...props}>
-          <Ant.Select
-          {{# if required }}
-            {{ else }}
-            allowClear
-          {{/ if }}
-            {{# if isMany }}
+            <Ant.Select
+              {{# if required }}
+              {{ else }}
+              allowClear
+              {{/ if }}
+              {{# if isMany }}
               mode="multiple"
-            {{/ if }}
-            placeholder={t('{{ title }}')}
-          >
-            {{# each enumValues }}
-              <Ant.Select.Option value="{{ value }}" key="{{ value }}">{{ label }}</Ant.Select.Option>
-            {{/ each }}
-          </Ant.Select>
-        </Ant.Form.Item>
-      ),
+              {{/ if }}
+              placeholder={t("{{ title }}")}
+            >
+              {options.map((option) => (
+                <Ant.Select.Option value={option.value} key={option.value}>
+                  {t(`{{ title }}_enums.${option.label.toLowerCase()}`)
+                    ? t(`{{ title }}_enums.${option.label.toLowerCase()}`)
+                    : option.label}
+                </Ant.Select.Option>
+              ))}
+            </Ant.Select>
+          </Ant.Form.Item>
+      )},
     {{/ if }}
   {{/ if }}
 },
