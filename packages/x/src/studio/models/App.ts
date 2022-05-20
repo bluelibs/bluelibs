@@ -132,6 +132,13 @@ export class App extends BaseModel<App> {
     });
 
     this.collections.forEach((c) => {
+      if (c.only === true) {
+        this.app.only = this.app.only ? [...this.app.only, c.id] : [c.id];
+      }
+      if (c.skip === true) {
+        this.app.skip = this.app.skip ? [...this.app.skip, c.id] : [c.id];
+      }
+
       c.app = this;
       c.clean();
     });
@@ -141,7 +148,7 @@ export class App extends BaseModel<App> {
     //skip and only strategies
     if (this.app.skip?.length) {
       this.collectionsToWrite = this.collectionsToWrite.filter(
-        (c) => !this.skip.some((s) => s === c.id)
+        (c) => !this.app.skip.some((s) => s === c.id)
       );
     }
 
