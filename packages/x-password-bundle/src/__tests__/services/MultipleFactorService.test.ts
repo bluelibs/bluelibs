@@ -10,7 +10,7 @@ import {
   XPasswordService,
   MultipleFactorService,
   X_PASSWORD_SETTINGS,
-} from "../../..";
+} from "../..";
 import { createEcosystem } from "../createEcosystem";
 
 describe("MultipleFactorService.test ", () => {

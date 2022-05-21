@@ -1,6 +1,6 @@
 import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
-import { XPasswordService } from "../../..";
+import { XPasswordService } from "../..";
 import { createEcosystem } from "../createEcosystem";
 import * as superagent from "superagent";
 import { HTTPBundle } from "@bluelibs/http-bundle";

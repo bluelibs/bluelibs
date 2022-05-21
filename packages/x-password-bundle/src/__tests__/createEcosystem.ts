@@ -7,7 +7,7 @@ import { SecurityBundle } from "@bluelibs/security-bundle";
 import { PasswordBundle } from "@bluelibs/password-bundle";
 import { HTTPBundle } from "@bluelibs/http-bundle";
 import { SecurityMongoBundle } from "@bluelibs/security-mongo-bundle";
-import { XPasswordBundle } from "../..";
+import { XPasswordBundle } from "..";
 import { EmailBundle } from "@bluelibs/email-bundle";
 
 export async function createEcosystem(configXpasswordBundle = {}) {
@@ -39,6 +39,3 @@ export async function createEcosystem(configXpasswordBundle = {}) {
     throw err;
   }
 }
-
-//export const kernel = createKernel();
-//export const container = kernel.container;

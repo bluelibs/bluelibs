@@ -51,6 +51,7 @@
     "@types/graphql": "^0.11.3",
     "@types/jest": "^27.0.3",
     "@types/node": "^8.10.66",
+    "@types/passport-strategy": "^0.2.35",
     "@typescript-eslint/eslint-plugin": "2.3.0",
     "@typescript-eslint/parser": "2.3.0",
     "chai": "^4.2.0",
@@ -73,7 +74,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@types/passport-strategy": "^0.2.35",
     "passport": "^0.5.2",
     "passport-mock-strategies": "^1.0.0",
     "superagent": "^7.1.3"

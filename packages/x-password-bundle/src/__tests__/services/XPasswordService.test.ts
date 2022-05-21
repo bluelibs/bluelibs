@@ -10,7 +10,7 @@ import {
   XPasswordBundle,
   XPasswordService,
   X_PASSWORD_SETTINGS,
-} from "../../..";
+} from "../..";
 import { createEcosystem } from "../createEcosystem";
 
 describe("XPasswordService.test ", () => {
