@@ -7,4 +7,4 @@ export { ObjectId, ObjectId as ObjectID } from "@bluelibs/ejson";
 export * from "./defs";
 export * from "./events";
 export * from "./exceptions";
-export { ReducersToGo } from "./reducersToGo";
+export * from "./reducersToGo";

@@ -1,6 +1,5 @@
 import * as MongoDB from "mongodb";
 import { IReducerOption } from "@bluelibs/nova";
-import { Collection } from "../models/Collection";
 
 export default async function createCountReducer(
   instance: any,
@@ -10,7 +9,7 @@ export default async function createCountReducer(
     relation: string;
     filters?: MongoDB.Filter<any>;
   }
-): IReducerOption {
+): Promise<IReducerOption> {
   let { collection, relation, context, filters } = options;
   if (!filters) filters = {};
   const container = context.container;
@@ -19,7 +18,12 @@ export default async function createCountReducer(
   let count, query, relationCollection;
   const collectionlink = collection.links[relation];
   if (!collectionlink)
-    throw "cant find such a relation ${relation} in collection ${collection.collectionName}";
+    throw (
+      "cant find such a relation " +
+      relation +
+      " in collection " +
+      collection.collectionName
+    );
   relationCollection = collectionlink.collection(container);
 
   if (collectionlink.field) {
