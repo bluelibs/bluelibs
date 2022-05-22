@@ -13,7 +13,7 @@ describe("SocialLoginService.test ", () => {
     xPasswordService,
     container,
     app,
-    userId;
+    userId: any;
 
   beforeEach(async () => {
     container = await createEcosystem({
@@ -69,7 +69,11 @@ describe("SocialLoginService.test ", () => {
     await superagent
       .get("http://localhost:5000/auth/mock")
       .end((res, err) => {});
-    userId = await passwordService.findUserIdByUsername(userData.email);
+    userId = await securityService.findUser({
+      "password.username": userData.email,
+      "profile.firstName": userData.firstName,
+      "profile.lastName": userData.lastName,
+    });
     expect(userId).toBeDefined();
   });
 });
