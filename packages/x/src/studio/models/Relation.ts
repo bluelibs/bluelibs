@@ -198,6 +198,7 @@ export class Relation extends BaseModel<Relation> {
       key: this.id,
       label: this.ui ? this.ui.label : this.id,
       description: this.description,
+      enums: undefined,
     };
   }
 
