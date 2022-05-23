@@ -1,5 +1,6 @@
 import { EJSON } from "../ejson";
 import * as EJSONTest from "./custom_model";
+import "./toModel";
 import { assert } from "chai";
 import { ObjectId } from "..";
 import { toModel } from "../toModel";
