@@ -104,7 +104,7 @@ A good tutorial to show-case the full flow [can be found here](https://www.apoll
 The typical process is that from your client you have added the [Apollo Upload Link](https://github.com/jaydenseric/apollo-upload-client). This is by default included in `x-ui` package so you don't have to worry. What it does is that it transforms the HTTP request into a multi-part form to send the files (if there are any)
 
 ```ts
-import { S3UploadService, AppFilesCollection } from "@bluelibs/x-s3-bundle";
+import { UploadService, AppFilesCollection } from "@bluelibs/x-s3-bundle";
 
 const types = `
   type Mutation {
@@ -116,9 +116,9 @@ async function uploadResolver(_, args, ctx) {
   // The file is the GQL Upload Scalar
   const { file } = args;
 
-  const s3UploadService = ctx.container.get(S3UploadService);
+  const uploadService = ctx.container.get(UploadService);
 
-  const appFile = await s3UploadService.upload(file, {
+  const appFile = await uploadService.upload(file, {
     uploadedById: ctx.userId,
   });
 
@@ -128,13 +128,13 @@ async function uploadResolver(_, args, ctx) {
 
 Now, in most cases what interests you is that `downloadable url` so the user can access it. To do this we have the following options.
 
-Through `S3UploadService`:
+Through `UploadService`:
 
 ```ts
-import { S3UploadService } from "@bluelibs/x-s3-bundle";
+import { UploadService } from "@bluelibs/x-s3-bundle";
 
-const s3UploadService = ctx.container.get(S3UploadService);
-s3UploadService.getFileURL(appFile._id); // This will return a fully downloadable path
+const uploadService = ctx.container.get(UploadService);
+uploadService.getFileURL(appFile._id); // This will return a fully downloadable path
 ```
 
 Through [Nova](https://www.bluelibs.com/docs/package-nova):
@@ -153,8 +153,8 @@ const appFile = appFiles.queryOne({
 If you want to upload without `GraphQL`:
 
 ```ts
-const s3UploadService = ctx.container.get(S3UploadService);
-const appFile = s3UploadService.doUpload(filename, mimeType, buffer);
+const uploadService = ctx.container.get(UploadService);
+const appFile = uploadService.doUpload(filename, mimeType, buffer);
 ```
 
 the previous will target the store by default,
@@ -162,7 +162,7 @@ the previous will target the store by default,
 if you want to target the upload to a specifiq store, you can target by the storeId
 
 ```ts
-const appFile = s3UploadService.doUpload(filename, mimeType, buffer, storeId);
+const appFile = uploadService.doUpload(filename, mimeType, buffer, storeId);
 ```
 
 ## Removing Files
@@ -263,8 +263,8 @@ A sample resolver how you would update this:
 async function uploadAvatarResolver(_, args, ctx) {
   // TODO: check if there is a previous avatar and delete it.
 
-  const s3UploadService = ctx.container.get(S3UploadService);
-  const appFile = await s3UploadService.upload(args.file, {
+  const uploadService = ctx.container.get(UploadService);
+  const appFile = await uploadService.upload(args.file, {
     uploadedById: ctx.userId,
   });
 
@@ -295,7 +295,7 @@ tasksCollection.insertOne({
 });
 
 // Now when you do  the upload and you have the file
-const appFile = await s3UploadService.upload(args.file, {
+const appFile = await uploadService.upload(args.file, {
   uploadedById: ctx.userId,
 });
 
@@ -344,7 +344,7 @@ kernel.addBundle(
 This can be used to either have multiple uploading buckets, either override and customise the logic.
 
 ```ts
-class ImageS3UploadService extends S3UploadService {
+class ImageUploadService extends UploadService {
   constructor() {
     super(NEW_AWS_CONFIG);
   }
@@ -396,7 +396,7 @@ new XS3Bundle({
 Note: context is passed by extension of the app file:
 
 ```ts
-const appFile = await s3UploadService.upload(file, {
+const appFile = await uploadService.upload(file, {
   uploadedById: ctx.userId,
   context: ["avatar"],
 });
