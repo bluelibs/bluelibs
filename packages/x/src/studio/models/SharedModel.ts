@@ -68,7 +68,7 @@ export class SharedModel extends BaseModel<SharedModel> {
     } else {
       this.fields.forEach((f) => {
         f.app = this.app;
-        f.sharedCollection = this;
+        f.sharedModel = this;
         f.clean();
       });
     }
