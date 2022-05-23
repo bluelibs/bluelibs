@@ -78,6 +78,13 @@ const application = app({
 generateProject(application);
 ```
 
+:::note
+Sometimes as your app grows you might want to generate things only for specific set of collections, or you're playing around with one collection and you don't want it to affect other files
+You can use booleans `skip:true`, `only:false` properties in collections objects, or introduce array of strings `skip=['Users']`,`only=["Posts"]` of collections ids in the app object,
+Or you can generate project with command :`npm run blueprint:generate skip=Users only=Posts`
+
+:::
+
 By default all collections and fields are `ui` aware and exposed in the GraphQL API. To disable this behavior for collections or fields:
 
 ```ts
