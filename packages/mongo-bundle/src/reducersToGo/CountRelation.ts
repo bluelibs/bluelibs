@@ -1,18 +1,19 @@
 import * as MongoDB from "mongodb";
 import { IReducerOption } from "@bluelibs/nova";
+import { Collection } from "../models/Collection";
+import { Constructor } from "@bluelibs/core";
 
 export default async function createCountReducer(
   instance: any,
   options: {
-    context: any;
+    container: any;
     collection: any;
     relation: string;
     filters?: MongoDB.Filter<any>;
   }
 ): Promise<IReducerOption> {
-  let { collection, relation, context, filters } = options;
+  let { collection, relation, container, filters } = options;
   if (!filters) filters = {};
-  const container = context.container;
 
   //method
   let count, query, relationCollection;
