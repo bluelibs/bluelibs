@@ -291,10 +291,15 @@ type User {
   // The second argument refers to the argument's name that you want to transform
   // If you maintain the pattern and name all of them "input", the second argument is optional.
   X.ToModel(User, "input"),
+
+  // Ignores default values if they aren't present in the input
+  X.ToModel(User, "input", { partial: true }),
   // Input now becomes a model instance of `User` class.
 
   // Throws exception of `ValidationError` default field is input either way.
   X.Validate({ field: "input" })
+  // Only performs validation on fields that exist in the input, commonly used for when you have required default values stored in the model
+  X.Validate({ field: "input", partial: true  })
   async (_, args, ctx) => {
     const user = args.input; // user instanceof User === true
   }
@@ -992,14 +997,15 @@ Inside your resolver, use the cache Executor and feed it the chain of functions 
 
 You can also use unique caching configuration for every resolver method by pasing object of options, the options fields are:
 
-| field                    | type     | default     | description                                                                                                        |
-| ------------------------ | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
-| ttl                      | number   | 30          | expiration time of cached Data in seconds                                                                          |
-| refresh                  | boolean  | false       | if true :reset ttl count of a cached data, every time this data is consumed from the cache                         |
-| contextBoundness         | boolean  | true        | if true: takes into account other fields in order to personalize cache usage for every user/role..                 |
-| contextBoundnessFields   | string[] | ["userId"]  | if contextBoundness is true: the fields we want to build on the user boundness. those fields expected to be in ctx |
-| expirationBoundness      | boolean  | true        | if true: takes into account the expiration time of the data                                                        |
-| expirationBoundnessField | string   | "expiredAt" | if expirationBoundness is true: the field of the expiration date or duration in seconds, Date or number            |
+| field | type | default | description |
+| ----- | ---- | ------- | ----------- |
+
+| ttl | number | 30 | expiration time of cached Data in seconds |
+| refresh | boolean | false | if true :reset ttl count of a cached data, every time this data is consumed from the cache |
+| contextBoundness | boolean | true | if true: takes into account other fields in order to personalize cache usage for every user/role.. |
+| contextBoundnessFields | string[] | ["userId"] | if contextBoundness is true: the fields we want to build on the user boundness. those fields expected to be in ctx |
+| expirationBoundness | boolean | true | if true: takes into account the expiration time of the data |
+| expirationBoundnessField | string | "expiredAt" | if expirationBoundness is true: the field of the expiration date or duration in seconds, Date or number |
 
 ```ts
 {

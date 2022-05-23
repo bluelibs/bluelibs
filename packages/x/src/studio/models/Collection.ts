@@ -8,6 +8,7 @@ import {
   UIModeType,
   UICollectionConfigType,
   Resolvable,
+  CrudGenerator,
 } from "../defs";
 
 export type BehaviorsConfig = {
@@ -78,6 +79,21 @@ export class Collection extends BaseModel<Collection> {
   };
 
   /**
+   * Whether this collection will have crud queries and mutations, this crud will overforce the ui crud
+   */
+  crud: CrudGenerator = {
+    findOne: true,
+    find: true,
+    delete: true,
+    count: true,
+    insertOne: true,
+    updateOne: true,
+    deleteOne: true,
+    subscription: true,
+    subscriptionCount: true,
+  };
+
+  /**
    * Whether this collection is something users can see and we expose it as a Type
    */
   enableGraphQL:
@@ -130,6 +146,8 @@ export class Collection extends BaseModel<Collection> {
       f.app = this.app;
       f.clean();
     });
+    //override crud booleans on ui booleans
+    this.uniteCrudGenerators();
 
     this.cleanDuplicateFields();
     this.enableGraphQLCleaning();
@@ -243,6 +261,44 @@ export class Collection extends BaseModel<Collection> {
       return this.enableGraphQL;
     } else {
       return this.enableGraphQL[type];
+    }
+  }
+
+  //ovveride the crud ui to match the graphql crud
+  uniteCrudGenerators() {
+    if (!this.crud) {
+      this.ui = false;
+    }
+
+    if (this.ui && this.crud) {
+      const defaultCrud = {
+        findOne: true,
+        find: true,
+        delete: true,
+        count: true,
+        insertOne: true,
+        updateOne: true,
+        deleteOne: true,
+        subscription: true,
+        subscriptionCount: true,
+      };
+      //to work just on input crud variables that user enetered
+      this.crud = { ...defaultCrud, ...this.crud };
+      if (!this.crud.findOne) {
+        this.ui.view = false;
+      }
+      if (!this.crud.find || !this.crud.count) {
+        this.ui.list = false;
+      }
+      if (!this.crud.delete) {
+        this.ui.delete = false;
+      }
+      if (!this.crud.insertOne) {
+        this.ui.create = false;
+      }
+      if (!this.crud.updateOne) {
+        this.ui.edit = false;
+      }
     }
   }
 }
