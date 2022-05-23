@@ -8,7 +8,7 @@ export interface IXUII18NBundleConfig {
   polyglots: Array<
     Polyglot.PolyglotOptions & {
       locale: string;
-      domain?: "string";
+      domain?: string;
       http?: boolean;
     }
   >;

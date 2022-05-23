@@ -24,10 +24,3 @@ export interface IRouteGenerationProps<T = any, Q = any> {
 export interface IRouteParams {
   [key: string]: string | number;
 }
-
-export type I18nRoutingConfig = {
-  defaultLocale: string;
-  polyglots: Array<
-    Polyglot.PolyglotOptions & { locale: string; domain?: string }
-  >;
-};

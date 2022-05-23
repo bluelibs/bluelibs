@@ -1,10 +1,9 @@
+import { IRoute, IRouteGenerationProps, IRouteParams } from "../defs";
+import { ContainerInstance, Inject, Service } from "@bluelibs/core";
 import {
-  I18nRoutingConfig,
-  IRoute,
-  IRouteGenerationProps,
-  IRouteParams,
-} from "../defs";
-import { Service } from "@bluelibs/core";
+  XUII18NBundle,
+  IXUII18NBundleConfig,
+} from "@bluelibs/x-ui-i18n-bundle";
 import * as queryString from "query-string";
 
 export type AddRoutingArguments<T> = {
@@ -16,26 +15,28 @@ export abstract class XCoreRouter<
   RT extends IRoute,
   RP extends IRouteParams = IRouteParams
 > {
+  @Inject(() => ContainerInstance)
+  protected container: ContainerInstance;
   store: RT[] = [];
   routePathPrefix: string = "";
 
-  i18nConfig: I18nRoutingConfig;
+  i18nConfig: IXUII18NBundleConfig;
   /**
    * Add routes in the form of { [name]: config }
    * @param routes
    */
   add(
-    routes: AddRoutingArguments<RT>,
+    routes: AddRoutingArguments<RT> /*,
     i18nConfig: I18nRoutingConfig = {
       defaultLocale: "en",
       polyglots: [],
-    }
+    }*/
   ) {
-    this.i18nConfig = i18nConfig;
-    if (i18nConfig?.polyglots.length) {
+    this.i18nConfig = this.container.get(XUII18NBundle)?.getConfig();
+    if (this.i18nConfig?.polyglots.length) {
       this.routePathPrefix = `/:locale(${[
-        ...i18nConfig?.polyglots.map((x) => x.locale),
-        i18nConfig.defaultLocale,
+        ...this.i18nConfig?.polyglots.map((x) => x.locale),
+        this.i18nConfig.defaultLocale,
       ].join("|")})?`;
     }
 
