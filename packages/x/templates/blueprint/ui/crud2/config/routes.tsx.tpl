@@ -1,6 +1,7 @@
 /** @overridable */
 import { IRoute } from "@bluelibs/x-ui";
 import * as React from "react";
+{{# if uiDynamicLoading }}
 {{# if (hasFeature "list") }}
 const {{ generateComponentName "list" }} = React.lazy(() => import("../components/List/{{ collectionName }}List"));
 {{/ if }}
@@ -13,7 +14,20 @@ const {{ generateComponentName "edit" }} = React.lazy(() => import("../component
 {{# if (hasFeature "view") }}
 const {{ generateComponentName "view" }} = React.lazy(() => import("../components/View/{{ collectionName }}View"));
 {{/ if }}
-
+{{ else }}
+{{# if (hasFeature "list") }}
+import { {{ generateComponentName "list" }} } from "../components/List/{{ collectionName }}List";
+{{/ if }}
+{{# if (hasFeature "create") }}
+import { {{ generateComponentName "create" }} } from "../components/Create/{{ collectionName }}Create";
+{{/ if }}
+{{# if (hasFeature "edit") }}
+import { {{ generateComponentName "edit" }} } from "../components/Edit/{{ collectionName }}Edit";
+{{/ if }}
+{{# if (hasFeature "view") }}
+import { {{ generateComponentName "view" }} } from "../components/View/{{ collectionName }}View";
+{{/ if }}
+{{/ if }}
 import { {{ icon }} } from "@ant-design/icons";
 
 {{#*inline "nullComponent"}}

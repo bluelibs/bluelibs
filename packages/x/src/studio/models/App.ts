@@ -112,6 +112,10 @@ export class App extends BaseModel<App> {
   id: string;
   collections: Collection[] = [];
   sharedModels: Array<SharedModel> = [];
+  /**
+   * Whether the default routing of collections in ui-admin will be dynamic loaded
+   */
+  uiDynamicLoading: boolean = false;
 
   clean() {
     this.app = this;
@@ -128,6 +132,8 @@ export class App extends BaseModel<App> {
     });
 
     this.collections.forEach((c) => {
+      if (c.uiDynamicLoading === undefined)
+        c.uiDynamicLoading = this.uiDynamicLoading;
       c.app = this;
       c.clean();
     });

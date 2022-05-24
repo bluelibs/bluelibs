@@ -111,6 +111,11 @@ export class Collection extends BaseModel<Collection> {
     count: 0,
   };
 
+  /**
+   * Whether the routing of this collection in ui-admin will be dynamic loaded
+   */
+  uiDynamicLoading?: boolean;
+
   clean() {
     // this.fields = this.instanceify(this.fields, Field);
     // this.relations = this.instanceify(this.relations, Relation);

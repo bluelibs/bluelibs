@@ -56,6 +56,7 @@ export class UICRUDModel {
         [key in CRUDFeatureType]?: boolean;
       } = true;
   typesToImport: { create?: string; edit?: string } = {};
+  uiDynamicLoading?: boolean;
 
   hasFeature(feature: CRUDFeatureType) {
     if (this.features === true) {
