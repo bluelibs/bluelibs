@@ -83,13 +83,13 @@ export interface ISubscriptionHandler<T> {
 }
 
 export type InsertExecutorOptions = {
-  deepSync?: boolean | string | string[];
+  deepSync?: boolean;
   field?: string;
   extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>;
 };
 
 export type UpdateExecutorOptions = {
-  deepSync?: boolean | string | string[];
+  deepSync?: boolean;
   field?: string;
 };
 

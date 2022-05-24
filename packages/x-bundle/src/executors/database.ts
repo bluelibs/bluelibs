@@ -168,20 +168,6 @@ export function ToDocumentInsert<T>(
       await options.extend(document, ctx);
     }
     if (options?.deepSync) {
-      if (typeof options.deepSync !== "boolean") {
-        const deepSyncFields = {};
-        (Array.isArray(options.deepSync)
-          ? options.deepSync
-          : [options.deepSync]
-        ).forEach((key) => {
-          deepSyncFields[key] = document[key];
-        });
-
-        document = {
-          ...toModel(collectionClass.model, document),
-          ...deepSyncFields,
-        };
-      }
       await collection.deepSync(document, { context: ctx });
       return document._id;
     } else {
@@ -220,21 +206,6 @@ export function ToDocumentUpdateByID<T>(
     const _id = await idArgumentResolver(args);
     if (options?.deepSync) {
       let document = args[options.field || "document"];
-      if (typeof options.deepSync !== "boolean") {
-        const deepSyncFields = {};
-        (Array.isArray(options.deepSync)
-          ? options.deepSync
-          : [options.deepSync]
-        ).forEach((key) => {
-          deepSyncFields[key] = document[key];
-        });
-
-        document = {
-          _id,
-          ...toModel(collectionClass.model, document),
-          ...deepSyncFields,
-        };
-      }
       await collection.deepSync(document, { context: ctx });
       return document._id;
     } else {
