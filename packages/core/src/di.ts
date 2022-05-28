@@ -44,42 +44,49 @@ export function Service<T = unknown>(
 
 export class ContainerInstance extends BaseContainerInstance {
   get<T>(id: ServiceIdentifier<T>): T {
-    // @ts-ignore
-    if (!this.has(id)) {
-      if (id[SERVICE_META_STORAGE]) {
-        // It's clearly a constructor
-        this.set({
-          ...id[SERVICE_META_STORAGE],
-          id,
-          type: id,
-        });
-
-        return super.get(id);
-      }
-    }
-
     try {
-      return super.get(id);
-    } catch (e) {
-      // The reason we do this is to allow services that don't specify @Service()
-      if (
-        e instanceof ServiceNotFoundError ||
-        e.toString() === "ServiceNotFoundError"
-      ) {
-        if (typeof id === "function") {
-          // console.warn(
-          //   `You have tried to get from the container a class (${id?.name}) which doesn't have @Service() specified. Please add it to remove this warning.`
-          // );
+      // @ts-ignore
+      if (!this.has(id)) {
+        if (id[SERVICE_META_STORAGE]) {
+          // It's clearly a constructor
           this.set({
-            id: id as Function,
-            type: id as any,
+            ...id[SERVICE_META_STORAGE],
+            id,
+            type: id,
           });
+
           return super.get(id);
         }
       }
-      console.error(
-        `ServiceNotFoundError for ID: ${id instanceof Token ? id.name : id}`
-      );
+
+      try {
+        return super.get(id);
+      } catch (e) {
+        // The reason we do this is to allow services that don't specify @Service()
+        if (
+          e instanceof ServiceNotFoundError ||
+          e.toString() === "ServiceNotFoundError"
+        ) {
+          if (typeof id === "function") {
+            // console.warn(
+            //   `You have tried to get from the container a class (${id?.name}) which doesn't have @Service() specified. Please add it to remove this warning.`
+            // );
+            this.set({
+              id: id as Function,
+              type: id as any,
+            });
+            return super.get(id);
+          }
+        }
+
+        throw e;
+      }
+    } catch (e) {
+      const key = (id as any).name ? (id as any).name : id;
+      e.ServiceNotFoundErrorChain = e.ServiceNotFoundErrorChain
+        ? e.ServiceNotFoundErrorChain + " -> " + key
+        : key;
+
       throw e;
     }
   }
