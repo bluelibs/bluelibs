@@ -1,6 +1,6 @@
 import "@bluelibs/x-ui-router";
 import * as React from "react";
-import { IComponents, IRoute } from "@bluelibs/x-ui";
+import { IComponents, IRoute, QueryBodyType } from "@bluelibs/x-ui";
 import "./react/components/types";
 
 declare module "@bluelibs/x-ui-router" {
@@ -35,5 +35,46 @@ export interface IMenuItemConfig {
   subitems?: IMenuItemConfig[];
   route?: IRoute;
 }
-
+export type OwnField =
+  | string
+  | [string, string]
+  | [string, string][]
+  | {
+      $or?: ([string, string] | string)[];
+      $and?: ([string, string] | string)[];
+    };
 export interface IRouteMenuItemConfig extends IMenuItemConfig {}
+export type UICrudSecurityByRole<T = null> = {
+  find?:
+    | boolean
+    | {
+        intersect?: QueryBodyType<T>;
+      };
+  filters?:
+    | boolean
+    | {
+        allowFilterOn?: Array<keyof T>;
+        denyFilterOn?: Array<keyof T>;
+      };
+  edit?:
+    | boolean
+    | {
+        own?: OwnField;
+        allow?: Array<keyof T>;
+        deny?: Array<keyof T>;
+      };
+  create?:
+    | boolean
+    | {
+        allow?: Array<keyof T>;
+        deny?: Array<keyof T>;
+      };
+  delete?: boolean | { own?: OwnField };
+};
+
+export type UiCrudSecurity<T = null> = {
+  roles: {
+    [k: string]: UICrudSecurityByRole<T>;
+  };
+  defaults: UICrudSecurityByRole<T>;
+};

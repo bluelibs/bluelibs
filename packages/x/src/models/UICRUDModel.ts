@@ -1,6 +1,12 @@
 import * as _ from "lodash";
 import * as Studio from "../studio";
-import { Field, SharedModel, UIModeType } from "../studio";
+import {
+  Field,
+  SecuritySchematic,
+  SharedModel,
+  UiCrudSecurity,
+  UIModeType,
+} from "../studio";
 import { XBridge } from "../studio/bridge/XBridge";
 import { FieldValueKind } from "../studio/models/FieldValueKind";
 import { Relation } from "../studio/models/Relation";
@@ -56,6 +62,8 @@ export class UICRUDModel {
         [key in CRUDFeatureType]?: boolean;
       } = true;
   typesToImport: { create?: string; edit?: string } = {};
+  uiCrudSheild?: UiCrudSecurity;
+  uiCrudSheildJSON?: string;
 
   hasFeature(feature: CRUDFeatureType) {
     if (this.features === true) {
@@ -81,6 +89,71 @@ export class UICRUDModel {
     );
     if (types && types.length > 0) return types.join(", ");
     return null;
+  }
+
+  generateUiCrudSheild(securityConfig: SecuritySchematic): void {
+    function convertRoleSecurityToUI(roleConfig) {
+      if (typeof roleConfig === "boolean") return roleConfig;
+      if (!roleConfig) return false;
+      //find
+      const config: any = {};
+      if (typeof roleConfig.find === "boolean") config.find = roleConfig.find;
+      if (roleConfig.find?.intersect)
+        config.find = { intersect: roleConfig.find?.intersect };
+      else config.find = true;
+      //filters
+      config.filters = {};
+      if (roleConfig?.find?.allowFilterOn)
+        config.filters.allowFilterOn = roleConfig?.find?.allowFilterOn;
+      if (roleConfig?.find?.denyFilterOn)
+        config.filters.allowFilterOn = roleConfig?.find?.denyFilterOn;
+      if (config.filters === {}) config.filters = true;
+      //edit
+      config.edit = {};
+      if (typeof roleConfig.updateOne === "boolean")
+        config.edit = roleConfig.updateOne;
+      else {
+        if (roleConfig.updateOne.own)
+          config.edit.own = roleConfig.updateOne.own;
+        if (roleConfig.updateOne.allow)
+          config.edit.allow = roleConfig.updateOne.allow;
+        if (roleConfig.updateOne.deny)
+          config.edit.deny = roleConfig.updateOne.deny;
+        if (config.edit === {}) config.edit = true;
+      }
+      //create
+      config.create = {};
+      if (typeof roleConfig.insertOne === "boolean")
+        config.create = roleConfig.insertOne;
+      else {
+        if (roleConfig.insertOne.allow)
+          config.create.allow = roleConfig.insertOne.allow;
+        if (roleConfig.insertOne.deny)
+          config.create.deny = roleConfig.insertOne.deny;
+        if (config.create === {}) config.create = true;
+      }
+      //delete
+      config.delete = {};
+      if (typeof roleConfig.deleteOne === "boolean")
+        config.delete = roleConfig.deleteOne;
+      else {
+        if (roleConfig.deleteOne.own)
+          config.delete.own = roleConfig.deleteOne.own;
+
+        if (config.delete === {}) config.delete = true;
+      }
+      return config;
+    }
+    this.uiCrudSheild = {
+      roles: Object.keys(securityConfig.roles).reduce((prev, curr) => {
+        return {
+          ...prev,
+          [curr]: convertRoleSecurityToUI(securityConfig.roles[curr]),
+        };
+      }, {}),
+      defaults: convertRoleSecurityToUI(securityConfig.defaults),
+    };
+    this.uiCrudSheildJSON = JSON.stringify(this.uiCrudSheild);
   }
 
   get sheetName() {

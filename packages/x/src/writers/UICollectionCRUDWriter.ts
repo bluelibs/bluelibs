@@ -120,6 +120,14 @@ export class UICollectionCRUDWriter extends BlueprintWriter {
           );
           copy(`view.config.tsx.tpl`, `${model.entityName}Viewer.tsx`, true);
         }
+        if (model.uiCrudSheild) {
+          copy(`crud.sheild.tsx.tpl`, `${model.entityName}.crud.sheild.tsx`);
+          copy(
+            `crud.sheild.tsx.tpl`,
+            `${model.entityName}.crud.sheild.tsx`,
+            true
+          );
+        }
       }
     });
 

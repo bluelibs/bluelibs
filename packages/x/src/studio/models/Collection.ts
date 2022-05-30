@@ -275,31 +275,38 @@ export class Collection extends BaseModel<Collection> {
 
   protected prepareSecurityDefaultsConfig() {
     if (!this.security) return;
+    if (this.security.uiAdminAdaptation === undefined)
+      this.security.uiAdminAdaptation = true;
     const defaultShematics: SecuritySchematicRole = {
       find: true,
       insertOne: true,
       updateOne: true,
       deleteOne: true,
     };
-    this.security.defaults = {
-      ...defaultShematics,
-      ...this.security?.defaults,
-    };
+    this.security.defaults =
+      typeof this.security.defaults === "boolean"
+        ? this.security.defaults
+        : {
+            ...defaultShematics,
+            ...this.security?.defaults,
+          };
     if (!this.security.roles) this.security.roles = {};
-    ["anonymous"].forEach(
-      (role) =>
-        (this.security[role] = {
-          ...this.security.defaults,
-          ...this.security[role],
-        })
-    );
-    Object.keys(this.security.roles).map(
-      (role) =>
-        (this.security.roles[role] = {
+
+    if (!this.security.anonymous) this.security.anonymous = false;
+
+    Object.keys(this.security.roles).forEach((role) => {
+      if (this.security.roles[role] === undefined)
+        this.security.roles[role] = this.security.defaults;
+      else if (
+        typeof this.security.roles[role] !== "boolean" &&
+        typeof this.security.defaults !== "boolean"
+      ) {
+        this.security.roles[role] = {
           ...this.security.defaults,
           ...this.security.roles[role],
-        })
-    );
+        };
+      }
+    });
   }
 
   //ovveride the crud ui to match the graphql crud

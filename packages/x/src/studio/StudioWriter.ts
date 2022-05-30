@@ -347,6 +347,9 @@ export class StudioWriter {
       model.bundleName = "UIAppBundle";
       model.studioCollection = collection;
       model.features = collection.ui;
+      if (collection.security && collection.security.uiAdminAdaptation) {
+        model.generateUiCrudSheild(collection.security);
+      }
 
       writer.write(model, session);
       this.success(`(UI) Created CRUD interfaces for: "${collection.id}"`);

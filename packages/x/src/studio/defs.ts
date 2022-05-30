@@ -133,7 +133,14 @@ export type GenerateProjectOptionsType = {
   writers: Partial<StudioWritersType>;
 };
 
-type OwnField = string | [string, string];
+export type OwnField =
+  | string
+  | [string, string]
+  | [string, string][]
+  | {
+      $or?: ([string, string] | string)[];
+      $and?: ([string, string] | string)[];
+    };
 
 type FieldSelection<T> = Array<T extends null ? string : keyof T>;
 
@@ -146,6 +153,8 @@ export type SecuritySchematic<T = null> = {
    * Options that will be stored as defaults for all the roles.
    */
   defaults?: boolean | SecuritySchematicRole<T>;
+  uiAdminAdaptation?: boolean;
+  throwWhenSurpassFields?: boolean;
 };
 
 export type SecuritySchematicRole<T = null> = {
@@ -153,10 +162,6 @@ export type SecuritySchematicRole<T = null> = {
   insertOne?: boolean | SecuritySchematicInsert<T>;
   updateOne?: boolean | SecuritySchematicUpdate<T>;
   deleteOne?: boolean | SecuritySchematicDelete<T>;
-  //parent ocllection, exmaple : all collection belong to a hospital, and each user have to see once hospital data
-  affiliation?: string[] | string;
-  //relation ownership and other
-  relations?: string[] | string;
 };
 
 export type SecuritySchematicFind<T = null> = {
@@ -166,6 +171,8 @@ export type SecuritySchematicFind<T = null> = {
   maxLimit?: number;
   maxDepth?: number;
   options?: IQueryOptions<T>;
+  allowFilterOn?: FieldSelection<T>;
+  denyFilterOn?: FieldSelection<T>;
 };
 
 export type SecuritySchematicUpdate<T = null> = {
@@ -174,10 +181,11 @@ export type SecuritySchematicUpdate<T = null> = {
   intersect?: QueryBodyType<T>;
   allow?: FieldSelection<T>;
   deny?: FieldSelection<T>;
+  allowFilterOn?: FieldSelection<T>;
+  denyFilterOn?: FieldSelection<T>;
 };
 
 export type SecuritySchematicInsert<T = null> = {
-  own?: OwnField;
   intersect?: QueryBodyType<T>;
   allow?: FieldSelection<T>;
   deny?: FieldSelection<T>;
@@ -186,4 +194,41 @@ export type SecuritySchematicInsert<T = null> = {
 export type SecuritySchematicDelete<T = null> = {
   own?: OwnField;
   filters?: Filter<T>;
+  allowFilterOn?: FieldSelection<T>;
+  denyFilterOn?: FieldSelection<T>;
+};
+
+export type UICrudSecurityByRole<T = null> = {
+  find?:
+    | boolean
+    | {
+        intersect?: QueryBodyType<T>;
+      };
+  filters?:
+    | boolean
+    | {
+        allowFilterOn?: Array<keyof T>;
+        denyFilterOn?: Array<keyof T>;
+      };
+  edit?:
+    | boolean
+    | {
+        own?: OwnField;
+        allow?: Array<keyof T>;
+        deny?: Array<keyof T>;
+      };
+  create?:
+    | boolean
+    | {
+        allow?: Array<keyof T>;
+        deny?: Array<keyof T>;
+      };
+  delete?: boolean | { own?: OwnField };
+};
+
+export type UiCrudSecurity<T = null> = {
+  roles: {
+    [k: string]: UICrudSecurityByRole<T>;
+  };
+  defaults: UICrudSecurityByRole<T>;
 };
