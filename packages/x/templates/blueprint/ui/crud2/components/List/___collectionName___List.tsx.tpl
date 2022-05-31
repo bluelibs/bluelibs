@@ -11,6 +11,13 @@ import * as Ant from "antd";
 import { Routes } from "@bundles/{{ bundleName }}";
 import { features } from "../../config/features";
 import { {{ generateComponentName "listFilters "}} } from "./{{ generateComponentName "listFilters" }}";
+{{# if uiCrudSheild }}
+import { useGuardian } from "@bluelibs/x-ui-guardian-bundle";
+import { {{ entityName }}SecurityConfig } from "../config/{{ entityName }}.crud.sheild";
+import { sheildCrudOperation } from "@bluelibs/x-ui-admin";
+
+let loggedInUser;
+{{/ if }}
 
 export function {{ generateComponentName "list" }}() {
   const UIComponents = useUIComponents();
@@ -18,6 +25,9 @@ export function {{ generateComponentName "list" }}() {
   const t = useTranslate();
   const [api, Provider] = newSmart({{ collectionName }}AntTableSmart);
   const [filtersOpened, setFiltersOpened] = useState(false);
+  {{# if uiCrudSheild }}
+  loggedInUser = useGuardian()?.state?.user;
+  {{/ if }}
   const onFiltersUpdate = useMemo(() => {
     return (filters) => {
       api.setFlexibleFilters(filters);
@@ -29,7 +39,7 @@ export function {{ generateComponentName "list" }}() {
       <Ant.PageHeader
         title={t('management.{{ generateI18NName }}.list.header')}
         extra={[
-          features.create ?
+          features.create {{# if uiCrudSheild }} && sheildCrudOperation(loggedInUser, "create", {}, {{ entityName }}SecurityConfig) {{/ if }}?
             <Ant.Button key="1" onClick={() => router.go(Routes.{{ generateRouteName "create" }})} 
               icon={<PlusOutlined />}>
               {t('management.{{ generateI18NName }}.list.create_btn')}

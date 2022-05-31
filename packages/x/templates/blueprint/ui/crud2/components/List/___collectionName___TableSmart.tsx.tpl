@@ -14,10 +14,19 @@ import { Service } from "@bluelibs/core";
 import * as Ant from "antd";
 import { features } from "../../config/features";
 import { {{ entityName }}List } from "../../config/{{ entityName }}List";
+{{# if uiCrudSheild }}
+import { useGuardian } from "@bluelibs/x-ui-guardian-bundle";
+import { {{ entityName }}SecurityConfig } from "../config/{{ entityName }}.crud.sheild";
+import { sheildCrudOperation } from "@bluelibs/x-ui-admin";
+
+let loggedInUser;
+{{/ if }}
 
 export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityName }}> {
   collectionClass = {{ collectionClass }};
-
+  {{# if uiCrudSheild }}
+  loggedInUser = useGuardian()?.state?.user;
+  {{/ if }}
   getBody(): QueryBodyType<{{ entityName }}> {
     return {{ entityName }}List.getRequestBody();
   }
@@ -42,7 +51,7 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
         return this.generateActions(model, {
           label: this.i18n.t('generics.list_actions'),
           icon: <DownOutlined />,
-          items: this.getActionItems(),
+          items: this.getActionItems({{# if uiCrudSheild }}model{{/ if }}),
         });
       },
     };
@@ -52,7 +61,7 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
     return {{ entityName }}List.getSortMap();
   }
 
-  getActionItems() {
+  getActionItems({{# if uiCrudSheild }}model{{/ if }}) {
     const actions = [];
 
     if (features.view) {
@@ -67,7 +76,7 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
       })
     }
     
-    if (features.edit) {
+    if (features.edit{{# if uiCrudSheild }} && sheildCrudOperation(loggedInUser, "edit", model, {{ entityName }}SecurityConfig) {{/ if }}) {
       actions.push({
         label: this.i18n.t('generics.edit'),
         icon: <EditOutlined />,
@@ -79,7 +88,7 @@ export class {{ collectionName }}AntTableSmart extends AntTableSmart<{{ entityNa
       })
     }
 
-    if (features.delete) {
+    if (features.delete{{# if uiCrudSheild }} && sheildCrudOperation(loggedInUser, "delete", model, {{ entityName }}SecurityConfig) {{/ if }}) {
       actions.push({
         label: this.i18n.t('generics.delete'),
         icon: <DeleteOutlined />,

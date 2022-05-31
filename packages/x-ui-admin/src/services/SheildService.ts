@@ -16,10 +16,10 @@ function safeIntersect(config, source): QueryBodyType {
   return config;
 }
 
-export function getSheildedRequestBody(
+export function getSheildedRequestBody<T = any>(
   user,
   requestBody: QueryBodyType,
-  config: UiCrudSecurity
+  config: UiCrudSecurity<T>
 ): QueryBodyType {
   let roleConfig: any = getRoleConfig(user, "find", config);
   if (!roleConfig) {
@@ -31,29 +31,28 @@ export function getSheildedRequestBody(
   return requestBody;
 }
 
-export function sheildField(
+export function sheildField<T = any>(
   user,
   type: "find" | "create" | "edit" | "filters",
   fieldId: string,
-  crudSecurityConfig: UiCrudSecurity
+  crudSecurityConfig: UiCrudSecurity<T>
 ): boolean {
   let roleConfig: any = getRoleConfig(user, type, crudSecurityConfig);
   switch (type) {
     case "find":
       if (typeof roleConfig === "boolean" && roleConfig === true) return true;
       if (!roleConfig) return false;
-      let fieldIntersect = fieldId
-        .split(".")
-        .reverse()
-        .reduce((prev, curr, index) => {
-          if (index === 0) return (prev[curr] = 1);
-          return { curr: prev };
-        }, {});
-      if (
-        roleConfig.intersect &&
-        safeIntersect(fieldIntersect, roleConfig.intersect) === fieldIntersect
-      )
-        return true;
+      if (roleConfig.intersect) {
+        let allow = true;
+        let obj = roleConfig.intersect;
+        fieldId.split(".").map((key) => {
+          if (obj[key]) {
+            obj = obj[key];
+          } else allow = false;
+        });
+        return allow;
+      }
+      return true;
 
       return false;
     case "create":
@@ -82,11 +81,11 @@ export function sheildField(
   }
 }
 
-export function sheildCrudOperation(
+export function sheildCrudOperation<T = any>(
   user,
   type: "find" | "delete" | "create" | "edit" | "filters",
   item: any,
-  crudSecurityConfig: UiCrudSecurity
+  crudSecurityConfig: UiCrudSecurity<T>
 ): boolean {
   let roleConfig: any = getRoleConfig(user, type, crudSecurityConfig);
   switch (type) {
@@ -116,17 +115,27 @@ export function sheildCrudOperation(
   }
 }
 
-function getRoleConfig(
+function getRoleConfig<T = any>(
   user,
   opearationKey: "find" | "delete" | "create" | "edit" | "filters",
-  config: UiCrudSecurity
+  config: UiCrudSecurity<T>
 ): UICrudSecurityByRole {
   let roleConfig;
   const choosedRole = Object.keys(config?.roles).find(
-    (r) => user.roles.some((ur) => ur === r) && config?.roles[opearationKey]
+    (r) =>
+      user?.roles?.some((ur) => ur === r) &&
+      config?.roles?.[opearationKey] !== undefined
   );
-  if (choosedRole) roleConfig = config.roles[choosedRole][opearationKey];
-  else roleConfig = config.defaults[opearationKey];
+  if (choosedRole)
+    roleConfig =
+      typeof config.roles[choosedRole] === "boolean"
+        ? config.roles[choosedRole]
+        : config.roles[choosedRole][opearationKey];
+  else
+    roleConfig =
+      typeof config.defaults === "boolean"
+        ? config.defaults
+        : config.defaults[opearationKey];
   return roleConfig;
 }
 

@@ -6,12 +6,22 @@ import { ObjectId } from "@bluelibs/ejson";
 import { {{ entityName }}, {{ collectionClass }} } from "@bundles/{{ bundleName }}/collections";
 import { {{ entityName }}Viewer } from "../../config/{{ entityName }}Viewer";
 import { features } from "../../config/features";
+{{# if uiCrudSheild }}
+import { useGuardian } from "@bluelibs/x-ui-guardian-bundle";
+import { {{ entityName }}SecurityConfig } from "../config/{{ entityName }}.crud.sheild";
+import { sheildCrudOperation } from "@bluelibs/x-ui-admin";
 
+let loggedInUser;
+{{/ if }}
 export function {{ generateComponentName "view" }}(props: { id: string }) {
   const UIComponents = useUIComponents();
   const router = useRouter();
   const t = useTranslate();
   const collection = use({{ collectionClass }});
+  {{# if uiCrudSheild }}
+  loggedInUser = useGuardian()?.state?.user;
+  {{/ if }}
+
 
   // If you want to benefit of live data features use useLiveData()
   const {data: document, isLoading, error} = useDataOne({{ collectionClass }}, new ObjectId(props.id), {{ entityName }}Viewer.getRequestBody());
@@ -63,7 +73,7 @@ export function getHeaderActions(collection: {{ collectionClass }}, router: XRou
   const actions = [];
   const t = useTranslate();
 
-  if (features.edit) {
+  if (features.edit {{# if uiCrudSheild }} && sheildCrudOperation(loggedInUser, "edit", document, {{ entityName }}SecurityConfig) {{/ if }}) {
     actions.push(
       <Link key="edit" to={router.path(Routes.{{ generateRouteName "edit" }}, {
         params: { id },
@@ -74,7 +84,7 @@ export function getHeaderActions(collection: {{ collectionClass }}, router: XRou
       </Link>
     )
   }
-  if (features.delete) {
+  if (features.delete {{# if uiCrudSheild }} && sheildCrudOperation(loggedInUser, "delete", document, {{ entityName }}SecurityConfig) {{/ if }}) {
     actions.push(
       <Ant.Popconfirm 
         key="delete"

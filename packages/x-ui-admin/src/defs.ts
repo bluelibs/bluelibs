@@ -74,7 +74,7 @@ export type UICrudSecurityByRole<T = null> = {
 
 export type UiCrudSecurity<T = null> = {
   roles: {
-    [k: string]: UICrudSecurityByRole<T>;
+    [k: string]: boolean | UICrudSecurityByRole<T>;
   };
-  defaults: UICrudSecurityByRole<T>;
+  defaults: boolean | UICrudSecurityByRole<T>;
 };
