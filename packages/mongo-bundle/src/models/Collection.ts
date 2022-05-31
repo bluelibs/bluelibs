@@ -42,6 +42,7 @@ import {
   addSchema,
   addLinks,
   IAstToQueryOptions,
+  AnyifyFieldsWithIDs,
   LINK_STORAGE,
   Linker,
 } from "@bluelibs/nova";
@@ -136,7 +137,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param options
    */
   find(
-    filter: MongoDB.Filter<T> = {},
+    filter: MongoDB.Filter<AnyifyFieldsWithIDs<T>> = {},
     options?: MongoDB.FindOptions<T extends T ? T : T>
   ): MongoDB.FindCursor<MongoDB.WithId<T>> {
     const cursor = this.collection.find(filter, options);
@@ -157,7 +158,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @returns
    */
   async count(
-    filter: MongoDB.Filter<T> = {},
+    filter: MongoDB.Filter<AnyifyFieldsWithIDs<T>> = {},
     options?: MongoDB.CountOptions
   ): Promise<number> {
     return this.collection.countDocuments(filter, options);
@@ -169,7 +170,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param options
    */
   async findOne(
-    query: MongoDB.Filter<T> = {},
+    query: MongoDB.Filter<AnyifyFieldsWithIDs<T>> = {},
     options?: MongoDB.FindOptions<T extends T ? T : T>
   ): Promise<T> {
     const result = await this.collection.findOne(query, options);
@@ -263,7 +264,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   }
 
   async updateOne(
-    filters: MongoDB.Filter<T>,
+    filters: MongoDB.Filter<AnyifyFieldsWithIDs<T>>,
     update: MongoDB.UpdateFilter<T>,
     options: IContextAware & MongoDB.UpdateOptions = {}
   ): Promise<MongoDB.UpdateResult> {
@@ -301,7 +302,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   }
 
   async updateMany(
-    filters: MongoDB.Filter<T>,
+    filters: MongoDB.Filter<AnyifyFieldsWithIDs<T>>,
     update: MongoDB.UpdateFilter<T>,
     options: IContextAware & MongoDB.UpdateOptions = {}
   ): Promise<MongoDB.UpdateResult> {
@@ -340,7 +341,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   }
 
   async deleteOne(
-    filters: MongoDB.Filter<T>,
+    filters: MongoDB.Filter<AnyifyFieldsWithIDs<T>>,
     options: IContextAware & MongoDB.DeleteOptions = {}
   ): Promise<MongoDB.DeleteResult> {
     if (options) {
@@ -375,7 +376,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param options
    */
   async deleteMany(
-    filters: MongoDB.Filter<T>,
+    filters: MongoDB.Filter<AnyifyFieldsWithIDs<T>>,
     options: IContextAware & MongoDB.DeleteOptions = {}
   ): Promise<MongoDB.DeleteResult> {
     if (options) {
@@ -407,7 +408,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   }
 
   async findOneAndDelete(
-    filters: MongoDB.Filter<T> = {},
+    filters: MongoDB.Filter<AnyifyFieldsWithIDs<T>> = {},
     options: IContextAware & MongoDB.FindOneAndDeleteOptions = {}
   ): Promise<MongoDB.ModifyResult<T>> {
     if (options) {
@@ -443,7 +444,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   }
 
   async findOneAndUpdate(
-    filters: MongoDB.Filter<T> = {},
+    filters: MongoDB.Filter<AnyifyFieldsWithIDs<T>> = {},
     update: MongoDB.UpdateFilter<T>,
     options: IContextAware & MongoDB.FindOneAndUpdateOptions = {}
   ): Promise<MongoDB.ModifyResult<T>> {
