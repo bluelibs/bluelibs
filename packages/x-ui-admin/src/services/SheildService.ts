@@ -77,7 +77,18 @@ export function sheildField<T = any>(
       }
       return true;
     case "filters":
-      return true;
+      if (typeof roleConfig === "boolean" && roleConfig === true) return true;
+      if (!roleConfig) return false;
+      if (roleConfig.allowFilterOn) {
+        return roleConfig.allowFilterOn.some(
+          (key) => fieldId.indexOf(key) === 0
+        );
+      }
+      if (roleConfig.denyFilterOn) {
+        return roleConfig.denyFilterOn.every(
+          (key) => fieldId.indexOf(key) !== 0
+        );
+      }
   }
 }
 
@@ -140,6 +151,7 @@ function getRoleConfig<T = any>(
 }
 
 function isOwner(item, ownerConfig, user): boolean {
+  if (ownerConfig === undefined) return true;
   if (typeof ownerConfig === "string") {
     return item[ownerConfig] === user._id;
   } else if (
