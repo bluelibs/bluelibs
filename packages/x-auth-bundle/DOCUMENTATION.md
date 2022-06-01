@@ -164,6 +164,10 @@ export interface IXAuthBundleConfig {
 }
 ```
 
+:::caution
+If you are gonna use the rest api, or social auth, you are gonna need to include the `HttpBundle` in your kernel
+:::
+
 ## Custom Registration
 
 By default registration accepts `firstName`, `lastName`, `email` and `password`. If you have a more complex registration, we recommend disabling `register` mutation as shown above and implement your own:
@@ -214,7 +218,7 @@ function register(_, args: InputType<RegisterInput>, context: IGraphQLContext) {
 
 ## Magic Link/Code Authentication
 
-We provide in addition to password authentication option, an option to login by sending a magic code/token to the user email,
+We provide in addition to password authentication option, an option to login by sending a magic code/token to the user email :
 
 ```ts
 // The configuration is:
@@ -249,16 +253,19 @@ new XAuthBundle({
 
 ## Multiple Factor Authentication
 
-The multiple factor strategy, is configured like this:
+The multiple factor strategy, is configured based on an array of `factors` that the user with a specific condition need to authorize all of them before gaining access to the app :
 
 ```ts
+import { PASSWORD_STRATEGY, MAGIC_AUTH_STRATEGY } from "@bluelibs/x-auth-bundle";
+
 // The configuration is:
 export interface IXAuthBundleConfig {
   multipleFactorAuth: {
-    //an array of the auth strategies that the multiple will be based on, with theire redirect links that will be configured in front end, the name of strategy is imported from constants
       factors: [
         {
+          //name of auth strategy
           strategy: PASSWORD_STRATEGY,
+          //front-end url to be redirected to,in order to login this strategy method as well
           redirectUrl: "http://localhost:8080/login",
         },
         {
@@ -267,7 +274,7 @@ export interface IXAuthBundleConfig {
         },
       ],
 
-      //this Optionnal method decide if the user have to multiple factor or not, the default methdo right now is judging based on last loginAt,
+      //this Optionnal method decide if the user have to multiple factor or not, the default methdod is to judge user based on last loginAt < 24h ,
       userHaveToMultipleFactorAuth: (userId: UserId):Promise<boolean> => {
         ...
       };
@@ -275,9 +282,9 @@ export interface IXAuthBundleConfig {
 }
 ```
 
-and how it's working, is if the `userHaveToMultipleFactorAuth` return true for a user, it will create a session and check just the method he just login using for example password, and instead of returning the token, it redirect to the next un-checked auth method with the session id,
+And how it's working, is if the `userHaveToMultipleFactorAuth` return `true` for a user, it will create a session and check just the auth strategy method he just login using for example password, and instead of returning the token, it redirect to the next un-checked auth strategy,
 
-if you decide to override logic and extend from `IMultipleFactorService`, you can implement what ever auth strategy, just give a strategy name and a redirect link, and dont forget to use the session id
+If you decide to override logic and extend from `IMultipleFactorService`, you can implement what ever auth strategy, just give a strategy name and a redirect link
 
 ## Social Auth - Passport
 
@@ -287,7 +294,7 @@ Bluelibs contains a feature that allows you to use what ever passport strategy, 
 // The configuration is:
 export interface IXAuthBundleConfig {
   socialAuth: {
-    //decide what to do with user Data after social login
+    //decide what to do with user Data after collecting profile data
     onSocialAuth?: (
       req,
       type,
@@ -315,9 +322,12 @@ export interface IXAuthBundleConfig {
           };
         };
         url: {
+          // the url for social auth
           auth: "/auth/facebook";
           callback: "/auth/facebook/callback";
+          //the success url redirect to your frontend app with a token param
           success: "http://localhost:8080/auth/social/";
+          //the failure url redirect to your frontend app
           fail: "http://localhost:8080/login";
         };
       };

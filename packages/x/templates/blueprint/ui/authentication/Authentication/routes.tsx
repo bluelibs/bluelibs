@@ -10,7 +10,7 @@ import { ResetPassword } from "./ResetPassword/ResetPassword";
 import { ChangePassword } from "./ChangePassword/ChangePassword";
 import { RequestMagicLink } from "./MagicLink/RequestMagicLink";
 import { SubmitMagicLink } from "./MagicLink/SubmitMagicLink";
-import { SocialAuth } from "./SocialAutth/SocialAuth";
+import { SocialAuth } from "./SocialAuth/SocialAuth";
 
 i18n.push(AuthenticationMessages);
 

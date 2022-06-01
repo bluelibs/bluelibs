@@ -69,35 +69,6 @@ export function RequestMagicLink(props: {
       <Col sm={24} md={12} lg={6}>
         <Card title={tl("header")}>
           <Form className="authentication-form" onFinish={(data) => onSubmit()}>
-            <Tabs defaultActiveKey="email" onChange={setMethod}>
-              <TabPane
-                tab={
-                  <span>
-                    <MailOutlined />
-                    By Email
-                  </span>
-                }
-                key="email"
-              />
-              <TabPane
-                tab={
-                  <span>
-                    <MessageOutlined />
-                    By SMS
-                  </span>
-                }
-                key="sms"
-              />
-              <TabPane
-                tab={
-                  <span>
-                    <PhoneOutlined />
-                    By Phonecall
-                  </span>
-                }
-                key="phonecall"
-              />
-            </Tabs>
             {userId ? (
               <></>
             ) : (

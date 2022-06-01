@@ -30,7 +30,6 @@ export const SubmitMagicLink = (props: {
   };
 }) => {
   const guardian = useGuardian();
-  console.log(props);
   const { userId, code } = props.queryVariables;
 
   const tl = useTranslate("authentication.submitMagicLink");
