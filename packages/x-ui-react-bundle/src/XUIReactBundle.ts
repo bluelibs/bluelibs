@@ -1,4 +1,4 @@
-import { Bundle } from "@bluelibs/core";
+import { Bundle, ContainerInstance, Kernel } from "@bluelibs/core";
 import { OrderedList } from "@bluelibs/ordered-lists";
 import { setDefaults } from "@bluelibs/smart";
 import {
@@ -9,6 +9,17 @@ import {
   XUI_COMPONENTS_TOKEN,
 } from ".";
 import { IComponents } from "./react/components";
+
+let smartContainer: ContainerInstance;
+
+setDefaults({
+  factory(targetType) {
+    if (!smartContainer || !smartContainer?.get(Kernel)?.isInitialised()) {
+      console.error("You are trying to access kernel before it's initialised");
+    }
+    return smartContainer.get(targetType);
+  },
+});
 
 export class XUIReactBundle extends Bundle<IXUIReactBundleConfigType> {
   protected defaultConfig: IXUIReactBundleConfigType = {
@@ -42,13 +53,7 @@ export class XUIReactBundle extends Bundle<IXUIReactBundleConfigType> {
       Object.assign({}, Components, this.config.components)
     );
 
-    const container = this.container;
-
-    setDefaults({
-      factory(targetType) {
-        return container.get(targetType);
-      },
-    });
+    smartContainer = this.container;
   }
 
   /**
