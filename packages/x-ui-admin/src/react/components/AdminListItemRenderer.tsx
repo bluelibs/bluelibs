@@ -1,4 +1,4 @@
-import { I18NService, IRoute, use } from "@bluelibs/x-ui";
+import { Components, I18NService, IRoute, use } from "@bluelibs/x-ui";
 import { Button, Tag, Tooltip } from "antd";
 import * as React from "react";
 import { Link } from "react-router-dom";
@@ -138,6 +138,5 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
   if (value === undefined || value === null) {
     return emptyValue;
   }
-
-  return value;
+  return <Components.ErrorBoundary>{value}</Components.ErrorBoundary>;
 }
