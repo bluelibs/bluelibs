@@ -34,7 +34,7 @@ import {
   VerifyMagicLinkInput,
 } from "../inputs/RequestMagicLinkInput";
 import { ObjectId } from "mongodb";
-import { MultipleFcatorRedirect } from "../multipleAuthFactor/defs";
+import { MultipleFactorRedirect } from "../multipleAuthFactor/defs";
 import { MultipleFactorService } from "../multipleAuthFactor/MultipleFactorService";
 import { AuthenticationCodesCollection } from "../collections/AuthenticationCodes.collection";
 import * as ms from "ms";
@@ -145,7 +145,7 @@ export class XAuthService implements IXAuthService {
 
   async login(
     input: LoginInput
-  ): Promise<{ token: string } | MultipleFcatorRedirect> {
+  ): Promise<{ token: string } | MultipleFactorRedirect> {
     const userId = await this.passwordService.findUserIdByUsername(
       input.username
     );
@@ -410,9 +410,10 @@ export class XAuthService implements IXAuthService {
 
   async verifyMagicCode(
     input: VerifyMagicLinkInput
-  ): Promise<{ token: string } | MultipleFcatorRedirect> {
+  ): Promise<{ token: string } | MultipleFactorRedirect> {
     const magicCode: string = input.magicCode,
-      userId: UserId = ObjectId(input.userId);
+      userId: UserId = new ObjectId(input.userId);
+
     const session = await this.getConfirmationSession(magicCode, userId);
 
     if (!session) throw new Error("invalid-magic-code");

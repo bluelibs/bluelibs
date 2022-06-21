@@ -4,14 +4,14 @@ import {
   ISession,
 } from "@bluelibs/security-bundle";
 
-import { MultipleFcatorRedirect } from "./defs";
+import { MultipleFactorRedirect } from "./defs";
 
 export interface IMultipleFactorService {
   isMultipleFactorRequired(): boolean;
   login(
     userId: UserId,
     options: ICreateSessionOptions
-  ): Promise<{ token: string } | MultipleFcatorRedirect>;
+  ): Promise<{ token: string } | MultipleFactorRedirect>;
   userHaveToMultipleFactorAuth: (userId: UserId) => Promise<boolean>;
   loginSessionFactor(
     userId: UserId,

@@ -14,7 +14,7 @@ import {
   UnValidFactorStrategy,
   UserSessionError,
 } from "./exceptions";
-import { MultipleFcatorRedirect } from "./defs";
+import { MultipleFactorRedirect } from "./defs";
 
 @Service()
 export class MultipleFactorService {
@@ -58,7 +58,7 @@ export class MultipleFactorService {
   async login(
     userId: UserId,
     options: ICreateSessionOptions
-  ): Promise<{ token: string } | MultipleFcatorRedirect> {
+  ): Promise<{ token: string } | MultipleFactorRedirect> {
     if (
       !this.isMultipleFactorRequired() ||
       (this.isMultipleFactorRequired() &&
