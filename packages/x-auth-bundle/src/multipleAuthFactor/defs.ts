@@ -1,4 +1,4 @@
-export type MultipleFcatorRedirect = {
+export type MultipleFactorRedirect = {
   redirectUrl?: string;
   strategy: string;
 };

@@ -10,9 +10,9 @@ import "@bluelibs/password-bundle";
 import { IPasswordAuthenticationStrategy } from "@bluelibs/password-bundle";
 import { IRequestMagicLinkProps } from "./emails/RequestMagicLink";
 import {
-  socialArrayPropsTypes,
-  socialCustomConfigMapType,
-  socialPropsTypes,
+  socialArrayPropsTypes as SocialArrayPropsTypes,
+  socialCustomConfigMapType as SocialCustomConfigMapType,
+  socialPropsTypes as SocialPropsTypes,
   SocialServiceConfigType,
   SOCIAL_LOGIN_TYPE,
 } from "./social-passport/defs";
@@ -25,6 +25,10 @@ declare module "@bluelibs/security-bundle" {
   export interface IUser {
     password: IPasswordAuthenticationStrategy;
     profile: IUserProfile;
+    socialAccounts?: { service: string; id: string }[];
+  }
+  export interface ISessionData {
+    factors: { strategy: string; redirectUrl: string }[];
   }
   export interface IUserProfile {
     firstName: string;
@@ -100,14 +104,14 @@ export interface IXAuthBundleConfig {
       done
     ) => any;
     url: string;
-    socialUniqueIds?: socialPropsTypes;
-    strategyNameMap?: socialPropsTypes;
-    socialCustomConfig?: socialCustomConfigMapType;
+    socialUniqueIds?: SocialPropsTypes;
+    strategyNameMap?: SocialPropsTypes;
+    socialCustomConfig?: SocialCustomConfigMapType;
     importStrategyMap?: {
       [key: string]: any;
     };
-    fieldsValues?: socialArrayPropsTypes;
-    profileObjectPath?: socialArrayPropsTypes;
+    fieldsValues?: SocialArrayPropsTypes;
+    profileObjectPath?: SocialArrayPropsTypes;
   };
 
   multipleFactorAuth?: {
