@@ -196,8 +196,8 @@ export class SecurityService implements ISecurityService {
   }
 
   /**
-   * Logging out the user based on userId
-   * @param userId
+   * Logging out the user based on token
+   * @param token
    */
   async logout(token: string) {
     const session = await this.sessionPersistanceLayer.getSession(token);
@@ -416,5 +416,23 @@ export class SecurityService implements ISecurityService {
     return this.updateUser(userId, {
       roles,
     });
+  }
+
+  //maybe we do that in sessionPersistanceLayer, but I thought we dont update for a reason
+  async updateSession(newSession: ISession): Promise<string> {
+    await this.sessionPersistanceLayer.deleteSession(newSession.token);
+    return await this.sessionPersistanceLayer.newSession(
+      newSession.userId,
+      newSession.expiresAt,
+      newSession.data
+    );
+  }
+
+  async findSession(userId: UserId, data: any): Promise<ISession | null> {
+    return this.sessionPersistanceLayer.findSession(userId, data);
+  }
+
+  async deleteSession(token: string) {
+    await this.sessionPersistanceLayer.deleteSession(token);
   }
 }

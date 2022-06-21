@@ -18,6 +18,7 @@ terminal-bundle
 ui-apollo-bundle
 validator-bundle
 x
+x-auth-bundle
 x-bundle
 x-cron-bundle
 x-password-bundle

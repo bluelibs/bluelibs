@@ -70,6 +70,9 @@ jobs:
     - name: x
       cache: npm
       env: TARGET=packages/x
+    - name: x-auth-bundle
+      cache: npm
+      env: TARGET=packages/x-auth-bundle
     - name: x-bundle
       cache: npm
       env: TARGET=packages/x-bundle
