@@ -20,7 +20,6 @@ export interface IUser {
   createdAt: Date;
   lastLoginAt?: Date;
   roles?: string[];
-  socialAccounts?: { service: string; id: string }[];
 }
 
 export interface IFieldMap {
