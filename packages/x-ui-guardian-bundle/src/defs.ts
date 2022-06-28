@@ -4,6 +4,7 @@ import { Constructor } from "@bluelibs/core";
 import { GuardianSmart, ProtectProps } from ".";
 
 export type IXUIGuardianBundleConfigType = {
+  multipleFactorAuth?: boolean;
   guardianClass: Constructor<GuardianSmart>;
   /**
    * Provide this component if you want to prevent rendering until Guardian has been initialised.

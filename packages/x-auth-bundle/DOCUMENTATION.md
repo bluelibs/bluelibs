@@ -280,6 +280,23 @@ export interface IXAuthBundleConfig {
       };
     }
 }
+
+//If You want your guardian login mutation to expect multiple factor strategy, you have to set it it up too :
+//in Admin kernel config:
+export const kernel = new Kernel({
+  bundles: [
+    new XUIBundle({
+      guardian: {
+        multipleFactorAuth: true,
+      },
+      graphql: {
+        uri: process.env.API_URL,
+      },
+    }),
+    new UIAppBundle(),
+    new XUIAdminBundle(),
+  ],
+});
 ```
 
 And how it's working, is if the `userHaveToMultipleFactorAuth` return `true` for a user, it will create a session and check just the auth strategy method he just login using for example password, and instead of returning the token, it redirect to the next un-checked auth strategy,

@@ -6,3 +6,6 @@ export const LOCAL_STORAGE_TOKEN_KEY = "bluelibs-token";
 export const GUARDIAN_SMART_TOKEN = new Token<Constructor<GuardianSmart>>(
   "GUARDIAN_SMART"
 );
+export const GUARDIAN_IS_MULTIPLEFACTOR_AUTH = new Token<Boolean>(
+  "GUARDIAN_IS_MULTIPLEFACTOR_AUTH"
+);

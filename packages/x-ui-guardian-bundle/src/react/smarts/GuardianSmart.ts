@@ -7,7 +7,10 @@ import {
   UserLoggedInEvent,
   UserLoggedOutEvent,
 } from "../../events";
-import { LOCAL_STORAGE_TOKEN_KEY } from "../../constants";
+import {
+  GUARDIAN_IS_MULTIPLEFACTOR_AUTH,
+  LOCAL_STORAGE_TOKEN_KEY,
+} from "../../constants";
 import { Smart } from "@bluelibs/smart";
 import { ObjectId } from "@bluelibs/ejson";
 import { GuardianUserRetrievedEvent } from "../events/GuardianUserRetrievedEvent";
@@ -75,6 +78,9 @@ export class GuardianSmart<
 
   @Inject()
   eventManager: EventManager;
+
+  @Inject(GUARDIAN_IS_MULTIPLEFACTOR_AUTH)
+  isMultipleFactorAuth?: boolean;
 
   async init() {
     return this.load()
@@ -225,14 +231,22 @@ export class GuardianSmart<
 
     return this.apolloClient
       .mutate({
-        mutation: gql`
-          mutation login($input: LoginInput!) {
-            login(input: $input) {
-              token
-              redirectUrl
-            }
-          }
-        `,
+        mutation: this.isMultipleFactorAuth
+          ? gql`
+              mutation login($input: LoginInput!) {
+                login(input: $input) {
+                  token
+                  redirectUrl
+                }
+              }
+            `
+          : gql`
+              mutation login($input: LoginInput!) {
+                login(input: $input) {
+                  token
+                }
+              }
+            `,
         variables: {
           input: {
             username,
@@ -463,14 +477,22 @@ export class GuardianSmart<
 
     return this.apolloClient
       .mutate({
-        mutation: gql`
-          mutation verifyMagicCode($input: VerifyMagicLinkInput!) {
-            verifyMagicCode(input: $input) {
-              token
-              redirectUrl
-            }
-          }
-        `,
+        mutation: this.isMultipleFactorAuth
+          ? gql`
+              mutation verifyMagicCode($input: VerifyMagicLinkInput!) {
+                verifyMagicCode(input: $input) {
+                  token
+                  redirectUrl
+                }
+              }
+            `
+          : gql`
+              mutation verifyMagicCode($input: VerifyMagicLinkInput!) {
+                verifyMagicCode(input: $input) {
+                  token
+                }
+              }
+            `,
         variables: {
           input: {
             userId,
