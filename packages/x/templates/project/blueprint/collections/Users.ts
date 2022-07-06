@@ -1,11 +1,4 @@
-import {
-  collection,
-  field,
-  relation,
-  shortcuts,
-  sharedModel,
-  faker,
-} from "../utils";
+import { collection, field, shortcuts } from "../utils";
 
 export const Users = collection({
   id: "Users",

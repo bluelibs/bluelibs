@@ -1,8 +1,6 @@
 import { FieldValueKind } from "./FieldValueKind";
 import { BaseModel } from "./App";
 import { Collection } from "./Collection";
-import { ObjectId } from "@bluelibs/ejson";
-import * as faker from "faker";
 import { IGenericFieldSubModel } from "../../models";
 import {
   Cleanable,
