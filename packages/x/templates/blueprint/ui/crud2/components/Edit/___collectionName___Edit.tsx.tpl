@@ -71,3 +71,5 @@ export function {{ generateComponentName "edit" }}(props: { id: string }) {
     </UIComponents.AdminLayout>
   )
 }
+
+export default {{ generateComponentName "edit" }};

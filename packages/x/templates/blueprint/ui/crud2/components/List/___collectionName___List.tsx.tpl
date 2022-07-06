@@ -67,3 +67,5 @@ export function {{ generateComponentName "list" }}() {
     </UIComponents.AdminLayout>
   );
 }
+
+export default {{ generateComponentName "list" }};

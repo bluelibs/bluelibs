@@ -92,6 +92,10 @@ export const DASHBOARD_SPECIFICS = {
 };
 ```
 
+:::note
+You can apply dynamic loading to your admin dashboard routes by adding boolean `uiDynamicLoading: true` to your app model in blueprint, or to a specific collection if you want to target one collection
+:::
+
 ## Consumers
 
 In order to have a mechanism of using forms in a nice descriptive manner, we created a `Consumer` class which allows us to construct it with a set of data and then consume elements one by one, and ability to display the rest of unconsumed elements.
