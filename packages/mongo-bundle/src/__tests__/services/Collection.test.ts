@@ -12,6 +12,7 @@ import {
 } from "../../events";
 import { EJSON } from "@bluelibs/ejson";
 import { ObjectId } from "mongodb";
+import { createCountReducer } from "../../reducersToGo";
 
 describe("Collection", () => {
   test("Should dispatch events properly", async () => {
@@ -348,5 +349,51 @@ describe("Collection", () => {
       $: { filters: { _id: u1.insertedId } },
       _id: 1,
     });
+  });
+
+  test("should count reducer", async () => {
+    const { container } = await getEcosystem();
+
+    const comments = container.get<Comments>(Comments);
+    const posts = container.get<Posts>(Posts);
+    const users = container.get<Users>(Users);
+
+    const u1 = await users.insertOne({
+      name: "John",
+    });
+    const u2 = await users.insertOne({
+      name: "Mal",
+    });
+
+    const p1 = await posts.insertOne({
+      title: "John Post",
+      authorId: u1.insertedId,
+    });
+
+    const c1 = await comments.insertOne({
+      title: "Hello",
+      userId: u1.insertedId,
+      postId: p1.insertedId,
+    });
+    const c2 = await comments.insertOne({
+      title: "Hello",
+      userId: u2.insertedId,
+      postId: p1.insertedId,
+    });
+    const instance = await posts.findOne({ _id: p1.insertedId });
+    let commentsCount = await createCountReducer(instance, {
+      container,
+      collection: Posts,
+      relation: "comments",
+      filters: {},
+    });
+    expect(commentsCount).toEqual(2);
+    commentsCount = await createCountReducer(instance, {
+      container,
+      collection: Posts,
+      relation: "comments",
+      filters: { userId: u1.insertedId },
+    });
+    expect(commentsCount).toEqual(1);
   });
 });

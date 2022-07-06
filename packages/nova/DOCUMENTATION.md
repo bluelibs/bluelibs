@@ -598,6 +598,27 @@ declare module "@bluelibs/nova" {
 }
 ```
 
+### Count Reducer
+
+You can use `createCountReducer` inside your `reduce` function to count for direct relations or inversed, with possibility to filter :
+
+```ts
+import { createCountReducer } from "@bluelibs/mongo-bundle";
+
+//count the published articles
+  async reduce(user, { {context} }) {
+    return createCountReducer(user, {
+      container:context.container,
+      collection: UsersCollection,
+      relation: "articles",
+      filters: {
+        isPublished:true
+        },
+    });
+  }
+
+```
+
 Notes:
 
 - Do not specify nested fields, use instead: `profile.name: 1` => `profile: { name: 1 }`
