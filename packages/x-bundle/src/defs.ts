@@ -6,6 +6,8 @@ import { ClientOpts } from "redis";
 import { ICacheManagerConfig } from "./cache/defs";
 import { DocumentMutationType } from "./constants";
 import { SubscriptionHandler } from "./models/SubscriptionHandler";
+import { IGraphQLContext } from "@bluelibs/graphql-bundle";
+
 export interface IXBundleConfig {
   /**
    * Application URL is useful as XBundle can be used to route to different part of your web/front-end application
@@ -79,6 +81,17 @@ export interface ISubscriptionHandler<T> {
   onStop(handler: Function);
   stop(): Promise<void>;
 }
+
+export type InsertExecutorOptions = {
+  deepSync?: boolean;
+  field?: string;
+  extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>;
+};
+
+export type UpdateExecutorOptions = {
+  deepSync?: boolean;
+  field?: string;
+};
 
 declare module "@bluelibs/graphql-bundle" {
   export interface IGraphQLContext {
