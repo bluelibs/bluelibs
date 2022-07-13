@@ -111,6 +111,16 @@ export class Collection extends BaseModel<Collection> {
     count: 0,
   };
 
+  /**
+   * skip collection while blueprint generation
+   */
+  skip?: boolean;
+
+  /**
+   * skip other collections except the ones with only=true while blueprint generation
+   */
+  only?: boolean;
+
   clean() {
     // this.fields = this.instanceify(this.fields, Field);
     // this.relations = this.instanceify(this.relations, Relation);
