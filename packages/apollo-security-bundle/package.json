@@ -27,7 +27,7 @@
     "@bluelibs/graphql-bundle": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
     "@bluelibs/security-bundle": "^1.0.0",
-    "passport": "^0.4.1"
+    "passport": "^0.6.0"
   },
   "devDependencies": {
     "@bluelibs/apollo-bundle": "^1.0.0",
