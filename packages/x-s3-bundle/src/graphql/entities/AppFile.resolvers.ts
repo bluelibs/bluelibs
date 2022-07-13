@@ -4,14 +4,14 @@ import {
   AppFile,
   AppFileThumb,
 } from "../../collections/appFiles/AppFile.model";
-import { S3UploadService } from "../../services/S3UploadService";
+import { UploadService } from "../../services/UploadService";
 
 export default {
   AppFile: {
     downloadUrl(appFile: Partial<AppFile>, args, ctx) {
       // if it was fetched through nova and injected as a reducer
       if (!appFile.downloadUrl) {
-        const service = ctx.container.get(S3UploadService);
+        const service = ctx.container.get(UploadService);
 
         return service.getUrl(appFile.path);
       }
@@ -28,7 +28,7 @@ export default {
   },
   AppFileThumb: {
     downloadUrl(appFileThumb: Partial<AppFileThumb>, args, ctx) {
-      const service = ctx.container.get(S3UploadService);
+      const service = ctx.container.get(UploadService);
 
       return service.getUrl(appFileThumb.path);
     },

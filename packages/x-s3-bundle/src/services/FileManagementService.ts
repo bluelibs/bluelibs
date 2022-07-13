@@ -9,7 +9,7 @@ import { Inject } from "@bluelibs/core";
 import { AppFileGroupsCollection } from "../collections/appFileGroups/AppFileGroups.collection";
 import { AppFilesCollection } from "../collections/appFiles/AppFiles.collection";
 import { ObjectID } from "@bluelibs/mongo-bundle";
-import { S3UploadService } from "./S3UploadService";
+import { UploadService } from "./UploadService";
 import { LoggerService } from "@bluelibs/logger-bundle";
 import {
   APP_FILES_COLLECTION_TOKEN,
@@ -26,8 +26,8 @@ export class FileManagementService {
   @Inject(APP_FILE_GROUPS_COLLECTION_TOKEN)
   protected appFileGroups: AppFileGroupsCollection;
 
-  @Inject(() => S3UploadService)
-  protected uploadService: S3UploadService;
+  @Inject(() => UploadService)
+  protected uploadService: UploadService;
 
   @Inject(() => LoggerService)
   protected logger: LoggerService;

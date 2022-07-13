@@ -6,6 +6,7 @@ import { XS3Bundle } from "../XS3Bundle";
 import { XBundle } from "@bluelibs/x-bundle";
 import { MongoBundle } from "@bluelibs/mongo-bundle";
 import { SecurityBundle } from "@bluelibs/security-bundle";
+import { Stores } from "../defs";
 
 class MyBundle extends Bundle {
   async prepare() {
@@ -30,11 +31,33 @@ export function createKernel() {
       }),
       new XBundle(),
       new XS3Bundle({
-        accessKeyId: "A",
-        secretAccessKey: "B",
-        bucket: "test.com",
-        endpoint: "https://s3.amazonaws.com/test.com",
-        region: "eu-west-2",
+        stores: [
+          new Stores.S3({
+            id: "s3-store",
+            credentials: {
+              accessKeyId: "A",
+              secretAccessKey: "B",
+              bucket: "test.com",
+              endpoint: "https://s3.amazonaws.com/test.com",
+              region: "eu-west-2",
+            },
+            //the s3 store will be the default store, if not defined by default the first store of the stores iwll be the default
+            default: true,
+          }),
+          new Stores.Local({
+            id: "localstorage",
+            credentials: {
+              localStoragePath: "./temp",
+              downloadUrl: "/download-local-file",
+            },
+          }),
+          new Stores.Database({
+            id: "dbstorage",
+            credentials: {
+              downloadUrl: "/download-db-file",
+            },
+          }),
+        ],
       }),
       new MyBundle(),
     ],

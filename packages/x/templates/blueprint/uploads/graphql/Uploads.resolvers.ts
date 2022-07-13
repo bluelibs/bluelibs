@@ -3,7 +3,7 @@ import { IResolverMap } from "@bluelibs/graphql-bundle";
 import {
   AppFilesCollection,
   AppFileGroupsCollection,
-  S3UploadService,
+  UploadService,
   FileManagementService,
 } from "@bluelibs/x-s3-bundle";
 
@@ -28,7 +28,7 @@ export default {
         async (_, args, ctx) => {
           const { groupId, upload, context } = args;
 
-          const uploadService = ctx.container.get(S3UploadService);
+          const uploadService = ctx.container.get(UploadService);
           const fileManagementService = ctx.container.get(
             FileManagementService
           );
@@ -48,7 +48,7 @@ export default {
         async (_, args, ctx) => {
           const { upload, context } = args;
 
-          const uploadService = ctx.container.get(S3UploadService);
+          const uploadService = ctx.container.get(UploadService);
           const appFile = await uploadService.upload(upload, {
             uploadedById: ctx.userId,
             context,

@@ -1,6 +1,6 @@
 import { ContainerInstance } from "@bluelibs/core";
 import { IReducerOption } from "@bluelibs/nova";
-import { S3UploadService } from "../../services/S3UploadService";
+import { UploadService } from "../../services/UploadService";
 
 // Export link names as constants with type of: BundleLinkCollectionOption, sample:
 // export const myCustomLink: IReducerOption = { ... }
@@ -13,7 +13,7 @@ export const downloadUrl: IReducerOption = {
   reduce(upload, params) {
     // To fix TS later, interface extension from mongo-bundle to nova is not taken into account for some reason
     const container: ContainerInstance = (params.context as any).container;
-    const service = container.get(S3UploadService);
+    const service = container.get(UploadService);
 
     return service.getUrl(upload.path);
   },
