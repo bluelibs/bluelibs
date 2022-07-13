@@ -120,6 +120,12 @@ export class Field extends BaseModel<Field> {
   collection: Collection;
 
   /**
+   * The sharedmodel it belongs to the parend shared model.
+   * @cleanable
+   */
+  sharedModel?: SharedModel;
+
+  /**
    * Parent field in case it's a subfield
    */
   parent?: Field;
