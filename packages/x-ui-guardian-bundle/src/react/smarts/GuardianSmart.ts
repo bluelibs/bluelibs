@@ -7,7 +7,10 @@ import {
   UserLoggedInEvent,
   UserLoggedOutEvent,
 } from "../../events";
-import { LOCAL_STORAGE_TOKEN_KEY } from "../../constants";
+import {
+  GUARDIAN_IS_MULTIPLEFACTOR_AUTH,
+  LOCAL_STORAGE_TOKEN_KEY,
+} from "../../constants";
 import { Smart } from "@bluelibs/smart";
 import { ObjectId } from "@bluelibs/ejson";
 import { GuardianUserRetrievedEvent } from "../events/GuardianUserRetrievedEvent";
@@ -56,7 +59,6 @@ export type GuardianUserRegistrationType = {
   email: string;
   password: string;
 };
-
 export class GuardianSmart<
   TUserType extends IUserMandatory = GuardianUserType,
   TUserRegistrationType = GuardianUserRegistrationType
@@ -76,6 +78,9 @@ export class GuardianSmart<
 
   @Inject()
   eventManager: EventManager;
+
+  @Inject(GUARDIAN_IS_MULTIPLEFACTOR_AUTH)
+  isMultipleFactorAuth?: boolean;
 
   async init() {
     return this.load()
@@ -226,13 +231,22 @@ export class GuardianSmart<
 
     return this.apolloClient
       .mutate({
-        mutation: gql`
-          mutation login($input: LoginInput!) {
-            login(input: $input) {
-              token
-            }
-          }
-        `,
+        mutation: this.isMultipleFactorAuth
+          ? gql`
+              mutation login($input: LoginInput!) {
+                login(input: $input) {
+                  token
+                  redirectUrl
+                }
+              }
+            `
+          : gql`
+              mutation login($input: LoginInput!) {
+                login(input: $input) {
+                  token
+                }
+              }
+            `,
         variables: {
           input: {
             username,
@@ -241,7 +255,12 @@ export class GuardianSmart<
         },
       })
       .then(async (response) => {
-        const { token } = response.data.login;
+        const { token, redirectUrl } = response.data.login;
+        if (redirectUrl) {
+          window.location.replace(redirectUrl);
+          return;
+        }
+
         await this.eventManager.emit(new UserLoggedInEvent({ token }));
 
         // We await this as storing the token might be blocking
@@ -407,6 +426,89 @@ export class GuardianSmart<
           fetchingUserData: false,
         });
         return;
+      });
+  }
+
+  /**
+   * request Magic Link
+   * @param username
+   * @param method
+   */
+  async requestLoginLink(input: {
+    username?: string;
+    method?: string;
+    userId: string;
+  }): Promise<any> {
+    return this.apolloClient
+      .mutate({
+        mutation: gql`
+          mutation requestLoginLink($input: RequestLoginLinkInput!) {
+            requestLoginLink(input: $input) {
+              magicCodeSent
+              userId
+              method
+              confirmationFormat
+            }
+          }
+        `,
+        variables: {
+          input: {
+            username: input.username,
+            type: input.method,
+            userId: input.userId,
+          },
+        },
+      })
+      .then((response: any) => {
+        return response.data.requestLoginLink;
+      });
+  }
+
+  /**
+   * verify Magic Link
+   * @param userId
+   * @param code
+   */
+  async verifyMagicCode(userId: string, code: string): Promise<string> {
+    this.updateState({
+      hasInvalidToken: false,
+    });
+    await this.storeToken(null);
+
+    return this.apolloClient
+      .mutate({
+        mutation: this.isMultipleFactorAuth
+          ? gql`
+              mutation verifyMagicCode($input: VerifyMagicLinkInput!) {
+                verifyMagicCode(input: $input) {
+                  token
+                  redirectUrl
+                }
+              }
+            `
+          : gql`
+              mutation verifyMagicCode($input: VerifyMagicLinkInput!) {
+                verifyMagicCode(input: $input) {
+                  token
+                }
+              }
+            `,
+        variables: {
+          input: {
+            userId,
+            magicCode: code,
+          },
+        },
+      })
+      .then(async (response: any) => {
+        const { token } = response.data.verifyMagicCode;
+        await this.eventManager.emit(new UserLoggedInEvent({ token }));
+
+        // We await this as storing the token might be blocking
+        await this.storeToken(token);
+        await this.load();
+
+        return token;
       });
   }
 

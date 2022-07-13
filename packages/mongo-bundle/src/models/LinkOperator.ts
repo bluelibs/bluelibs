@@ -138,7 +138,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
     let orphanedIds = null;
     if (options.delete) {
       await this.relatedCollection.deleteMany({
-        _id: { $in: ids },
+        _id: { $in: ids as MongoDB.ObjectId[] },
       });
     }
 
@@ -174,14 +174,14 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
   ) {
     if (options.delete) {
       await this.relatedCollection.deleteMany({
-        _id: { $in: ids },
+        _id: { $in: ids as MongoDB.ObjectId[] },
       });
     }
 
     if (this.linker.isMany()) {
       await this.relatedCollection.updateMany(
         {
-          _id: { $in: ids },
+          _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
           // @ts-ignore
@@ -194,7 +194,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
       // TODO: delete?
       await this.relatedCollection.updateMany(
         {
-          _id: { $in: ids },
+          _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
           $set: {
@@ -245,7 +245,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
     if (this.linker.isMany()) {
       await this.relatedCollection.updateMany(
         {
-          _id: { $in: ids },
+          _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
           // @ts-ignore
@@ -257,7 +257,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
     } else {
       await this.relatedCollection.updateMany(
         {
-          _id: { $in: ids },
+          _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
           $set: {

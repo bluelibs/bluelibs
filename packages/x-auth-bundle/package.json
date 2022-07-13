@@ -1,0 +1,81 @@
+{
+  "name": "@bluelibs/x-auth-bundle",
+  "version": "1.0.1",
+  "description": "Password integration with Apollo Bundle using X-Framework.",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluelibs/bluelibs"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "watch": "tsc -w",
+    "pretest": "npm run compile",
+    "test": "jest --verbose dist/__tests__/index.js --passWithNoTests",
+    "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
+    "test:clean": "jest --clearCache",
+    "test:watch": "jest --verbose --watch dist/__tests__/index.js",
+    "testonly": "npm test",
+    "test:ci": "npm run coverage -- --ci --maxWorkers=2  --reporters=default --reporters=jest-junit",
+    "coverage": "npm test -- --coverage",
+    "coverage:upload": "codecov",
+    "prepublishOnly": "npm run compile",
+    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
+  },
+  "peerDependencies": {
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/email-bundle": "^1.0.0",
+    "@bluelibs/graphql-bundle": "^1.0.0",
+    "@bluelibs/http-bundle": "^1.0.2",
+    "@bluelibs/mongo-bundle": "^1.0.0",
+    "@bluelibs/password-bundle": "^1.0.0",
+    "@bluelibs/security-bundle": "^1.0.0",
+    "@bluelibs/security-mongo-bundle": "^1.0.0",
+    "@bluelibs/validator-bundle": "^1.0.0",
+    "@bluelibs/x-bundle": "^1.0.0"
+  },
+  "devDependencies": {
+    "@bluelibs/core": "^1.0.0",
+    "@bluelibs/email-bundle": "^1.0.0",
+    "@bluelibs/graphql-bundle": "^1.0.0",
+    "@bluelibs/http-bundle": "^1.0.2",
+    "@bluelibs/mongo-bundle": "^1.0.0",
+    "@bluelibs/nova": "^1.0.0",
+    "@bluelibs/password-bundle": "^1.0.0",
+    "@bluelibs/security-bundle": "^1.1.6",
+    "@bluelibs/security-mongo-bundle": "^1.2.2",
+    "@bluelibs/validator-bundle": "^1.0.0",
+    "@bluelibs/x-bundle": "^1.0.0",
+    "@types/chai": "^4.2.3",
+    "@types/chai-as-promised": "^7.1.2",
+    "@types/graphql": "^0.11.3",
+    "@types/jest": "^27.0.3",
+    "@types/node": "^14.0.0",
+    "@types/passport-strategy": "^0.2.35",
+    "@typescript-eslint/eslint-plugin": "2.3.0",
+    "@typescript-eslint/parser": "2.3.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^6.6.0",
+    "eslint-config-prettier": "6.3.0",
+    "eslint-plugin-prettier": "3.1.1",
+    "jest": "^27.3.1",
+    "jest-junit": "^10.0.0",
+    "prettier": "^2.0.5",
+    "react": "^17.0.0",
+    "react-dom": "^17.0.0",
+    "source-map-support": "^0.5.13",
+    "ts-jest": "^27.0.3",
+    "typescript": "4.4.4"
+  },
+  "typings": "dist/index.d.ts",
+  "typescript": {
+    "definition": "dist/index.d.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "passport": "^0.6.0",
+    "passport-mock-strategies": "^1.0.0",
+    "superagent": "^7.1.3"
+  }
+}

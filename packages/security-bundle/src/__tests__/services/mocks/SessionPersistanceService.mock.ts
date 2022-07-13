@@ -4,7 +4,6 @@ export class SessionPersistanceService implements ISessionPersistance {
 
   async newSession(userId, expiresAt, data): Promise<string> {
     const token = Math.random().toString();
-
     const session = {
       userId,
       expiresAt,
@@ -33,5 +32,13 @@ export class SessionPersistanceService implements ISessionPersistance {
   async cleanExpiredTokens(): Promise<void> {
     const now = new Date().getTime();
     this.db = this.db.filter((s) => s.expiresAt.getTime() < now);
+  }
+
+  async findSession(userId: UserId, data: any): Promise<ISession> {
+    return this.db.find((s) =>
+      Object.keys(data).reduce((prev, key) => {
+        return prev && s.data && data && s.data[key] === data[key];
+      }, s?.userId === userId && new Date(s.expiresAt).getTime() >= new Date().getTime())
+    );
   }
 }

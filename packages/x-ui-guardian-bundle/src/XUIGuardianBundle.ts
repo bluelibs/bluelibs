@@ -7,7 +7,11 @@ import {
 } from "@bluelibs/ui-apollo-bundle";
 import { XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { GuardianSmart } from "./react/smarts/GuardianSmart";
-import { GUARDIAN_SMART_TOKEN, LOCAL_STORAGE_TOKEN_KEY } from "./constants";
+import {
+  GUARDIAN_IS_MULTIPLEFACTOR_AUTH,
+  GUARDIAN_SMART_TOKEN,
+  LOCAL_STORAGE_TOKEN_KEY,
+} from "./constants";
 import { IXUIGuardianBundleConfigType } from "./defs";
 import { Protect } from "./react/components/Protect";
 import { UserLoggedInEvent, UserLoggedOutEvent } from "./events";
@@ -15,6 +19,7 @@ import { XUIGuardianProvider } from "./react/provider/XUIGuardianProvider";
 
 export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
   protected defaultConfig = {
+    multipleFactorAuth: false,
     guardianClass: GuardianSmart,
   } as IXUIGuardianBundleConfigType;
 
@@ -82,6 +87,10 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
   }
 
   async init() {
+    this.container.set(
+      GUARDIAN_IS_MULTIPLEFACTOR_AUTH,
+      this.config.multipleFactorAuth
+    );
     this.container.set(GUARDIAN_SMART_TOKEN, this.config.guardianClass);
   }
 }

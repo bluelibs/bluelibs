@@ -32,6 +32,7 @@
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/email-bundle": "^1.0.0",
     "@bluelibs/graphql-bundle": "^1.0.0",
+    "@bluelibs/http-bundle": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
     "@bluelibs/mongo-bundle": "^1.0.0",
     "@bluelibs/nova": "^1.0.0",
@@ -39,6 +40,7 @@
     "@bluelibs/security-bundle": "^1.0.0",
     "@bluelibs/security-mongo-bundle": "^1.0.0",
     "@bluelibs/validator-bundle": "^1.0.0",
+    "@bluelibs/x-auth-bundle": "^1.0.0",
     "@bluelibs/x-bundle": "^1.0.0",
     "@bluelibs/x-s3-bundle": "^1.0.0",
     "@bluelibs/x-password-bundle": "^1.0.0",
@@ -49,9 +51,9 @@
     "graphql-upload": "^12.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "passport": "^0.4.1",
+    "passport": "^0.6.0",
     "moment": "^2.29.1",
-    "mongodb": "4.2.2",
+    "mongodb": "^4.2.2",
     "yup": "^0.32.0"
   },
   "devDependencies": {

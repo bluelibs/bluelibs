@@ -19,7 +19,9 @@ export interface ISecureOptions<T = null> {
   /**
    * Enforce filters
    */
-  filters?: T extends null ? FilterQuery<any> : FilterQuery<T>;
+  filters?: T extends null
+    ? FilterQuery<any>
+    : FilterQuery<AnyifyFieldsWithIDs<T>>;
   options?: any;
   /**
    * This gets deeply merged with the body (useful for $ argument)
@@ -126,7 +128,9 @@ export interface IQueryOptions<T = any> {
 }
 
 export interface ICollectionQueryConfig<T = any> {
-  filters?: T extends null ? FilterQuery<any> : FilterQuery<T>;
+  filters?: T extends null
+    ? FilterQuery<any>
+    : FilterQuery<AnyifyFieldsWithIDs<T>>;
   options?: IQueryOptions<T>;
   pipeline?: any[];
 }
@@ -170,6 +174,12 @@ type SimpleFieldValue =
 //   };
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
+
+type HasID<T> = "_id" extends keyof Unpacked<T> ? true : false;
+
+export type AnyifyFieldsWithIDs<T> = {
+  [K in keyof T]: true extends HasID<T[K]> ? any : T[K];
+};
 
 export type AnyBody = {
   $alias?: string;

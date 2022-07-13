@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x",
-  "version": "1.11.1",
+  "version": "1.12.0",
   "description": "Scaffolding tool for BlueLibs Framework using X-Framework.",
   "main": "dist/index.js",
   "repository": {
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@bluelibs/core": "^1.0.0",
-    "@bluelibs/ejson": "^1.0.0",
+    "@bluelibs/ejson": "^1.2.1",
     "@bluelibs/terminal-bundle": "^1.0.0",
     "@graphql-tools/merge": "^6.0.7",
     "@types/faker": "^5.5.7",

@@ -75,7 +75,14 @@ export function Login() {
                 {tl("forgotPassword_btn")}
               </Link>
             </Form.Item>
-
+            <Form.Item>
+              <Link
+                className="authentication-request-magic-link"
+                to={router.path(Routes.REQUEST_MAGIC_LINK)}
+              >
+                {tl("request_magic_link_btn")}
+              </Link>
+            </Form.Item>
             <Form.Item>
               <Button
                 type="primary"
