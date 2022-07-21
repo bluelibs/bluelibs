@@ -12,7 +12,7 @@
 <br />
 <br />
 
-The X-Framework generator is a command-line utility which enables you to write code the X-Framework with incredible speed bost provided by the X-Framework Bundle by BlueLibs.
+The X-Framework generator is a command-line utility which enables you to write code the X-Framework with the incredible speed boost provided by the X-Framework Bundle by BlueLibs.
 
 ## Install
 
@@ -20,7 +20,7 @@ The X-Framework generator is a command-line utility which enables you to write c
 npm install -g @bluelibs/x-generator-bundle
 ```
 
-Just type `x` and start coding the X-Framework:
+Just type `x` and start coding with the X-Framework:
 
 ```bash
 x
