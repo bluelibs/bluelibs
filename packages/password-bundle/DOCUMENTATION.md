@@ -14,7 +14,7 @@ const kernel = new Kernel({
 
 ## Purpose
 
-This is an authentication strategy implemented for the `SecurityBundle`. It does not expose any routes, nor does it send any emails and it doesn't care about your persistance layer (database-agnostic). It just focuses on the `raw` handling of passwords for a user.
+This is an authentication strategy implemented for the `SecurityBundle`. It does not expose any routes, nor does it send any emails and it doesn't care about your persistence layer (it is database-agnostic). It just focuses on the low-level handling of passwords for a user.
 
 ```typescript
 import { PasswordBundle } from "@bluelibs/password-bundle";
@@ -64,9 +64,9 @@ Checking is password is valid:
 const isValid = await passwordService.isPasswordValid(userId, "PASSWORD");
 ```
 
-Note that password validation will also register invalid attempts, and depending on how you have configured the bundle it can temporary suspend the user.
+Note that password validation will also register invalid attempts, and depending on how you have configured the bundle it can temporarily suspend the user.
 
-If you want to bypass this functionality you can pass as the 3rd argument:
+If you want to bypass this functionality you can pass a 3rd argument:
 
 ```typescript
 passwordService.isPasswordValid(userId, "PASSWORD", {
@@ -76,7 +76,7 @@ passwordService.isPasswordValid(userId, "PASSWORD", {
 
 ## Forgot Password
 
-This contains the full flow of a forgot password process. First we get a token to reset the password send send it by email, then we check if the token is valid and we reset it with it.
+This contains the full flow of a forgot password process. First we get a token to reset the password and send it by email, then we check if the token is valid and we reset it with it.
 
 ```typescript
 const token = await passwordService.createTokenForPasswordReset(userId);
@@ -97,7 +97,7 @@ Overriding a password is as easy as:
 await passwordService.setPassword(userId, "NEW_PASSWORD");
 ```
 
-The passwords are hashed individually per user's salt via `sha512`
+The passwords are hashed individually with the user's salt via `sha512`
 
 ## Events
 
@@ -196,7 +196,7 @@ This is the raw functionality of handling passwords. A complete integration for 
 
 ### Boilerplates
 
-- COMMING SOON
+- COMING SOON
 
 ### Challenges
 
