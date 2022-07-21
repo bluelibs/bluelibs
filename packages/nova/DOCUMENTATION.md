@@ -41,9 +41,10 @@ addLinks(Patients, {
     // @default = false
     many: false,
 
-    // We pass this because we don't expect another Patient with the same MedicalProfile ID
+    // We would make this true if we didn't expect another Patient with
+    // the same MedicalProfile ID; see below
     // @default = false
-    unique: true,
+    unique: false,
   },
 });
 ```
@@ -218,7 +219,7 @@ addLinks(Companies, {
       roles: { $in: ["EMPLOYEE"] },
     },
   },
-  managgers: {
+  managers: {
     collection: () => Users,
     inversedBy: "company",
     filters: {
@@ -260,7 +261,7 @@ addLinks(Users, {
 
 ### Aliasing
 
-Sometimes you may find useful to fetch the same link but in different contexts, for example you want to get a Company with the last 3 invoices and with overdue invoices without much hassle:
+Sometimes you may find useful to fetch the same link but in different contexts, for example you want to get a Company with the last 3 invoices and with overdue invoices without much hassle (see the next section for more information on `query()` and the `$` field):
 
 ```typescript
 manyToOne(Invoices, Company, {
@@ -308,7 +309,7 @@ query(Company, {
 })
 ```
 
-## Query-ing
+## Querying
 
 We showed a little bit of how we can query stuff, but we need to dive a little bit deeper, so let's explore together how we can filter, sort, and paginate our query.
 
@@ -603,11 +604,11 @@ Notes:
 - Do not specify nested fields, use instead: `profile.name: 1` => `profile: { name: 1 }`
 - Reducers can use other links and other reducers naturally.
 - Just be careful when extending the pipeline it may have unexpected results.
-- We recommend that you initially do not focus on performance, rather on code-clarity
+- We recommend that you initially do not focus on performance, rather on code clarity.
 
 ## Secure the Body
 
-Sometimes you might get the body request from the client. You want to ensure the client doesn't ask extra fields and it's at least decent in its request, below we'll explore how we can do this once we get that body:
+Sometimes you might get the body of a request from the client. You want to ensure the client doesn't ask for extra fields and that it's at least decent in its request.  This is how we can do this once we get that body:
 
 ```ts
 import { secureBody } from "@bluelibs/nova";
@@ -795,7 +796,7 @@ However, we currently can't work with fields in arrays of objects, or have array
 
 ## Hypernova
 
-This is the crown jewl of Nova. It has been engineered for absolute performance. We had to name this whole process somehow, and we had to give it a bombastic name, due to its similarity with an explosion of data.
+This is the crown jewel of Nova. It has been engineered for absolute performance. We had to name this whole process somehow, and we had to give it a bombastic name, due to its similarity with an explosion of data.
 
 To understand what we're talking about let's take this example of a query:
 
@@ -844,7 +845,7 @@ We would have blasted the database with:
 
 This means `131` database requests.
 
-Ok, you can cache some stuff, maybe some authors collide, but in order to write a performant code,
+Ok, you can cache some stuff, maybe some authors collide, but in order to write a performant implementation
 you would have to write a bunch of non-reusable code.
 
 But this is just a simple query, imagine something deeper nested. For Nova, it's a breeze.
@@ -861,12 +862,12 @@ The number of database requests is predictable, because it represents the number
 (If you use reducers that make use of links, take those into consideration as well)
 
 It does this by aggregating filters at each level, fetching the data, and then it reassembles data to their
-propper objects.
+proper objects.
 
-Not only it makes **5 requests** instead of 131, but it smartly re-uses categories and authors at each collection node,
+Not only does it make **5 requests** instead of 131, but it also smartly re-uses categories and authors at each collection node,
 meaning you will have much less bandwidth consumed.
 
-Making it more efficient in terms of bandwidth than SQL or other relational databases.
+This makes it more efficient in terms of bandwidth than SQL or other relational databases.
 
 Example:
 
@@ -880,9 +881,9 @@ Example:
 }
 ```
 
-Let's assume we have 100 posts, and the total number of categories is like 4. Hypernova does 2 requests to the database,
-and fetches 100 posts, and 4 categories. If you would have used `JOIN` functionality in SQL, you would have received
-the categories for each post.
+Let's assume we have 100 posts, and the total number of categories is 4. Hypernova does 2 requests to the database,
+and fetches 100 posts and 4 categories. If you would have used `JOIN` functionality in SQL, you would have received
+the full category names for each post.
 
 ## Geographical Queries
 
@@ -951,11 +952,11 @@ query(
 
 ## High Performance Queries
 
-Deeper queries are run in parallel, make sure you have a connection `poolSize` of 10. This can be configured when creating your `MongoClient`. A larger `poolSize` might increase performance, but it can also decrease it.
+Deeper queries are run in parallel, so make sure you have a connection `poolSize` of at least 10. This can be configured when creating your `MongoClient`. An even larger `poolSize` might increase performance, but it can also decrease it.
 
-If you have a lot of nested fields, you also have the `$all: true` option at your disposal, sending out a large projection to MongoDB can sometimes make it slower than getting all the data. If you specify any collection fields and `$all: true`, all fields will be fetched, but your result will still be projected in the final result of the query.
+If you have a lot of nested fields, you also have the `$all: true` option at your disposal: sending out a large projection to MongoDB can sometimes make it slower than getting all the data. If you specify any collection fields and `$all: true`, all fields will be fetched, but your result will still be projected in the final result of the query.
 
-We can also benefit of extreme rapid BSON decoding through JIT compilers as long as we know not only the fields, but their type too. This is done with the help of [@deepkit/bson](https://github.com/deepkit/deepkit-framework/tree/master/packages/bson) and [@deepkit/type](https://deepkit.io/documentation/type).
+We can also benefit from extremely rapid BSON decoding through JIT compilers as long as we know not only the fields, but their type too. This is done with the help of [@deepkit/bson](https://github.com/deepkit/deepkit-framework/tree/master/packages/bson) and [@deepkit/type](https://deepkit.io/documentation/type).
 
 ```ts
 import { t, query } from "@bluelibs/nova"; // t is from "deepkit/type" package
@@ -1010,7 +1011,7 @@ Reducers do not need to be added in the schema, as they are computed and added i
 
 ### Summary
 
-If you want to use MongoDB, Nova is the most advanced and fastest relational data fetcher on Node ecosystem at the moment. Even if you do not use the whole `BlueLibs` ecosystem it's still a must for you.
+If you want to use MongoDB, Nova is the most advanced and fastest relational data fetcher in the Node ecosystem at the moment. Even if you do not use the whole `BlueLibs` ecosystem it's still a must for you.
 
 ### Boilerplates
 
