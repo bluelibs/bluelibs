@@ -1,4 +1,4 @@
-EJSON is a great way to use JSON to pass binaries and serialize/deserialize any type of data with ease. We use it to easily serialise/deserialise our objects while maintaining important objects such as dates, object ids, regexp etc.
+EJSON is a great way to use JSON to pass binaries and serialize/deserialize any type of data with ease. We use it to easily serialise/deserialise our objects while maintaining important objects such as dates, object ids, regexps, etc.
 
 ## Install
 
@@ -26,7 +26,7 @@ https://docs.meteor.com/api/ejson.html
 
 ## Custom Types
 
-Works with customly defined objects for easy serialisastion and deserialisation:
+Works with custom defined objects for easy serialisastion and deserialisation:
 
 ```ts
 class Distance {
@@ -76,7 +76,7 @@ const post = EJSON.fromJSONValue(postEJSON);
 post._id instanceof ObjectId; // true
 ```
 
-This is mostly used for `MongoDB` database, if you use other databases and don't need it, then you have to leave it be as a dormant functionality.
+This is mostly used for `MongoDB` database; if you use other databases and don't need it, then you can leave it be as a dormant functionality.
 
 ## Models
 
@@ -123,7 +123,7 @@ Another solution which focuses on speed but also Developer Experience is [Type f
 
 ### Summary
 
-EJSON is JSON + some flavors. It allows us to easily communicate with external JSON APIs and removes the headache of handling Dates, RegExps when they are comming as a client request.
+EJSON is JSON + some flavors. It allows us to easily communicate with external JSON APIs and removes the headache of handling Dates, RegExps when they are coming as a client request.
 
 ### Challenges
 
