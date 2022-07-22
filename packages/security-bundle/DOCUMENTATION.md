@@ -15,11 +15,11 @@ We wanted to create a module that is database agnostic and helps us with:
 - Ability to have dynamic fully-customisable authentication strategies (password, biometric, jwt, etc)
 - Fully-featured Permissioning System with Permission Hierarchies.
 
-This module works with any database and you can have different `persistance layers` for each: Users, Sessions, Permissions. For example once your application becomes very large, you might want to store your `Sessions` inside redis for its raw speed. This is done by simply changing an abstraction layer and not lay a single finger on your code, everything will work.
+This module works with any database and you can have different `persistence layers` for each: Users, Sessions, Permissions. For example once your application becomes very large, you might want to store your `Sessions` inside redis for its raw speed. This is done by simply changing an abstraction layer and not lay a single finger on your code, everything will work.
 
 ## Configuration
 
-By default it uses an in-memory database as persistance for users/permission/sessions, which means that on every server-restart everything will be forgotten. Either implement your own persistance layers either use some already done such as: [Security Mongo Bundle](/docs/package-security-mongo)
+By default it uses an in-memory database as persistence for users/permission/sessions, which means that on every server-restart everything will be forgotten. Either implement your own persistence layers or use some pre-existing solution such as: [Security Mongo Bundle](/docs/package-security-mongo)
 
 ```typescript
 import { SecurityBundle } from "@bluelibs/security-bundle";
@@ -42,7 +42,7 @@ new SecurityBundle({
 });
 ```
 
-## Persistance Layers
+## Persistence Layers
 
 In our current bundle we refer to persistence layers, as the services which lets us find, insert, update and remove different aspects of our models `User`, `Permission`, `Session`.
 
@@ -51,12 +51,12 @@ You can specify these permission layers in the bundle's config:
 ```ts
 import { SecurityBundle, IUserPersistance } from "@bluelibs/security-bundle";
 
-class MyUserPersistance implements IUserPersistance {
+class MyUserPersistence implements IUserPersistance {
   // all the methods to satisfy the IUserPersistance interface
 }
 
 new SecurityBundle({
-  userPersistance: MyUserPersistance,
+  userPersistance: MyUserPersistence,
 });
 
 // OR
@@ -176,7 +176,7 @@ export interface ISession {
 Let's say you want to clean-up sessions for the users, we offer two simple methods for this:
 
 ```typescript
-// If you choose to suspend the user, you can also cancel all his active sessions:
+// If you choose to suspend the user, you can also cancel all their active sessions:
 
 const { sessionPersistanceLayer } = securityService;
 await sessionPersistanceLayer.deleteAllSessionsForUser(userId);
@@ -206,11 +206,11 @@ const session = await securityService.getSession(sessionToken);
 await securityService.logout(sessionToken);
 ```
 
-As we've seen so far it's quite easy to create users, create sessions for them that we an identify
+As we've seen so far it's quite easy to create users and create sessions for them that we can identify.
 
 ### Strategies
 
-How can we authenticate users from an `end-to-end` perspective? We have passwords, biometric data, github, google. There are many ways. Let's see how the `SecurityService` comes in our aid.
+How can we authenticate users from an `end-to-end` perspective? We have passwords, biometric data, github, google. There are many ways. Let's see how the `SecurityService` comes to our aid.
 
 We introduce a new concept called `AuthenticationStrategy`, we are going to refer to it as `UAS`. What this means is that it allows you to work with the `UserPermissionPersistance` layer to store information associated to authenticating users. For example, when dealing with `password` authentication, we'll store a `hash` of that password. If we're dealing with `facebook` authentication, we'll store the `facebookProfileId` in the User somehow.
 
@@ -240,7 +240,7 @@ await securityService.removeAuthenticationStrategyData(userId, "password");
 ```
 
 :::note
-These strategies work perfectly well with any authentication mechanism, we have full support for passport, opening ourselves up to 500+ authentication strategies, which can make our life a breeze!
+These strategies work perfectly well with any authentication mechanism. We have full support for passport, opening ourselves up to 500+ authentication strategies, which can make our life a breeze!
 :::
 
 ## Permissioning
@@ -248,7 +248,7 @@ These strategies work perfectly well with any authentication mechanism, we have 
 Let us introduce you to our little friends: `IPermission` and `PermissionService`:
 
 ```typescript
-// This is how permission look like:
+// This is how permission looks like:
 export interface IPermission {
   userId: any;
   permission: string; // "ADMIN"
@@ -297,7 +297,7 @@ export interface IPermissionSearchFilter {
 }
 ```
 
-This type of search can aid us find permissions, verify if the user has them:
+This type of search can aid us find permissions and verify if the user has them:
 
 ```ts
 permissionService.has(permissionSearchFilter); // Promise<boolean>
@@ -322,7 +322,7 @@ await permissionService.has({
 
 ### Hierarchy
 
-Let us secure a method: `viewSallary()` is only accessible by people with role `MANAGER` and `ADMIN`. How does the check look like?
+Let us secure a method: `viewSalary()` is only accessible by people with role `MANAGER` and `ADMIN`. How does the check look like?
 
 ```ts
 if (hasRole("ADMIN") || hasRole("MANAGER")) {
@@ -438,14 +438,14 @@ await permissionService.add({
   domain: "marketing",
 });
 
-// **true** because he is "admin" on "finance" and "viewer" is under "admin"'s hierarchy
+// **true** because user is "admin" on "finance" and "viewer" is under "admin"'s hierarchy
 await permissionService.has({
   userId,
   permission: "viewer",
   domain: "finance",
 });
 
-// **false** because he is only "viewer" on "marketing"
+// **false** because user is only "viewer" on "marketing"
 await permissionService.has({
   userId,
   permission: "admin",
@@ -507,7 +507,7 @@ permissionService.findPermissions({
 
 ### Roles
 
-We call "role" a permission which is on `app` domain and has no `domainIdentifier`. The roles are typically stored under an array of strings under `user: { roles: [] }` but it can also be stored under permission collection as they normally are. It's your choice, the system works with both options, but for consistency it's best to just stick to one that fits best.
+We call "role" a permission which is on `app` domain and has no `domainIdentifier`. The roles are typically stored under an array of strings under `user: { roles: [] }` but it can also be stored under permission collection as they normally are. It's your choice: the system works with both options, but for consistency it's best to just stick to one that fits best.
 
 ```ts
 import { SecurityService } from "@bluelibs/security-bundle";
