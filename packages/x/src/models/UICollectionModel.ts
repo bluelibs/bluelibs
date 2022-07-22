@@ -69,7 +69,7 @@ export class UICollectionModel {
     // const isNotFile = (relation: Relation) => !relation.isFileRelated();
 
     const directLinks = this.studioCollection.relations
-      .filter((r) => r.isDirect)
+      .filter((r) => r.isDirect && r.enableGraphQL)
       // .filter(isNotFile)
       .map((relation) => {
         const r = relation.cleaned;
@@ -82,7 +82,7 @@ export class UICollectionModel {
       });
 
     const inversedLinks = this.studioCollection.relations
-      .filter((r) => !r.isDirect)
+      .filter((r) => !r.isDirect && r.enableGraphQL)
       // .filter(isNotFile)
       .map((relation) => {
         const r = relation.cleaned;
