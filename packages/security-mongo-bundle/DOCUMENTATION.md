@@ -23,9 +23,9 @@ kernel.addBundles([
 
 ## Purpose
 
-We need to blend `MongoBundle` which handles our connection to the database with `SecurityBundle` which is a database-agnostic to handle authentication, authorization and complex permissioning.
+We need to blend `MongoBundle` which handles our connection to the database with `SecurityBundle` which is a database-agnostic way to handle authentication, authorization and complex permissioning.
 
-We are doing this by creating the persistance layers (`users`, `sessions`, `permissions`) into their `MongoDB` collections
+We are doing this by creating the persistence layers (`users`, `sessions`, `permissions`) as `MongoDB` collections.
 
 ## Customise
 
@@ -52,8 +52,8 @@ const kernel = new Kernel({
 ```
 
 :::note
-The usecase for `null`-ifying is for example if you want to use Redis, you would create a custom persistance layer
-which you set in `SecurityBundle`, and you don't want this bundle (`SecurityMongoBundle`) to perform any modifications to use its `MongoDB` one.
+The use case for `null`-ifying is (for example) if you wanted to use Redis you could create a custom persistence layer
+which you set in `SecurityBundle`, and you then wouldn't want this bundle (`SecurityMongoBundle`) to perform any modifications to use its `MongoDB` one.
 :::
 
 Accessing the `MongoBundle` collections, for raw access to your data:
@@ -73,7 +73,7 @@ const permissionsCollection = container.get(PermissionsCollection);
 
 ## Custom Users Collection
 
-You have the option to make changes to your collection, for example if you user is linked to other collections or you simply want a different collectio name:
+You have the option to make changes to your collection, for example if you user is linked to other collections or you simply want a different collection name:
 
 ```typescript
 import {
