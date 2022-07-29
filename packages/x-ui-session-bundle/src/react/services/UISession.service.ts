@@ -88,7 +88,7 @@ export class UISessionService {
   ) {
     const previousValue = this.state[fieldName];
 
-    this._state = Object.assign({
+    this._state = Object.assign(this._state, {
       [fieldName]: value,
     });
 
