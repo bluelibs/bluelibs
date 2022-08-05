@@ -8,6 +8,7 @@ import { Inject, Service, ContainerInstance } from "@bluelibs/core";
 import { HTTPBundle } from "@bluelibs/http-bundle";
 import * as passport from "passport";
 import * as bodyParser from "body-parser";
+import * as session from "express-session";
 import {
   SOCIAL_CUSTOM_CONFIG,
   SOCIAL_UNIQUE_IDS,
@@ -24,9 +25,11 @@ import {
   socialPropsTypes,
 } from "./defs";
 import { MultipleFactorService } from "../multipleAuthFactor/MultipleFactorService";
+
 @Service()
 export class SocialLoginService {
-  httpBundle;
+  @Inject()
+  httpBundle: HTTPBundle;
   constructor(
     protected readonly container: ContainerInstance,
     @Inject(X_AUTH_SETTINGS)
@@ -63,7 +66,6 @@ export class SocialLoginService {
       ...PROFILE_OBJECT_PATH,
       ...this.config.socialAuth.profileObjectPath,
     };
-
     this.init();
   }
   protected passport;
@@ -89,6 +91,13 @@ export class SocialLoginService {
   init() {
     //prepare the rest app for our passport
     this.httpBundle.app.enable("trust proxy");
+    this.httpBundle.app.use(
+      session({
+        secret: this.config.socialAuth.sessionSecretkey || "secret",
+        resave: false,
+        saveUninitialized: true,
+      })
+    );
 
     this.httpBundle.app.use(bodyParser.urlencoded({ extended: false }));
     this.httpBundle.app.use(bodyParser.json());
@@ -197,7 +206,7 @@ export class SocialLoginService {
         failureRedirect: setting.url.fail,
         failureFlash: true,
       }),
-      (req, res, next) => {
+      (req: any, res, next) => {
         //here in our callback method we return return token of teh user
         if (req.user.token)
           res.redirect(setting.url?.success + "?token=" + req.user?.token);

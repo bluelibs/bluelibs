@@ -22,6 +22,7 @@
     "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
   },
   "devDependencies": {
+    "@bluelibs/apollo-bundle": "^1.2.3",
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
     "@types/express": "^4.17.13",

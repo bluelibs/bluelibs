@@ -5,7 +5,8 @@ export const RouteHandlerPreviousResultStore = Symbol(
   "RouteHandler_PreviousResultStore"
 );
 export type HTTPBundleConfigType = {
-  port: number;
+  port?: number;
+  useApolloBundleHttp?: boolean;
 };
 
 export type RouteHandlerType = (

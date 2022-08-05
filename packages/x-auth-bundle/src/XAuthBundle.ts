@@ -139,7 +139,7 @@ export class XAuthBundle extends Bundle<IXAuthBundleConfig> {
     if (this.config.socialAuth && this.config.services?.SocialLoginService) {
       this.container.set({
         id: SOCIAL_AUTH_SERVICE_TOKEN,
-        type: SocialLoginService,
+        type: this.config.services.SocialLoginService,
       });
       this.container.get(SOCIAL_AUTH_SERVICE_TOKEN);
     }
