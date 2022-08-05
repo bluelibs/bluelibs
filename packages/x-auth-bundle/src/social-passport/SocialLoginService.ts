@@ -93,7 +93,7 @@ export class SocialLoginService {
     this.httpBundle.app.enable("trust proxy");
     this.httpBundle.app.use(
       session({
-        secret: this.config.socialAuth.sessionSecretkey || "secret",
+        secret: this.config.socialAuth.sessionSecretkey,
         resave: false,
         saveUninitialized: true,
       })
@@ -208,7 +208,7 @@ export class SocialLoginService {
       }),
       (req: any, res, next) => {
         //here in our callback method we return return token of teh user
-        if (req.user.token)
+        if (req.user?.token)
           res.redirect(setting.url?.success + "?token=" + req.user?.token);
         else if (req.user.redirectUrl) {
           res.redirect(req.user.redirectUrl);
