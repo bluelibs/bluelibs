@@ -75,7 +75,7 @@ export abstract class Smart<StateModel = any, Config = any> {
   /**
    * @param subscriber
    */
-  protected subscribe(subscriber: SmartSubscriber) {
+  protected __subscribe(subscriber: SmartSubscriber) {
     if (this.subscribers.indexOf(subscriber) === -1) {
       this.subscribers.push(subscriber);
     }
@@ -84,7 +84,7 @@ export abstract class Smart<StateModel = any, Config = any> {
   /**
    * @param subscriber
    */
-  protected unsubscribe(subscriber: SmartSubscriber) {
+  protected __unsubscribe(subscriber: SmartSubscriber) {
     this.subscribers = this.subscribers.filter((s) => s !== subscriber);
   }
 
