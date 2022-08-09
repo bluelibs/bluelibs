@@ -1,8 +1,4 @@
-import {
-  Bundle,
-  IBundleConstructor,
-  KernelAfterInitEvent,
-} from "@bluelibs/core";
+import { Bundle, KernelAfterInitEvent } from "@bluelibs/core";
 import {
   HTTPBundleConfigType,
   RouteType,
@@ -11,10 +7,6 @@ import {
 import * as express from "express";
 import * as http from "http";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import {
-  ApolloBundle,
-  ApolloServerAfterInitEvent,
-} from "@bluelibs/apollo-bundle";
 import * as cookieParser from "cookie-parser";
 import {
   HTTPServerBeforeInitialisationEvent,
@@ -22,7 +14,6 @@ import {
 } from "./events";
 
 export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
-  dependencies = [ApolloBundle];
   public app: express.Application;
   public router: express.Router;
   public routes: RouteType[] = [];
@@ -35,37 +26,25 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
 
   async hook() {
     const logger = this.container.get(LoggerService);
-    if (this.config.useApolloBundleHttp) {
-      this.eventManager.addListener(ApolloServerAfterInitEvent, async (e) => {
-        //if we depend on apollo server we wait for its init not kernel init
-        await this.eventManager.emit(new HTTPServerBeforeInitialisationEvent());
-        this.httpServer = this.container.get(ApolloBundle).httpServer;
-        return new Promise((resolve, reject) => {
-          this.addRoutesToRouter();
-        });
-      });
-    } else {
-      this.eventManager.addListener(KernelAfterInitEvent, async (e) => {
-        await this.eventManager.emit(new HTTPServerBeforeInitialisationEvent());
 
-        return new Promise((resolve, reject) => {
-          this.addRoutesToRouter();
+    this.eventManager.addListener(KernelAfterInitEvent, async (e) => {
+      await this.eventManager.emit(new HTTPServerBeforeInitialisationEvent());
 
-          if (!this.httpServer) {
-            this.httpServer = this.app
-              .listen(this.config.port, () => {
-                this.isInitialised = true;
-                logger.info(`Started HTTP Server on port: ${this.config.port}`);
-                this.eventManager.emit(new HTTPServerInitialisedEvent());
-                resolve();
-              })
-              .on("error", (e) => {
-                reject(e);
-              });
-          }
-        });
+      return new Promise((resolve, reject) => {
+        this.addRoutesToRouter();
+
+        this.httpServer = this.app
+          .listen(this.config.port, () => {
+            this.isInitialised = true;
+            logger.info(`Started HTTP Server on port: ${this.config.port}`);
+            this.eventManager.emit(new HTTPServerInitialisedEvent());
+            resolve();
+          })
+          .on("error", (e) => {
+            reject(e);
+          });
       });
-    }
+    });
   }
 
   protected addRoutesToRouter() {
@@ -84,25 +63,17 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
   }
 
   async prepare() {
-    if (this.config.useApolloBundleHttp && this.container.get(ApolloBundle)) {
-      this.app = this.container.get(ApolloBundle).app;
-      this.router = this.container.get(ApolloBundle).app;
-      this.app.use(cookieParser());
-      this.app.use(express.json()); // for parsing application/json
-      this.app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-    } else {
-      this.app = express();
-      this.app.use((req, res, next) => {
-        res.setHeader("X-Framework", "BlueLibs");
-        next();
-      });
-      this.app.use(cookieParser());
-      this.app.use(express.json()); // for parsing application/json
-      this.app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+    this.app = express();
+    this.app.use((req, res, next) => {
+      res.setHeader("X-Framework", "BlueLibs");
+      next();
+    });
+    this.app.use(cookieParser());
+    this.app.use(express.json()); // for parsing application/json
+    this.app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-      this.router = express.Router();
-      this.app.use(this.router);
-    }
+    this.router = express.Router();
+    this.app.use(this.router);
   }
 
   async init() {}

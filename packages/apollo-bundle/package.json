@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@graphql-tools/schema": "^8.3.0",
-    "apollo-server-express": "^3.5.0",
     "apollo-server-core": "^3.0.0",
+    "apollo-server-express": "^3.5.0",
     "apollo-server-lambda": "^3.6.3",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.1",
@@ -44,6 +44,7 @@
     "@bluelibs/core": "^1.0.2",
     "@bluelibs/email-bundle": "^1.0.1",
     "@bluelibs/graphql-bundle": "^1.0.0",
+    "@bluelibs/http-bundle": "^1.0.2",
     "@bluelibs/logger-bundle": "^1.1.0",
     "@bluelibs/security-bundle": "^1.0.4",
     "@types/chai": "^4.2.22",

@@ -25,6 +25,7 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
 import { ApolloServer as ApolloServerLambda } from "apollo-server-lambda";
+import { HTTPBundle } from "@bluelibs/http-bundle";
 
 export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
@@ -40,6 +41,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     jit: true,
     useJSONMiddleware: true,
     serverless: false,
+    useHttpBundle: false,
   };
 
   public httpServer: http.Server;
@@ -91,7 +93,8 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       if (this.config.serverless) {
         logger.info(`Serverless Apollo handler ready.`);
       } else {
-        logger.info(`HTTP Server listening on port: ${this.config.port}`);
+        if (!this.config.useHttpBundle)
+          logger.info(`HTTP Server listening on port: ${this.config.port}`);
         let url = this.config.url;
         url += url.endsWith("/") ? "graphql" : "/graphql";
         logger.info(`GraphQL endpoint ready: ${url}`);
@@ -169,24 +172,35 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   protected async startHTTPServer(): Promise<void> {
     const { app, httpServer, server } = this;
     const manager = this.get<EventManager>(EventManager);
-
-    // server starting
-    return new Promise((resolve) => {
-      httpServer.listen(this.config.port, async () => {
-        resolve();
-        await manager.emit(
-          new ApolloServerAfterInitEvent({
-            app,
-            httpServer,
-            server,
-          })
-        );
+    if (this.config.useHttpBundle) {
+      return manager.emit(
+        new ApolloServerAfterInitEvent({
+          app,
+          httpServer,
+          server,
+        })
+      );
+    } else {
+      // server starting
+      return new Promise((resolve) => {
+        httpServer.listen(this.config.port, async () => {
+          resolve();
+          await manager.emit(
+            new ApolloServerAfterInitEvent({
+              app,
+              httpServer,
+              server,
+            })
+          );
+        });
       });
-    });
+    }
   }
 
   protected async instantiateExpress() {
-    const app = express();
+    const app = this.config.useHttpBundle
+      ? this.container.get(HTTPBundle)?.app
+      : express();
     app.use(
       (req, res, next) => {
         res.setHeader("X-Framework", "BlueLibs");
@@ -223,7 +237,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
     let httpServer: http.Server;
     if (!this.config.serverless) {
-      httpServer = http.createServer(app);
+      httpServer = this.config.useHttpBundle
+        ? this.container.get(HTTPBundle).httpServer
+        : http.createServer(app);
 
       if (this.config.enableSubscriptions) {
         // apolloServer.
