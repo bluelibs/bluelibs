@@ -200,15 +200,13 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
       }
 
       if (Array.isArray(value)) {
-        if (moment.isMoment(value[0])) {
+        if (moment.isMoment(value[0]) && value.length === 2) {
           // We detect a date-range
           push(key, {
             $gte: value[0].startOf("day").toDate(),
             $lte: value[1].endOf("day").toDate(),
           });
-        }
-
-        if (typeof value[0] === "number") {
+        } else if (typeof value[0] === "number" && value.length === 2) {
           // Number range detected
           push(key, {
             $gte: value[0],
@@ -217,9 +215,10 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
         }
 
         // most likely array of objectIds
-        push(key, {
-          $in: filters[key],
-        });
+        else
+          push(key, {
+            $in: filters[key],
+          });
       } else {
         if (typeof filters[key] === "string") {
           if (filters[key] !== "") {
