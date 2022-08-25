@@ -144,13 +144,13 @@ function reactToSmartStateChange(model) {
 
   useMemo(() => {
     // If we put this in useEffect it won't work initially as useEffect can be run async later
-    model.subscribe(forceUpdate);
+    model.__subscribe(forceUpdate);
     return null;
   }, []);
 
   useEffect(() => {
     return () => {
-      model.unsubscribe(forceUpdate);
+      model.__unsubscribe(forceUpdate);
     };
   }, []);
 }
