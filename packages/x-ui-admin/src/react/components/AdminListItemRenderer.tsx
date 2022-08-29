@@ -7,7 +7,7 @@ import * as startCase from "lodash.startcase";
 import { ObjectId } from "@bluelibs/ejson";
 import * as _ from "lodash";
 
-const emptyValue = "N/A";
+const emptyValue = <>"N/A"</>;
 
 export type AdminListItemRendererProps = {
   value: any;
@@ -105,7 +105,7 @@ export function AdminListItemRenderer(props: AdminListItemRendererProps) {
 
   if (props.type === "fileGroup") {
     if (!props.value) {
-      value = "N/A";
+      value = emptyValue;
     } else {
       value = (
         <>
