@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/mongo-bundle",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Easy MongoDB solution designed for BlueLibs Framework.",
   "main": "dist/index.js",
   "repository": {
