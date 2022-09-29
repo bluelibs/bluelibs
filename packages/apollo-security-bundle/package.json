@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/apollo-security-bundle",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Get access to currently logged in users through GraphQL context",
   "main": "dist/index.js",
   "repository": {
@@ -40,7 +40,7 @@
     "@types/express": "^4.17.13",
     "@types/graphql": "^0.11.3",
     "@types/jest": "^27.0.3",
-    "@types/node": "^8.0.28",
+    "@types/node": "^14.0.0",
     "@types/passport": "^1.0.6",
     "@types/passport-facebook": "^2.1.10",
     "@typescript-eslint/eslint-plugin": "2.3.0",
