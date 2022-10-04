@@ -197,7 +197,7 @@ Now let's insert, update and remove some data, note that what we see below are s
 ```ts
 const insertSomething = [
   // The second argument is what object to insert, in our case "post"
-  X.ToDocumentInsert(CollectionClass, "post"),
+  X.ToDocumentInsert(CollectionClass, { field: "post" }),
 
   // Because we return a `Post` from the insertion:
   // This one takes the returned _id from the above executor, and transforms it into a Nova query
@@ -232,6 +232,25 @@ const insertSomething = [
   },
 ];
 ```
+
+:::note
+You can also use the deep synchronisation option with the two executors: `ToDocumentInsert`,`ToDocumentUpdateByID`:
+
+```ts
+const insertSomething = [
+  X.ToDocumentInsert(CollectionClass, { field: "post", deepSync: true }),
+];
+const updateSomething = [
+  X.ToDocumentUpdateByID(
+    CollectionClass,
+    null,
+    ({ document }) => ({ $set: document }),
+    { deepSync: true }
+  ),
+];
+```
+
+:::
 
 :::note
 Whenever it feels hard or inconvenient to use this executors, just opt-out of them, they aren't designed to be very smart or adaptable. Move your logic into specialised services so that they can be easily tested.
