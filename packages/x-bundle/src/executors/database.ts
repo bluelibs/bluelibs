@@ -5,7 +5,7 @@ import { Filter, UpdateFilter } from "mongodb";
 import { prepareForExecution } from "./utils/prepareForExecution";
 import { GraphQLToNovaOptionsResolverType } from "./utils/GraphQLToNovaOptionsResolverType";
 import { NOVA_AST_TO_QUERY_OPTIONS } from "./security";
-import { IAstToQueryOptions } from "@bluelibs/nova";
+import { IAstToQueryOptions, AnyifyFieldsWithIDs as Clean } from "@bluelibs/nova";
 
 const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<
   any
@@ -96,7 +96,7 @@ export function ToNovaByResultID<T>(
 
 export function ToCollectionCount<T>(
   collectionClass: Constructor<Collection<T>>,
-  filterResolver?: (_, args, ctx, ast) => Filter<T> | Promise<Filter<T>>
+  filterResolver?: (_, args, ctx, ast) => Filter<Clean<T>> | Promise<Filter<Clean<T>>>
 ) {
   if (!filterResolver) {
     filterResolver = (_, args) => {
@@ -183,7 +183,7 @@ export function ToDocumentInsert<T>(
 export function ToDocumentUpdateByID<T>(
   collectionClass: Constructor<Collection<T>>,
   idArgumentResolver?: (args) => any | Promise<any>,
-  mutateResolver?: (args) => UpdateFilter<T> | Promise<UpdateFilter<T>>
+  mutateResolver?: (args) => UpdateFilter<Clean<T>> | Promise<UpdateFilter<Clean<T>>>
 ) {
   if (!idArgumentResolver) {
     idArgumentResolver = (args) => args._id;
