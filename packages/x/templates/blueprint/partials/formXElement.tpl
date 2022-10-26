@@ -112,9 +112,7 @@
             >
               {options.map((option) => (
                 <Ant.Select.Option value={option.value} key={option.value}>
-                  {t(`{{ title }}_enums.${option.label.toLowerCase()}`)
-                    ? t(`{{ title }}_enums.${option.label.toLowerCase()}`)
-                    : option.label}
+                  {t(`{{ title }}_enums.${option.label.toLowerCase()}`) ?? option.label}
                 </Ant.Select.Option>
               ))}
             </Ant.Select>
