@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-bundle",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "X-Framework is a feature-rich solution with fast prototyping in mind for BlueLibs",
   "main": "dist/index.js",
   "repository": {
@@ -60,7 +60,7 @@
     "@bluelibs/graphql-bundle": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
     "@bluelibs/mongo-bundle": "^1.0.0",
-    "@bluelibs/nova": "^1.0.0",
+    "@bluelibs/nova": "^1.4.3",
     "@bluelibs/password-bundle": "^1.0.0",
     "@bluelibs/security-bundle": "^1.0.0",
     "@bluelibs/security-mongo-bundle": "^1.0.0",
