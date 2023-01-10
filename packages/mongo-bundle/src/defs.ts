@@ -35,6 +35,15 @@ export interface IContextAware {
   context?: IExecutionContext;
 }
 
+export interface ITranslatableBehaviorOptions {
+  collection: Collection<any>;
+  /**
+   * Specify the top level fields that you want to be translatable
+   */
+  fields: string[];
+  defaultLocale: string;
+}
+
 export interface ITimestampableBehaviorOptions {
   fields?: {
     createdAt?: string;

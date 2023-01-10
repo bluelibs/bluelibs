@@ -997,15 +997,14 @@ Inside your resolver, use the cache Executor and feed it the chain of functions 
 
 You can also use unique caching configuration for every resolver method by pasing object of options, the options fields are:
 
-| field | type | default | description |
-| ----- | ---- | ------- | ----------- |
-
-| ttl | number | 30 | expiration time of cached Data in seconds |
-| refresh | boolean | false | if true :reset ttl count of a cached data, every time this data is consumed from the cache |
-| contextBoundness | boolean | true | if true: takes into account other fields in order to personalize cache usage for every user/role.. |
-| contextBoundnessFields | string[] | ["userId"] | if contextBoundness is true: the fields we want to build on the user boundness. those fields expected to be in ctx |
-| expirationBoundness | boolean | true | if true: takes into account the expiration time of the data |
-| expirationBoundnessField | string | "expiredAt" | if expirationBoundness is true: the field of the expiration date or duration in seconds, Date or number |
+| field                    | type     | default     | description                                                                                                        |
+| ------------------------ | -------- | ----------- | ------------------------------------------------------------------------------------------------------------------ |
+| ttl                      | number   | 30          | expiration time of cached Data in seconds                                                                          |
+| refresh                  | boolean  | false       | if true :reset ttl count of a cached data, every time this data is consumed from the cache                         |
+| contextBoundness         | boolean  | true        | if true: takes into account other fields in order to personalize cache usage for every user/role..                 |
+| contextBoundnessFields   | string[] | ["userId"]  | if contextBoundness is true: the fields we want to build on the user boundness. those fields expected to be in ctx |
+| expirationBoundness      | boolean  | true        | if true: takes into account the expiration time of the data                                                        |
+| expirationBoundnessField | string   | "expiredAt" | if expirationBoundness is true: the field of the expiration date or duration in seconds, Date or number            |
 
 ```ts
 {

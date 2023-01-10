@@ -955,6 +955,90 @@ export interface IMigrationStatus {
 }
 ```
 
+## Localization / I18N
+
+To implement localisation logic, we create separate collection for each translatable entity which will hold a language identifier and fields with their translation.
+
+If no translation is found for a specific language, we should fallback to the default one.
+
+The data model:
+
+```ruby
+Post {
+  _id
+  i18ns: PostsI18N
+}
+
+PostsI18N {
+  lang # the language code en, en-US
+  referenceId
+  title
+  description
+}
+```
+
+```ts
+interface I18N<T = null> {
+  [language: string]: T extends null ? {
+    [key: string]: any
+  } : T
+}
+
+class PostI18N {
+  title: string;
+  description: string;
+}
+
+type PostI18N {
+  title: String!
+}
+
+class Post {
+  title: string; // reducer for default lang
+  description: string; // reducer for default lang
+  /**
+   * Virtual field fetched via a reducer that accepts a 'lang'
+   */
+  i18n: I18N<PostI18N>;
+}
+
+class PostsCollection extends Collection<Post> {
+  static collectionName = "posts"
+  static model = Post
+
+  static behaviors = [
+    // each insert might trigger additional inserts depending on the model for each language
+    // each removal triggers removal for all i18n fields
+    // each update might result into 2 updates since we need to update the i18n collection
+    Translatable({
+      defaultLocale: "en_US"
+    })
+  ]
+}
+
+translator.setTranslation(collection, postId, {
+  title: "description",
+})
+
+// i18n reducer
+return translator.getTranslation(collection, postId)
+
+```
+
+```graphql
+type Post {
+  i18n: I18NConnection
+  title: String! # this is in fact a reducer
+}
+
+query PostsFind {
+  _id
+  i18n(locale: "fr") {
+    title
+  }
+}
+```
+
 ## Meta
 
 ### Summary
