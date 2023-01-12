@@ -57,9 +57,9 @@ export abstract class Listener {
 
 const eventHandlerMetadata = Symbol("eventHandler");
 
-export function On(
-  eventClass: IEventConstructor,
-  eventOptions?: IEventHandlerOptions
+export function On<T>(
+  eventClass: IEventConstructor<T>,
+  eventOptions?: IEventHandlerOptions<T>
 ) {
   return Reflect.metadata(eventHandlerMetadata, { eventClass, eventOptions });
 }
