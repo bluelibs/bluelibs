@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/smart",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Smart is a very small library which helps decouple state management and non-ui-related actions to separate classes.",
   "main": "dist/index.js",
   "repository": {
