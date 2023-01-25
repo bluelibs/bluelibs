@@ -21,7 +21,6 @@ export class UsersCollection<K extends IUser>
 
     return result.insertedId;
   }
-  x;
 
   async updateUser(userId: UserId, data: any): Promise<void> {
     await this.updateOne(

@@ -64,13 +64,13 @@ export interface IPermissioning {
   ): void;
 }
 
-export interface IUserPersistance {
+export interface IUserPersistance<K extends IUser = IUser> {
   insertUser(data): Promise<any>; // returns UserID
   updateUser(userId, data): Promise<void>; // $set, returns void
   deleteUser(userId): Promise<void>;
 
-  findUser(filters, fields?: IFieldMap): Promise<IUser>;
-  findUserById(userId: UserId, fields?: IFieldMap): Promise<IUser>;
+  findUser(filters, fields?: IFieldMap): Promise<K>;
+  findUserById(userId: UserId, fields?: IFieldMap): Promise<K>;
 
   findThroughAuthenticationStrategy<T = any>(
     strategyName: string,
