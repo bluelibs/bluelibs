@@ -8,6 +8,7 @@ import {
   SCHEMA_FIELD,
   SCHEMA_BSON_AGGREGATE_DECODER_STORAGE,
   SCHEMA_BSON_DOCUMENT_SERIALIZER,
+  CONTEXT_FIELD,
 } from "../../constants";
 import {
   QueryBodyType,
@@ -94,7 +95,7 @@ export default class CollectionNode implements INode {
    */
   public linker: Linker;
   public linkStorageField: string;
-
+  public readonly context: IQueryContext;
   public results: any = [];
 
   /**
@@ -102,10 +103,7 @@ export default class CollectionNode implements INode {
    */
   protected processedExpanders: string[] = [];
 
-  constructor(
-    options: CollectionNodeOptions,
-    public readonly context: IQueryContext
-  ) {
+  constructor(options: CollectionNodeOptions, context: IQueryContext = {}) {
     const { collection, body, name, parent, linker, explain = false } = options;
 
     if (collection && !_.isObject(body)) {
@@ -114,14 +112,21 @@ export default class CollectionNode implements INode {
       );
     }
 
+    this.context = context;
     this.props = body[SPECIAL_PARAM_FIELD] || {};
     this.alias = body[ALIAS_FIELD];
     this.schema = body[SCHEMA_FIELD];
+
+    if (body[CONTEXT_FIELD]) {
+      this.context = Object.assign({}, body[CONTEXT_FIELD], this.context);
+    }
+
     this.queryAllFields = Boolean(body[ALL_FIELDS]);
 
     this.body = _.cloneDeep(body);
     delete this.body[SPECIAL_PARAM_FIELD];
     delete this.body[ALIAS_FIELD];
+    delete this.body[CONTEXT_FIELD];
     delete this.body[SCHEMA_FIELD];
     delete this.body[ALL_FIELDS];
 

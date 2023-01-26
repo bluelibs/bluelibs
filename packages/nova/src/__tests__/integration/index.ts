@@ -726,6 +726,43 @@ describe("Main tests", function () {
     assert.isUndefined(result.profile);
   });
 
+  it("[Reducers] Should work with context passed as $context", async () => {
+    addReducers(A, {
+      fullName: {
+        dependency: {
+          profile: {
+            firstName: 1,
+            lastName: 1,
+          },
+        },
+        async reduce(obj, { context }) {
+          // @ts-ignore
+          assert.equal(context.test, 1);
+          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+        },
+      },
+    });
+
+    const a1 = await A.insertOne({
+      profile: {
+        firstName: 1,
+        lastName: 1,
+        number: 1,
+      },
+    });
+
+    const result: any = await query(A, {
+      $context: {
+        test: 1,
+      },
+      _id: 1,
+      fullName: 1,
+    }).fetchOne();
+
+    assert.equal(`1 1`, result.fullName);
+    assert.isUndefined(result.profile);
+  });
+
   it("[Reducers] Should work with nested expansion", async () => {
     manyToOne(A, B, {
       linkName: "b",

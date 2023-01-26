@@ -143,6 +143,7 @@ export interface IParameterableObject extends ICollectionQueryConfig {}
 // The separation between body and sub body is the fact body doesn't have functionable $()
 type BodyCustomise<T = null> = {
   $?: ICollectionQueryConfig<T>;
+  $context?: IQueryContext;
   $schema?: ClassSchema;
   $all?: boolean;
 };
