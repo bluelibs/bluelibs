@@ -32,7 +32,7 @@ import {
   DeepSyncOptionsType,
 } from "../services/deep-sync/DeepSyncDocumentNode";
 import {
-  query,
+  query as queryNova,
   ILinkOptions,
   QueryBodyType,
   IReducerOptions,
@@ -45,6 +45,7 @@ import {
   AnyifyFieldsWithIDs as Clean,
   LINK_STORAGE,
   Linker,
+  IQueryContext,
 } from "@bluelibs/nova";
 import {
   DocumentWithID,
@@ -504,9 +505,11 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    */
   async query(
     request: QueryBodyType<T>,
-    session?: MongoDB.ClientSession
+    session?: MongoDB.ClientSession,
+    context?: Partial<IQueryContext>
   ): Promise<Array<Partial<T>>> {
-    const results = await query(this.collection, request, {
+    const results = await queryNova(this.collection, request, {
+      ...context,
       container: this.container,
       session,
     }).fetch();
@@ -521,11 +524,13 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    */
   async queryOne(
     request: QueryBodyType<T>,
-    session?: MongoDB.ClientSession
+    session?: MongoDB.ClientSession,
+    context?: Partial<IQueryContext>
   ): Promise<Partial<T>> {
-    const result = await query(this.collection, request, {
-      container: this.container,
+    const result = await queryNova(this.collection, request, {
+      ...context,
       session,
+      container: this.container,
     }).fetchOne();
 
     return this.toModel(result);
@@ -598,7 +603,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * Transforms a plain object to the model
    * @param plain Object which you want to transform
    */
-  toModel(plain: any | any[]) {
+  toModel(plain: any | any[]): any | any[] {
     const model = this.getStaticVariable("model");
 
     if (model) {
@@ -627,10 +632,12 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   async queryGraphQL(
     ast: any,
     config?: IAstToQueryOptions<T>,
-    session?: MongoDB.ClientSession
+    session?: MongoDB.ClientSession,
+    context?: Partial<IQueryContext>
   ): Promise<Array<Partial<T>>> {
-    const result = await query
+    const result = await queryNova
       .graphql(this.collection, ast, config, {
+        ...context,
         container: this.container,
         session,
       })
@@ -647,10 +654,12 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   async queryOneGraphQL(
     ast,
     config?: IAstToQueryOptions<T>,
-    session?: MongoDB.ClientSession
+    session?: MongoDB.ClientSession,
+    context?: Partial<IQueryContext>
   ): Promise<Partial<T>> {
-    const result = await query
+    const result = await queryNova
       .graphql(this.collection, ast, config, {
+        ...context,
         container: this.container,
         session,
       })

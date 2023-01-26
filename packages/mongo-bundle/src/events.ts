@@ -8,7 +8,7 @@ type CollectionEventData = {
 };
 
 export abstract class CollectionEvent<
-  T extends CollectionEventData = any
+  T extends CollectionEventData = CollectionEventData
 > extends Event<T> {
   protected _collection: Collection<any>;
 
@@ -24,13 +24,13 @@ export abstract class CollectionEvent<
   }
 }
 
-export class BeforeInsertEvent<T = any> extends CollectionEvent<{
+export class BeforeInsertEvent<T = Object> extends CollectionEvent<{
   document: T;
   context: IExecutionContext;
   options: MongoDB.InsertOneOptions;
 }> {}
 
-export class AfterInsertEvent<T = any> extends CollectionEvent<{
+export class AfterInsertEvent<T = Object> extends CollectionEvent<{
   document: T;
   _id: any;
   context: IExecutionContext;
@@ -69,6 +69,31 @@ export class AfterDeleteEvent<T = any> extends CollectionEvent<{
   context: any;
   result: MongoDB.DeleteResult | MongoDB.ModifyResult<T>;
   options: MongoDB.DeleteOptions | MongoDB.FindOneAndDeleteOptions;
+}> {}
+
+/**
+ * Before a find operation is executed we await changes to the filters. Translation is a good use-case for this.
+ */
+export class BeforeQueryLocalEvent<T = any> extends CollectionEvent<{
+  filter: MongoDB.Filter<T>;
+  context: IExecutionContext;
+  method: "findOne" | "find" | "count";
+}> {}
+/**
+ * Before a nova operation is executed we await changes to the filters. Translation is a good use-case for this.
+ */
+export class BeforeNovaQueryLocalEvent<T = any> extends CollectionEvent<{
+  filter: MongoDB.Filter<T>;
+  context: IExecutionContext;
+  method: "findOne" | "find" | "count";
+}> {}
+
+/**
+ * This event is done before we transform the data to the default model.
+ */
+export class BeforeToModelLocalEvent<T = any> extends CollectionEvent<{
+  filter: MongoDB.Filter<T>;
+  context: IExecutionContext;
 }> {}
 
 /**

@@ -957,87 +957,136 @@ export interface IMigrationStatus {
 
 ## Localization / I18N
 
-To implement localisation logic, we create separate collection for each translatable entity which will hold a language identifier and fields with their translation.
-
-If no translation is found for a specific language, we should fallback to the default one.
-
-The data model:
-
-```ruby
-Post {
-  _id
-  i18ns: PostsI18N
-}
-
-PostsI18N {
-  lang # the language code en, en-US
-  referenceId
-  title
-  description
-}
-```
+Let us understand the preferred way of storing the data model:
 
 ```ts
-interface I18N<T = null> {
-  [language: string]: T extends null ? {
-    [key: string]: any
-  } : T
-}
-
-class PostI18N {
-  title: string;
-  description: string;
-}
-
-type PostI18N {
-  title: String!
-}
+import { I18NType } from "@bluelibs/mongo-bundle";
 
 class Post {
-  title: string; // reducer for default lang
-  description: string; // reducer for default lang
-  /**
-   * Virtual field fetched via a reducer that accepts a 'lang'
-   */
-  i18n: I18N<PostI18N>;
+  title: string;
+  title_i18n: I18NType<string>;
+
+  content: string;
+  content_i18n: I18NType<string>;
 }
+```
+
+This will create a `title` and `content` field in the database, but it will also create a `title_i18n` and `content_i18n` field. The `Localized` decorator will automatically handle the translation for you.
+
+```ts
+await postsCollection.insert(
+  {
+    title: "Hello",
+  },
+  {
+    context: { locale: "en" },
+  }
+);
+// works with updates too limited to $set.
+
+// will transform into: { title_i18n: [{ locale: "en", value: "Hello" }] }
+
+// you can also pass the i18n directly especially if you want to insert multiple locales at once
+
+await postsCollection.insert({
+  title_i18n: [
+    { locale: "en", value: "Hello" },
+    { locale: "fr", value: "Bonjour" },
+  ],
+});
+
+const post = await postsCollection.queryOne(
+  {
+    $: {
+      filters: {
+        _id: postId,
+      },
+    },
+    title: 1,
+  },
+  null,
+  {
+    locale: "en",
+  }
+);
+// Works with nested collections as well.
+
+// If you don't specify locale it will default to the default one
+
+console.log(post.title); // Hello
+```
+
+How to configure `Translatable` behavior into your collection to enable this functionality:
+
+```ts
+import Business from "../business.ts";
+import { Behaviors } from "@bluelibs/mongo-bundle";
 
 class PostsCollection extends Collection<Post> {
-  static collectionName = "posts"
-  static model = Post
+  static collectionName = "posts";
+  static model = Post;
 
   static behaviors = [
-    // each insert might trigger additional inserts depending on the model for each language
-    // each removal triggers removal for all i18n fields
-    // each update might result into 2 updates since we need to update the i18n collection
-    Translatable({
-      defaultLocale: "en_US"
-    })
-  ]
+    Behaviors.Translatable({
+      defaultLocale: Business.DEFAULT_LOCALE,
+      locales: Business.LOCALES,
+      fields: ["title", "content"], // fields to translate
+      // This is the default, but you can override it
+    }),
+  ];
 }
-
-translator.setTranslation(collection, postId, {
-  title: "description",
-})
-
-// i18n reducer
-return translator.getTranslation(collection, postId)
-
 ```
+
+### Nova Integration
+
+When a request is made to fetch data and the fields are translatable, we expand the request graph to also contain the `i18n` fields.
+
+```ts
+// This will automatically expand the request to also include the i18n fields
+postsCollection.queryOne({
+  title: 1,
+  content: 1,
+});
+
+// PostsCollection will automatically expand the request to also include the i18n fields and do proper cleanups.
+```
+
+### GraphQL Integration
 
 ```graphql
 type Post {
-  i18n: I18NConnection
-  title: String! # this is in fact a reducer
+  title: String
+  title_i18n: [I18N]
+  content: String
+  content_i18n: [I18N]
 }
+```
 
+When performing a request from the frontend, you should have a context reducer which will automatically add the `locale` to the context.
+
+```graphql
 query PostsFind {
-  _id
-  i18n(locale: "fr") {
+  PostsFind {
     title
+    content
   }
 }
 ```
+
+When performing the finds pass the `locale` to the context of the Collection to automatically transform the fields.
+
+### Limitations
+
+Our solution only works with strings for ease of use. If you want to store numbers or booleans, you will have to take care of the data serialisation/deserialisation yourself. (JSON should work nicely)
+
+It only works with top level fields currently. If you want to translate a field inside an object, it is currently not possible, we suggest you move it
+to the top level or decouple it in a separate collection.
+
+Currently we fetch all the i18n data when performing a find or an update. This is not ideal, but it is the easiest way to implement it. We will improve it in the future.
+
+Only works with $set operator for updating. We will improve it in the future.
+
+We try not to override default Mongo behavior via `find()` and `findOne()` we do not apply any translation magic. If you want to translate the fields, you will have to use `queryOne()` and `query()`. As the fields get transformed into Nova reducers behind the scenes.
 
 ## Meta
 
