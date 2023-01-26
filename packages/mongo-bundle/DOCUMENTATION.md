@@ -957,7 +957,7 @@ export interface IMigrationStatus {
 
 ## Localization / I18N
 
-Let us understand the preferred way of storing the data model:
+We are storing i18n data in a separate field called `{fieldName}_i18n` which is an object containing the language as key and the value as the translation.
 
 ```ts
 import { I18NType } from "@bluelibs/mongo-bundle";
@@ -969,6 +969,15 @@ class Post {
   content: string;
   content_i18n: I18NType<string>;
 }
+```
+
+The `I18NType` looks something like this:
+
+```ts
+export type I18NType<T = string> = Array<{
+  locale: string;
+  value: T;
+}>;
 ```
 
 This will create a `title` and `content` field in the database, but it will also create a `title_i18n` and `content_i18n` field. The `Localized` decorator will automatically handle the translation for you.
@@ -984,10 +993,7 @@ await postsCollection.insert(
 );
 // works with updates too limited to $set.
 
-// will transform into: { title_i18n: [{ locale: "en", value: "Hello" }] }
-
 // you can also pass the i18n directly especially if you want to insert multiple locales at once
-
 await postsCollection.insert({
   title_i18n: [
     { locale: "en", value: "Hello" },
@@ -1003,13 +1009,13 @@ const post = await postsCollection.queryOne(
       },
     },
     title: 1,
+    // Works with nested collections as well.
   },
   null,
   {
     locale: "en",
   }
 );
-// Works with nested collections as well.
 
 // If you don't specify locale it will default to the default one
 
@@ -1028,10 +1034,9 @@ class PostsCollection extends Collection<Post> {
 
   static behaviors = [
     Behaviors.Translatable({
-      defaultLocale: Business.DEFAULT_LOCALE,
-      locales: Business.LOCALES,
-      fields: ["title", "content"], // fields to translate
-      // This is the default, but you can override it
+      defaultLocale: Business.DEFAULT_LOCALE, // the default locale
+      locales: Business.LOCALES, // available locales
+      fields: ["title", "content"], // fields that are watched for translation
     }),
   ];
 }
@@ -1039,7 +1044,7 @@ class PostsCollection extends Collection<Post> {
 
 ### Nova Integration
 
-When a request is made to fetch data and the fields are translatable, we expand the request graph to also contain the `i18n` fields.
+The fields `title` become reducers that draw their data from the `i18n` fields. When a request is made to fetch data and the fields are translatable, we expand the request graph to also contain the `i18n` fields.
 
 ```ts
 // This will automatically expand the request to also include the i18n fields
@@ -1054,6 +1059,11 @@ postsCollection.queryOne({
 ### GraphQL Integration
 
 ```graphql
+type I18N {
+  locale: String!
+  value: String!
+}
+
 type Post {
   title: String
   title_i18n: [I18N]

@@ -49,7 +49,10 @@ export interface ITranslatableBehaviorOptions {
   defaultLocale: string;
 }
 
-export type I18NType<T = string> = T;
+export type I18NType<T = string> = Array<{
+  locale: string;
+  value: T;
+}>;
 
 export interface ITimestampableBehaviorOptions {
   fields?: {
