@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/mongo-bundle",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "description": "Easy MongoDB solution designed for BlueLibs Framework.",
   "main": "dist/index.js",
   "repository": {
@@ -34,7 +34,7 @@
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
-    "@bluelibs/nova": "^1.4.3",
+    "@bluelibs/nova": "^1.5.0",
     "@bluelibs/validator-bundle": "^1.0.0",
     "@types/graphql": "^0.11.3",
     "@types/jest": "^27.0.3",

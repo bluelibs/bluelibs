@@ -1001,21 +1001,19 @@ await postsCollection.insert({
   ],
 });
 
-const post = await postsCollection.queryOne(
-  {
-    $: {
-      filters: {
-        _id: postId,
-      },
-    },
-    title: 1,
-    // Works with nested collections as well.
+const post = await postsCollection.queryOne({
+  // You can also pass context as the 3rd argument to queryOne or directly in the QueryBody
+  $context: {
+    locale: "fr",
   },
-  null,
-  {
-    locale: "en",
-  }
-);
+  $: {
+    filters: {
+      _id: postId,
+    },
+  },
+  title: 1,
+  // Works with nested collections as well.
+});
 
 // If you don't specify locale it will default to the default one
 

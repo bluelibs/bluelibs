@@ -12,7 +12,7 @@ export type BehaviorType = (collectionEventManager: Collection<any>) => void;
 
 declare module "@bluelibs/nova" {
   export interface IQueryContext {
-    container: ContainerInstance;
+    container?: ContainerInstance;
     locale?: string;
   }
 }

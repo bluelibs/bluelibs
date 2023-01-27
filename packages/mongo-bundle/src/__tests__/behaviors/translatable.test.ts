@@ -118,6 +118,22 @@ describe("Translatable", () => {
 
     expect(post.title).toBe("Bonjour");
 
+    post = await postsCollection.queryOne({
+      $context: {
+        container: null,
+        locale: "fr",
+      },
+      $: {
+        filters: {
+          _id: post._id,
+        },
+      },
+      _id: 1,
+      title: 1,
+    });
+
+    expect(post.title).toBe("Bonjour");
+
     await postsCollection.updateOne(
       { _id: post._id },
       {
