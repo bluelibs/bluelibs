@@ -980,7 +980,34 @@ export type I18NType<T = string> = Array<{
 }>;
 ```
 
-This will create a `title` and `content` field in the database, but it will also create a `title_i18n` and `content_i18n` field. The `Localized` decorator will automatically handle the translation for you.
+In the database we're storing `title_i18n` and `content_i18n` fields as:
+
+```json
+{
+  "title_i18n": [
+    {
+      "locale": "en",
+      "value": "Hello World"
+    },
+    {
+      "locale": "fr",
+      "value": "Bonjour le monde"
+    }
+  ],
+  "content_i18n": [
+    {
+      "locale": "en",
+      "value": "This is a post"
+    },
+    {
+      "locale": "fr",
+      "value": "Ceci est un post"
+    }
+  ]
+}
+```
+
+Now use it naturally:
 
 ```ts
 await postsCollection.insert(

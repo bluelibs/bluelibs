@@ -42,7 +42,7 @@
     "@bluelibs/ejson": "^1.2.1",
     "@bluelibs/graphql-bundle": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
-    "@bluelibs/mongo-bundle": "^1.4.0",
+    "@bluelibs/mongo-bundle": "^1.7.0",
     "@bluelibs/nova": "^1.3.0",
     "@bluelibs/security-bundle": "^1.0.0",
     "@bluelibs/validator-bundle": "^1.0.0",
