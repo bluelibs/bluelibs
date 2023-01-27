@@ -26,7 +26,7 @@
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
-    "@bluelibs/nova": "^1.4.3",
+    "@bluelibs/nova": "^1.5.0",
     "@bluelibs/validator-bundle": "^1.0.0",
     "mongodb": "^4.3.0"
   },
