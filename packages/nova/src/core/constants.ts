@@ -16,6 +16,7 @@ export const SCHEMA_BSON_DOCUMENT_SERIALIZER = Symbol(
 export const EXPANDER_STORAGE = Symbol("expandersStorage");
 export const SPECIAL_PARAM_FIELD = "$";
 export const ALIAS_FIELD = "$alias";
+export const CONTEXT_FIELD = "$context";
 export const SCHEMA_FIELD = "$schema";
 export const ALL_FIELDS = "$all";
 
@@ -26,7 +27,8 @@ export const SPECIAL_FIELDS = [
   ALL_FIELDS,
 ];
 
-export const LINK_COLLECTION_OPTIONS_DEFAULTS: Partial<ILinkCollectionOptions> = {
-  many: false,
-  index: true,
-};
+export const LINK_COLLECTION_OPTIONS_DEFAULTS: Partial<ILinkCollectionOptions> =
+  {
+    many: false,
+    index: true,
+  };

@@ -955,6 +955,147 @@ export interface IMigrationStatus {
 }
 ```
 
+## Localization / I18N
+
+We are storing i18n data in a separate field called `{fieldName}_i18n` which is an object containing the language as key and the value as the translation.
+
+```ts
+import { I18NType } from "@bluelibs/mongo-bundle";
+
+class Post {
+  title: string;
+  title_i18n: I18NType<string>;
+
+  content: string;
+  content_i18n: I18NType<string>;
+}
+```
+
+The `I18NType` looks something like this:
+
+```ts
+export type I18NType<T = string> = Array<{
+  locale: string;
+  value: T;
+}>;
+```
+
+This will create a `title` and `content` field in the database, but it will also create a `title_i18n` and `content_i18n` field. The `Localized` decorator will automatically handle the translation for you.
+
+```ts
+await postsCollection.insert(
+  {
+    title: "Hello",
+  },
+  {
+    context: { locale: "en" },
+  }
+);
+// works with updates too limited to $set.
+
+// you can also pass the i18n directly especially if you want to insert multiple locales at once
+await postsCollection.insert({
+  title_i18n: [
+    { locale: "en", value: "Hello" },
+    { locale: "fr", value: "Bonjour" },
+  ],
+});
+
+const post = await postsCollection.queryOne({
+  // You can also pass context as the 3rd argument to queryOne or directly in the QueryBody
+  $context: {
+    locale: "fr",
+  },
+  $: {
+    filters: {
+      _id: postId,
+    },
+  },
+  title: 1,
+  // Works with nested collections as well.
+});
+
+// If you don't specify locale it will default to the default one
+
+console.log(post.title); // Hello
+```
+
+How to configure `Translatable` behavior into your collection to enable this functionality:
+
+```ts
+import Business from "../business.ts";
+import { Behaviors } from "@bluelibs/mongo-bundle";
+
+class PostsCollection extends Collection<Post> {
+  static collectionName = "posts";
+  static model = Post;
+
+  static behaviors = [
+    Behaviors.Translatable({
+      defaultLocale: Business.DEFAULT_LOCALE, // the default locale
+      locales: Business.LOCALES, // available locales
+      fields: ["title", "content"], // fields that are watched for translation
+    }),
+  ];
+}
+```
+
+### Nova Integration
+
+The fields `title` become reducers that draw their data from the `i18n` fields. When a request is made to fetch data and the fields are translatable, we expand the request graph to also contain the `i18n` fields.
+
+```ts
+// This will automatically expand the request to also include the i18n fields
+postsCollection.queryOne({
+  title: 1,
+  content: 1,
+});
+
+// PostsCollection will automatically expand the request to also include the i18n fields and do proper cleanups.
+```
+
+### GraphQL Integration
+
+```graphql
+type I18N {
+  locale: String!
+  value: String!
+}
+
+type Post {
+  title: String
+  title_i18n: [I18N]
+  content: String
+  content_i18n: [I18N]
+}
+```
+
+When performing a request from the frontend, you should have a context reducer which will automatically add the `locale` to the context.
+
+```graphql
+query PostsFind {
+  PostsFind {
+    title
+    content
+  }
+}
+```
+
+When performing the finds pass the `locale` to the context of the Collection to automatically transform the fields.
+
+### Limitations
+
+Our solution only works with strings for ease of use. If you want to store numbers or booleans, you will have to take care of the data serialisation/deserialisation yourself. (JSON should work nicely)
+
+It only works with top level fields currently. If you want to translate a field inside an object, it is currently not possible, we suggest you move it
+to the top level or decouple it in a separate collection.
+
+Currently we fetch all the i18n data when performing a find or an update. This is not ideal, but it is the easiest way to implement it. We will improve it in the future.
+
+Only works with $set operator for updating. We will improve it in the future.
+
+We try not to override default Mongo behavior via `find()` and `findOne()` we do not apply any translation magic. If you want to translate the fields, you will have to use `queryOne()` and `query()`. As the fields get transformed into Nova reducers behind the scenes.
+
 ## Meta
 
 ### Summary

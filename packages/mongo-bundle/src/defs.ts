@@ -12,7 +12,8 @@ export type BehaviorType = (collectionEventManager: Collection<any>) => void;
 
 declare module "@bluelibs/nova" {
   export interface IQueryContext {
-    container: ContainerInstance;
+    container?: ContainerInstance;
+    locale?: string;
   }
 }
 
@@ -29,11 +30,29 @@ export interface IExecutionContext {
    * Used for transactions
    */
   session?: ClientSession;
+  /**
+   * Used for i18n
+   */
+  locale?: string;
 }
 
 export interface IContextAware {
   context?: IExecutionContext;
 }
+
+export interface ITranslatableBehaviorOptions {
+  /**
+   * Specify the top level fields that you want to be translatable
+   */
+  fields: string[];
+  locales: string[];
+  defaultLocale: string;
+}
+
+export type I18NType<T = string> = Array<{
+  locale: string;
+  value: T;
+}>;
 
 export interface ITimestampableBehaviorOptions {
   fields?: {
