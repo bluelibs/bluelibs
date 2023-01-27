@@ -581,6 +581,7 @@ query(
   {
     fullName: 1,
   },
+  // The context
   {
     language: "en",
   }
@@ -599,16 +600,28 @@ declare module "@bluelibs/nova" {
 }
 ```
 
+You can also specify `$context` inside the query:
+
+```ts
+query(Users, {
+  $context: {
+    language: "en",
+  },
+  fullName: 1,
+});
+```
+
 Notes:
 
-- Do not specify nested fields, use instead: `profile.name: 1` => `profile: { name: 1 }`
-- Reducers can use other links and other reducers naturally.
-- Just be careful when extending the pipeline it may have unexpected results.
-- We recommend that you initially do not focus on performance, rather on code clarity.
+- Context is passed to all reducers below the current one.
+- While `$context` can be nested into deeper collections, please note that the context on top will have priority and will override the contexts below and merge with them. This is important because we want the 'rule of law' to be the top context.
+- Do not specify nested fields inside reducer's dependency, use instead: `profile.name: 1` => `profile: { name: 1 }`
+- Reducers can use other links and other reducers naturally, it ensures there is no circular dependency and optimizes compute to reduce the number of 'reduce' function calls.
+- Be careful when extending the pipeline and what fields you use.
 
 ## Secure the Body
 
-Sometimes you might get the body of a request from the client. You want to ensure the client doesn't ask for extra fields and that it's at least decent in its request.  This is how we can do this once we get that body:
+Sometimes you might get the body of a request from the client. You want to ensure the client doesn't ask for extra fields and that it's at least decent in its request. This is how we can do this once we get that body:
 
 ```ts
 import { secureBody } from "@bluelibs/nova";
