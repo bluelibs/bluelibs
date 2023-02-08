@@ -9,7 +9,7 @@ import {
 export class XSubscription<T extends { _id: any }> {
   protected isReady = false;
   protected dataSet: T[] = [];
-  protected subscriptionHandler: ZenObservable.Subscription;
+  protected subscriptionHandler: Observable.Subscription;
 
   constructor(
     public readonly observable: Observable<any>,
