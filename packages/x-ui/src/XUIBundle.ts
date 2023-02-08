@@ -37,15 +37,7 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
   async extend() {
     const config = this.config;
 
-    // TODO: cleanup after deprecation
-    await this.addDependency(
-      UIApolloBundle,
-      (config.graphql && {
-        client: config.graphql,
-        enableSubscriptions: config.enableSubscriptions,
-      }) ||
-        this.config.apollo
-    );
+    await this.addDependency(UIApolloBundle, this.config.apollo);
 
     await this.addDependency(
       XUIGuardianBundle,
