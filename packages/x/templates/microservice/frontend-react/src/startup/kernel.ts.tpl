@@ -15,6 +15,9 @@ export const kernel = new Kernel({
         // https://www.apollographql.com/docs/react/api/core/ApolloClient/#ApolloClientOptions
         uri: process.env.API_URL,
       },
+      apollo: {
+        enableSubscriptions: true,
+      },
     }),
     new UIAppBundle(),
     {{# if adminMode }}
