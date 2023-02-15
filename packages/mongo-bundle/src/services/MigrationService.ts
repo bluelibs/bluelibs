@@ -62,9 +62,8 @@ export class MigrationService {
   async getStatus(): Promise<IMigrationStatus> {
     let control = await this.migrationsCollection.findOne({ _id: "status" });
     if (!control) {
-      const lastMigration = this.migrationConfigs[
-        this.migrationConfigs.length - 1
-      ];
+      const lastMigration =
+        this.migrationConfigs[this.migrationConfigs.length - 1];
       control = {
         _id: "status",
         locked: false,
@@ -124,9 +123,8 @@ export class MigrationService {
    */
   async migrateToLatest(): Promise<void> {
     if (this.migrationConfigs.length > 0) {
-      const lastMigration = this.migrationConfigs[
-        this.migrationConfigs.length - 1
-      ];
+      const lastMigration =
+        this.migrationConfigs[this.migrationConfigs.length - 1];
 
       return this.migrateTo(lastMigration.version);
     }
@@ -139,7 +137,7 @@ export class MigrationService {
     this.logger.info("Finished migrating.");
   }
 
-  async migrateTo(version: number): Promise<void> {
+  async migrateTo(targetVersion: number): Promise<void> {
     const status = await this.getStatus();
     let currentVersion = status.version;
 
@@ -148,8 +146,8 @@ export class MigrationService {
       return;
     }
 
-    if (currentVersion === version) {
-      this.logger.info("Not migrating, already at version " + version);
+    if (currentVersion === targetVersion) {
+      this.logger.info("Not migrating, already at version " + targetVersion);
       this.unlock(currentVersion);
       return;
     }
@@ -157,16 +155,18 @@ export class MigrationService {
     var startIdx = this.migrationConfigs.findIndex(
       (c) => c.version === currentVersion
     );
-    var endIdx = this.migrationConfigs.findIndex((c) => c.version === version);
+    var endIdx = this.migrationConfigs.findIndex(
+      (c) => c.version === targetVersion
+    );
 
-    this.logger.info(`Bring it to: ${version}`);
+    this.logger.info(`Bring it to: ${targetVersion}`);
     this.logger.info("startIdx:" + startIdx + " endIdx:" + endIdx);
-    this.logger.info(`Migrating from ${currentVersion} to ${version}`);
+    this.logger.info(`Migrating from ${currentVersion} to ${targetVersion}`);
 
     try {
-      if (currentVersion < version) {
-        for (var i = startIdx; i < endIdx; i++) {
-          const migration = this.migrationConfigs[i + 1];
+      if (currentVersion < targetVersion) {
+        for (var i = startIdx === -1 ? 0 : startIdx; i <= endIdx; i++) {
+          const migration = this.migrationConfigs[i];
           if (migration) {
             await this.run("up", migration);
             currentVersion = migration.version;
@@ -175,7 +175,7 @@ export class MigrationService {
       } else {
         // When you're migrating to a version, you don't want to execute that down() version?
         for (var i = startIdx; i > endIdx; i--) {
-          const migration = this.migrationConfigs[i - 1];
+          const migration = this.migrationConfigs[i];
           if (migration) {
             await this.run("down", migration);
             currentVersion = migration.version;

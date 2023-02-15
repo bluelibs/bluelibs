@@ -53,7 +53,7 @@ describe("Migrations", () => {
     expect(await posts.find().count()).toBe(1);
 
     await migrationService.migrateTo(0);
-    expect(await posts.find().count()).toBe(1);
+    expect(await posts.find().count()).toBe(0);
 
     await migrationService.migrateToLatest();
     expect(await posts.find().count()).toBe(2);
@@ -88,5 +88,42 @@ describe("Migrations", () => {
         async down() {},
       });
     }).toThrow();
+  });
+
+  test("Ensure offset works", async () => {
+    const { container } = await getEcosystem();
+
+    const comments = container.get<Comments>(Comments);
+    const posts = container.get<Posts>(Posts);
+    const users = container.get<Users>(Users);
+
+    const migrationService = container.get(MigrationService);
+
+    function add(version: number) {
+      migrationService.add({
+        name: "Add a new post",
+        version,
+        async up() {
+          await posts.insertOne({
+            title: `Post ${version}`,
+          });
+        },
+        async down() {
+          await posts.deleteOne({
+            title: `Post ${version}`,
+          });
+        },
+      });
+    }
+    add(1);
+    add(2);
+    add(3);
+    // make the 3 adds above into a function that runs in a loop to i
+    // and then run the test again
+    await migrationService.migrateToLatest();
+    await migrationService.migrateTo(2);
+    expect(await posts.find({ title: "Post 1" }).count()).toBe(1);
+    expect(await posts.find({ title: "Post 2" }).count()).toBe(1);
+    expect(await posts.find().count()).toBe(2);
   });
 });
