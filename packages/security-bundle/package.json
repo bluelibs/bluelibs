@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/security-bundle",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "The official Security Solution for BlueLibs",
   "main": "dist/index.js",
   "repository": {
@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "dependency-graph": "^0.9.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "ms": "^2.1.2"
   },
   "peerDependencies": {
