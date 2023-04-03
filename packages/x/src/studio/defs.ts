@@ -14,9 +14,10 @@ export type Resolved<T> = {
   [K in keyof T]: T[K] extends Resolvable<infer Q> ? Q : T[K];
 };
 
-export type RequireFields<T, K extends (keyof T)[]> = DeepPartial<T> & {
-  [Z in K[number]]: T[Z];
-};
+export type RequireFields<T, K extends (keyof T)[]> = DeepPartial<T> &
+  {
+    [Z in K[number]]: T[Z];
+  };
 
 export type FactoryFunction<T, RT extends (keyof T)[] = null> = (
   data: RequireFields<T, RT>
@@ -129,4 +130,9 @@ export type GenerateProjectOptionsType = {
    * Writers are what write from models to the file system. You have the flexibility of creating your own. Easiest way to do this is just to look at the source and see what's going on under the hood.
    */
   writers: Partial<StudioWritersType>;
+
+  /**
+   * The path where the project will be generated, it uses the current working directory by default
+   */
+  projectPath: string;
 };

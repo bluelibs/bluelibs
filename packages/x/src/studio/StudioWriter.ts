@@ -104,7 +104,7 @@ export class StudioWriter {
       return;
     }
 
-    const projectPath = process.cwd();
+    const projectPath = this.options.projectPath || process.cwd();
     let firstTimeGeneration = false;
     session.setProjectPath(projectPath);
 
