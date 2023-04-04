@@ -112,6 +112,7 @@ export interface IXAuthBundleConfig {
     };
     fieldsValues?: SocialArrayPropsTypes;
     profileObjectPath?: SocialArrayPropsTypes;
+    sessionSecretkey?: string;
   };
 
   multipleFactorAuth?: {
