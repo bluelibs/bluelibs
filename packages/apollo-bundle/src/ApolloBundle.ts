@@ -8,8 +8,7 @@ import { Loader, ISchemaResult } from "@bluelibs/graphql-bundle";
 import * as http from "http";
 import * as express from "express";
 import * as cookieParser from "cookie-parser";
-import { ApolloServer, ApolloServerExpressConfig } from "apollo-server-express";
-
+import { ApolloServer, ApolloServerExpressConfig } from "@apollo/server";
 import {
   ApolloServerAfterInitEvent,
   ApolloServerBeforeInitEvent,
@@ -17,14 +16,19 @@ import {
   WebSocketOnDisconnectEvent,
 } from "./events";
 import { ApolloBundleConfigType } from "./defs";
+import {
+  startServerAndCreateLambdaHandler,
+  handlers,
+} from "@as-integrations/aws-lambda";
+
 import { IRouteType } from "./defs";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import { GraphQLUpload, graphqlUploadExpress } from "graphql-upload";
+import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
+import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
 import { GraphQLError, execute, subscribe } from "graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
-import { ApolloServer as ApolloServerLambda } from "apollo-server-lambda";
 
 export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
@@ -44,7 +48,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
   public httpServer: http.Server;
   public app: express.Application;
-  public server: ApolloServer | ApolloServerLambda;
+  public server: ApolloServer;
   public subscriptionServer: SubscriptionServer;
   /**
    * This is used to creating the serverless handler
@@ -125,13 +129,12 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     if (this.config.serverless) {
       const apolloConfig = this.getApolloConfig();
 
-      this.server = new ApolloServerLambda(apolloConfig);
-      this.serverlessHandler = this.server.createHandler({
-        expressAppFromMiddleware: (middleware) => {
-          this.app.use(middleware);
-          return this.app;
-        },
-      });
+      this.server = new ApolloServer(apolloConfig);
+      this.serverlessHandler = startServerAndCreateLambdaHandler(
+        this.server,
+        // We will be using the Proxy V2 handler
+        handlers.createAPIGatewayProxyEventV2RequestHandler()
+      );
     }
   }
 
@@ -212,7 +215,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   protected async prepareApolloServer(
     apolloServerConfig: ApolloServerExpressConfig,
-    apolloServer: ApolloServer | ApolloServerLambda
+    apolloServer: ApolloServer
   ) {
     const manager = this.container.get(EventManager);
     const { app } = this;

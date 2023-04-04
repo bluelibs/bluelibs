@@ -47,7 +47,7 @@
     "@bluelibs/security-bundle": "^1.0.0",
     "@bluelibs/validator-bundle": "^1.0.0",
     "bson": "^4.6.0",
-    "graphql": "^15.3.0 || ^14.0.0",
+    "graphql": "^16.0.0 || ^15.3.0 || ^14.0.0",
     "mongodb": "^4.0.0"
   },
   "devDependencies": {

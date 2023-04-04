@@ -1,22 +1,26 @@
-import { ApolloClient } from "apollo-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { HttpLink } from "apollo-link-http";
-import { onError } from "apollo-link-error";
-import { ApolloLink } from "apollo-link";
-import { WebSocketLink } from "apollo-link-ws";
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  HttpLink,
+} from "@apollo/client";
+import { onError } from "@apollo/client/link/error";
+import { split } from "@apollo/client/link/core";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { createClient } from "graphql-ws";
+
 import * as fetch from "isomorphic-fetch";
-import { split } from "apollo-link";
-import { getMainDefinition } from "apollo-utilities";
 import * as ws from "ws";
 
 export default function getClient(port: number = 6000): ApolloClient<any> {
-  const wsLink = new WebSocketLink({
-    uri: `ws://localhost:${port}/graphql`,
-    options: {
-      reconnect: true,
-    },
-    webSocketImpl: ws,
-  });
+  const wsLink = new GraphQLWsLink(
+    createClient({
+      url: `ws://localhost:${port}/graphql`,
+      retryAttempts: 5,
+      webSocketImpl: ws,
+    })
+  );
 
   const httpLink = new HttpLink({
     uri: `http://localhost:${port}/graphql`,

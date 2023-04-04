@@ -2,7 +2,7 @@ import { Kernel, Bundle, ContainerInstance } from "@bluelibs/core";
 import { ApolloBundle } from "../ApolloBundle";
 import { Loader } from "@bluelibs/graphql-bundle";
 import createApolloClient from "./apolloClientCreator";
-import { gql } from "apollo-boost";
+import { gql } from "@apollo/client";
 import { assert } from "chai";
 import { PubSub } from "graphql-subscriptions";
 

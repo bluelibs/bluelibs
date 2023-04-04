@@ -34,7 +34,7 @@
     "faker": "^5.5.3",
     "fast-glob": "^3.2.2",
     "fs-extra": "^9.0.0",
-    "graphql": "^15.3.0",
+    "graphql": "^16.6.0",
     "handlebars": "^4.7.6",
     "inflected": "^2.1.0",
     "lodash": "^4.17.15",
