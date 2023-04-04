@@ -1,6 +1,6 @@
 import * as shortid from "shortid";
-import { FileUpload } from "graphql-upload";
-import { S3 } from "aws-sdk";
+import { FileUpload } from "graphql-upload/processRequest.mjs";
+import { PutObjectOutput, PutObjectRequest, S3 } from "@aws-sdk/client-s3";
 import * as moment from "moment";
 import { XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";
@@ -160,8 +160,8 @@ export class S3UploadService {
    * @param stream
    * @returns
    */
-  async putObject(fileKey, mimeType, stream): Promise<S3.PutObjectOutput> {
-    const params: S3.PutObjectRequest = {
+  async putObject(fileKey, mimeType, stream): Promise<PutObjectOutput> {
+    const params: PutObjectRequest = {
       Bucket: this.config.bucket,
       Key: fileKey,
       Body: stream,
@@ -169,7 +169,7 @@ export class S3UploadService {
       ACL: "public-read",
     };
 
-    return this.s3.putObject(params).promise();
+    return this.s3.putObject(params);
   }
 
   /**
@@ -178,12 +178,10 @@ export class S3UploadService {
    * @returns
    */
   async remove(key) {
-    return this.s3
-      .deleteObject({
-        Bucket: this.config.bucket,
-        Key: key,
-      })
-      .promise();
+    return this.s3.deleteObject({
+      Bucket: this.config.bucket,
+      Key: key,
+    });
   }
 
   /**
@@ -233,11 +231,9 @@ export class S3UploadService {
    * @returns
    */
   generateKey(filename: string, context = ""): string {
-    const dateFolder = `${moment()
+    const dateFolder = `${moment().locale("en").format("YYYY")}/${moment()
       .locale("en")
-      .format("YYYY")}/${moment().locale("en").format("MM")}/${moment()
-      .locale("en")
-      .format("DD")}`;
+      .format("MM")}/${moment().locale("en").format("DD")}`;
 
     let key = `${dateFolder}/${shortid.generate()}`;
 

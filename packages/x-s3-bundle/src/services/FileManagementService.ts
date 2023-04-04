@@ -1,8 +1,4 @@
-import * as shortid from "shortid";
-import { URL } from "url";
-import { Upload } from "graphql-upload";
-import { S3 } from "aws-sdk";
-import * as moment from "moment";
+import { S3 } from "@aws-sdk/client-s3";
 import { AWSS3Config } from "../defs";
 import { AppFile } from "../collections/appFiles/AppFile.model";
 import { Inject } from "@bluelibs/core";

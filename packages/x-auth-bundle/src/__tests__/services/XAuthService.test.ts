@@ -1,3 +1,4 @@
+import { Kernel } from "@bluelibs/core";
 import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
 import {
@@ -39,6 +40,10 @@ describe("XAuthService.test ", () => {
 
   afterEach(async () => {
     await securityService.deleteUser(userId);
+  });
+  afterEach(async () => {
+    const kernel = container.get(Kernel);
+    await kernel.shutdown();
   });
 
   test("register", async () => {

@@ -20,7 +20,7 @@ export function createKernel() {
   return new Kernel({
     bundles: [
       new ApolloBundle({
-        port: 5000,
+        port: 5022,
       }),
       new GraphQLBundle(),
       new LoggerBundle(),
@@ -40,6 +40,3 @@ export function createKernel() {
     ],
   });
 }
-
-export const kernel = createKernel();
-export const container = kernel.container;

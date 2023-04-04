@@ -10,6 +10,7 @@ import { SecurityMongoBundle } from "@bluelibs/security-mongo-bundle";
 import { XAuthBundle } from "..";
 import { EmailBundle } from "@bluelibs/email-bundle";
 
+export const PORT = 64022;
 export async function createEcosystem(configXAuthBundle = {}) {
   try {
     const kernel = new Kernel({
@@ -17,7 +18,9 @@ export async function createEcosystem(configXAuthBundle = {}) {
         new LoggerBundle(),
         new GraphQLBundle(),
         new EmailBundle(),
-        new HTTPBundle(),
+        new HTTPBundle({
+          port: PORT,
+        }),
         new MongoBundle({
           uri: "mongodb://localhost:27017/test",
         }),
