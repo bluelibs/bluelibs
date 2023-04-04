@@ -7,7 +7,7 @@ export function createKernel() {
   return new Kernel({
     bundles: [
       new ApolloBundle({
-        port: 5000,
+        port: 6400,
       }),
       new ApolloSecurityBundle(),
       new SecurityBundle(),

@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/apollo-bundle",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "description": "Zero-config Apollo/GraphQL solution for BlueLibs Framework",
   "main": "dist/index.js",
   "repository": {
@@ -11,7 +11,7 @@
     "compile": "tsc",
     "watch": "tsc -w",
     "pretest": "npm run compile",
-    "test": "jest --verbose dist/__tests__/index.js",
+    "test": "jest --verbose dist/__tests__/index.js --detectOpenHandles",
     "test:clean": "jest --clearCache",
     "test:dev": "jest --verbose --watch src/__tests__/index.ts --detectOpenHandles",
     "test:watch": "jest --verbose --watch dist/__tests__/index.js",
@@ -33,7 +33,6 @@
     "graphql-subscriptions": "^2.0.0",
     "graphql-upload": "^16.0.2",
     "graphql-ws": "^5.12.1",
-    "subscriptions-transport-ws": "^0.9.19",
     "tiny-lru": "^7.0.6"
   },
   "peerDependencies": {
@@ -56,6 +55,7 @@
     "@types/graphql": "^14.2.3",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.3",
+    "@types/ws": "^8.5.4",
     "babel-jest": "^29.5.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",

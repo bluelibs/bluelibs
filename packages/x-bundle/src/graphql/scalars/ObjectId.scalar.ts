@@ -9,7 +9,7 @@ export default {
       name: "ObjectId",
       description: "ObjectId custom scalar type",
       parseValue(value) {
-        return new ObjectId(value);
+        return new ObjectId(value as string);
       },
       serialize(value: ObjectId) {
         return value.toString();

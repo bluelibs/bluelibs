@@ -12,7 +12,7 @@ export default {
           return null;
         }
 
-        return new Date(value); // value from the client
+        return new Date(value as number); // value from the client
       },
       serialize(value) {
         if (!value) {

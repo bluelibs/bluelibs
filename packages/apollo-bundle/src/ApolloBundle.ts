@@ -22,14 +22,13 @@ import {
   startServerAndCreateLambdaHandler,
   handlers,
 } from "@as-integrations/aws-lambda";
-
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { IRouteType } from "./defs";
 import { LoggerService } from "@bluelibs/logger-bundle";
 import GraphQLUpload from "./graphql-upload/GraphQLUpload";
 import graphqlUploadExpress from "./graphql-upload/graphqlUploadExpress";
 import { GraphQLError } from "graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import { SubscriptionServer } from "subscriptions-transport-ws";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
 import { expressMiddleware } from "@apollo/server/express4";
 import * as bodyParser from "body-parser";
@@ -54,7 +53,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   public httpServer: http.Server;
   public app: express.Application;
   public server: ApolloServer;
-  public subscriptionServer: SubscriptionServer;
+  public subscriptionServer: WebSocketServer;
   /**
    * This is used to creating the serverless handler
    */
@@ -113,14 +112,49 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   private async setupApolloServer() {
     const apolloServerConfig = this.getApolloConfig();
+    this.httpServer = http.createServer(this.app);
+    const { enableSubscriptions } = this.config;
 
     if (this.config.serverless) {
       await this.createServerlessHandler();
     } else {
-      this.server = new ApolloServer(apolloServerConfig);
+      // Hand in the schema we just created and have the
+      // WebSocketServer start listening.
+      let serverCleanup;
+      if (enableSubscriptions) {
+        this.attachSubscriptionService(apolloServerConfig, this.httpServer);
+
+        serverCleanup = useServer(
+          { schema: apolloServerConfig.schema },
+          this.subscriptionServer
+        );
+      }
+
+      this.server = new ApolloServer({
+        ...apolloServerConfig,
+        plugins: [
+          ApolloServerPluginDrainHttpServer({
+            httpServer: this.httpServer,
+          }),
+          // Proper shutdown for the WebSocket server.
+          {
+            async serverWillStart() {
+              return {
+                async drainServer() {
+                  enableSubscriptions && (await serverCleanup.dispose());
+                },
+              };
+            },
+          },
+        ],
+      });
     }
 
-    await this.prepareApolloServer(apolloServerConfig, this.server);
+    await this.prepareApolloServer(
+      apolloServerConfig,
+      this.server,
+      this.httpServer
+    );
 
     if (!this.config.serverless) {
       await this.startHTTPServer();
@@ -221,7 +255,8 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   protected async prepareApolloServer(
     apolloServerConfig: ApolloServerOptions<any>,
-    apolloServer: ApolloServer
+    apolloServer: ApolloServer,
+    httpServer: http.Server
   ) {
     const manager = this.container.get(EventManager);
     const { app } = this;
@@ -230,17 +265,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       app.use("/graphql", graphqlUploadExpress(this.config.uploads));
     }
 
-    let httpServer: http.Server;
     if (!this.config.serverless) {
-      httpServer = http.createServer(app);
-
-      if (this.config.enableSubscriptions) {
-        // apolloServer.
-        this.attachSubscriptionService(apolloServerConfig, httpServer);
-      }
-
-      this.httpServer = httpServer;
-
       await apolloServer.start();
 
       app.use(
@@ -291,13 +316,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       // ...this.createSubscriptions(apolloServerConfig.c)
       ...this.createSubscriptions(this.currentSchema.contextReducers),
     });
-
-    // Hand in the schema we just created and have the
-    // WebSocketServer start listening.
-    const serverCleanup = useServer(
-      { schema: apolloServerConfig.schema },
-      this.subscriptionServer
-    );
   }
 
   /**
@@ -429,7 +447,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       this.subscriptionServer.close();
     }
     await this.server.stop();
-    await this.httpServer.close();
+    if (this.httpServer.listening) {
+      await this.httpServer.close();
+    }
   }
 
   /**

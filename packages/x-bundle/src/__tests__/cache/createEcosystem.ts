@@ -12,6 +12,7 @@ import { SecurityMongoBundle } from "@bluelibs/security-mongo-bundle";
 import { PasswordBundle } from "@bluelibs/password-bundle";
 
 import { GraphQLBundle } from "@bluelibs/graphql-bundle";
+export const PORT = 6400;
 
 export async function createEcosystem(): Promise<ContainerInstance> {
   const kernel = new Kernel({
@@ -28,7 +29,7 @@ export async function createEcosystem(): Promise<ContainerInstance> {
       new SecurityMongoBundle(),
       new XBundle(),
       new ApolloBundle({
-        port: 7000,
+        port: PORT,
       }),
       new ApolloSecurityBundle(),
     ],

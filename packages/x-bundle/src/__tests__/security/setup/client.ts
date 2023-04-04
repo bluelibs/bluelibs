@@ -5,12 +5,18 @@ import {
   ApolloLink,
 } from "@apollo/client";
 import fetch from "node-fetch";
+import { PORT } from "../../cache/createEcosystem";
 
 export const authStorage = {
   value: "",
 };
-//@ts-ignore
-const httpLink = new HttpLink({ uri: "http://localhost:7000/graphql", fetch });
+
+const httpLink = new HttpLink({
+  uri: `http://localhost:${PORT}/graphql`,
+  // @ts-ignore
+  fetch,
+});
+
 const authMiddleware = new ApolloLink((operation, forward) => {
   // add the authorization to the headers
   operation.setContext(({ headers = {} }) => {
@@ -29,7 +35,7 @@ const authMiddleware = new ApolloLink((operation, forward) => {
 
 export function createClient(): ApolloClient<any> {
   return new ApolloClient({
-    uri: "http://localhost:7000/graphql",
+    uri: `http://localhost:${PORT}/graphql`,
     cache: new InMemoryCache(),
     link: ApolloLink.from([authMiddleware, httpLink]),
     defaultOptions: {

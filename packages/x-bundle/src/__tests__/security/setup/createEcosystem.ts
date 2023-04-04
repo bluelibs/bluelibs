@@ -101,6 +101,8 @@ class AppBundle extends BaseBundle {
   }
 }
 
+export const PORT = 6400;
+
 export async function createEcosystem(): Promise<ContainerInstance> {
   const kernel = new Kernel({
     bundles: [
@@ -116,7 +118,7 @@ export async function createEcosystem(): Promise<ContainerInstance> {
       new SecurityMongoBundle(),
       new XBundle({}),
       new ApolloBundle({
-        port: 7000,
+        port: PORT,
       }),
       new ApolloSecurityBundle(),
       new AppBundle(),
