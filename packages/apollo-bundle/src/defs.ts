@@ -1,14 +1,14 @@
-import { ApolloServerExpressConfig } from "apollo-server-express";
 import * as express from "express";
 import { ExecutionParams } from "subscriptions-transport-ws";
 import { ContainerInstance } from "@bluelibs/core";
-import { UploadOptions } from "graphql-upload";
+import { UploadOptions } from "graphql-upload/GraphQLUpload.mjs";
 import { RequestHandler } from "express";
+import { ApolloServerOptions } from "@apollo/server";
 
 export type ApolloBundleConfigType = {
   port?: number;
   url?: string;
-  apollo?: ApolloServerExpressConfig;
+  apollo?: ApolloServerOptions<any>;
   enableSubscriptions?: boolean;
   middlewares?: RequestHandler[];
   routes?: IRouteType[];

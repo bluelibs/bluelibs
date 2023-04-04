@@ -172,7 +172,7 @@ describe("ApolloBundle", () => {
   });
 
   it("Should be able to access the container from within", async () => {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       createEcosystemWithInit({
         typeDefs: `
             type Query { something: String }
@@ -180,7 +180,11 @@ describe("ApolloBundle", () => {
         resolvers: {
           Query: {
             something: (_, args, ctx) => {
-              assert.instanceOf(ctx.container, ContainerInstance);
+              try {
+                assert.instanceOf(ctx.container, ContainerInstance);
+              } catch (e) {
+                reject(e);
+              }
               resolve();
             },
           },

@@ -6,9 +6,11 @@ import {
 } from "@bluelibs/core";
 import { Loader, ISchemaResult } from "@bluelibs/graphql-bundle";
 import * as http from "http";
-import * as express from "express";
-import * as cookieParser from "cookie-parser";
-import { ApolloServer, ApolloServerExpressConfig } from "@apollo/server";
+import express from "express";
+import cookieParser from "cookie-parser";
+import { ApolloServer, ApolloServerOptions } from "@apollo/server";
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
 import {
   ApolloServerAfterInitEvent,
   ApolloServerBeforeInitEvent,
@@ -23,12 +25,15 @@ import {
 
 import { IRouteType } from "./defs";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import GraphQLUpload from "graphql-upload/GraphQLUpload.mjs";
-import graphqlUploadExpress from "graphql-upload/graphqlUploadExpress.mjs";
-import { GraphQLError, execute, subscribe } from "graphql";
+import GraphQLUpload from "./graphql-upload/GraphQLUpload";
+import graphqlUploadExpress from "./graphql-upload/graphqlUploadExpress";
+import { GraphQLError } from "graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
+import { expressMiddleware } from "@apollo/server/express4";
+import * as bodyParser from "body-parser";
+import cors from "cors";
 
 export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
@@ -108,6 +113,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   private async setupApolloServer() {
     const apolloServerConfig = this.getApolloConfig();
+
     if (this.config.serverless) {
       await this.createServerlessHandler();
     } else {
@@ -214,7 +220,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    * This function purely initialises the server
    */
   protected async prepareApolloServer(
-    apolloServerConfig: ApolloServerExpressConfig,
+    apolloServerConfig: ApolloServerOptions<any>,
     apolloServer: ApolloServer
   ) {
     const manager = this.container.get(EventManager);
@@ -234,8 +240,19 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       }
 
       this.httpServer = httpServer;
+
       await apolloServer.start();
-      apolloServer.applyMiddleware({ app });
+
+      app.use(
+        "/",
+        cors<cors.CorsRequest>(),
+        bodyParser.json(),
+        // expressMiddleware accepts the same arguments:
+        // an Apollo Server instance and optional configuration options
+        expressMiddleware(apolloServer, {
+          context: this.createContext(this.currentSchema.contextReducers),
+        })
+      );
     }
 
     this.addRoutesToExpress();
@@ -258,41 +275,41 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   }
 
   private attachSubscriptionService(
-    apolloServerConfig: ApolloServerExpressConfig,
+    apolloServerConfig: ApolloServerOptions<any>,
     httpServer: http.Server
   ) {
-    this.subscriptionServer = SubscriptionServer.create(
-      {
-        // This is the `schema` we just created.
-        schema: apolloServerConfig.schema,
-        // These are imported from `graphql`.
-        execute,
-        subscribe,
-        // Providing `onConnect` is the `SubscriptionServer` equivalent to the
-        // `context` function in `ApolloServer`. Please [see the docs](https://github.com/apollographql/subscriptions-transport-ws#constructoroptions-socketoptions--socketserver)
-        // for more information on this hook.
-        // ...this.createSubscriptions(apolloServerConfig.c)
-        ...this.createSubscriptions(this.currentSchema.contextReducers),
-      },
-      {
-        // This is the `httpServer` we created in a previous step.
-        server: httpServer,
-        // This `server` is the instance returned from `new ApolloServer`.
-        path: "/graphql",
-      }
+    this.subscriptionServer = new WebSocketServer({
+      // This is the `httpServer` we created in a previous step.
+      server: httpServer,
+      // Pass a different path here if app.use
+      // serves expressMiddleware at a different path
+      path: "/graphql",
+
+      // Providing `onConnect` is the `SubscriptionServer` equivalent to the
+      // `context` function in `ApolloServer`. Please [see the docs](https://github.com/apollographql/subscriptions-transport-ws#constructoroptions-socketoptions--socketserver)
+      // for more information on this hook.
+      // ...this.createSubscriptions(apolloServerConfig.c)
+      ...this.createSubscriptions(this.currentSchema.contextReducers),
+    });
+
+    // Hand in the schema we just created and have the
+    // WebSocketServer start listening.
+    const serverCleanup = useServer(
+      { schema: apolloServerConfig.schema },
+      this.subscriptionServer
     );
   }
 
   /**
    * Returns the ApolloConfiguration for ApolloServer
    */
-  protected getApolloConfig(): ApolloServerExpressConfig {
+  protected getApolloConfig(): ApolloServerOptions<any> {
     const schema = makeExecutableSchema({
       typeDefs: this.currentSchema.typeDefs,
       resolvers: this.currentSchema.resolvers,
     });
 
-    const config: ApolloServerExpressConfig = Object.assign(
+    const config: ApolloServerOptions<any> = Object.assign(
       {
         cors: true,
         formatError: (e: GraphQLError) => {
@@ -325,7 +342,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       {
         schema,
         executor: this.config.jit ? jitSchemaExecutor(schema) : undefined,
-        context: this.createContext(this.currentSchema.contextReducers),
         uploads: false,
       }
     );

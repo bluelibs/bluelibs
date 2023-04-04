@@ -1,11 +1,10 @@
-import { ApolloServer } from "apollo-server-express";
-import { ApolloServer as ApolloServerLambda } from "apollo-server-lambda";
+import { ApolloServer } from "@apollo/server";
 import { Event } from "@bluelibs/core";
 import * as express from "express";
 import * as http from "http";
 
 export interface IApolloServerInitialisation {
-  server?: ApolloServer | ApolloServerLambda; // ApolloServer Express
+  server?: ApolloServer; // ApolloServer Express
   httpServer?: http.Server; // HTTP Server from Node
   app?: express.Application; // express() app
 }

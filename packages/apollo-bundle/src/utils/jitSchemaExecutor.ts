@@ -1,4 +1,3 @@
-import { GraphQLExecutor } from "apollo-server-core";
 import { GraphQLSchema } from "graphql";
 const LRU = require("tiny-lru");
 import {

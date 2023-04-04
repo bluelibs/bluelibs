@@ -10,13 +10,13 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 
-import * as fetch from "isomorphic-fetch";
-import * as ws from "ws";
+import fetch from "isomorphic-fetch";
+import ws from "ws";
 
 export default function getClient(port: number = 6000): ApolloClient<any> {
   const wsLink = new GraphQLWsLink(
     createClient({
-      url: `ws://localhost:${port}/graphql`,
+      url: `ws://127.0.0.1:${port}/graphql`,
       retryAttempts: 5,
       webSocketImpl: ws,
     })
