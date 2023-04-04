@@ -1,5 +1,8 @@
-export * from "./services/S3UploadService";
+export * from "./services/UploadService";
+export * from "./services/IUploadService";
+
 export * from "./services/FileManagementService";
+export * from "./services/IStoreUploadService";
 
 export * from "./collections/appFiles/AppFiles.collection";
 export * from "./collections/appFiles/AppFile.model";

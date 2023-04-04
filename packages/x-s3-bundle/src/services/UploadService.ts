@@ -6,16 +6,21 @@ import { XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";
 import { Inject, EventManager } from "@bluelibs/core";
 import { AppFilesCollection } from "../collections/appFiles/AppFiles.collection";
-import { X_S3_CONFIG_TOKEN, APP_FILES_COLLECTION_TOKEN } from "../constants";
+import { UPLOAD_CONFIG, APP_FILES_COLLECTION_TOKEN } from "../constants";
 import { ObjectID } from "@bluelibs/mongo-bundle";
 import { ImageService } from "./ImageService";
 import { BeforeFileUploadEvent, AfterFileUploadEvent } from "../events";
+import { IUploadService } from "./IUploadService";
+import { IStoreUploadService } from "./IStoreUploadService";
+import { DbService } from "./StoreServices/DbService";
 
-export class S3UploadService {
-  protected s3: S3;
+export class UploadService implements IUploadService {
+  //protected s3: S3;
+  protected stores: IStoreUploadService[];
+  protected defaultStore: IStoreUploadService;
 
   constructor(
-    @Inject(X_S3_CONFIG_TOKEN)
+    @Inject(UPLOAD_CONFIG)
     protected readonly config: XS3BundleConfigType,
 
     @Inject(APP_FILES_COLLECTION_TOKEN)
@@ -24,8 +29,7 @@ export class S3UploadService {
     protected readonly eventManager: EventManager,
     protected readonly imageService: ImageService
   ) {
-    const { s3 } = config;
-    this.s3 = new S3(s3);
+    (this.stores = config.stores), (this.defaultStore = config.defaultStore);
   }
 
   /**
@@ -35,7 +39,8 @@ export class S3UploadService {
    */
   async upload(
     upload: Promise<FileUpload>,
-    extension?: Partial<AppFile>
+    extension?: Partial<AppFile>,
+    storeId?: string
   ): Promise<AppFile> {
     extension = extension || {};
     const { createReadStream, filename, mimetype } = await upload;
@@ -57,11 +62,18 @@ export class S3UploadService {
         buffer,
         extension,
         filename,
-        mimetype
+        mimetype,
+        storeId
       );
     }
 
-    const appFile = await this.doUpload(filename, mimetype, buffer, extension);
+    const appFile = await this.doUpload(
+      filename,
+      mimetype,
+      buffer,
+      extension,
+      storeId
+    );
 
     await this.eventManager.emit(
       new AfterFileUploadEvent({
@@ -72,15 +84,17 @@ export class S3UploadService {
     return appFile;
   }
 
-  protected async handleImageUploading(
+  async handleImageUploading(
     buffer: Buffer,
     extension: Partial<AppFile>,
     filename: string,
-    mimetype: string
+    mimetype: string,
+    storeId?: string
   ) {
     const response = await this.imageService.getImageThumbs(
       buffer,
-      extension?.context
+      extension?.context,
+      this.getTargetStore(storeId).id
     );
     const thumbs: AppFileThumb[] = [];
     for (const id in response) {
@@ -88,11 +102,16 @@ export class S3UploadService {
       const newFileKey = await this.uploadBuffer(
         newFileName,
         mimetype,
-        response[id]
+        response[id],
+        storeId
       );
       thumbs.push({
         id,
         path: newFileKey,
+        buffer:
+          this.getTargetStore(storeId) instanceof DbService
+            ? buffer
+            : undefined,
       });
     }
     Object.assign(extension, { thumbs });
@@ -112,9 +131,15 @@ export class S3UploadService {
     filename: string,
     mimetype: string,
     buffer: Buffer,
-    extension?: Partial<AppFile>
+    extension?: Partial<AppFile>,
+    storeId?: string
   ): Promise<AppFile> {
-    const fileKey = await this.uploadBuffer(filename, mimetype, buffer);
+    const fileKey = await this.uploadBuffer(
+      filename,
+      mimetype,
+      buffer,
+      storeId
+    );
 
     const appFile = new AppFile();
     if (extension) {
@@ -125,6 +150,11 @@ export class S3UploadService {
     appFile.name = filename;
     appFile.mimeType = mimetype;
     appFile.size = Buffer.byteLength(buffer);
+    appFile.store = this.getTargetStore(storeId).id;
+
+    if (this.getTargetStore(storeId) instanceof DbService) {
+      appFile.buffer = buffer.toString("base64");
+    }
 
     const result = await this.appFiles.insertOne(appFile);
     appFile._id = result.insertedId;
@@ -139,51 +169,19 @@ export class S3UploadService {
    * @param buffer
    * @returns
    */
-  protected async uploadBuffer(
+  async uploadBuffer(
     filename: string,
     mimetype: string,
-    buffer: Buffer
+    buffer: Buffer,
+    storeId?: string
   ) {
     const id = shortid.generate();
     const fileName = `${id}-${filename}`;
     const fileKey = this.generateKey(fileName);
 
-    await this.putObject(fileKey, mimetype, buffer);
+    await this.getTargetStore(storeId).writeFile(fileKey, mimetype, buffer);
 
     return fileKey;
-  }
-
-  /**
-   * Uploads your buffer/stream to the desired path in S3
-   * @param fileKey
-   * @param mimeType
-   * @param stream
-   * @returns
-   */
-  async putObject(fileKey, mimeType, stream): Promise<S3.PutObjectOutput> {
-    const params: S3.PutObjectRequest = {
-      Bucket: this.config.bucket,
-      Key: fileKey,
-      Body: stream,
-      ContentType: mimeType,
-      ACL: "public-read",
-    };
-
-    return this.s3.putObject(params).promise();
-  }
-
-  /**
-   * Removes it from S3 deleting it forever
-   * @param key
-   * @returns
-   */
-  async remove(key) {
-    return this.s3
-      .deleteObject({
-        Bucket: this.config.bucket,
-        Key: key,
-      })
-      .promise();
   }
 
   /**
@@ -191,7 +189,12 @@ export class S3UploadService {
    * @param fileId
    * @returns
    */
-  async getFileURL(fileId: ObjectID) {
+  async getFileURL(fileId: ObjectID, storeId?: string) {
+    const query: any = {
+      _id: fileId,
+      store: this.getTargetStore(storeId).id,
+    };
+
     const file = await this.appFiles.findOne(
       { _id: fileId },
       {
@@ -205,25 +208,7 @@ export class S3UploadService {
       throw new Error(`File with id: ${fileId} was not found`);
     }
 
-    return this.getUrl(file.path);
-  }
-
-  /**
-   * Returns the downloadable URL for the specified key
-   *
-   * @param key
-   * @returns
-   */
-  getUrl(key: string): string {
-    let urlPath = this.config.endpoint;
-    if (urlPath[urlPath.length - 1] !== "/") {
-      urlPath = urlPath + "/";
-    }
-    if (key[0] === "/") {
-      key = key.slice(1);
-    }
-    // urlPath ends with '/', key surely doesn't
-    return urlPath + key;
+    return this.getTargetStore(storeId).getDownloadUrl(file.path);
   }
 
   /**
@@ -233,11 +218,9 @@ export class S3UploadService {
    * @returns
    */
   generateKey(filename: string, context = ""): string {
-    const dateFolder = `${moment()
+    const dateFolder = `${moment().locale("en").format("YYYY")}/${moment()
       .locale("en")
-      .format("YYYY")}/${moment().locale("en").format("MM")}/${moment()
-      .locale("en")
-      .format("DD")}`;
+      .format("MM")}/${moment().locale("en").format("DD")}`;
 
     let key = `${dateFolder}/${shortid.generate()}`;
 
@@ -246,6 +229,35 @@ export class S3UploadService {
     }
 
     return `${key}-${filename}`;
+  }
+  /**
+   * Uploads your buffer/stream to the desired path in S3
+   * @param fileKey
+   * @param mimeType
+   * @param stream
+   * @returns
+   */
+  async putObject(fileKey, mimeType, stream, storeId?: string): Promise<any> {
+    return this.getTargetStore(storeId).writeFile(fileKey, mimeType, stream);
+  }
+
+  /**
+   * Removes it from S3 deleting it forever
+   * @param key
+   * @returns
+   */
+  async remove(key, storeId?: string) {
+    return this.getTargetStore(storeId).deleteFile(key);
+  }
+
+  /**
+   * Returns the downloadable URL for the specified key
+   *
+   * @param key
+   * @returns
+   */
+  getUrl(key: string, storeId?: string): string {
+    return this.getTargetStore(storeId).getDownloadUrl(key);
   }
 
   /**
@@ -267,9 +279,16 @@ export class S3UploadService {
   /**
    * Transforms /whatever/path/file.png, small -> /whatever/path/file-small.png
    */
-  protected injectFileSuffix(path: string, suffix: string): string {
+  injectFileSuffix(path: string, suffix: string): string {
     const parts = path.split(".");
 
     return [...parts.slice(0, -1), suffix, parts[parts.length - 1]].join(".");
+  }
+
+  getTargetStore(storeId?: string): IStoreUploadService {
+    if (!storeId) return this.defaultStore;
+    const store = this.stores.find((st) => st.id === storeId);
+    if (!store) throw "Couldn't find the store with id" + storeId;
+    return store;
   }
 }
