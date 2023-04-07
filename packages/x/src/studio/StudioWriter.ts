@@ -56,6 +56,12 @@ export class StudioWriter {
     if (!options.generators) {
       options.generators = ALL_GENERATORS;
     }
+    if (options.installNpmDependencies === undefined) {
+      options.installNpmDependencies = true;
+    }
+    if (options.verbose === undefined) {
+      options.verbose = true;
+    }
 
     this.options = options as GenerateProjectOptionsType;
     this.session = container.get(XSession);
@@ -171,20 +177,28 @@ export class StudioWriter {
 
     await this.setupI18NGenerics(studioApp, session, commit);
 
-    this.ensureNpmDependencies(firstTimeGeneration);
+    if (this.options.installNpmDependencies) {
+      this.ensureNpmDependencies(projectPath, firstTimeGeneration);
+    }
   }
 
   /**
    * Install all dependencies necessary
    */
-  protected ensureNpmDependencies(firstTimeGeneration: boolean) {
+  protected ensureNpmDependencies(projectPath, firstTimeGeneration: boolean) {
     console.log("");
 
     this.loading("Installing npm dependencies for api");
-    execSync("npm install", { cwd: "microservices/api", stdio: "inherit" });
+    execSync("npm install", {
+      cwd: path.join(projectPath, "microservices", "api"),
+      stdio: "inherit",
+    });
 
     this.loading("Installing npm dependencies for admin");
-    execSync("npm install", { cwd: "microservices/admin", stdio: "inherit" });
+    execSync("npm install", {
+      cwd: path.join(projectPath, "microservices", "api"),
+      stdio: "inherit",
+    });
 
     console.log("");
     this.success("Done. Now you can use:");
@@ -840,7 +854,6 @@ export class StudioWriter {
     // NPM
     const npmPackages = {
       "aws-sdk": "^2.948.0",
-      "graphql-upload": "^12.0.0",
       "@bluelibs/x-s3-bundle": "^1.0.0",
     };
 
@@ -856,14 +869,16 @@ export class StudioWriter {
   }
 
   public skipping(message) {
-    console.log(`${chalk.magentaBright("➤")} ${message} (skipping)`);
+    this.options.verbose &&
+      console.log(`${chalk.magentaBright("➤")} ${message} (skipping)`);
   }
 
   public success(message) {
-    console.log(`${chalk.greenBright("✓")} ${message}`);
+    this.options.verbose && console.log(`${chalk.greenBright("✓")} ${message}`);
   }
 
   public loading(message) {
-    console.log(`${chalk.redBright("♦")} ${message}...`);
+    this.options.verbose &&
+      console.log(`${chalk.redBright("♦")} ${message}...`);
   }
 }

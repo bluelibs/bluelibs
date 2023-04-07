@@ -84,13 +84,9 @@ export class {{ fixtureClass }} {
   async shouldRun() {
     if (this.kernel.isTesting()) return false
 
-    for (const collectionName in dataMap) {
-      const collection = this.databaseService.getMongoCollection(
-        collectionName
-      );
-      if ((await collection.find().count()) === 0) {
-        return true;
-      }
+    // npm run start
+    if (process.env.RUN_FIXTURES) {
+      return true;
     }
 
     return false;

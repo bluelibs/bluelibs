@@ -30,11 +30,13 @@ export function createKernel() {
       }),
       new XBundle(),
       new XS3Bundle({
-        accessKeyId: "A",
-        secretAccessKey: "B",
-        bucket: "test.com",
-        endpoint: "https://s3.amazonaws.com/test.com",
-        region: "eu-west-2",
+        s3: {
+          accessKeyId: "A",
+          secretAccessKey: "B",
+          bucket: "test.com",
+          endpoint: "https://s3.amazonaws.com/test.com",
+          region: "eu-west-2",
+        },
       }),
       new MyBundle(),
     ],

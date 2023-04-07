@@ -25,11 +25,6 @@ export type File = {
 export type XS3BundleConfigType = {
   s3: AWSS3Config;
   /**
-   * Please use the s3 config variable
-   * @deprecated
-   */
-  accessKeyId: string;
-  /**
    * Thumbs information, whether to generate thumbs for uploaded images. By default it generates: "small", "medium", "large"
    * If you override this the defaults will be wiped out you will have to customise them yourself.
    */
@@ -37,31 +32,6 @@ export type XS3BundleConfigType = {
 
   appFilesCollection?: Constructor<AppFilesCollection>;
   appFileGroupsCollection?: Constructor<AppFileGroupsCollection>;
-} & XS3BundleDeprecated;
-
-export type XS3BundleDeprecated = {
-  /**
-   * Please use the s3 config variable
-   * @deprecated
-   */
-  secretAccessKey: string;
-
-  /**
-   * Please use the s3 config variable
-   * @deprecated
-   */
-  region: string;
-
-  /**
-   * Please use the s3 config variable
-   * @deprecated
-   */
-  bucket: string;
-  /**
-   * Please use the s3 config variable
-   * @deprecated
-   */
-  endpoint: string;
 };
 
 export type ThumbConfigType = {

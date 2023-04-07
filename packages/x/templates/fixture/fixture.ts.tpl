@@ -31,6 +31,6 @@ export class {{ fixtureClass }} {
   }
 
   async shouldRun() {
-    return await this.getCollection().find().count() === 0
+    return await this.getCollection().countDocuments() === 0
   }
 }

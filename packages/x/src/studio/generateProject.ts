@@ -6,18 +6,18 @@ import { StudioWriter } from "./StudioWriter";
 import { GenerateProjectOptionsType, ALL_GENERATORS } from "./defs";
 import { SanityChecker } from "./bridge/SanityChecker";
 
-const kernel = new Kernel({
-  bundles: [
-    // new TerminalBundle({
-    //   version: require("../../package.json").version,
-    // }),
-  ],
-});
-
 export async function generateProject(
   studioApp: Studio.App,
   options?: Partial<GenerateProjectOptionsType>
 ) {
+  const kernel = new Kernel({
+    bundles: [
+      // new TerminalBundle({
+      //   version: require("../../package.json").version,
+      // }),
+    ],
+  });
+
   // Warning if git has things to commit, to encourage new stuff
 
   studioApp.clean();
@@ -31,6 +31,7 @@ export async function generateProject(
   try {
     await writer.write();
     await writer.session.commit();
+    await kernel.shutdown();
 
     writer.success("Successfully generated the project");
   } catch (e) {

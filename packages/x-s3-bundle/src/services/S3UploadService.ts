@@ -1,6 +1,11 @@
 import * as shortid from "shortid";
 import { FileUpload } from "graphql-upload/processRequest.mjs";
-import { PutObjectOutput, PutObjectRequest, S3 } from "@aws-sdk/client-s3";
+import {
+  PutObjectCommandInput,
+  PutObjectOutput,
+  PutObjectRequest,
+  S3,
+} from "@aws-sdk/client-s3";
 import * as moment from "moment";
 import { XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";
@@ -25,7 +30,8 @@ export class S3UploadService {
     protected readonly imageService: ImageService
   ) {
     const { s3 } = config;
-    this.s3 = new S3(s3);
+    const { bucket, endpoint, ...restS3 } = s3;
+    this.s3 = new S3(restS3);
   }
 
   /**
@@ -161,8 +167,8 @@ export class S3UploadService {
    * @returns
    */
   async putObject(fileKey, mimeType, stream): Promise<PutObjectOutput> {
-    const params: PutObjectRequest = {
-      Bucket: this.config.bucket,
+    const params: PutObjectCommandInput = {
+      Bucket: this.config.s3.bucket,
       Key: fileKey,
       Body: stream,
       ContentType: mimeType,
@@ -179,7 +185,7 @@ export class S3UploadService {
    */
   async remove(key) {
     return this.s3.deleteObject({
-      Bucket: this.config.bucket,
+      Bucket: this.config.s3.bucket,
       Key: key,
     });
   }
@@ -213,7 +219,7 @@ export class S3UploadService {
    * @returns
    */
   getUrl(key: string): string {
-    let urlPath = this.config.endpoint;
+    let urlPath = this.config.s3.endpoint;
     if (urlPath[urlPath.length - 1] !== "/") {
       urlPath = urlPath + "/";
     }

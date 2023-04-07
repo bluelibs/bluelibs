@@ -5,6 +5,7 @@ import createApolloClient from "./apolloClientCreator";
 import { gql } from "@apollo/client";
 import { assert } from "chai";
 import { PubSub } from "graphql-subscriptions";
+import { LoggerBundle } from "@bluelibs/logger-bundle";
 Object.assign(global, { WebSocket: require("ws") });
 let currentKernel;
 
@@ -24,6 +25,9 @@ async function createEcosystemWithInit(
         port: 6000,
         enableSubscriptions: true,
         ...otherOptions,
+      }),
+      new LoggerBundle({
+        console: true,
       }),
       new MyBundle(),
     ],
@@ -214,6 +218,50 @@ describe("ApolloBundle", () => {
             }
           `,
         });
+      });
+    });
+  });
+
+  it("Should print the exception nicely", async () => {
+    return new Promise<void>((resolve, reject) => {
+      createEcosystemWithInit({
+        typeDefs: `
+            type Query { something: String }
+          `,
+        resolvers: {
+          Query: {
+            something: (_, args, ctx) => {
+              // emulate some function calls so we have some stack traces.
+              const a = () => {
+                const b = () => {
+                  const c = () => {
+                    // this is the error we want to throw
+                    throw new Error(
+                      "TEST ERROR - ALL IS GOOD, THIS IS JUST A TEST. DO NOT PANIC. THIS IS ONLY A TEST. PLEASE DO NOT PANIC."
+                    );
+                  };
+                  c();
+                };
+                b();
+              };
+              a();
+            },
+          },
+        },
+      }).then((kernel) => {
+        const client = createApolloClient(6000);
+
+        client
+          .query({
+            query: gql`
+              query {
+                something
+              }
+            `,
+          })
+          .catch((e) => {
+            resolve();
+          });
       });
     });
   });

@@ -27,7 +27,7 @@ export class ConsoleListener extends Listener {
       }
 
       const date = new Date();
-      let diff = 0;
+      let diff = -1;
       // get diff of last log date and this date
       if (this.lastLogDate) {
         diff = date.getTime() - this.lastLogDate.getTime();
@@ -49,9 +49,16 @@ export class ConsoleListener extends Listener {
 
       const contextPrefix = log.context ? `${log.context} ` : "";
 
-      let msSinceLastLog = diff > 0 ? chalk.greenBright(`+${diff}ms `) : "";
+      let msSinceLastLog = "";
+      if (diff === 0) {
+        msSinceLastLog = chalk.yellowBright(`⚡`);
+      }
+      if (diff > 0 && diff < 10000) {
+        msSinceLastLog = chalk.greenBright(`+${diff}ms`);
+      }
       if (diff > 10000) {
-        msSinceLastLog = null;
+        // make it a lightning in utf-8 like this: ⚡
+        msSinceLastLog = chalk.yellowBright(`⚡`);
       }
 
       const criticalAlertPrefix =

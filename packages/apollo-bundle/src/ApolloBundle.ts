@@ -331,7 +331,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       {
         cors: true,
         formatError: (e: GraphQLError) => {
-          this.logger.error(JSON.stringify(e, null, 4));
+          this.printError(e);
 
           if (e instanceof Exception) {
             return {
@@ -365,6 +365,40 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     );
 
     return config;
+  }
+
+  /**
+   * Prints the error in a nice format
+   */
+  protected printError(e: GraphQLError) {
+    const stackTrace: string[] = (e.extensions.stacktrace as any[]) || [];
+    const rootPath = __dirname.split("/").slice(0, -1).join("/");
+    const replacement = "";
+
+    const stackTraceMapped = stackTrace.map((line) =>
+      line.replace(rootPath, replacement)
+    );
+
+    const pathsString = e.path.join(" -> ");
+
+    const logCtx = `GraphQL`;
+    const humanReadableTimestamp = new Date().toLocaleString();
+
+    if (e.originalError instanceof Exception) {
+      this.logger.error(
+        `${e.originalError.getMessage()} (${e.originalError.getCode()})\nPath: ${pathsString}`,
+        logCtx
+      );
+    }
+
+    this.logger.error(
+      `${e.extensions.code}\n${e.message}\nPath: ${pathsString}`,
+      logCtx
+    );
+
+    if (stackTraceMapped.length) {
+      this.logger.error(`Stacktrace:\n${stackTraceMapped.join("\n")}`, logCtx);
+    }
   }
 
   /**

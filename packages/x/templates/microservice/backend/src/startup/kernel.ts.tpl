@@ -54,11 +54,13 @@ export const kernel = new Kernel({
     new XAuthBundle(),
     {{# if hasUploads }}
       new XS3Bundle({
-        accessKeyId: env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-        bucket: env.AWS_BUCKET,
-        region: env.AWS_REGION,
-        endpoint: env.AWS_ENDPOINT,
+        s3: {
+          accessKeyId: env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+          bucket: env.AWS_BUCKET,
+          region: env.AWS_REGION,
+          endpoint: env.AWS_ENDPOINT,
+        },
       }),
     {{/ if }}
   ],

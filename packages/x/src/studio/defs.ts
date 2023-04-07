@@ -135,4 +135,14 @@ export type GenerateProjectOptionsType = {
    * The path where the project will be generated, it uses the current working directory by default
    */
   projectPath: string;
+  /**
+   * Install npm dependencies
+   * @defaults true
+   */
+  installNpmDependencies: boolean;
+  /**
+   * Whether you see the logs or not
+   * @default true
+   */
+  verbose: boolean;
 };
