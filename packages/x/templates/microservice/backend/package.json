@@ -51,6 +51,7 @@
     "passport": "^0.6.0",
     "moment": "^2.29.1",
     "mongodb": "^4.2.2",
+    "tsconfig-paths": "^3.12.0",
     "yup": "^0.32.0"
   },
   "devDependencies": {
@@ -62,10 +63,10 @@
     "prettier": "^2.0.5",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.3",
-    "ts-node-dev": "^1.1.8",
-    "tsconfig-paths": "^3.12.0",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
     "ttypescript": "^1.5.13",
-    "typescript": "4.7.4",
+    "typescript": "^4.9.5",
     "typescript-transform-paths": "^3.3.1"
   },
   "bluelibs": {

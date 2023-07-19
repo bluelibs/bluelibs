@@ -56,9 +56,11 @@ export class XBridge {
         relations
           .filter((r) => r.isDirect)
           .forEach((r) => {
-            model.addField(
-              XBridge.fieldToGenericField(r.cleaned.field, options.isInput)
-            );
+            if (!model.hasField(r.cleaned.field.id)) {
+              model.addField(
+                XBridge.fieldToGenericField(r.cleaned.field, options.isInput)
+              );
+            }
           });
       } else {
         relations.forEach((relation) => {
