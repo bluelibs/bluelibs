@@ -198,6 +198,8 @@ Now let's insert, update and remove some data, note that what we see below are s
 const insertSomething = [
   // The second argument is what object to insert, in our case "post"
   X.ToDocumentInsert(CollectionClass, "post"),
+  // The second argument is what object to deep sync, in our case "post"
+  X.ToDocumentDeepSync(CollectionClass, "post"),
 
   // Because we return a `Post` from the insertion:
   // This one takes the returned _id from the above executor, and transforms it into a Nova query

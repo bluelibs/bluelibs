@@ -5,7 +5,10 @@ import { Filter, UpdateFilter } from "mongodb";
 import { prepareForExecution } from "./utils/prepareForExecution";
 import { GraphQLToNovaOptionsResolverType } from "./utils/GraphQLToNovaOptionsResolverType";
 import { NOVA_AST_TO_QUERY_OPTIONS } from "./security";
-import { IAstToQueryOptions, AnyifyFieldsWithIDs as Clean } from "@bluelibs/nova";
+import {
+  IAstToQueryOptions,
+  AnyifyFieldsWithIDs as Clean,
+} from "@bluelibs/nova";
 
 const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<
   any
@@ -96,7 +99,12 @@ export function ToNovaByResultID<T>(
 
 export function ToCollectionCount<T>(
   collectionClass: Constructor<Collection<T>>,
-  filterResolver?: (_, args, ctx, ast) => Filter<Clean<T>> | Promise<Filter<Clean<T>>>
+  filterResolver?: (
+    _,
+    args,
+    ctx,
+    ast
+  ) => Filter<Clean<T>> | Promise<Filter<Clean<T>>>
 ) {
   if (!filterResolver) {
     filterResolver = (_, args) => {
@@ -176,6 +184,35 @@ export function ToDocumentInsert<T>(
 }
 
 /**
+ * Inserts/updates the document in the required collection and the nested/relational collections depending on whether _id exists or not.
+ * @param collectionClass
+ * @param field The field from GraphQL arguments
+ * @param extend Possibly extend the document, such as adding additional fields like a userId or whatever you wish.
+ * @returns
+ */
+export function ToDocumentDeepSync<T>(
+  collectionClass: Constructor<Collection<T>>,
+  field = "document",
+  extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
+) {
+  return async function (_, args, ctx, ast) {
+    const collection: Collection = ctx.container.get(collectionClass);
+    const document = args[field];
+    if (extend) {
+      await extend(document, ctx);
+    }
+
+    await collection.deepSync(args[field], {
+      context: {
+        userId: ctx.userId,
+      },
+    });
+
+    return args[field]._id;
+  };
+}
+
+/**
  * @param collectionClass
  * @param idArgumentResolver How to get the _id based on the arguments?
  * @param mutateResolver This should return the update query. {$set: something}
@@ -183,7 +220,9 @@ export function ToDocumentInsert<T>(
 export function ToDocumentUpdateByID<T>(
   collectionClass: Constructor<Collection<T>>,
   idArgumentResolver?: (args) => any | Promise<any>,
-  mutateResolver?: (args) => UpdateFilter<Clean<T>> | Promise<UpdateFilter<Clean<T>>>
+  mutateResolver?: (
+    args
+  ) => UpdateFilter<Clean<T>> | Promise<UpdateFilter<Clean<T>>>
 ) {
   if (!idArgumentResolver) {
     idArgumentResolver = (args) => args._id;
