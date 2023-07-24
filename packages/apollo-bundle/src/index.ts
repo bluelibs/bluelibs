@@ -1,4 +1,5 @@
 import "./declarations";
+import "./graphql-upload/processRequest";
 import { Loader } from "@bluelibs/graphql-bundle";
 import * as express from "express";
 export { createServerlessHandler } from "./createServerlessHandler";
