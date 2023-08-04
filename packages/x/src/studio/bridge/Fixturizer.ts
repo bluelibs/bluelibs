@@ -1,6 +1,6 @@
 import { ObjectId } from "@bluelibs/ejson";
 import * as Studio from "..";
-import * as faker from "faker";
+import { faker } from "@faker-js/faker";
 import { FieldValueKind } from "../models/FieldValueKind";
 import { Field } from "../models/Field";
 

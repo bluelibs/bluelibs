@@ -1,14 +1,4 @@
-import {
-  generateProject,
-  app,
-  collection,
-  field,
-  relation,
-  shortcuts,
-  sharedModel,
-  GeneratorKind,
-  faker,
-} from "../utils";
+import { field, sharedModel } from "../utils";
 
 export const Address = sharedModel({
   id: "Address",
