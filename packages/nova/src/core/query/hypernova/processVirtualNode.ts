@@ -13,7 +13,8 @@ export default function processVirtualNode(
   childCollectionNode: CollectionNode
 ) {
   const parentResults = childCollectionNode.parent.results;
-  const linkStorageField = childCollectionNode.linkStorageField;
+  const linkStorageField = childCollectionNode.linkForeignStorageField;
+  const linkForeignStorageField = childCollectionNode.linkForeignStorageField;
   const linkName = childCollectionNode.name;
   const isMany = childCollectionNode.linker.isMany();
   const linkStorageFieldDot = linkStorageField.indexOf(".") >= 0;
@@ -28,7 +29,9 @@ export default function processVirtualNode(
         (childResult) => {
           const linkingStorage = getStorageValue(childResult);
           if (linkingStorage) {
-            return linkingStorage.find((l) => idsEqual(l, parentResult._id));
+            return linkingStorage.find((l) =>
+              idsEqual(l, parentResult[linkForeignStorageField])
+            );
           }
         }
       );
@@ -36,7 +39,8 @@ export default function processVirtualNode(
   } else {
     const group = _.groupBy(childCollectionNode.results, linkStorageField);
     parentResults.forEach((parentResult) => {
-      parentResult[linkName] = group[parentResult._id.toString()] || [];
+      parentResult[linkName] =
+        group[parentResult[linkForeignStorageField].toString()] || [];
     });
   }
 }

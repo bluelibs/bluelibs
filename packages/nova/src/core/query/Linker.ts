@@ -40,9 +40,13 @@ export default class Linker<T = any> {
     this._validateAndClean();
 
     if (!this.isVirtual() && linkConfig.index === true) {
-      mainCollection.createIndex({
-        [linkConfig.field]: 1,
-      });
+      mainCollection.createIndex({ [linkConfig.field]: 1 });
+
+      if (linkConfig.foreignField) {
+        this.getLinkedCollection().createIndex({
+          [linkConfig.foreignField]: 1,
+        });
+      }
     }
   }
 
@@ -95,14 +99,26 @@ export default class Linker<T = any> {
 
   /**
    * Returns the field name in the document where the actual relationships are stored.
-   * @returns string
+   * @returns {string}
    */
-  get linkStorageField() {
+  get linkStorageField(): string {
     if (this.isVirtual()) {
       return this.relatedLinker.linkStorageField;
     }
 
     return this.linkConfig.field;
+  }
+
+  /**
+   * Returns the field name in the document where the actual relationships are stored.
+   * @returns {string}
+   */
+  get linkForeignStorageField(): string {
+    if (this.isVirtual()) {
+      return this.relatedLinker.linkForeignStorageField ?? "_id";
+    }
+
+    return this.linkConfig.foreignField ?? "_id";
   }
 
   /**
@@ -135,7 +151,10 @@ export default class Linker<T = any> {
   }
 
   /**
+   * Is the Linker comes from the main collection of a relationship.
    * @returns {boolean}
+   * @returns {true} true - The Linker comes from the collection that physically stores the foreignKey
+   * @returns {false} false - The Linker comes from the collection that is virtually related to the main collection. And thus reversing the relationship
    */
   public isVirtual() {
     return Boolean(this.linkConfig.inversedBy);
@@ -155,8 +174,12 @@ export default class Linker<T = any> {
    * Returns the aggregation pipeline
    */
   public getLookupAggregationPipeline(options: IGetLookupOperatorOptions = {}) {
-    const localField = this.isVirtual() ? "_id" : this.linkStorageField;
-    const foreignField = this.isVirtual() ? this.linkStorageField : "_id";
+    const localField = this.isVirtual()
+      ? this.linkForeignStorageField
+      : this.linkStorageField;
+    const foreignField = this.isVirtual()
+      ? this.linkStorageField
+      : this.linkForeignStorageField;
 
     let matches = this.createAggregationMatches(foreignField);
 

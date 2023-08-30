@@ -11,6 +11,7 @@ export default function processDirectNode(childCollectionNode: CollectionNode) {
   const linker = childCollectionNode.linker;
 
   const linkStorageField = linker.linkStorageField;
+  const linkForeignStorageField = linker.linkForeignStorageField;
 
   if (childCollectionNode.results.length === 0) {
     const defaultValue = linker.strategy === LinkStrategy.ONE ? null : [];
@@ -22,7 +23,7 @@ export default function processDirectNode(childCollectionNode: CollectionNode) {
   }
 
   const resultsByKeyId = _.groupBy(childCollectionNode.results, (r) =>
-    r._id.toString()
+    r[linkForeignStorageField].toString()
   );
 
   if (linker.strategy === LinkStrategy.ONE) {
@@ -48,10 +49,10 @@ export default function processDirectNode(childCollectionNode: CollectionNode) {
 
       const data = [];
 
-      value.forEach((_id) => {
-        const result = resultsByKeyId[_id];
+      value.forEach((foreignKey) => {
+        const result = resultsByKeyId[foreignKey];
         if (result) {
-          data.push(_.first(resultsByKeyId[_id]));
+          data.push(_.first(resultsByKeyId[foreignKey]));
         }
       });
 
