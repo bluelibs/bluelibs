@@ -1114,6 +1114,190 @@ describe("Main tests", function () {
     });
   });
 
+  it("[Foreign Fields - One] Should work with foreign fields direct and inversed", async () => {
+    oneToOne(A, B, {
+      foreignField: "foreign",
+      inversedLinkName: "a",
+      linkName: "b",
+    });
+
+    const b1 = await B.insertOne({
+      foreign: "someId",
+      test: "123",
+    });
+
+    await A.insertOne({
+      bId: "someId",
+      number: 123,
+    });
+
+    const result: any = await query(A, {
+      _id: 1,
+      b: {
+        test: 1,
+      },
+    }).fetchOne();
+
+    assert.isObject(result.b);
+    assert.equal("123", result.b.test);
+
+    const result2: any = await query(B, {
+      a: {
+        number: {},
+      },
+    }).fetchOne();
+
+    assert.isObject(result2.a);
+    assert.equal(123, result2.a.number);
+  });
+
+  it("[Foreign Fields - Many] Should work with foreign fields direct and inversed", async () => {
+    manyToMany(A, B, {
+      foreignField: "foreign",
+      inversedLinkName: "as",
+      linkName: "bs",
+    });
+
+    const b1 = await B.insertOne({
+      foreign: "someId1",
+      test: "123",
+    });
+    const b2 = await B.insertOne({
+      foreign: "someId2",
+      test: "123",
+    });
+
+    await A.insertOne({
+      bsIds: ["someId1", "someId2"],
+      number: 123,
+    });
+
+    const result: any = await query(A, {
+      _id: 1,
+      bs: {
+        test: 1,
+      },
+    }).fetchOne();
+
+    assert.isArray(result.bs);
+    assert.lengthOf(result.bs, 2);
+
+    const result2: any = await query(B, {
+      as: {
+        number: {},
+      },
+    }).fetch();
+
+    result2.forEach((r) => {
+      assert.isArray(r.as);
+      assert.lengthOf(r.as, 1);
+    });
+  });
+
+  it("[Nested foreign Fields - One] Should work with foreign fields direct and inversed", async () => {
+    oneToOne(A, B, {
+      foreignField: "foreign.key",
+      inversedLinkName: "a",
+      linkName: "b",
+    });
+
+    const b1 = await B.insertOne({
+      foreign: {
+        key: "someId",
+      },
+      test: "123",
+    });
+    const b2 = await B.insertOne({
+      foreign: {
+        key: "someId2",
+      },
+      test: "shouldnotberetrieved",
+    });
+
+    await A.insertOne({
+      bId: "someId",
+      number: 123,
+    });
+
+    const result: any = await query(A, {
+      _id: 1,
+      b: {
+        test: 1,
+      },
+    }).fetchOne();
+
+    assert.isObject(result.b);
+    assert.equal("123", result.b.test);
+
+    const result2: any = await query(B, {
+      a: {
+        number: {},
+      },
+    }).fetchOne();
+
+    assert.isObject(result2.a);
+    assert.equal(123, result2.a.number);
+  });
+
+  it("[Nested foreign Fields - Many] Should work with foreign fields direct and inversed", async () => {
+    manyToMany(A, B, {
+      foreignField: "foreign.key",
+      inversedLinkName: "as",
+      linkName: "bs",
+    });
+
+    const b1 = await B.insertOne({
+      foreign: {
+        key: "someId1",
+      },
+      test: "123",
+    });
+    const b2 = await B.insertOne({
+      foreign: {
+        key: "someId2",
+      },
+      test: "123",
+    });
+    const b3 = await B.insertOne({
+      foreign: {
+        key: "someId3",
+      },
+      test: "shouldnotberetrieved",
+    });
+
+    await A.insertOne({
+      bsIds: ["someId1", "someId2"],
+      number: 123,
+    });
+
+    const result: any = await query(A, {
+      _id: 1,
+      bs: {
+        test: 1,
+      },
+    }).fetchOne();
+
+    assert.isArray(result.bs);
+    assert.lengthOf(result.bs, 2);
+
+    const result2: any[] = await query(B, {
+      test: 1,
+      as: {
+        number: {},
+      },
+    }).fetch();
+
+    result2.forEach((r) => {
+      if (r.test === "shouldnotberetrieved") {
+        assert.isArray(r.as);
+        assert.lengthOf(r.as, 0);
+      } else {
+        assert.isArray(r.as);
+        assert.lengthOf(r.as, 1);
+      }
+    });
+  });
+
   it("[Defaults] If no link data is found respond with a null or [] depending on case", async () => {
     manyToMany(A, B, {
       field: "whateverIds",
