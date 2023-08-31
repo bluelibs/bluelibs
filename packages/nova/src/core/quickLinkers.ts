@@ -9,6 +9,10 @@ export interface IQuickLinkingArguments {
    * Defaults to linkName + 'Id' or 'Ids' depending how many we store
    */
   field?: string;
+  /**
+   * @default _id
+   */
+  foreignField?: string;
 }
 
 export function oneToOne(
@@ -20,6 +24,7 @@ export function oneToOne(
     [options.linkName]: {
       collection: () => C2,
       field: options.field || `${options.linkName}Id`,
+      foreignField: options.foreignField,
       unique: true,
     },
   });
@@ -41,6 +46,7 @@ export function manyToOne(
     [options.linkName]: {
       collection: () => C2,
       field: options.field || `${options.linkName}Id`,
+      foreignField: options.foreignField,
     },
   });
 
@@ -61,6 +67,7 @@ export function oneToMany(
     [options.linkName]: {
       collection: () => C2,
       field: options.field || `${options.linkName}Ids`,
+      foreignField: options.foreignField,
       many: true,
       unique: true,
     },
@@ -83,6 +90,7 @@ export function manyToMany(
     [options.linkName]: {
       collection: () => C2,
       field: options.field || `${options.linkName}Ids`,
+      foreignField: options.foreignField,
       many: true,
     },
   });
