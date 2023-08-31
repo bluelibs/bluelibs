@@ -22,9 +22,16 @@ export default function processDirectNode(childCollectionNode: CollectionNode) {
     return;
   }
 
-  const resultsByKeyId = _.groupBy(childCollectionNode.results, (r) =>
-    r[linkForeignStorageField].toString()
-  );
+  const resultsByKeyId = _.groupBy(childCollectionNode.results, (r) => {
+    const linkForeignStorageFieldDot =
+      linkForeignStorageField.indexOf(".") >= 0;
+
+    const value = linkForeignStorageFieldDot
+      ? _.get(r, linkForeignStorageField)
+      : r[linkForeignStorageField];
+
+    return value.toString();
+  });
 
   if (linker.strategy === LinkStrategy.ONE) {
     parent.results.forEach((parentResult) => {
