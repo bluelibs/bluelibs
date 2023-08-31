@@ -259,6 +259,22 @@ addLinks(Users, {
 });
 ```
 
+### Foreign keys
+
+By default, Nova uses the field `_id` of the collection B as the foreign field. Sometimes you may want another field to be your foreign key.
+
+You can decide which foreign field to use by specifying `foreignField` in the relationship configuration.
+
+```typescript
+addLinks(Users, {
+  // Don't use the `Comment._id` field as a foreign field for the lookup but `Comment.anotherField`
+  comments: {
+    collection: () => Comment,
+    foreignField: 'anotherField'
+  },
+});
+```
+
 ### Aliasing
 
 Sometimes you may find useful to fetch the same link but in different contexts, for example you want to get a Company with the last 3 invoices and with overdue invoices without much hassle (see the next section for more information on `query()` and the `$` field):
@@ -806,6 +822,8 @@ However, we currently can't work with fields in arrays of objects, or have array
   ]
 }
 ```
+
+This limitation also applies to the `foreignField` option.
 
 ## Hypernova
 
