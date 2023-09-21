@@ -13,7 +13,7 @@
     "start:dev": "webpack serve --open --config webpack.dev.js",
     "build": "NODE_ENV=production webpack --config webpack.prod.js",
     "test": "npx jest",
-    "generate": "graphql-codegen --config codegen.yml"
+    "generate:types": "graphql-codegen --config codegen.yml"
   },
   "keywords": [],
   "author": "",
@@ -35,7 +35,7 @@
     "apollo-upload-client": "^16.0.0"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^1.20.1",
+    "@graphql-codegen/cli": "^5.0.0",
     "@graphql-codegen/introspection": "^1.8.3",
     "@graphql-codegen/typescript": "^1.21.0",
     "@graphql-codegen/typescript-operations": "^1.17.14",
