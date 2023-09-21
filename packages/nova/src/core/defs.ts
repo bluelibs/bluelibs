@@ -58,6 +58,7 @@ export type HardwiredFiltersOptions = {
 export interface ILinkCollectionOptions {
   collection: () => Collection;
   field?: string;
+  foreignField?: string;
   unique?: boolean;
   many?: boolean;
   /**

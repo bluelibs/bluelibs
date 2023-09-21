@@ -95,6 +95,7 @@ export default class CollectionNode implements INode {
    */
   public linker: Linker;
   public linkStorageField: string;
+  public linkForeignStorageField: string;
   public readonly context: IQueryContext;
   public results: any = [];
 
@@ -163,10 +164,17 @@ export default class CollectionNode implements INode {
     this.isVirtual = linker.isVirtual();
     this.isOneResult = linker.isOneResult();
     this.linkStorageField = linker.linkStorageField;
+    this.linkForeignStorageField = linker.linkForeignStorageField;
     if (this.isVirtual) {
       this.addField(this.linkStorageField, {}, true);
+      if (this.linkForeignStorageField !== "_id") {
+        parent.addField(this.linkForeignStorageField, {}, true);
+      }
     } else {
       parent.addField(this.linkStorageField, {}, true);
+      if (this.linkForeignStorageField !== "_id") {
+        this.addField(this.linkForeignStorageField, {}, true);
+      }
     }
   }
 

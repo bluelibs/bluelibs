@@ -13,6 +13,7 @@ export default async function processRecursiveNode(
   const parentResults = childCollectionNode.parent.results;
   const allResults = [];
   const linkStorageField = childCollectionNode.linkStorageField;
+  const linkForeignStorageField = childCollectionNode.linkForeignStorageField;
   const linkName = childCollectionNode.name;
   const isMany = childCollectionNode.linker.isMany();
 
@@ -22,7 +23,7 @@ export default async function processRecursiveNode(
     for (const parentResult of parentResults) {
       const results = await childCollectionNode.toArray(
         {
-          [linkStorageField]: { $in: [parentResult._id] }
+          [linkStorageField]: { $in: [parentResult[linkForeignStorageField]] },
         },
         parentResult
       );
@@ -43,7 +44,7 @@ export default async function processRecursiveNode(
 
       const results = await childCollectionNode.toArray(
         {
-          _id: { $in }
+          [linkForeignStorageField]: { $in },
         },
         parentResult
       );
@@ -53,5 +54,5 @@ export default async function processRecursiveNode(
     }
   }
 
-  childCollectionNode.results = _.uniqBy(allResults, id => id.toString());
+  childCollectionNode.results = _.uniqBy(allResults, (id) => id.toString());
 }
