@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "private": false,
   "description": "X-UI represents a set of standards to build scalable UI using X-Framework by BlueLibs",
   "main": "dist/index.js",
@@ -38,7 +38,7 @@
     "@bluelibs/x-ui-react-bundle": "^1.0.4",
     "@bluelibs/x-ui-react-router-bundle": "^1.0.4",
     "@bluelibs/x-ui-session-bundle": "^1.0.1",
-    "react": "^17.0.2"
+    "react": "^17.0.2 || ^18.0.0"
   },
   "devDependencies": {
     "@apollo/client": "^3.4.16",
