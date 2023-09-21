@@ -932,10 +932,19 @@ We typically store out tests inside `src/__tests__/*.test.ts`, and we try to mai
 Our solution to this is to use `dotenv` npm package and craft our own `env.ts` file which exports a type-safe constant.
 
 ```bash title=".env.development"
+# This represents the webapp url (if you have it), used for the email templates, and other things
 APP_URL="http://127.0.0.1:3000"
+
+# This represents your root url, the one holding the API.
 ROOT_URL="http://127.0.0.1:4000"
+# The port to open on
 ROOT_PORT=4000
-MONGO_URL="mongodb://127.0.0.1:27017/bluelibs"
+
+# The connection to the database
+MONGO_URL="mongodb://127.0.0.1:27017/{{ projectName }}"
+
+# Uncomment to run fixtures and create users and data for the first time.
+# RUN_FIXTURES=1
 
 AWS_ACCESS_KEY_ID=XXX
 AWS_SECRET_ACCESS_KEY=XXX
