@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-auth-bundle",
-  "version": "1.2.1",
+  "version": "1.2.3",
   "description": "Password integration with Apollo Bundle using X-Framework.",
   "main": "dist/index.js",
   "repository": {
@@ -61,8 +61,8 @@
     "jest": "^27.3.1",
     "jest-junit": "^10.0.0",
     "prettier": "^2.0.5",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.1 || ^18.0.0",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.3",
     "typescript": "4.4.4"

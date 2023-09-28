@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-collections-bundle",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "private": false,
   "description": "XUICollectionsBundle",
   "main": "dist/index.js",
@@ -38,7 +38,7 @@
     "@bluelibs/smart": "^1.0.0",
     "@bluelibs/ui-apollo-bundle": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
-    "react": "^17.0.2"
+    "react": "^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@apollo/client": "^3.4.16",
@@ -50,7 +50,7 @@
     "@types/jest": "^27.0.3",
     "@types/react": "^17.0.37",
     "jest": "^27.3.1",
-    "react": "^17.0.2",
+    "react": "^17.0.0 || ^18.0.0",
     "ts-jest": "^27.0.7",
     "typescript": "4.4.4"
   }

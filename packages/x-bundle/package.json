@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-bundle",
-  "version": "1.6.0",
+  "version": "1.6.2",
   "description": "X-Framework is a feature-rich solution with fast prototyping in mind for BlueLibs",
   "main": "dist/index.js",
   "repository": {
@@ -91,8 +91,8 @@
     "mongodb": "^4.0.0",
     "node-fetch": "^2.6.1",
     "prettier": "^2.0.5",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.1 || ^18.0.0",
     "source-map-support": "^0.5.13",
     "ts-jest": "^29.1.0",
     "typescript": "4.8",

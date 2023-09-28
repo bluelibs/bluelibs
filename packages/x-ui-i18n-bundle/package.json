@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-i18n-bundle",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "I18N bundle for UI",
   "main": "dist/index.js",
   "repository": {
@@ -34,7 +34,7 @@
   "peerDependencies": {
     "@bluelibs/core": "^1.2.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.1",
-    "react": "^17.0.2"
+    "react": "^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@bluelibs/core": "^1.2.0",
@@ -42,7 +42,7 @@
     "@types/jest": "^27.0.3",
     "@types/react": "^17.0.37",
     "jest": "^27.3.1",
-    "react": "^17.0.2",
+    "react": "^17.0.0 || ^18.0.0",
     "ts-jest": "^27.0.7",
     "typescript": "4.4.4"
   }

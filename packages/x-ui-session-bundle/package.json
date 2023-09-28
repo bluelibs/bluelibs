@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-session-bundle",
-  "version": "1.1.6",
+  "version": "1.1.9",
   "private": false,
   "description": "UISessionBundle",
   "main": "dist/index.js",
@@ -32,8 +32,8 @@
     "@bluelibs/core": "^1.2.0",
     "@bluelibs/ejson": "^1.0.0",
     "@bluelibs/x-ui-react-bundle": "^1.0.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "devDependencies": {
     "@bluelibs/core": "^1.2.0",

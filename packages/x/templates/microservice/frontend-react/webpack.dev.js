@@ -7,6 +7,6 @@ module.exports = (env) =>
     mode: "development",
     devtool: "source-map",
     devServer: {
-      contentBase: "./dist",
+      // contentBase: "./dist",
     },
   });

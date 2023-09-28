@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/smart",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "Smart is a very small library which helps decouple state management and non-ui-related actions to separate classes.",
   "main": "dist/index.js",
   "repository": {
@@ -42,8 +42,8 @@
     "jest": "^27.3.1",
     "jest-junit": "^13.0.0",
     "prettier": "^2.4.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.1 || ^18.0.0",
     "react-test-renderer": "^17.0.2",
     "source-map-support": "^0.5.20",
     "typescript": "4.4.4"

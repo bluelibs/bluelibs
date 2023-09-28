@@ -4,7 +4,6 @@ Install dependencies:
 
 ```
 npm install
-
 ```
 
 Ensure that you have the types generated:

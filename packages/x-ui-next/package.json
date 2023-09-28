@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-ui-next",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "private": false,
   "description": "X-Framework UI Implementation for Next",
   "main": "dist/index.js",
@@ -38,11 +38,11 @@
     "@bluelibs/x-ui-session-bundle": "^1.0.0",
     "next": "^12.0.9",
     "query-string": "^7.0.1",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.2"
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.1 || ^18.0.0"
   },
   "peerDependencies": {
-    "react": "^17.0.0"
+    "react": "^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
     "@apollo/client": "^3.4.16",
@@ -59,7 +59,7 @@
     "@types/react-dom": "^17.0.10",
     "@types/react-test-renderer": "^17.0.1",
     "jest": "^27.3.1",
-    "react": "^17.0.0",
+    "react": "^17.0.0 || ^18.0.0",
     "react-test-renderer": "^17.0.2",
     "typescript": "4.4.4"
   }

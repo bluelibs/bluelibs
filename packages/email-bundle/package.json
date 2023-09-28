@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/email-bundle",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Provides easy strategy to send emails using server-side rendered React templates",
   "main": "dist/index.js",
   "repository": {
@@ -28,8 +28,8 @@
   "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
     "@bluelibs/logger-bundle": "^1.0.0",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0"
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.1 || ^18.0.0"
   },
   "devDependencies": {
     "@bluelibs/core": "^1.0.0",
@@ -50,8 +50,8 @@
     "jest": "^27.3.1",
     "jest-junit": "^10.0.0",
     "prettier": "^2.0.5",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.1 || ^18.0.0",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.4",
     "typescript": "4.4.4"
