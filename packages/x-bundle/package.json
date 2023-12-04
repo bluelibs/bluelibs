@@ -1,6 +1,10 @@
 {
   "name": "@bluelibs/x-bundle",
+<<<<<<< Updated upstream
   "version": "1.6.2",
+=======
+  "version": "1.6.3",
+>>>>>>> Stashed changes
   "description": "X-Framework is a feature-rich solution with fast prototyping in mind for BlueLibs",
   "main": "dist/index.js",
   "repository": {

@@ -73,7 +73,7 @@ export function CheckPermission(
 export function Secure(rules: SecureRuleType[]): SecureGraphQLResolver<void> {
   return async function (_, args, ctx: IGraphQLContext, ast) {
     const xSecurity = ctx.container.get(XGraphQLSecurityService);
-    await xSecurity.secure(rules, args, ctx, ast);
+    return await xSecurity.secure(rules, args, ctx, ast);
   };
 }
 // run: [
