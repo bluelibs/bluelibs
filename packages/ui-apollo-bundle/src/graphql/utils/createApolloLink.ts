@@ -1,7 +1,7 @@
 import { split, ApolloLink, GraphQLRequest } from "@apollo/client/core";
-import { createUploadLink } from "apollo-upload-client";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
+import createUploadLink from "../uploads/createUploadLink";
 import {
   ConnectionParams,
   SubscriptionClient,
