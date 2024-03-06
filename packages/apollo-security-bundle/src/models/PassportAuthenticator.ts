@@ -20,14 +20,16 @@ export type EasyRouteCallback<T = IUser> = (
 @Service()
 export abstract class PassportAuthenticator {
   public strategy: passport.Strategy;
-  protected app: express.Application;
 
   constructor(
     protected readonly securityService: SecurityService,
     protected readonly apolloBundle: ApolloBundle
   ) {
-    this.app = apolloBundle.app;
     this.strategy = this.createStrategy();
+  }
+
+  get app(): express.Application {
+    return this.apolloBundle.app;
   }
 
   /**
