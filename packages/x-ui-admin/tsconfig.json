@@ -9,6 +9,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
     "pretty": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,

@@ -106,7 +106,7 @@ export function RemoteSelectLazy(props: RemoteSelectLazyProps) {
     }
   }
 
-  const collection: Collection = use(collectionClass);
+  const collection: Collection<any> = use(collectionClass);
 
   return (
     <DebounceSelect

@@ -59,4 +59,29 @@ export const cronfigs: ICronConfig[] = [
 ];
 ```
 
-If you want to schedule to run at 8:00 am in your local time zone, please note the time in `parser` is in UTC and adapt accordingly.
+If you want to schedule to run at 8:00 am in your local time zone, please note the time in [`parser`](http://bunkat.github.io/later/parsers.html#cron) is in UTC and adapt accordingly.
+
+
+## Persistence
+
+By default jobs are saved into the database, to bypass this use:
+
+```ts
+cronService.add({
+  // ...
+  persist: false,
+})
+```
+
+Delete them yourself in your own cronjob if older than a certain date:
+
+```ts
+import { CronsCollection } from "@bluelibs/x-cron-bundle";
+
+const collection = container.get(CronsCollection);
+collection.removeMany({
+  finishedAt: {
+    // $lte: twoDaysAgo; 
+  }
+})
+```

@@ -57,6 +57,7 @@ export function RemoteSelect(props: RemoteSelectProps) {
       onClear={() => {
         const isArray = Array.isArray(value);
         onChange(isArray ? [] : null, {
+          label: "Cleared",
           value: undefined,
         });
       }}
