@@ -1,6 +1,5 @@
 import { GraphQLRequest } from "@apollo/client/link/core";
 import { Event } from "@bluelibs/core";
-import { ConnectionParams } from "subscriptions-transport-ws";
 
 export class ApolloBeforeOperationEvent extends Event<{
   context: {
@@ -10,5 +9,5 @@ export class ApolloBeforeOperationEvent extends Event<{
 }> {}
 
 export class ApolloSubscriptionOnConnectionParamsSetEvent extends Event<{
-  params: ConnectionParams;
+  params: Record<string, any>;
 }> {}

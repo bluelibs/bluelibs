@@ -1,13 +1,12 @@
 import { ApolloClient as BaseApolloClient } from "@apollo/client/core";
-import { EventManager, Service } from "@bluelibs/core";
-import { ContainerInstance } from "@bluelibs/core";
-import { SubscriptionClient } from "subscriptions-transport-ws";
+import { ContainerInstance, EventManager, Service } from "@bluelibs/core";
+import { Client } from "graphql-ws";
 import { IUIApolloBundleConfig } from "../defs";
 import { createApolloLink } from "./utils/createApolloLink";
 
 @Service()
 export class ApolloClient extends BaseApolloClient<any> {
-  public subscriptionClient?: SubscriptionClient;
+  public subscriptionClient?: Client;
 
   constructor(container: ContainerInstance, options: IUIApolloBundleConfig) {
     const { finalLink, subscriptionClient } = createApolloLink(
