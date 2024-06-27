@@ -269,7 +269,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       await apolloServer.start();
 
       app.use(
-        "/",
+        "/graphql",
         cors<cors.CorsRequest>(),
         bodyParser.json(),
         // expressMiddleware accepts the same arguments:
