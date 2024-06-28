@@ -18,9 +18,10 @@ import * as bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import { GraphQLError } from "graphql";
+import { GraphQLError, GraphQLFormattedError } from "graphql";
 import { useServer } from "graphql-ws/lib/use/ws";
 import * as http from "http";
+import { inspect } from "node:util";
 import { WebSocketServer } from "ws";
 import { ApolloBundleConfigType, IRouteType } from "./defs";
 import {
@@ -124,7 +125,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         this.attachSubscriptionService(apolloServerConfig, this.httpServer);
 
         serverCleanup = useServer(
-          { 
+          {
             schema: apolloServerConfig.schema,
             context: this.createContext(this.currentSchema.contextReducers),
           },
@@ -332,30 +333,30 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     const config: ApolloServerOptions<any> = Object.assign(
       {
         cors: true,
-        formatError: (e: GraphQLError) => {
-          this.printError(e);
+        formatError: (
+          formattedError: GraphQLFormattedError,
+          error: unknown
+        ) => {
+          this.printError(error).catch();
 
-          if (e instanceof Exception) {
+          if (error instanceof Exception) {
             return {
-              message: e.getMessage(),
-              code: e.getCode(),
-              context: e.getContext(),
+              message: error.getMessage(),
+              code: error.getCode(),
+              context: error.getContext(),
             };
           }
 
-          const response = {
-            message: e.message,
-            path: e.path,
-          };
-
-          if (e.originalError instanceof Exception) {
-            Object.assign(response, {
-              code: e.originalError.getCode(),
-              context: e.originalError.getContext(),
-            });
+          if (error instanceof GraphQLError) {
+            if (error.originalError instanceof Exception) {
+              Object.assign(formattedError, {
+                code: error.originalError.getCode(),
+                context: error.originalError.getContext(),
+              });
+            }
           }
 
-          return response;
+          return formattedError;
         },
       },
       this.config.apollo,
@@ -372,35 +373,66 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Prints the error in a nice format
    */
-  protected printError(e: GraphQLError) {
-    const stackTrace: string[] = (e.extensions.stacktrace as any[]) || [];
-    const rootPath = __dirname.split("/").slice(0, -1).join("/");
-    const replacement = "";
+  protected async printError(e: unknown) {
+    if (e instanceof GraphQLError) {
+      const stackTrace: string[] = (e.extensions.stacktrace as any[]) || [];
+      const rootPath = __dirname.split("/").slice(0, -1).join("/");
+      const replacement = "";
 
-    const stackTraceMapped = stackTrace.map((line) =>
-      line.replace(rootPath, replacement)
-    );
+      const stackTraceMapped = stackTrace.map((line) =>
+        line.replace(rootPath, replacement)
+      );
 
-    const pathsString = e.path.join(" -> ");
+      const pathsString = e.path?.join(" -> ");
 
-    const logCtx = `GraphQL`;
-    const humanReadableTimestamp = new Date().toLocaleString();
+      const logCtx = `GraphQL`;
+      const humanReadableTimestamp = new Date().toLocaleString();
 
-    if (e.originalError instanceof Exception) {
-      this.logger.error(
-        `${e.originalError.getMessage()} (${e.originalError.getCode()})\nPath: ${pathsString}`,
+      if (e.originalError instanceof Exception) {
+        await this.logger.error(
+          `${e.originalError.getMessage()} (${e.originalError.getCode()})\nPath: ${pathsString}`,
+          logCtx
+        );
+      }
+
+      await this.logger.error(
+        `${e.extensions.code}\n${e.message}\nPath: ${pathsString}`,
         logCtx
       );
+
+      if (stackTraceMapped.length) {
+        await this.logger.error(
+          `Stacktrace:\n${stackTraceMapped.join("\n")}`,
+          logCtx
+        );
+      }
+
+      return;
     }
 
-    this.logger.error(
-      `${e.extensions.code}\n${e.message}\nPath: ${pathsString}`,
-      logCtx
-    );
-
-    if (stackTraceMapped.length) {
-      this.logger.error(`Stacktrace:\n${stackTraceMapped.join("\n")}`, logCtx);
+    if (e instanceof Exception) {
+      await this.logger.error(`${e.getMessage()} (${e.getCode()})`);
+      if (e.stack) {
+        await this.logger.error(`Stacktrace:\n${e.stack}`);
+      }
+      return;
     }
+
+    if (e instanceof Error) {
+      await this.logger.error(inspect(e));
+      return;
+    }
+
+    try {
+      await this.logger.error(e.toString());
+    } catch {
+      await this.logger.error(
+        "Failed to print error. Printing raw error below."
+      );
+      console.error(e);
+    }
+
+    return;
   }
 
   /**
