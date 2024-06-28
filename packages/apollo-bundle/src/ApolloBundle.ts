@@ -1,38 +1,37 @@
+import { ApolloServer, ApolloServerOptions } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import {
+  handlers,
+  startServerAndCreateLambdaHandler,
+} from "@as-integrations/aws-lambda";
 import {
   Bundle,
-  KernelAfterInitEvent,
   EventManager,
   Exception,
+  KernelAfterInitEvent,
 } from "@bluelibs/core";
-import { Loader, ISchemaResult } from "@bluelibs/graphql-bundle";
-import * as http from "http";
-import express from "express";
+import { ISchemaResult, Loader } from "@bluelibs/graphql-bundle";
+import { LoggerService } from "@bluelibs/logger-bundle";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+import * as bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
-import { ApolloServer, ApolloServerOptions } from "@apollo/server";
-import { WebSocketServer } from "ws";
+import cors from "cors";
+import express from "express";
+import { GraphQLError } from "graphql";
 import { useServer } from "graphql-ws/lib/use/ws";
+import * as http from "http";
+import { WebSocketServer } from "ws";
+import { ApolloBundleConfigType, IRouteType } from "./defs";
 import {
   ApolloServerAfterInitEvent,
   ApolloServerBeforeInitEvent,
   WebSocketOnConnectEvent,
   WebSocketOnDisconnectEvent,
 } from "./events";
-import { ApolloBundleConfigType } from "./defs";
-import {
-  startServerAndCreateLambdaHandler,
-  handlers,
-} from "@as-integrations/aws-lambda";
-import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { IRouteType } from "./defs";
-import { LoggerService } from "@bluelibs/logger-bundle";
 import GraphQLUpload from "./graphql-upload/GraphQLUpload";
 import graphqlUploadExpress from "./graphql-upload/graphqlUploadExpress";
-import { GraphQLError } from "graphql";
-import { makeExecutableSchema } from "@graphql-tools/schema";
 import { jitSchemaExecutor } from "./utils/jitSchemaExecutor";
-import { expressMiddleware } from "@apollo/server/express4";
-import * as bodyParser from "body-parser";
-import cors from "cors";
 
 export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   defaultConfig = {
@@ -125,7 +124,10 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         this.attachSubscriptionService(apolloServerConfig, this.httpServer);
 
         serverCleanup = useServer(
-          { schema: apolloServerConfig.schema },
+          { 
+            schema: apolloServerConfig.schema,
+            context: this.createContext(this.currentSchema.contextReducers),
+          },
           this.subscriptionServer
         );
       }

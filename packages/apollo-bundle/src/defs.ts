@@ -1,9 +1,9 @@
-import * as express from "express";
-import { ExecutionParams } from "subscriptions-transport-ws";
-import { ContainerInstance } from "@bluelibs/core";
-import { UploadOptions } from "graphql-upload/GraphQLUpload.mjs";
-import { RequestHandler } from "express";
 import { ApolloServerOptions } from "@apollo/server";
+import { ContainerInstance } from "@bluelibs/core";
+import * as express from "express";
+import { RequestHandler } from "express";
+import { UploadOptions } from "graphql-upload/GraphQLUpload.mjs";
+import { Context } from "graphql-ws";
 
 export type ApolloBundleConfigType = {
   port?: number;
@@ -36,7 +36,7 @@ export interface IRouteType {
 export interface IGraphQLContext {
   req: express.Request;
   res: express.Response;
-  connection?: ExecutionParams;
+  connection?: Context;
   container: ContainerInstance;
   /**
    * Connection Parameters from Websocket

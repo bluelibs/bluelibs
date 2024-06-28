@@ -1,13 +1,13 @@
-import "@bluelibs/graphql-bundle";
 import { ContainerInstance } from "@bluelibs/core";
+import "@bluelibs/graphql-bundle";
 import * as express from "express";
-import { ExecutionParams } from "subscriptions-transport-ws";
+import { Context } from "graphql-ws";
 
 declare module "@bluelibs/graphql-bundle" {
   export interface IGraphQLContext {
     container: ContainerInstance;
     req: express.Request;
     res: express.Response;
-    connection?: ExecutionParams;
+    connection?: Context;
   }
 }

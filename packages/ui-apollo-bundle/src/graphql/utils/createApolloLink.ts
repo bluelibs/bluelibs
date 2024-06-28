@@ -1,17 +1,14 @@
-import { split, ApolloLink, GraphQLRequest } from "@apollo/client/core";
+import { ApolloLink, GraphQLRequest, split } from "@apollo/client/core";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";
-import { WebSocketLink } from "@apollo/client/link/ws";
-import createUploadLink from "../uploads/createUploadLink";
-import {
-  ConnectionParams,
-  SubscriptionClient,
-} from "subscriptions-transport-ws";
-import { setContext } from "apollo-link-context";
 import { EventManager } from "@bluelibs/core";
+import { setContext } from "apollo-link-context";
+import { Client, createClient } from "graphql-ws";
 import {
   ApolloBeforeOperationEvent,
   ApolloSubscriptionOnConnectionParamsSetEvent,
 } from "../../events";
+import createUploadLink from "../uploads/createUploadLink";
 
 const createContextLink = (eventManager: EventManager) => {
   return setContext(async (operation: GraphQLRequest, prevContext: any) => {
@@ -38,8 +35,8 @@ export function createApolloLink(
 ): {
   httpLink: ApolloLink;
   finalLink: ApolloLink;
-  wsLink?: WebSocketLink;
-  subscriptionClient?: SubscriptionClient;
+  wsLink?: GraphQLWsLink;
+  subscriptionClient?: Client;
 } {
   const uploadLink = createUploadLink({
     uri,
@@ -54,24 +51,21 @@ export function createApolloLink(
     finalLink = enhancedHttpLink;
 
   if (options.subscriptions) {
-    subscriptionClient = new SubscriptionClient(
-      uri.replace("http://", "ws://").replace("https://", "wss://"),
-      {
-        reconnect: true,
-        connectionParams: async () => {
-          const params: ConnectionParams = {};
+    subscriptionClient = createClient({
+      url: uri.replace("http://", "ws://").replace("https://", "wss://"),
+      connectionParams: async () => {
+        const params: Record<string, any> = {};
 
-          await eventManager.emit(
-            new ApolloSubscriptionOnConnectionParamsSetEvent({
-              params,
-            })
-          );
+        await eventManager.emit(
+          new ApolloSubscriptionOnConnectionParamsSetEvent({
+            params,
+          })
+        );
 
-          return params;
-        },
-      }
-    );
-    wsLink = new WebSocketLink(subscriptionClient);
+        return params;
+      },
+    });
+    wsLink = new GraphQLWsLink(subscriptionClient);
     // The split function takes three parameters:
     //
     // * A function that's called for each operation to execute
