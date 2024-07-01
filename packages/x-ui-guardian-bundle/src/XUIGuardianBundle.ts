@@ -67,7 +67,7 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
 
     if (!subscriptionClient) return;
 
-    subscriptionClient.close();
+    subscriptionClient.terminate();
   }
 
   async prepare() {
