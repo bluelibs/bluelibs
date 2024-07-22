@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x",
-  "version": "1.15.12",
+  "version": "1.15.14",
   "description": "Scaffolding tool for BlueLibs Framework using X-Framework.",
   "main": "dist/index.js",
   "repository": {
@@ -60,7 +60,7 @@
     "jest-junit": "^10.0.0",
     "run-script-os": "^1.1.6",
     "source-map-support": "^0.5.13",
-    "typescript": "4.4.4"
+    "typescript": "^4.9.5"
   },
   "typings": "dist/index.d.ts",
   "typescript": {
