@@ -8,10 +8,10 @@
     "generate:types": "run-script-os",
     "start:api:default": "cd microservices/api ; npm run start:dev",
     "start:admin:default": "npm run generate:types; cd microservices/admin ; npm run start:dev",
-    "generate:types:default": "cd microservices/admin ; npm run generate",
+    "generate:types:default": "cd microservices/admin ; npm run generate:types",
     "start:api:win32": "cd microservices/api && npm run start:dev",
     "start:admin:win32": "npm run generate:types && cd microservices/admin && npm run start:dev",
-    "generate:types:win32": "cd microservices/admin && npm run generate"
+    "generate:types:win32": "cd microservices/admin && npm run generate:types"
   },
   "dependencies": {},
   "bluelibs": {
