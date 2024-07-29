@@ -13,6 +13,7 @@
     "pretty": true,
     "removeComments": true,
     "declaration": true,
+    "skipLibCheck": true,
     "typeRoots": ["node_modules/@types"]
   },
 

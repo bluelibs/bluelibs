@@ -15,6 +15,7 @@
     "removeComments": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
     "declaration": true,
     "typeRoots": ["node_modules/@types"]
   },
