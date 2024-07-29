@@ -4,6 +4,7 @@
     "module": "commonjs",
     "lib": ["esnext", "dom"],
     "moduleResolution": "node",
+    "skipLibCheck": true,
     "sourceMap": true,
     "noImplicitAny": false,
     "rootDir": "./src",

@@ -21,7 +21,7 @@ export function {{ generateComponentName "view" }}(props: { id: string }) {
     content = <Ant.Space align="center"><Ant.Spin size="large" /></Ant.Space>
   } else {
     if (error || document === null) {
-      content = <Ant.Alert message={error || t('generics.error_message')} type="error" />
+      content = <Ant.Alerst message={error.toString() || t('generics.error_message')} type="error" />
     } else {
       content = <{{ generateComponentName "viewComponent" }} document={document} />
     }

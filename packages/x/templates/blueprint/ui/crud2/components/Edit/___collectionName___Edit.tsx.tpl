@@ -50,7 +50,7 @@ export function {{ generateComponentName "edit" }}(props: { id: string }) {
       <Ant.Card>
         {isLoading && <Ant.Space align="center"><Ant.Spin size="large" /></Ant.Space>}
         {!isLoading && (error || !document) && 
-          <Ant.Alert message={error || t('generics.error_message')} type="error" />
+          <Ant.Alert message={error.toString() || t('generics.error_message')} type="error" />
         }
         {!isLoading && !error && (
           <Ant.Form 
