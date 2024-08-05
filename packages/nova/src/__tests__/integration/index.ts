@@ -1,29 +1,13 @@
 import { assert, expect } from "chai";
 import * as _ from "lodash";
 import { getRandomCollection, log } from "./helpers";
-import {
-  addLinks,
-  query,
-  clear,
-  addExpanders,
-  addReducers,
-} from "../../core/api";
+import { addLinks, query, clear, addExpanders, addReducers } from "../../core/api";
 import { client } from "../connection";
 import { Collection } from "mongodb";
 import { ClassSchema, getClassSchema, t } from "@deepkit/type";
 import { addSchema } from "../../core/api";
-import {
-  getBSONDecoder,
-  getRawBSONDecoder,
-  parseArray,
-  ParserV2,
-} from "@deepkit/bson";
-import {
-  manyToMany,
-  manyToOne,
-  oneToOne,
-  oneToMany,
-} from "../../core/quickLinkers";
+import { getBSONDecoder, getRawBSONDecoder, parseArray, ParserV2 } from "@deepkit/bson";
+import { manyToMany, manyToOne, oneToOne, oneToMany } from "../../core/quickLinkers";
 
 // Read: https://mongodb.github.io/node-mongodb-native/3.3/api/
 declare module "../../core/defs" {
@@ -41,7 +25,7 @@ afterAll(async () => {
   await client.close();
 });
 
-describe("Main tests", function () {
+describe("Main tests", function() {
   let A: Collection;
   let B: Collection;
   let C: Collection;
@@ -1618,7 +1602,7 @@ describe("Main tests", function () {
     assert.equal(post.comments[4].number, 8);
   });
 
-  it("Should work with custom data decoders at $schema level", async () => {
+  it.only("Should work with custom data decoders at $schema level", async () => {
     manyToMany(A, B, {
       linkName: "bs",
     });

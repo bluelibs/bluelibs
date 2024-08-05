@@ -1,6 +1,7 @@
 import * as _ from "lodash";
 import { ClientSession } from "mongodb";
 import * as dot from "dot-object";
+import * as BSON from "bson";
 
 import {
   SPECIAL_PARAM_FIELD,
@@ -10,31 +11,17 @@ import {
   SCHEMA_BSON_DOCUMENT_SERIALIZER,
   CONTEXT_FIELD,
 } from "../../constants";
-import {
-  QueryBodyType,
-  IReducerOption,
-  QuerySubBodyType,
-  IQueryContext,
-} from "../../defs";
+import { QueryBodyType, IReducerOption, QuerySubBodyType, IQueryContext } from "../../defs";
 
-import {
-  getLinker,
-  getReducerConfig,
-  getExpanderConfig,
-  hasLinker,
-} from "../../api";
+import { getLinker, getReducerConfig, getExpanderConfig, hasLinker } from "../../api";
 import Linker from "../Linker";
 import { INode } from "./INode";
 import FieldNode from "./FieldNode";
 import ReducerNode from "./ReducerNode";
 import { Collection, ObjectId } from "mongodb";
-import { ClassSchema, t } from "@deepkit/type";
-import { getBSONDecoder } from "@deepkit/bson";
-import {
-  SCHEMA_STORAGE,
-  SCHEMA_AGGREGATE_STORAGE,
-  ALL_FIELDS,
-} from "../../constants";
+import { ReflectionClass, t, typeOf } from "@deepkit/type";
+import { getBSONDeserializer } from "@deepkit/bson";
+import { SCHEMA_STORAGE, SCHEMA_AGGREGATE_STORAGE, ALL_FIELDS } from "../../constants";
 import { BSONLeftoverSerializer } from "./utils/BSONLeftoverSerializer";
 import { SCHEMA_BSON_OBJECT_DECODER_STORAGE } from "../../constants";
 import { Session } from "inspector";
@@ -61,7 +48,7 @@ export default class CollectionNode implements INode {
   public collection: Collection<any>;
   public parent: CollectionNode;
   public alias: string;
-  public schema: ClassSchema;
+  public schema: ReflectionClass<any>;
   public scheduledForDeletion: boolean = false;
 
   public nodes: INode[] = [];
@@ -108,9 +95,7 @@ export default class CollectionNode implements INode {
     const { collection, body, name, parent, linker, explain = false } = options;
 
     if (collection && !_.isObject(body)) {
-      throw new Error(
-        `The field "${name}" is a collection link, and should have its body defined as an object.`
-      );
+      throw new Error(`The field "${name}" is a collection link, and should have its body defined as an object.`);
     }
 
     this.context = context;
@@ -179,9 +164,7 @@ export default class CollectionNode implements INode {
   }
 
   get collectionNodes(): CollectionNode[] {
-    return this.nodes.filter(
-      (n) => n instanceof CollectionNode
-    ) as CollectionNode[];
+    return this.nodes.filter((n) => n instanceof CollectionNode) as CollectionNode[];
   }
 
   get fieldNodes(): FieldNode[] {
@@ -220,15 +203,14 @@ export default class CollectionNode implements INode {
    * Returns the filters and options needed to fetch this node
    * The argument parentObject is given when we perform recursive fetches
    */
-  public getPropsForQuerying(parentObject?: any): {
+  public getPropsForQuerying(
+    parentObject?: any
+  ): {
     filters: any;
     options: any;
     pipeline: any[];
   } {
-    let props =
-      typeof this.props === "function"
-        ? this.props(parentObject)
-        : _.cloneDeep(this.props);
+    let props = typeof this.props === "function" ? this.props(parentObject) : _.cloneDeep(this.props);
 
     let { filters = {}, options = {}, pipeline = [], decoder } = props;
 
@@ -332,42 +314,40 @@ export default class CollectionNode implements INode {
    * Fetches the data accordingly
    */
   public async toArray(additionalFilters = {}, parentObject?: any) {
-    const pipeline = this.getAggregationPipeline(
-      additionalFilters,
-      parentObject
-    );
+    const pipeline = this.getAggregationPipeline(additionalFilters, parentObject);
 
     if (this.explain) {
-      console.log(
-        `[${this.name}] Pipeline:\n`,
-        JSON.stringify(pipeline, null, 2)
-      );
+      console.log(`[${this.name}] Pipeline:\n`, JSON.stringify(pipeline, null, 2));
     }
 
     let { schema, aggregateDecoder, serializer } = this.getJITSchemaInfo();
 
     if (schema) {
-      // @types/mongodb complains about `batchSize` not being a valid option, it's a false issue
-      // @ts-ignore
-      const buffers = await this.collection
-        .aggregate(pipeline, {
-          allowDiskUse: true,
-          raw: true,
-          batchSize: 1_000_000,
-          session: this.session,
-        })
-        .toArray();
+      const cursor = await this.collection.aggregate(pipeline, {
+        allowDiskUse: true,
+        raw: true,
+        batchSize: 1_000_000,
+        session: this.session,
+      });
 
-      const result = aggregateDecoder(buffers[0]);
-      if (result.errmsg) {
-        throw new Error(JSON.stringify(result));
+      const results = [];
+
+      for await (const document of cursor) {
+        // BSON is already decoded into a JavaScript object
+        console.log(document, typeof document);
+        results.push(serializer.deserialize(document));
       }
 
-      const firstBatchResults = result.cursor.firstBatch;
+      console.log(results);
 
-      const results = firstBatchResults.map((result) =>
-        serializer.deserialize(result)
-      );
+      // const result = aggregateDecoder(buffers[0]);
+      // if (result.errmsg || !result.cursor) {
+      //   throw new Error("Could not decode BSON using JIT for this result: " + JSON.stringify(result));
+      // }
+
+      // const firstBatchResults = result.cursor.firstBatch;
+
+      // const results = firstBatchResults.map((result) => serializer.deserialize(result));
       return results;
     } else {
       // @ts-ignore
@@ -398,8 +378,7 @@ export default class CollectionNode implements INode {
       if (this.collection[SCHEMA_STORAGE]) {
         schema = this.collection[SCHEMA_STORAGE];
         aggregateSchema = this.collection[SCHEMA_AGGREGATE_STORAGE];
-        aggregateDecoder =
-          this.collection[SCHEMA_BSON_AGGREGATE_DECODER_STORAGE];
+        aggregateDecoder = this.collection[SCHEMA_BSON_AGGREGATE_DECODER_STORAGE];
         documentDecoder = this.collection[SCHEMA_BSON_OBJECT_DECODER_STORAGE];
         serializer = this.collection[SCHEMA_BSON_DOCUMENT_SERIALIZER];
       }
@@ -440,15 +419,8 @@ export default class CollectionNode implements INode {
   /**
    * Based on the current configuration fetches the pipeline
    */
-  public getAggregationPipeline(
-    additionalFilters = {},
-    parentObject?: any
-  ): any[] {
-    const {
-      filters,
-      options,
-      pipeline: pipelineFromProps,
-    } = this.getPropsForQuerying(parentObject);
+  public getAggregationPipeline(additionalFilters = {}, parentObject?: any): any[] {
+    const { filters, options, pipeline: pipelineFromProps } = this.getPropsForQuerying(parentObject);
 
     const pipeline = [];
     Object.assign(filters, additionalFilters);
@@ -501,21 +473,13 @@ export default class CollectionNode implements INode {
   /**
    * This function creates the children properly for my root.
    */
-  protected spread(
-    body: QuerySubBodyType,
-    fromReducerNode?: ReducerNode,
-    scheduleForDeletion?: boolean
-  ) {
+  protected spread(body: QuerySubBodyType, fromReducerNode?: ReducerNode, scheduleForDeletion?: boolean) {
     _.forEach(body, (fieldBody, fieldName) => {
       if (!fieldBody) {
         return;
       }
 
-      if (
-        fieldName === SPECIAL_PARAM_FIELD ||
-        fieldName === SCHEMA_FIELD ||
-        fieldName === ALL_FIELDS
-      ) {
+      if (fieldName === SPECIAL_PARAM_FIELD || fieldName === SCHEMA_FIELD || fieldName === ALL_FIELDS) {
         return;
       }
 
@@ -527,9 +491,7 @@ export default class CollectionNode implements INode {
 
       let linkType = this.getLinkingType(alias);
 
-      scheduleForDeletion = fromReducerNode
-        ? true
-        : Boolean(scheduleForDeletion);
+      scheduleForDeletion = fromReducerNode ? true : Boolean(scheduleForDeletion);
 
       /**
        * This allows us to have reducer with the same name as the field
@@ -542,11 +504,7 @@ export default class CollectionNode implements INode {
       switch (linkType) {
         case NodeLinkType.COLLECTION:
           if (this.hasCollectionNode(alias)) {
-            this.getCollectionNode(alias).spread(
-              fieldBody as QueryBodyType,
-              null,
-              scheduleForDeletion
-            );
+            this.getCollectionNode(alias).spread(fieldBody as QueryBodyType, null, scheduleForDeletion);
           } else {
             const linker = this.getLinker(alias);
 
@@ -594,9 +552,7 @@ export default class CollectionNode implements INode {
             // When we spread the body of that other reducer we also need to add it to its deps
             if (fromReducerNode) {
               const reducerNode = this.getReducerNode(fieldName);
-              if (
-                !fromReducerNode.dependencies.find((n) => n === reducerNode)
-              ) {
+              if (!fromReducerNode.dependencies.find((n) => n === reducerNode)) {
                 fromReducerNode.dependencies.push(reducerNode);
               }
             }
@@ -667,10 +623,7 @@ export default class CollectionNode implements INode {
       // In case it contains some sub fields
       const fieldNode = this.getFirstLevelField(fieldName);
 
-      if (
-        scheduleForDeletion === false &&
-        fieldNode.scheduledForDeletion === true
-      ) {
+      if (scheduleForDeletion === false && fieldNode.scheduledForDeletion === true) {
         fieldNode.scheduledForDeletion = false;
       }
 
@@ -740,18 +693,8 @@ export default class CollectionNode implements INode {
    * @param resultSchema
    * @returns
    */
-  public static getAggregateSchema(resultSchema: ClassSchema) {
-    return t.schema({
-      ok: t.number,
-      errmsg: t.string.optional,
-      code: t.number.optional,
-      codeName: t.string.optional,
-      cursor: {
-        id: t.number,
-        firstBatch: t.array(t.partial(resultSchema)),
-        nextBatch: t.array(t.partial(resultSchema)),
-      },
-    });
+  public static getAggregateSchema(resultSchema: ReflectionClass<any>) {
+    return typeOf(AggregationResponseType);
   }
 
   protected hasPipeline() {
