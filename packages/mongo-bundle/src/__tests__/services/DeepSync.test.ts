@@ -179,7 +179,7 @@ describe("DeepSync", () => {
     const newTag = new Tag({ title: "Tag 3" });
 
     await operator.link(post._id, newTag);
-    expect(await tags.find().count()).toBe(3);
+    expect(await tags.countDocuments()).toBe(3);
 
     await operator.unlink(post._id, newTag);
     const postResult = await posts.queryOne({
@@ -188,7 +188,7 @@ describe("DeepSync", () => {
       },
     });
     expect(postResult.tags).toHaveLength(2);
-    expect(await tags.find().count()).toBe(3);
+    expect(await tags.countDocuments()).toBe(3);
 
     expect(await tags.findOne({ _id: newTag._id })).toBeTruthy();
 
@@ -196,7 +196,7 @@ describe("DeepSync", () => {
       delete: true,
     });
 
-    expect(await tags.find().count()).toBe(2);
+    expect(await tags.countDocuments()).toBe(2);
 
     const postResult2 = await posts.queryOne({
       _id: 1,
@@ -207,7 +207,7 @@ describe("DeepSync", () => {
     await operator.clean(postResult2._id, {
       delete: true,
     });
-    expect(await tags.find().count()).toBe(0);
+    expect(await tags.countDocuments()).toBe(0);
     // await operator.clean(postId, { delete: true }); // removes tags and delets them
     // await operator.link(postId, [tagId1, tagId2], { override: true }); // overrides
     // await operator.unlink(postId, [tagId1, tagId2], { delete: true }); // (works with many relationships only) adds aditional tags

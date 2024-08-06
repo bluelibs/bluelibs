@@ -337,25 +337,6 @@ const results = query(
 );
 ```
 
-If you want to benefit of JIT bson-decoding for your data you can add it through `jitSchema` static variable. This speeds up the data fetching speeds by ~50% (the more data you fetch, the faster it gets).
-
-:::warning
-Keep in mind that if you forget to update the `jitSchema` you won't be able to receive the data not defined in schema from MongoDB, making you wonder what is going on, we advise using this only when you actually need it. Prematurue optimisation is not healthy.
-:::
-
-Example for a collection that contains only `name: string`:
-
-```ts
-class PostsCollection extends Collection {
-  // optional for absolute performance, import { t } from "@bluelibs/nova"
-  // Documentation is here: https://deepkit.io/documentation/type
-  // This only applies to Nova query-ing
-  static jitSchema = t.schema({
-    name: t.string,
-  });
-}
-```
-
 ### GraphQL
 
 [Nova Query](/docs/package-nova#graphql-integration) has an intuitive GraphQL transformation, which allows you to transform the `AbstractSourceTree`, which is the "query" transformed in a OOP-model, to a `Nova` query body so you can return only what is requested + collection-linked. This is the magical part.

@@ -39,7 +39,6 @@ import {
   IExpanderOptions,
   addReducers,
   addExpanders,
-  addSchema,
   addLinks,
   IAstToQueryOptions,
   AnyifyFieldsWithIDs as Clean,
@@ -150,6 +149,19 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     };
 
     return cursor;
+  }
+
+  /**
+   * Count number of documents
+   * @param filter
+   * @param options
+   * @returns
+   */
+  async countDocuments(
+    filter: MongoDB.Filter<Clean<T>> = {},
+    options?: MongoDB.CountOptions
+  ): Promise<number> {
+    return this.collection.countDocuments(filter, options);
   }
 
   /**
@@ -425,14 +437,19 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       })
     );
 
-    const result = await this.collection.findOneAndDelete(filters, options);
+    const result = await this.collection.findOneAndDelete(filters, 
+      {
+        ...options,
+        includeResultMetadata: true,
+      }
+    );
 
     await this.emit(
       new AfterDeleteEvent({
         context: options?.context || {},
         filter: filters,
         isMany: false,
-        result: result as MongoDB.ModifyResult<T>,
+        result: result as unknown as MongoDB.ModifyResult<T>,
         options,
       })
     );
@@ -468,7 +485,10 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     const result = await this.collection.findOneAndUpdate(
       filters,
       update,
-      options
+      {
+        ...options,
+        includeResultMetadata: true,
+      }
     );
 
     await this.emit(
@@ -584,9 +604,6 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     addLinks(this.collection, adaptedLinks);
     addReducers(this.collection, this.getStaticVariable("reducers") || {});
     addExpanders(this.collection, this.getStaticVariable("expanders") || {});
-    if (this.getStaticVariable("jitSchema")) {
-      addSchema(this.collection, this.getStaticVariable("jitSchema"));
-    }
   }
 
   /**
@@ -629,7 +646,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param ast
    * @param config
    */
-  async queryGraphQL(
+  async queryGraphQL<T = null>(
     ast: any,
     config?: IAstToQueryOptions<T>,
     session?: MongoDB.ClientSession,
@@ -651,7 +668,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param ast
    * @param config
    */
-  async queryOneGraphQL(
+  async queryOneGraphQL<T = null>(
     ast,
     config?: IAstToQueryOptions<T>,
     session?: MongoDB.ClientSession,

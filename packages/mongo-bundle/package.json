@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/mongo-bundle",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "description": "Easy MongoDB solution designed for BlueLibs Framework.",
   "main": "dist/index.js",
   "repository": {
@@ -41,7 +41,7 @@
     "@types/node": "^16.0.0",
     "class-transformer": "^0.4.0",
     "jest": "^27.3.1",
-    "mongodb": "^6.0.0",
+    "mongodb": "^6.8.0",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.4",
     "typescript": "4.9"

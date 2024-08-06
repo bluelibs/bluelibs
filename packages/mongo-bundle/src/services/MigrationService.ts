@@ -51,7 +51,7 @@ export class MigrationService {
     const status = await this.getStatus();
     await this.migrationsCollection.updateOne(
       {
-        _id: "status",
+        _id: "status" as any,
       },
       {
         $set: data,
@@ -60,7 +60,7 @@ export class MigrationService {
   }
 
   async getStatus(): Promise<IMigrationStatus> {
-    let control = await this.migrationsCollection.findOne({ _id: "status" });
+    let control = await this.migrationsCollection.findOne({ _id: "status" as any });
     if (!control) {
       const lastMigration =
         this.migrationConfigs[this.migrationConfigs.length - 1];
@@ -80,7 +80,7 @@ export class MigrationService {
     // the unlocked control, and locking occurs in the same update's modifier.
     // All other simultaneous callers will get false back from the update.
     const result = await this.migrationsCollection.updateOne(
-      { _id: "status", locked: false },
+      { _id: "status" as any, locked: false },
       { $set: { locked: true, lockedAt: new Date() } }
     );
 

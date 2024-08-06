@@ -25,8 +25,6 @@ export class DatabaseService {
     protected readonly container: ContainerInstance
   ) {
     this.client = new MongoClient(mongoUrl, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       ...mongoConnectionOptions,
     });
   }

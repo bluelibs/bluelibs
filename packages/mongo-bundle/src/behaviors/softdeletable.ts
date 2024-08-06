@@ -102,10 +102,10 @@ export default function softdeletable(
     };
 
     const oldQueryOneGraphQL = collection.queryOneGraphQL;
-    collection.queryOneGraphQL = (
+    collection.queryOneGraphQL = <T = null>(
       ast: any,
       config?: IAstToQueryOptions
-    ): Promise<any[]> => {
+    ): Promise<Partial<T>> => {
       config = prepareQueryGraphQLOptions(config || {}, options);
 
       return oldQueryOneGraphQL.call(collection, ast, config);

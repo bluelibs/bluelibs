@@ -47,16 +47,16 @@ describe("Migrations", () => {
     await migrationService.migrateToLatest();
     const status = await migrationService.getStatus();
     expect(status.version).toBe(2);
-    expect(await posts.find().count()).toBe(2);
+    expect(await posts.countDocuments()).toBe(2);
 
     await migrationService.migrateTo(1);
-    expect(await posts.find().count()).toBe(1);
+    expect(await posts.countDocuments()).toBe(1);
 
     await migrationService.migrateTo(0);
-    expect(await posts.find().count()).toBe(0);
+    expect(await posts.countDocuments()).toBe(0);
 
     await migrationService.migrateToLatest();
-    expect(await posts.find().count()).toBe(2);
+    expect(await posts.countDocuments()).toBe(2);
   });
 
   test("Should have sanity checks for adding migrations", async () => {
@@ -122,8 +122,8 @@ describe("Migrations", () => {
     // and then run the test again
     await migrationService.migrateToLatest();
     await migrationService.migrateTo(2);
-    expect(await posts.find({ title: "Post 1" }).count()).toBe(1);
-    expect(await posts.find({ title: "Post 2" }).count()).toBe(1);
-    expect(await posts.find().count()).toBe(2);
+    expect(await posts.countDocuments({ title: "Post 1" })).toBe(1);
+    expect(await posts.countDocuments({ title: "Post 2" })).toBe(1);
+    expect(await posts.countDocuments()).toBe(2);
   });
 });
