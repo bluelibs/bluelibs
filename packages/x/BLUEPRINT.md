@@ -67,7 +67,7 @@ const application = app({
         // Here we specify the fields for collection
         field({
           id: "title",
-          type: fields.types.STRING,
+          type: field.types.STRING,
         }),
       ],
     }),
