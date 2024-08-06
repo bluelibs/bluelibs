@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/security-mongo-bundle",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Persistance layer using MongoDB for BlueLibs Security",
   "main": "dist/index.js",
   "repository": {
@@ -41,7 +41,6 @@
     "@types/chai-as-promised": "^7.1.2",
     "@types/graphql": "^0.11.3",
     "@types/jest": "^27.0.3",
-    "@types/node": "^14.18.0",
     "@typescript-eslint/eslint-plugin": "2.3.0",
     "@typescript-eslint/parser": "2.3.0",
     "chai": "^4.2.0",
@@ -55,7 +54,7 @@
     "prettier": "^2.0.5",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.5",
-    "typescript": "4.4.4"
+    "typescript": "^4.9.5"
   },
   "typings": "dist/index.d.ts",
   "typescript": {

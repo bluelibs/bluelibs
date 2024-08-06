@@ -12,6 +12,8 @@
     "pretty": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     "declaration": true,
     "typeRoots": ["node_modules/@types"]
   },

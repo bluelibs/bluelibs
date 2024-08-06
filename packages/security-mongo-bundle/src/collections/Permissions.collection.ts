@@ -34,7 +34,7 @@ export class PermissionsCollection<T extends IPermission>
   }
 
   async countPermissions(filters: IPermissionSearchFilters): Promise<number> {
-    return this.find(this.createMongoFilters(filters)).count();
+    return this.countDocuments(this.createMongoFilters(filters));
   }
 
   async findPermissions(
@@ -80,7 +80,8 @@ export class PermissionsCollection<T extends IPermission>
    */
   protected createMongoFilters(filters: IPermissionSearchFilters) {
     let mongoFilters: any = {};
-    const { userId, domain, domainIdentifier, permission, createdById } = filters;
+    const { userId, domain, domainIdentifier, permission, createdById } =
+      filters;
 
     if (userId) {
       Object.assign(mongoFilters, { userId: { $in: userId } });
@@ -98,8 +99,8 @@ export class PermissionsCollection<T extends IPermission>
 
     if (createdById) {
       Object.assign(mongoFilters, {
-        createdById: { $in: createdById }
-      })
+        createdById: { $in: createdById },
+      });
     }
 
     if (permission) {
