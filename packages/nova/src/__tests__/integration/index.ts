@@ -4,9 +4,6 @@ import { getRandomCollection, log } from "./helpers";
 import { addLinks, query, clear, addExpanders, addReducers } from "../../core/api";
 import { client } from "../connection";
 import { Collection } from "mongodb";
-import { ClassSchema, getClassSchema, t } from "@deepkit/type";
-import { addSchema } from "../../core/api";
-import { getBSONDecoder, getRawBSONDecoder, parseArray, ParserV2 } from "@deepkit/bson";
 import { manyToMany, manyToOne, oneToOne, oneToMany } from "../../core/quickLinkers";
 
 // Read: https://mongodb.github.io/node-mongodb-native/3.3/api/
@@ -1600,113 +1597,6 @@ describe("Main tests", function() {
     assert.lengthOf(post.comments, 5);
     assert.equal(post.comments[0].number, 0);
     assert.equal(post.comments[4].number, 8);
-  });
-
-  it.only("Should work with custom data decoders at $schema level", async () => {
-    manyToMany(A, B, {
-      linkName: "bs",
-    });
-
-    const rest = {
-      date: new Date(),
-      isOk: true,
-      tags: [1, 2, 3],
-    };
-
-    const b1 = await B.insertOne({
-      number: 200,
-      ...rest,
-    });
-    const b2 = await B.insertOne({ number: 300, ...rest });
-    const b3 = await B.insertOne({ number: 500, ...rest });
-
-    await A.insertOne({
-      number: 100,
-      bsIds: [b1, b2, b3].map((b) => b.insertedId),
-    });
-
-    const resultSchema = t.schema({
-      _id: t.mongoId,
-      date: t.date,
-      isOk: t.boolean,
-      number: t.number,
-      tags: t.array(t.number),
-    });
-
-    let result = await query(A, {
-      bs: {
-        $schema: resultSchema,
-        _id: 1,
-        number: 1,
-        isOk: 1,
-        date: 1,
-        tags: 1,
-      },
-    }).fetchOne();
-
-    assert.isUndefined(result.bIds);
-    assert.isArray(result.bs);
-    assert.lengthOf(result.bs, 3);
-    result.bs.forEach((b) => {
-      assert.isNumber(b.number);
-      assert.isBoolean(b.isOk);
-      assert.isArray(b.tags);
-      assert.instanceOf(b.date, Date);
-    });
-  });
-
-  it("Should work with custom data decoders at collection level", async () => {
-    manyToMany(A, B, {
-      linkName: "bs",
-    });
-
-    const rest = {
-      date: new Date(),
-      isOk: true,
-      tags: [1, 2, 3],
-    };
-
-    const b1 = await B.insertOne({
-      number: 200,
-      ...rest,
-    });
-    const b2 = await B.insertOne({ number: 300, ...rest });
-    const b3 = await B.insertOne({ number: 500, ...rest });
-
-    await A.insertOne({
-      number: 100,
-      bsIds: [b1, b2, b3].map((b) => b.insertedId),
-    });
-
-    const resultSchema = t.schema({
-      _id: t.mongoId,
-      date: t.date,
-      isOk: t.boolean,
-      number: t.number,
-      tags: t.array(t.number),
-    });
-
-    addSchema(B, resultSchema);
-
-    let result = await query(A, {
-      bs: {
-        _id: 1,
-        number: 1,
-        isOk: 1,
-        date: 1,
-        tags: 1,
-      },
-    }).fetchOne();
-
-    assert.isUndefined(result.bIds);
-    assert.isArray(result.bs);
-    assert.lengthOf(result.bs, 3);
-    result.bs.forEach((b) => {
-      assert.isNumber(b.number);
-      assert.isBoolean(b.isOk);
-      assert.isArray(b.tags);
-      assert.instanceOf(b.date, Date);
-    });
   });
 
   it("should work with $all", async () => {

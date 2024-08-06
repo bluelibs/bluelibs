@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 import FieldNode from "../query/nodes/FieldNode";
 import { ArgumentStore } from "./astToQuery";
-import { SPECIAL_PARAM_FIELD, SCHEMA_FIELD } from "../constants";
+import { SPECIAL_PARAM_FIELD } from "../constants";
 
 /**
  * Intersects two query bodies and returns the result
@@ -16,9 +16,6 @@ export default function intersectBody(what, intersection, andThrow = false) {
   }
   if (what[SPECIAL_PARAM_FIELD]) {
     result[SPECIAL_PARAM_FIELD] = what[SPECIAL_PARAM_FIELD];
-  }
-  if (what[SCHEMA_FIELD]) {
-    result[SCHEMA_FIELD] = what[SCHEMA_FIELD];
   }
 
   _.forEach(intersection, (value, fieldName) => {

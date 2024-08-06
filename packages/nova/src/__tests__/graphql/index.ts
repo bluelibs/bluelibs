@@ -1,21 +1,15 @@
 import { assert } from "chai";
-import astToQuery, {
-  deny,
-  getMaxDepth,
-  astToBody,
-  astQueryToInfo,
-} from "../../core/graphql/astToQuery";
+import astToQuery, { deny, getMaxDepth, astToBody, astQueryToInfo } from "../../core/graphql/astToQuery";
 import gql from "graphql-tag";
 import { log, getRandomCollection } from "../integration/helpers";
 import { query, clear } from "../../core/api";
 import { Collection } from "mongodb";
 import { client } from "../connection";
-import { SPECIAL_PARAM_FIELD, SCHEMA_FIELD } from "../../core/constants";
+import { SPECIAL_PARAM_FIELD } from "../../core/constants";
 import { enforceMaxLimit } from "../../core/graphql/astToQuery";
 import Query from "../../core/query/Query";
-import { t } from "@deepkit/type";
 
-describe("GraphQL", function () {
+describe("GraphQL", function() {
   let A: Collection;
   let B: Collection;
   let C: Collection;
@@ -82,10 +76,6 @@ describe("GraphQL", function () {
 
     const info = astQueryToInfo(ast);
 
-    const schema = t.schema({
-      a: t.number,
-    });
-
     const query = astToQuery(Users, info, {
       // We also check if intersection works and preserves the arguments
       intersect: {
@@ -100,19 +90,17 @@ describe("GraphQL", function () {
       },
       sideBody: {
         a: 1,
-        $schema: schema,
       },
     });
 
     assert.instanceOf(query, Query);
 
     // console.log(query.body);
-    assert.isDefined(query.body[SCHEMA_FIELD]);
     assert.isUndefined(query.body.b);
     assert.isUndefined(query.body.profile.b);
   });
 
-  it("#deny()", function () {
+  it("#deny()", function() {
     const body = {
       test: 1,
       testDeny: 1,
@@ -139,13 +127,7 @@ describe("GraphQL", function () {
       },
     };
 
-    deny(body, [
-      "testDeny",
-      "nested.testDeny",
-      "nestedEmpty.disallow",
-      "nestedDeny",
-      "heavy.nest.ting.wup.denyThis",
-    ]);
+    deny(body, ["testDeny", "nested.testDeny", "nestedEmpty.disallow", "nestedDeny", "heavy.nest.ting.wup.denyThis"]);
 
     assert.isDefined(body.test);
     assert.isUndefined(body.testDeny);
@@ -155,7 +137,7 @@ describe("GraphQL", function () {
     assert.isUndefined(body.heavy);
   });
 
-  it("#getMaxDepth()", function () {
+  it("#getMaxDepth()", function() {
     let body: any = {
       a: 1,
       b: 2,
@@ -215,7 +197,7 @@ describe("GraphQL", function () {
     assert.equal(getMaxDepth(body), 6);
   });
 
-  it("#enforceMaxLimit()", function () {
+  it("#enforceMaxLimit()", function() {
     let props: any = {
       options: {
         limit: 5,

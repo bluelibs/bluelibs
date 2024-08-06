@@ -1,16 +1,8 @@
 import * as _ from "lodash";
 import { ClientSession } from "mongodb";
 import * as dot from "dot-object";
-import * as BSON from "bson";
 
-import {
-  SPECIAL_PARAM_FIELD,
-  ALIAS_FIELD,
-  SCHEMA_FIELD,
-  SCHEMA_BSON_AGGREGATE_DECODER_STORAGE,
-  SCHEMA_BSON_DOCUMENT_SERIALIZER,
-  CONTEXT_FIELD,
-} from "../../constants";
+import { SPECIAL_PARAM_FIELD, ALIAS_FIELD, CONTEXT_FIELD } from "../../constants";
 import { QueryBodyType, IReducerOption, QuerySubBodyType, IQueryContext } from "../../defs";
 
 import { getLinker, getReducerConfig, getExpanderConfig, hasLinker } from "../../api";
@@ -19,12 +11,7 @@ import { INode } from "./INode";
 import FieldNode from "./FieldNode";
 import ReducerNode from "./ReducerNode";
 import { Collection, ObjectId } from "mongodb";
-import { ReflectionClass, t, typeOf } from "@deepkit/type";
-import { getBSONDeserializer } from "@deepkit/bson";
-import { SCHEMA_STORAGE, SCHEMA_AGGREGATE_STORAGE, ALL_FIELDS } from "../../constants";
-import { BSONLeftoverSerializer } from "./utils/BSONLeftoverSerializer";
-import { SCHEMA_BSON_OBJECT_DECODER_STORAGE } from "../../constants";
-import { Session } from "inspector";
+import { ALL_FIELDS } from "../../constants";
 
 export interface CollectionNodeOptions {
   collection: Collection<any>;
@@ -48,7 +35,6 @@ export default class CollectionNode implements INode {
   public collection: Collection<any>;
   public parent: CollectionNode;
   public alias: string;
-  public schema: ReflectionClass<any>;
   public scheduledForDeletion: boolean = false;
 
   public nodes: INode[] = [];
@@ -101,7 +87,6 @@ export default class CollectionNode implements INode {
     this.context = context;
     this.props = body[SPECIAL_PARAM_FIELD] || {};
     this.alias = body[ALIAS_FIELD];
-    this.schema = body[SCHEMA_FIELD];
 
     if (body[CONTEXT_FIELD]) {
       this.context = Object.assign({}, body[CONTEXT_FIELD], this.context);
@@ -113,7 +98,6 @@ export default class CollectionNode implements INode {
     delete this.body[SPECIAL_PARAM_FIELD];
     delete this.body[ALIAS_FIELD];
     delete this.body[CONTEXT_FIELD];
-    delete this.body[SCHEMA_FIELD];
     delete this.body[ALL_FIELDS];
 
     this.explain = explain;
@@ -320,70 +304,13 @@ export default class CollectionNode implements INode {
       console.log(`[${this.name}] Pipeline:\n`, JSON.stringify(pipeline, null, 2));
     }
 
-    let { schema, aggregateDecoder, serializer } = this.getJITSchemaInfo();
-
-    if (schema) {
-      const cursor = await this.collection.aggregate(pipeline, {
+    return this.collection
+      .aggregate(pipeline, {
         allowDiskUse: true,
-        raw: true,
         batchSize: 1_000_000,
         session: this.session,
-      });
-
-      const results = [];
-
-      for await (const document of cursor) {
-        // BSON is already decoded into a JavaScript object
-        console.log(document, typeof document);
-        results.push(serializer.deserialize(document));
-      }
-
-      console.log(results);
-
-      // const result = aggregateDecoder(buffers[0]);
-      // if (result.errmsg || !result.cursor) {
-      //   throw new Error("Could not decode BSON using JIT for this result: " + JSON.stringify(result));
-      // }
-
-      // const firstBatchResults = result.cursor.firstBatch;
-
-      // const results = firstBatchResults.map((result) => serializer.deserialize(result));
-      return results;
-    } else {
-      // @ts-ignore
-      return this.collection
-        .aggregate(pipeline, {
-          allowDiskUse: true,
-          batchSize: 1_000_000,
-          session: this.session,
-        })
-        .toArray();
-    }
-  }
-
-  private getJITSchemaInfo() {
-    let schema = this.schema,
-      aggregateDecoder,
-      serializer,
-      aggregateSchema,
-      documentDecoder;
-
-    if (schema) {
-      aggregateSchema = CollectionNode.getAggregateSchema(schema);
-      aggregateDecoder = getBSONDecoder(aggregateSchema);
-      documentDecoder = getBSONDecoder(schema);
-      serializer = CollectionNode.getSchemaSerializer(schema);
-    } else if (schema === undefined) {
-      // Fallback to collection schema if $schema: null isn't specified
-      if (this.collection[SCHEMA_STORAGE]) {
-        schema = this.collection[SCHEMA_STORAGE];
-        aggregateSchema = this.collection[SCHEMA_AGGREGATE_STORAGE];
-        aggregateDecoder = this.collection[SCHEMA_BSON_AGGREGATE_DECODER_STORAGE];
-        documentDecoder = this.collection[SCHEMA_BSON_OBJECT_DECODER_STORAGE];
-        serializer = this.collection[SCHEMA_BSON_DOCUMENT_SERIALIZER];
-      }
-    }
-    return { schema, aggregateDecoder, serializer, documentDecoder };
+      })
+      .toArray();
   }
 
   /**
@@ -479,7 +406,7 @@ export default class CollectionNode implements INode {
         return;
       }
 
-      if (fieldName === SPECIAL_PARAM_FIELD || fieldName === SCHEMA_FIELD || fieldName === ALL_FIELDS) {
+      if (fieldName === SPECIAL_PARAM_FIELD || fieldName === ALL_FIELDS) {
         return;
       }
 
@@ -677,24 +604,6 @@ export default class CollectionNode implements INode {
     for (const field of this.fieldNodes) {
       field.project(this.results);
     }
-  }
-
-  /**
-   * Returns the BSON serializer for the schema
-   * @param resultSchema
-   * @returns
-   */
-  public static getSchemaSerializer(resultSchema: ClassSchema) {
-    return BSONLeftoverSerializer.for(resultSchema);
-  }
-
-  /**
-   * Returns the schema for the response of an aggregate
-   * @param resultSchema
-   * @returns
-   */
-  public static getAggregateSchema(resultSchema: ReflectionClass<any>) {
-    return typeOf(AggregationResponseType);
   }
 
   protected hasPipeline() {

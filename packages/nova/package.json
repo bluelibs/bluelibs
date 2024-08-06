@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/nova",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "Nova is a relational query layer over MongoDB Node Drivers",
   "main": "dist/index.js",
   "repository": {
@@ -22,14 +22,12 @@
     "prepublishOnly": "npm run compile"
   },
   "dependencies": {
-    "@deepkit/bson": "1.0.1-alpha.153",
-    "@deepkit/type": "1.0.1-alpha.153",
     "dot-object": "^2.1.4",
     "graphql-fields": "^2.0.3",
     "lodash": "^4.17.15"
   },
   "peerDependencies": {
-    "mongodb": "^6.0.0"
+    "mongodb": "^4.0.0 || ^5.0.0 || ^6.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.2.3",

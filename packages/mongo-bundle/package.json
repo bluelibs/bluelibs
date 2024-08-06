@@ -28,7 +28,7 @@
     "@bluelibs/logger-bundle": "^1.0.0",
     "@bluelibs/nova": "^1.5.0",
     "@bluelibs/validator-bundle": "^1.0.0",
-    "mongodb": "4.10.0"
+    "mongodb": "^6.0.0"
   },
   "devDependencies": {
     "@bluelibs/core": "^1.0.0",
@@ -41,7 +41,7 @@
     "@types/node": "^16.0.0",
     "class-transformer": "^0.4.0",
     "jest": "^27.3.1",
-    "mongodb": "4.10.0",
+    "mongodb": "^6.0.0",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.4",
     "typescript": "4.9"

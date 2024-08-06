@@ -987,56 +987,6 @@ Deeper queries are run in parallel, so make sure you have a connection `poolSize
 
 If you have a lot of nested fields, you also have the `$all: true` option at your disposal: sending out a large projection to MongoDB can sometimes make it slower than getting all the data. If you specify any collection fields and `$all: true`, all fields will be fetched, but your result will still be projected in the final result of the query.
 
-We can also benefit from extremely rapid BSON decoding through JIT compilers as long as we know not only the fields, but their type too. This is done with the help of [@deepkit/bson](https://github.com/deepkit/deepkit-framework/tree/master/packages/bson) and [@deepkit/type](https://deepkit.io/documentation/type).
-
-```ts
-import { t, query } from "@bluelibs/nova"; // t is from "deepkit/type" package
-
-const postSchema = t.schema({
-  text: t.string,
-  createdAt: t.date,
-});
-
-const commentsSchema = t.schema({
-  text: t.string,
-});
-
-// We do this by adding the special "$schema" field at the collection node we want fast procesing
-query(Posts, {
-  $schema: postSchema,
-  text: 1,
-  createdAt: 1,
-  comments: {
-    $schema: commentsSchema,
-  },
-});
-```
-
-We recommend using the `addSchema` directly to the collections itself, removing the necessity of having to specify `$schema`:
-
-```ts
-import { t, addSchema } from "@bluelibs/nova"; // t is from "deepkit/type" package
-
-addSchema(
-  Posts,
-  t.schema({
-    text: t.string,
-    createdAt: t.date,
-    userId: t.mongoId,
-    tagsIds: t.array(t.mongoId),
-    // these are just the fields, no reducers nor collections should be defined here
-  })
-);
-
-// High Performance Mode is now activated on all queries
-query(Posts, {
-  text: 1,
-});
-```
-
-:::note
-Reducers do not need to be added in the schema, as they are computed and added in the `post-processing` phase after the result has been retrieved. Be careful, if you add another field to the request, it must be in the schema, otherwise it won't show up.
-:::
 
 ## Meta
 
