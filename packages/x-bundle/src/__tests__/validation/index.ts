@@ -11,7 +11,7 @@ import { Collection } from "@bluelibs/mongo-bundle";
 import { Service } from "@bluelibs/core";
 
 describe("validation", () => {
-  test("it should work ok", async () => {
+  test("it should work ok with validation", async () => {
     const kernel = createKernel();
     await kernel.init();
     const container = kernel.container;

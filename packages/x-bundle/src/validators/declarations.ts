@@ -2,6 +2,7 @@ import "@bluelibs/validator-bundle";
 import { IUniqueFieldValidationConfig } from "./UniqueFieldValidationMethod";
 import { ObjectIdSchema } from "./ObjectId.validator";
 import "./ObjectId.validator";
+import * as yup from "yup";
 
 declare module "yup" {
   export interface DateSchema {
@@ -23,8 +24,8 @@ declare module "yup" {
   }
 
   export type ObjectIdSchemaConstructor = {
-    new (...args: any[]): ObjectIdSchema;
+    new (...args: any[]): typeof ObjectIdSchema;
   };
 
-  export const objectId: () => ObjectIdSchema;
+  export const objectId: () => typeof ObjectIdSchema;
 }
