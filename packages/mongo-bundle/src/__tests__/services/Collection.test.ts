@@ -10,7 +10,7 @@ import {
   BeforeUpdateEvent,
   AfterUpdateEvent,
 } from "../../events";
-import { EJSON } from "@bluelibs/ejson";
+import { EJSON, ObjectId as EjsonObjectId } from "@bluelibs/ejson";
 import { ObjectId } from "mongodb";
 
 describe("Collection", () => {
@@ -349,4 +349,29 @@ describe("Collection", () => {
       _id: 1,
     });
   });
+
+  test("It should work with ObjectId from EJSON package", async () => {
+    
+    const { container } = await getEcosystem();
+
+    const comments = container.get<Comments>(Comments);
+
+    const c1 = await comments.insertOne({
+      title: "Hello",
+    });
+
+    const insertedId = c1.insertedId.toString();
+    let ejsonId = new EjsonObjectId(insertedId);
+    const c2 = await comments.findOne({
+      _id: ejsonId
+    });
+
+    expect(c2).toBeInstanceOf(Comment);
+
+    // const count = await comments.count({
+    //   _id: ejsonId
+    // });
+
+    // expect(count).toBe(1);
+  })
 });
