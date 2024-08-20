@@ -1,7 +1,7 @@
-import { ObjectSchema, BaseSchema } from "yup";
+import { ObjectSchema, AnySchema } from "yup";
 import * as yup from "yup";
 
-export type SchemaOrSchemaCreator = BaseSchema<any> | (() => BaseSchema<any>);
+export type SchemaOrSchemaCreator = AnySchema<any> | (() => AnySchema<any>);
 export type ModelCreator = () => any;
 
 /**

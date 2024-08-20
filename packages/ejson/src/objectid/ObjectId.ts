@@ -10,14 +10,16 @@ export interface ObjectIdLike {
  * @public
  */
 export class ObjectId implements ObjectIdLike {
-  id: string | Uint8Array;
+  id: Uint8Array;
   __id?: string;
+  public _bsontype: "ObjectId" = "ObjectId";
 
   /**
    * Create a new LightObjectId
    * @param id - A 24 character hex string or a 12-byte Uint8Array
    */
   constructor(id?: string | Uint8Array) {
+    this[Symbol.for("@@mdb.bson.version")] = 6;
     if (id === undefined) {
       // Generate a new id if none provided
       this.id = ObjectId.generate();
@@ -25,7 +27,10 @@ export class ObjectId implements ObjectIdLike {
       if (id.length !== 24 || !/^[0-9a-fA-F]{24}$/.test(id)) {
         throw new Error("String should be a 24 character hex string");
       }
-      this.id = id.toLowerCase();
+      this.id = new Uint8Array(12);
+      for (let i = 0; i < 12; i++) {
+        this.id[i] = parseInt(id.slice(i * 2, i * 2 + 2), 16);
+      }
     } else if (id instanceof Uint8Array && id.length === 12) {
       this.id = id;
     } else {
@@ -122,6 +127,41 @@ export class ObjectId implements ObjectIdLike {
       return this.toHexString() === otherId.toHexString().toLowerCase();
     }
     return false;
+  }
+
+  /** @internal */
+  serializeInto(uint8array: Uint8Array, index: number): 12 {
+    uint8array[index] = this.id[0];
+    uint8array[index + 1] = this.id[1];
+    uint8array[index + 2] = this.id[2];
+    uint8array[index + 3] = this.id[3];
+    uint8array[index + 4] = this.id[4];
+    uint8array[index + 5] = this.id[5];
+    uint8array[index + 6] = this.id[6];
+    uint8array[index + 7] = this.id[7];
+    uint8array[index + 8] = this.id[8];
+    uint8array[index + 9] = this.id[9];
+    uint8array[index + 10] = this.id[10];
+    uint8array[index + 11] = this.id[11];
+    return 12;
+  }
+
+  inspect(): string {
+    return `ObjectId("${this.toHexString()}")`;
+  }
+
+  getTimestamp(): Date {
+    const timestamp = new Uint8Array(4);
+    timestamp[0] = this.id[0];
+    timestamp[1] = this.id[1];
+    timestamp[2] = this.id[2];
+    timestamp[3] = this.id[3];
+    const timestampInt = new DataView(timestamp.buffer).getUint32(0);
+    return new Date(timestampInt * 1000);
+  }
+
+  toJSON(): string {
+    return this.toHexString();
   }
 
   private static counter = Math.floor(Math.random() * 0xffffff);

@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/validator-bundle",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Object validation strategy using yup and decorators.",
   "main": "dist/index.js",
   "repository": {
@@ -24,7 +24,7 @@
   },
   "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
-    "yup": "^0.32.9"
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@bluelibs/core": "^1.0.0",
@@ -32,7 +32,6 @@
     "@types/chai-as-promised": "^7.1.2",
     "@types/graphql": "^0.11.3",
     "@types/jest": "^27.0.3",
-    "@types/node": "^8.0.28",
     "@typescript-eslint/eslint-plugin": "2.3.0",
     "@typescript-eslint/parser": "2.3.0",
     "eslint": "^6.6.0",
@@ -43,8 +42,8 @@
     "prettier": "^2.0.5",
     "source-map-support": "^0.5.13",
     "ts-jest": "^27.0.3",
-    "typescript": "4.4.4",
-    "yup": "^0.32.11"
+    "typescript": "^4.4.4",
+    "yup": "^1.4.0"
   },
   "typings": "dist/index.d.ts",
   "typescript": {
