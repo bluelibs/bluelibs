@@ -69,3 +69,56 @@ class UIAppBundle extends Bundle {
   }
 }
 ```
+
+## Routing
+
+You can use the locales in paths in the prefix or in the route configurations :
+
+```ts
+//kernel config
+new XUII18NBundle({
+  defaultLocale: "en",
+  polyglots: [
+    // ...rest represents the rest of custom options for Polyglot constructor, includign phrases
+    { locale: "fr" },
+  ],
+});
+
+//routes
+export const HOME = {
+  path: "/home",
+  component: HomeComponent,
+};
+
+export const FRHome = {
+  path: "/fr-home",
+  component: HomeComponent,
+  defaultLocale: "fr",
+};
+
+//- the language  on '/home' will be en
+//- the language  on 'fr-home' will be fr
+//- visiting '/fr/home' will use HomeComponent with fr language
+//- visiting '/en/fr-home' will use HomeComponent with en language
+
+//can be used also like this
+router.go(HOME, { locale: "fr" });
+```
+
+You can define the domains inside polyglots configurations :
+
+```ts
+//kernel config
+new XUII18NBundle({
+  defaultLocale: "en",
+  polyglots: [
+    {
+      locale: "fr",
+      //domain that's gonna be redirected to for this language with the same paths
+      domain: "domain.fr",
+      //either use https or http
+      http: true,
+    },
+  ],
+});
+```
