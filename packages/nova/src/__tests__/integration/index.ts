@@ -885,6 +885,52 @@ describe("Main tests", function () {
     assert.isString(result.profile.lastName);
   });
 
+  it("[Reducers] Should work well within many reducers", async () => {
+    const Deals = await getRandomCollection("Deals");
+
+    addReducers(Deals, {
+      notesLength: {
+        dependency: {
+          notes: true,
+        },
+        async reduce(deal) {
+          return deal.notes?.length;
+        },
+      },
+      hasNotes: {
+        dependency: {
+          notesLength: true,
+        },
+        async reduce(deal) {
+          return deal.notesLength > 0;
+        },
+      },
+      sureItHasNotes: {
+        dependency: {
+          hasNotes: true,
+        },
+        async reduce(deal) {
+          return deal.hasNotes === true; // Edited
+        },
+      },
+    });
+
+    const deal1 = await Deals.insertOne({
+      name: "Deal 1",
+      notes: ["note 1", "note 2"],
+    });
+    const tasks = await query(Deals, {
+      _id: 1,
+      name: 1,
+      sureItHasNotes: 1,
+    }).fetch();
+
+    const deal1Result = tasks[0];
+    assert.isTrue(deal1Result.sureItHasNotes);
+    assert.isUndefined(deal1Result.notesLength);
+    assert.isUndefined(deal1Result.hasNotes);
+  });
+
   it("[Reducers] Should work with other reducers, same level", async () => {
     addReducers(A, {
       fullName: {
@@ -1028,7 +1074,6 @@ describe("Main tests", function () {
     }).fetchOne();
 
     assert.equal(`John Smith`, result.fullName);
-    console.log(result);
     assert.isObject(result.profile);
     assert.isString(result.profile.firstName);
     assert.isNumber(result.profile.number);
