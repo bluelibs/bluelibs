@@ -1,10 +1,21 @@
 import { assert, expect } from "chai";
 import * as _ from "lodash";
 import { getRandomCollection, log } from "./helpers";
-import { addLinks, query, clear, addExpanders, addReducers } from "../../core/api";
+import {
+  addLinks,
+  query,
+  clear,
+  addExpanders,
+  addReducers,
+} from "../../core/api";
 import { client } from "../connection";
 import { Collection } from "mongodb";
-import { manyToMany, manyToOne, oneToOne, oneToMany } from "../../core/quickLinkers";
+import {
+  manyToMany,
+  manyToOne,
+  oneToOne,
+  oneToMany,
+} from "../../core/quickLinkers";
 
 // Read: https://mongodb.github.io/node-mongodb-native/3.3/api/
 declare module "../../core/defs" {
@@ -22,7 +33,7 @@ afterAll(async () => {
   await client.close();
 });
 
-describe("Main tests", function() {
+describe("Main tests", function () {
   let A: Collection;
   let B: Collection;
   let C: Collection;
@@ -985,6 +996,42 @@ describe("Main tests", function() {
     }).fetchOne();
 
     assert.equal(`John Smith`, result.fullName);
+  });
+
+  it("[Reducers] Should not clash with fields and other reducers", async () => {
+    addReducers(A, {
+      fullName: {
+        dependency: {
+          profile: {
+            firstName: 1,
+            lastName: 1,
+          },
+        },
+        reduce(obj, params) {
+          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+        },
+      },
+    });
+
+    const a1 = await A.insertOne({
+      profile: {
+        firstName: "John",
+        lastName: "Smith",
+        number: 500,
+      },
+    });
+
+    const result: any = await query(A, {
+      _id: 1,
+      profile: 1,
+      fullName: 1,
+    }).fetchOne();
+
+    assert.equal(`John Smith`, result.fullName);
+    console.log(result);
+    assert.isObject(result.profile);
+    assert.isString(result.profile.firstName);
+    assert.isNumber(result.profile.number);
   });
 
   it("[Projection Fields] Should work with projection $filter", async () => {

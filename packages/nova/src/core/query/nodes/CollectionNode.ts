@@ -2,10 +2,24 @@ import * as _ from "lodash";
 import { ClientSession } from "mongodb";
 import * as dot from "dot-object";
 
-import { SPECIAL_PARAM_FIELD, ALIAS_FIELD, CONTEXT_FIELD } from "../../constants";
-import { QueryBodyType, IReducerOption, QuerySubBodyType, IQueryContext } from "../../defs";
+import {
+  SPECIAL_PARAM_FIELD,
+  ALIAS_FIELD,
+  CONTEXT_FIELD,
+} from "../../constants";
+import {
+  QueryBodyType,
+  IReducerOption,
+  QuerySubBodyType,
+  IQueryContext,
+} from "../../defs";
 
-import { getLinker, getReducerConfig, getExpanderConfig, hasLinker } from "../../api";
+import {
+  getLinker,
+  getReducerConfig,
+  getExpanderConfig,
+  hasLinker,
+} from "../../api";
 import Linker from "../Linker";
 import { INode } from "./INode";
 import FieldNode from "./FieldNode";
@@ -81,7 +95,9 @@ export default class CollectionNode implements INode {
     const { collection, body, name, parent, linker, explain = false } = options;
 
     if (collection && !_.isObject(body)) {
-      throw new Error(`The field "${name}" is a collection link, and should have its body defined as an object.`);
+      throw new Error(
+        `The field "${name}" is a collection link, and should have its body defined as an object.`
+      );
     }
 
     this.context = context;
@@ -148,7 +164,9 @@ export default class CollectionNode implements INode {
   }
 
   get collectionNodes(): CollectionNode[] {
-    return this.nodes.filter((n) => n instanceof CollectionNode) as CollectionNode[];
+    return this.nodes.filter(
+      (n) => n instanceof CollectionNode
+    ) as CollectionNode[];
   }
 
   get fieldNodes(): FieldNode[] {
@@ -187,14 +205,15 @@ export default class CollectionNode implements INode {
    * Returns the filters and options needed to fetch this node
    * The argument parentObject is given when we perform recursive fetches
    */
-  public getPropsForQuerying(
-    parentObject?: any
-  ): {
+  public getPropsForQuerying(parentObject?: any): {
     filters: any;
     options: any;
     pipeline: any[];
   } {
-    let props = typeof this.props === "function" ? this.props(parentObject) : _.cloneDeep(this.props);
+    let props =
+      typeof this.props === "function"
+        ? this.props(parentObject)
+        : _.cloneDeep(this.props);
 
     let { filters = {}, options = {}, pipeline = [], decoder } = props;
 
@@ -298,10 +317,16 @@ export default class CollectionNode implements INode {
    * Fetches the data accordingly
    */
   public async toArray(additionalFilters = {}, parentObject?: any) {
-    const pipeline = this.getAggregationPipeline(additionalFilters, parentObject);
+    const pipeline = this.getAggregationPipeline(
+      additionalFilters,
+      parentObject
+    );
 
     if (this.explain) {
-      console.log(`[${this.name}] Pipeline:\n`, JSON.stringify(pipeline, null, 2));
+      console.log(
+        `[${this.name}] Pipeline:\n`,
+        JSON.stringify(pipeline, null, 2)
+      );
     }
 
     return this.collection
@@ -346,8 +371,15 @@ export default class CollectionNode implements INode {
   /**
    * Based on the current configuration fetches the pipeline
    */
-  public getAggregationPipeline(additionalFilters = {}, parentObject?: any): any[] {
-    const { filters, options, pipeline: pipelineFromProps } = this.getPropsForQuerying(parentObject);
+  public getAggregationPipeline(
+    additionalFilters = {},
+    parentObject?: any
+  ): any[] {
+    const {
+      filters,
+      options,
+      pipeline: pipelineFromProps,
+    } = this.getPropsForQuerying(parentObject);
 
     const pipeline = [];
     Object.assign(filters, additionalFilters);
@@ -400,7 +432,11 @@ export default class CollectionNode implements INode {
   /**
    * This function creates the children properly for my root.
    */
-  protected spread(body: QuerySubBodyType, fromReducerNode?: ReducerNode, scheduleForDeletion?: boolean) {
+  protected spread(
+    body: QuerySubBodyType,
+    fromReducerNode?: ReducerNode,
+    scheduleForDeletion?: boolean
+  ) {
     _.forEach(body, (fieldBody, fieldName) => {
       if (!fieldBody) {
         return;
@@ -418,7 +454,9 @@ export default class CollectionNode implements INode {
 
       let linkType = this.getLinkingType(alias);
 
-      scheduleForDeletion = fromReducerNode ? true : Boolean(scheduleForDeletion);
+      scheduleForDeletion = fromReducerNode
+        ? true
+        : Boolean(scheduleForDeletion);
 
       /**
        * This allows us to have reducer with the same name as the field
@@ -431,7 +469,11 @@ export default class CollectionNode implements INode {
       switch (linkType) {
         case NodeLinkType.COLLECTION:
           if (this.hasCollectionNode(alias)) {
-            this.getCollectionNode(alias).spread(fieldBody as QueryBodyType, null, scheduleForDeletion);
+            this.getCollectionNode(alias).spread(
+              fieldBody as QueryBodyType,
+              null,
+              scheduleForDeletion
+            );
           } else {
             const linker = this.getLinker(alias);
 
@@ -479,7 +521,9 @@ export default class CollectionNode implements INode {
             // When we spread the body of that other reducer we also need to add it to its deps
             if (fromReducerNode) {
               const reducerNode = this.getReducerNode(fieldName);
-              if (!fromReducerNode.dependencies.find((n) => n === reducerNode)) {
+              if (
+                !fromReducerNode.dependencies.find((n) => n === reducerNode)
+              ) {
                 fromReducerNode.dependencies.push(reducerNode);
               }
             }
@@ -550,17 +594,29 @@ export default class CollectionNode implements INode {
       // In case it contains some sub fields
       const fieldNode = this.getFirstLevelField(fieldName);
 
-      if (scheduleForDeletion === false && fieldNode.scheduledForDeletion === true) {
+      if (
+        scheduleForDeletion === false &&
+        fieldNode.scheduledForDeletion === true
+      ) {
         fieldNode.scheduledForDeletion = false;
       }
 
-      if (FieldNode.canBodyRepresentAField(body)) {
-        if (fieldNode.subfields.length > 0) {
-          // We override it, so we include everything
-          fieldNode.subfields = [];
-        }
+      if (fieldNode.subfields.length === 0) {
+        console.log("situation", {
+          fieldNode,
+          body,
+          scheduleForDeletion,
+        });
+        // This is the scenario where you are trying to add "profile.firstName" when "profile" is already added
       } else {
-        fieldNode.spread(body, scheduleForDeletion);
+        if (FieldNode.canBodyRepresentAField(body)) {
+          if (fieldNode.subfields.length > 0) {
+            // We override it, so we include everything
+            fieldNode.subfields = [];
+          }
+        } else {
+          fieldNode.spread(body, scheduleForDeletion);
+        }
       }
     }
   }
