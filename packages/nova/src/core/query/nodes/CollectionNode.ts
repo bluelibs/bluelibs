@@ -602,11 +602,6 @@ export default class CollectionNode implements INode {
       }
 
       if (fieldNode.subfields.length === 0) {
-        console.log("situation", {
-          fieldNode,
-          body,
-          scheduleForDeletion,
-        });
         // This is the scenario where you are trying to add "profile.firstName" when "profile" is already added
       } else {
         if (FieldNode.canBodyRepresentAField(body)) {
