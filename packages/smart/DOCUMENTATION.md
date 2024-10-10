@@ -1,197 +1,502 @@
-Smart is a very small library which helps decouple state management and non-ui-related actions to separate classes. Behind the scenes it's just hooks, nothing fancy.
+# Smart State Management Library
 
-Let us a imagine a counter model:
+Welcome to the **Smart** State Management Library — a lightweight, intuitive, and powerful solution for managing state in React applications. **Smart** is designed to simplify state handling, providing developers with a flexible architecture that seamlessly integrates with React's ecosystem. Whether you're building small components or large-scale applications, **Smart** offers the tools you need to create scalable and maintainable codebases.
 
-```ts
-import * as React from "react";
+## Table of Contents
+
+- [Smart State Management Library](#smart-state-management-library)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation](#installation)
+  - [Getting Started](#getting-started)
+    - [Creating a Smart Model](#creating-a-smart-model)
+    - [Using the `useSmart` Hook](#using-the-usesmart-hook)
+    - [Using the `withSmart` HOC](#using-the-withsmart-hoc)
+  - [Advanced Usage](#advanced-usage)
+    - [Customizing Smart Creation](#customizing-smart-creation)
+    - [Silent State Updates](#silent-state-updates)
+  - [Testing](#testing)
+    - [Jest Configuration](#jest-configuration)
+    - [TypeScript Configuration](#typescript-configuration)
+  - [API Reference](#api-reference)
+    - [Smart Class](#smart-class)
+      - [**Class: Smart**](#class-smart)
+      - [**Types**](#types)
+    - [Hooks and HOCs](#hooks-and-hocs)
+      - [**useSmart Hook**](#usesmart-hook)
+      - [**newSmart Hook**](#newsmart-hook)
+      - [**withSmart HOC**](#withsmart-hoc)
+  - [Examples](#examples)
+    - [Simple Counter Example](#simple-counter-example)
+    - [Higher-Order Component Example](#higher-order-component-example)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+## Features
+
+- **Simple State Management**: Manage your state with ease using the `Smart` class and React Hooks.
+- **TypeScript Support**: Fully typed with TypeScript for enhanced developer experience and type safety.
+- **React Integration**: Seamlessly integrates with React through custom Hooks and Higher-Order Components (HOCs).
+- **Subscriber Notifications**: Subscribe to state changes and react accordingly.
+- **Flexible Configuration**: Customize the behavior of your Smart models as needed.
+- **Testing Ready**: Designed with testing in mind, ensuring your state management logic is reliable.
+
+## Installation
+
+Install the **Smart** library via npm or yarn:
+
+```bash
+# Using npm
+npm install @bluelibs/smart
+
+# Using yarn
+yarn add @bluelibs/smart
+```
+
+## Getting Started
+
+### Creating a Smart Model
+
+Start by creating a subclass of the `Smart` class tailored to your specific state needs. For example, let's create a simple counter model.
+
+```typescript
+// CounterSmart.tsx
+import React, { createContext } from "react";
 import { Smart } from "@bluelibs/smart";
 
-interface IState {
+type CounterState = {
   count: number;
-}
+};
 
-/**
- * We need to create a static context for each model, because it will allow us to use multiple smart models * together and we must have a way to differentiate them
- */
-const CounterContext = React.createContext(null);
-
-class CounterModel extends Smart<IState> {
-  state: IState = {
-    count: 1,
-  };
-
-  increment() {
-    // Imutable state
-    this.setState({ count: this.state.count + 1 });
+export class CounterSmart extends Smart<CounterState> {
+  constructor() {
+    super();
+    this.state = { count: 0 };
   }
 
-  static getContext = () => CounterContext;
+  increment() {
+    this.updateState({ count: this.state.count + 1 });
+  }
+
+  decrement() {
+    this.updateState({ count: this.state.count - 1 });
+  }
+
+  static context = createContext<CounterSmart>(null as any);
+
+  static getContext() {
+    return this.context;
+  }
 }
 ```
 
-Above we see that our model only has an initial state, and then it exposes certain actions and uses `setState` to introduce the new `immutable` state.
+### Using the `useSmart` Hook
 
-Using it can be done like this:
+The `useSmart` Hook allows your React components to access and interact with the Smart model.
 
 ```tsx
-function Basic() {
-  // Api here will be a fresh instance of CounterModel + full autocompletion
-  const api = useSmart(CounterModel);
-  // Note that you can have multiple "smarts" with different models
+// CounterComponent.tsx
+import React from "react";
+import { useSmart } from "@bluelibs/smart";
+import { CounterSmart } from "./CounterSmart";
 
-  // You'll have autocompletion on api.state
-  // This will be re-rendered when state changes
-  const { state } = api;
+const CounterComponent: React.FC = () => {
+  const counter = useSmart(CounterSmart);
+
   return (
     <div>
-      Count: {state.count}
-      <br />
-      <button onClick={() => api.increment()}>Increment</button>
+      <p>Count: {counter.state.count}</p>
+      <button onClick={() => counter.increment()}>Increment</button>
+      <button onClick={() => counter.decrement()}>Decrement</button>
     </div>
   );
-}
+};
 
-const Component = smart(CounterModel)(Basic);
+export default CounterComponent;
 ```
 
-Another, more verbose way to create it would be like this:
+### Using the `withSmart` HOC
+
+Alternatively, you can use the `withSmart` Higher-Order Component to inject the Smart model into your components.
 
 ```tsx
-function Component{
-  const [api, Provider] = newSmart(CounterModel);
+// App.tsx
+import React from "react";
+import { withSmart } from "@bluelibs/smart";
+import { CounterSmart } from "./CounterSmart";
+import CounterComponent from "./CounterComponent";
+
+const SmartCounter = withSmart(CounterSmart)(CounterComponent);
+
+const App: React.FC = () => {
+  return (
+    <div>
+      <h1>Smart Counter</h1>
+      <SmartCounter />
+    </div>
+  );
+};
+
+export default App;
+```
+
+## Advanced Usage
+
+### Customizing Smart Creation
+
+You can customize how Smart models are created by providing a factory function or setting default options.
+
+```typescript
+// customFactory.ts
+import { Smart, INewSmartOptions, SmartConstructor } from "@bluelibs/smart";
+
+export function customFactory<S, U, T extends Smart<S, U>>(
+  targetType: SmartConstructor<S, U>,
+  config: U
+): T {
+  const model = new targetType();
+  // Customize the model as needed
+  return model;
+}
+
+// Usage
+import { newSmart, setDefaults } from "@bluelibs/smart";
+import { CounterSmart } from "./CounterSmart";
+import { customFactory } from "./customFactory";
+
+setDefaults({
+  factory: customFactory,
+});
+
+const [counter, Provider] = newSmart(CounterSmart, {
+  /* config */
+});
+```
+
+### Silent State Updates
+
+Sometimes you might want to update the state without notifying subscribers immediately. Use the `silent` option for this purpose.
+
+```typescript
+counter.setState({ count: 10 }, { silent: true });
+// Subscribers won't be notified
+counter.inform(); // Manually inform subscribers when ready
+```
+
+## Testing
+
+**Smart** is designed to work seamlessly with testing frameworks like Jest and React Testing Library. Below is an example of how to test a component using the `Smart` library.
+
+```typescript
+// CounterComponent.test.tsx
+import React from "react";
+import { render, fireEvent } from "@testing-library/react";
+import { CounterSmart } from "./CounterSmart";
+import { useSmart, createSmart, withSmart } from "@bluelibs/smart";
+import "@testing-library/jest-dom/extend-expect";
+
+// Define a test component
+const CounterComponent: React.FC = () => {
+  const counter = useSmart(CounterSmart);
 
   return (
+    <div>
+      <p data-testid="count">Count: {counter.state.count}</p>
+      <button onClick={() => counter.increment()}>Increment</button>
+      <button onClick={() => counter.decrement()}>Decrement</button>
+    </div>
+  );
+};
+
+// Create a wrapper with the Provider
+const Wrapper: React.FC = () => {
+  const [model, Provider] = createSmart(CounterSmart);
+  return (
     <Provider>
-      <Basic />
+      <CounterComponent />
     </Provider>
   );
 };
+
+test("CounterComponent increments and decrements", () => {
+  const { getByText, getByTestId } = render(<Wrapper />);
+
+  const countText = getByTestId("count");
+  const incrementButton = getByText("Increment");
+  const decrementButton = getByText("Decrement");
+
+  expect(countText).toHaveTextContent("Count: 0");
+
+  fireEvent.click(incrementButton);
+  expect(countText).toHaveTextContent("Count: 1");
+
+  fireEvent.click(decrementButton);
+  expect(countText).toHaveTextContent("Count: 0");
+});
 ```
 
-This would be helpful when you want to have multiple `hooks` in the same component.
+### Jest Configuration
 
-The model can be configured and act differently based on a configuration it receives:
+Ensure your Jest configuration is set up to handle React and TypeScript:
 
-```ts
+```javascript
+// jest.config.js
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "jsdom",
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+};
+```
+
+```typescript
+// jest.setup.ts
+import "@testing-library/jest-dom";
+```
+
+### TypeScript Configuration
+
+Update your `tsconfig.json` to include the necessary types:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "jsx": "react",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "types": ["jest", "@testing-library/jest-dom"],
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules", "**/*.test.tsx"]
+}
+```
+
+## API Reference
+
+### Smart Class
+
+The `Smart` class is the core of the library, providing state management and subscriber notifications.
+
+#### **Class: Smart**
+
+```typescript
+abstract class Smart<StateModel = any, Config = any> {
+  public state: StateModel;
+  public config: Config;
+
+  constructor(config?: Config);
+
+  async init(): Promise<void>;
+
+  async destroy(): Promise<void>;
+
+  setState(newState: StateModel, options?: SetStateOptions): void;
+
+  updateState(update: Partial<StateModel>, options?: SetStateOptions): void;
+
+  subscribe(subscriber: SmartSubscriber<StateModel>): void;
+
+  unsubscribe(subscriber: SmartSubscriber<StateModel>): void;
+
+  static getContext<T extends Smart>(): React.Context<T>;
+
+  getSubscriberCount(): number; // For testing purposes
+}
+```
+
+#### **Types**
+
+- **SmartSubscriber**
+
+  ```typescript
+  type SmartSubscriber<StateModel> = (
+    oldState: StateModel | undefined,
+    newState: StateModel
+  ) => void;
+  ```
+
+- **SetStateOptions**
+
+  ```typescript
+  type SetStateOptions = {
+    silent?: boolean;
+  };
+  ```
+
+### Hooks and HOCs
+
+#### **useSmart Hook**
+
+Allows components to access the Smart model from context and re-render on state changes.
+
+```typescript
+function useSmart<T extends Smart>(modelClass: {
+  getContext(): React.Context<T>;
+}): T;
+```
+
+#### **newSmart Hook**
+
+Initializes the Smart model and provides a Provider component.
+
+```typescript
+function newSmart<T extends Smart>(modelClass: {
+  new (): T;
+  getContext(): React.Context<T>;
+}): [T, FC];
+```
+
+#### **withSmart HOC**
+
+Wraps a component with the Smart Provider.
+
+```typescript
+function withSmart<T extends Smart>(modelClass: {
+  new (): T;
+  getContext(): React.Context<T>;
+}): <P extends object>(Component: React.ComponentType<P>) => FC<P>;
+```
+
+## Examples
+
+### Simple Counter Example
+
+**CounterSmart.tsx**
+
+```typescript
+import React, { createContext } from "react";
 import { Smart } from "@bluelibs/smart";
 
-interface IState {
-  loading: boolean;
-  results: any[];
-}
+type CounterState = {
+  count: number;
+};
 
-interface IConfig {
-  endpoint: string;
-}
-
-const HTTPLoaderContext = React.createContext(null);
-
-class HTTPLoader extends Smart<IState, IConfig> {
-  state: IState = {
-    loading: true,
-    results: [],
-  };
-
-  async init() {
-    this.load();
+export class CounterSmart extends Smart<CounterState> {
+  constructor() {
+    super();
+    this.state = { count: 0 };
   }
 
-  async destroy() {
-    // Perform things such as cleanup when the component gets unmounted
-    // This is very useful for subscriptions()
+  increment() {
+    this.updateState({ count: this.state.count + 1 });
   }
 
-  load() {
-    fetch(this.config.endpoint).then((results) => {
-      this.setState({
-        loading: false,
-        results,
-      });
-    });
+  decrement() {
+    this.updateState({ count: this.state.count - 1 });
   }
 
-  static getContext = () => HTTPLoaderContext;
+  static context = createContext<CounterSmart>(null as any);
+
+  static getContext() {
+    return this.context;
+  }
 }
 ```
 
-Now, we can use this configurable state as so:
+**CounterComponent.tsx**
 
 ```tsx
-const endpoint = "https://donuts.com/api/flavors";
+import React from "react";
+import { useSmart } from "@bluelibs/smart";
+import { CounterSmart } from "./CounterSmart";
 
-// You benefit of autocompletion
-const Component = smart(HTTPLoader, { endpoint })(Donuts);
-const [api, Provider] = newSmart(HTTPLoader, { endpoint });
-```
-
-There is another argument called `options` when creating a smart:
-
-```tsx
-smart(CustomModel, config, {
-  factory(classType, configuration) {
-    // you can create the class via a container maybe
-    // default it's just
-    new classType();
-
-    // Configuration is set later via `setConfig()`
-  },
-);
-```
-
-To be able to properly manipulate complex models with state, we recommend [immer](https://immerjs.github.io/immer/docs/introduction)
-
-## Silence & Isolation
-
-If you want to perform state changes without triggering an event, because maybe you want to do some modifications in batches, you can use the silent: true option:
-
-```ts
-api.updateState({ user }, { silent: true });
-api.updateState({ isLoggedIn: true }, { silent: true });
-// Now send the changes
-api.inform();
-```
-
-If you want to have components which only access the api methods or you simply do not want a re-render when state changes:
-
-```ts
-function Component() {
-  const api = useSmart(SmartModel, {
-    isolated: true,
-  });
-
-  // No re-render on state changes
-}
-```
-
-Same concept applies when you are creating the smart. You may have a component that simply handles instantiations and the children react, thus removing the need of unnecessary re-renders when state changes
-
-```tsx
-function Component() {
-  // The second {} is the config of the model
-  const [api, Provider] = newSmart(
-    CounterModel,
-    {},
-    {
-      isolated: true,
-    }
-  );
+const CounterComponent: React.FC = () => {
+  const counter = useSmart(CounterSmart);
 
   return (
-    <Provider>
-      <Basic />
-    </Provider>
+    <div>
+      <p>Count: {counter.state.count}</p>
+      <button onClick={() => counter.increment()}>Increment</button>
+      <button onClick={() => counter.decrement()}>Decrement</button>
+    </div>
   );
-}
+};
+
+export default CounterComponent;
 ```
 
-## Debugging
-
-If you want to see how a Smart changes its state and dispatches the changes use this:
+**App.tsx**
 
 ```tsx
-class MySmart extends Smart {
-  isDebug() {
-    return true;
-  }
-}
+import React from "react";
+import { createSmart } from "@bluelibs/smart";
+import { CounterSmart } from "./CounterSmart";
+import CounterComponent from "./CounterComponent";
+
+const App: React.FC = () => {
+  const [counterModel, CounterProvider] = createSmart(CounterSmart);
+
+  return (
+    <CounterProvider>
+      <h1>Smart Counter</h1>
+      <CounterComponent />
+    </CounterProvider>
+  );
+};
+
+export default App;
 ```
+
+### Higher-Order Component Example
+
+**EnhancedCounter.tsx**
+
+```tsx
+import React from "react";
+import { withSmart } from "@bluelibs/smart";
+import { CounterSmart } from "./CounterSmart";
+
+interface EnhancedCounterProps {
+  label: string;
+}
+
+const EnhancedCounter: React.FC<EnhancedCounterProps> = ({ label }) => {
+  const counter = useSmart(CounterSmart);
+
+  return (
+    <div>
+      <h2>{label}</h2>
+      <p>Count: {counter.state.count}</p>
+      <button onClick={() => counter.increment()}>Increment</button>
+      <button onClick={() => counter.decrement()}>Decrement</button>
+    </div>
+  );
+};
+
+export default withSmart(CounterSmart)(EnhancedCounter);
+```
+
+**App.tsx**
+
+```tsx
+import React from "react";
+import EnhancedCounter from "./EnhancedCounter";
+
+const App: React.FC = () => {
+  return (
+    <div>
+      <h1>Smart Counter with HOC</h1>
+      <EnhancedCounter label="My Counter" />
+    </div>
+  );
+};
+
+export default App;
+```
+
+## Contributing
+
+Contributions are welcome! Whether it's bug fixes, new features, or improving documentation, your input is valuable. To contribute:
+
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Commit your changes with clear messages.
+4. Submit a pull request describing your changes.
+
+Please ensure your code adheres to the project's coding standards and includes relevant tests.
+
+## License
+
+[MIT](LICENSE)

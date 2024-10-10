@@ -1,2 +1,1 @@
-import "./simple-render.test";
-import "./init-destroy.test";
+import "./Smart.test";

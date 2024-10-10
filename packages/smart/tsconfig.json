@@ -14,7 +14,9 @@
     "emitDecoratorMetadata": true,
     "declaration": true,
     "jsx": "react",
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true
   },
 
   "include": ["src/**/*.ts", "src/**/*.tsx"]
