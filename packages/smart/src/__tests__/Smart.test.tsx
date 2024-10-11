@@ -3,7 +3,7 @@ import * as React from "react";
 import "@testing-library/jest-dom";
 
 import { render, fireEvent, act } from "@testing-library/react";
-import { Smart, useSmart, newSmart, withSmart } from "../"; // Assuming Smart.tsx is in the same directory
+import { Smart, useSmart, useNewSmart, withSmart } from "../"; // Assuming Smart.tsx is in the same directory
 
 // Define a CounterSmart class for testing
 class CounterSmart extends Smart<{ count: number }> {
@@ -81,7 +81,7 @@ describe("Smart Class and Hooks", () => {
     };
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = newSmart(CounterSmart);
+      const [model, Provider] = useNewSmart(CounterSmart);
       return (
         <Provider>
           <CounterComponent />
@@ -108,7 +108,7 @@ describe("Smart Class and Hooks", () => {
     };
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = newSmart(CounterSmart);
+      const [model, Provider] = useNewSmart(CounterSmart);
       return (
         <Provider>
           <TestComponent />
@@ -142,7 +142,7 @@ describe("Smart Class and Hooks", () => {
     };
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = newSmart(CounterSmart);
+      const [model, Provider] = useNewSmart(CounterSmart);
       return (
         <Provider>
           <TestComponent />
@@ -201,7 +201,7 @@ describe("Smart Class and Hooks", () => {
     const destroySpy = jest.spyOn(CounterSmart.prototype, "destroy");
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = newSmart(CounterSmart);
+      const [model, Provider] = useNewSmart(CounterSmart);
       console.log(Provider);
       return (
         <Provider>

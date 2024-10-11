@@ -24,7 +24,7 @@ Welcome to the **Smart** State Management Library — a lightweight, intuitive, 
       - [**Types**](#types)
     - [Hooks and HOCs](#hooks-and-hocs)
       - [**useSmart Hook**](#usesmart-hook)
-      - [**newSmart Hook**](#newsmart-hook)
+      - [**useNewSmart Hook**](#usenewsmart-hook)
       - [**withSmart HOC**](#withsmart-hoc)
   - [Examples](#examples)
     - [Simple Counter Example](#simple-counter-example)
@@ -160,7 +160,7 @@ export function customFactory<S, U, T extends Smart<S, U>>(
 }
 
 // Usage
-import { newSmart, setDefaults } from "@bluelibs/smart";
+import { useNewSmart, setDefaults } from "@bluelibs/smart";
 import { CounterSmart } from "./CounterSmart";
 import { customFactory } from "./customFactory";
 
@@ -168,7 +168,7 @@ setDefaults({
   factory: customFactory,
 });
 
-const [counter, Provider] = newSmart(CounterSmart, {
+const [counter, Provider] = useNewSmart(CounterSmart, {
   /* config */
 });
 ```
@@ -337,12 +337,12 @@ function useSmart<T extends Smart>(modelClass: {
 }): T;
 ```
 
-#### **newSmart Hook**
+#### **useNewSmart Hook**
 
 Initializes the Smart model and provides a Provider component.
 
 ```typescript
-function newSmart<T extends Smart>(modelClass: {
+function useNewSmart<T extends Smart>(modelClass: {
   new (): T;
   getContext(): React.Context<T>;
 }): [T, FC];

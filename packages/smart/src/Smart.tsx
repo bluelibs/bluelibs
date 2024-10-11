@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type SmartSubscriber<StateModel> = (
   oldState: StateModel | undefined,
@@ -10,15 +10,14 @@ export type SetStateOptions = {
   silent?: boolean;
 };
 
-export abstract class Smart<StateModel = any, Config = any> {
-  public state: StateModel;
-  public config: Config;
-  private subscribers: SmartSubscriber<StateModel>[] = [];
-  private previousState?: StateModel;
+export abstract class Smart<StateModel = any, Config = null> {
+  public state!: StateModel;
+  public config!: Config;
+  protected subscribers: SmartSubscriber<any>[] = [];
+  protected previousState?: StateModel;
 
-  constructor(config?: Config) {
-    this.config = config || ({} as Config);
-    this.init();
+  setConfig(config: Config) {
+    this.config = config;
   }
 
   async init(): Promise<void> {}
@@ -38,7 +37,7 @@ export abstract class Smart<StateModel = any, Config = any> {
     this.setState({ ...this.state, ...update } as StateModel, options);
   }
 
-  private inform() {
+  protected inform() {
     this.subscribers.forEach((subscriber) => {
       subscriber(this.previousState, this.state);
     });
@@ -67,7 +66,7 @@ export abstract class Smart<StateModel = any, Config = any> {
 }
 
 // Custom Hook to use Smart model
-export function useSmart<T extends Smart>(modelClass: {
+export function useSmart<T extends Smart<any, any>>(modelClass: {
   getContext(): React.Context<T>;
 }): T {
   const Context = modelClass.getContext();
@@ -94,12 +93,27 @@ export function useSmart<T extends Smart>(modelClass: {
   return model;
 }
 
+/**
+ * @deprecated use useNewSmart() instead.
+ * @param args
+ */
+export function newSmart(...args: never[]) {}
+
 // Custom Hook to create Smart model and Provider
-export function newSmart<T extends Smart>(modelClass: {
-  new (): T;
-  getContext(): React.Context<T>;
-}): [T, FC<{ children: any }>] {
-  const model = useMemo(() => new modelClass(), [modelClass]);
+export function useNewSmart<T extends Smart<any, any>>(
+  modelClass: {
+    new (): T;
+    getContext(): React.Context<T>;
+  },
+  ...args: T extends Smart<infer S, infer C> ? (C extends null ? [] : [C]) : []
+): [T, FC<{ children: any }>] {
+  const model = useMemo(() => {
+    const instance = new modelClass();
+    instance.setConfig(args[0] as any);
+    instance.init();
+
+    return instance;
+  }, [modelClass, args[0]]);
 
   const Provider: FC<{ children: any }> = ({ children }) => {
     const Context = modelClass.getContext();
@@ -116,13 +130,16 @@ export function newSmart<T extends Smart>(modelClass: {
 }
 
 // Higher-Order Component to wrap components with Smart Provider
-export function withSmart<T extends Smart>(modelClass: {
-  new (): T;
-  getContext(): React.Context<T>;
-}) {
+export function withSmart<T extends Smart<S, C>, S, C>(
+  modelClass: {
+    new (): T;
+    getContext(): React.Context<T>;
+  },
+  ...args: T extends Smart<infer S, infer C> ? (C extends null ? [] : [C]) : []
+) {
   return function <P extends object>(Component: React.ComponentType<P>): FC<P> {
     return function SmartComponent(props: P) {
-      const [model, Provider] = newSmart(modelClass);
+      const [model, Provider] = useNewSmart(modelClass, ...args);
       return (
         <Provider>
           <Component {...props} />
