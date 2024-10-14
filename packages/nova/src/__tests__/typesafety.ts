@@ -13,7 +13,7 @@ describe("Type safety", () => {
     };
 
     const collection = new Collection<CustomType>();
-    const myCollection = decorate<ExtendedCustomType>(collection);
+    const myCollection = decorate<ExtendedCustomType, CustomType>(collection);
 
     myCollection.query({
       $: {},
@@ -22,6 +22,13 @@ describe("Type safety", () => {
       somethingElse: 1,
       // @ts-expect-error
       asfasf: 1,
+    });
+
+    myCollection.insertOne({
+      message: "Hello",
+      index: 1,
+      // @ts-expect-error
+      somethingElse: "World",
     });
   });
 });

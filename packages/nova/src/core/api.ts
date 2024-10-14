@@ -185,7 +185,7 @@ export function addReducers<T = any>(
   });
 }
 
-export type DecoratedCollection<T> = Collection<T> & {
+export type CollectionDecorations<T> = {
   query: (body: QueryBodyType<T>, context?: IQueryContext) => Query<T>;
   addLinks: (data: ILinkOptions) => void;
   addReducers: (data: IReducerOptions) => void;
@@ -214,18 +214,18 @@ export type DecoratedCollection<T> = Collection<T> & {
  * @param collection
  * @returns
  */
-export function decorate<T>(
-  collection: Collection<any>
-): DecoratedCollection<T> {
+export function decorate<TEnhanced, TCModel>(
+  collection: Collection<TCModel>
+): Collection<TCModel> & CollectionDecorations<TEnhanced> {
   Object.assign(collection, {
-    query: (body: QueryBodyType<T>, context?: IQueryContext) =>
+    query: (body: QueryBodyType<TEnhanced>, context?: IQueryContext) =>
       new Query(collection, body, context),
     addLinks: (data: ILinkOptions) => addLinks(collection, data),
     addReducers: (data: IReducerOptions) => addReducers(collection, data),
     addExpanders: (data: IExpanderOptions) => addExpanders(collection, data),
     querySecurely: (
-      config: ISecureOptions<T>,
-      body: QueryBodyType<T>,
+      config: ISecureOptions<TEnhanced>,
+      body: QueryBodyType<TEnhanced>,
       context?: IQueryContext
     ) => query(collection, secureBody(body, config), context),
     queryFromAST: (
@@ -235,5 +235,5 @@ export function decorate<T>(
     ) => astToQuery(collection, ast, options, context),
   });
 
-  return collection as any;
+  return collection as Collection<TCModel> & CollectionDecorations<TEnhanced>;
 }

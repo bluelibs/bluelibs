@@ -925,7 +925,7 @@ Decoration enables you to do most of the things you would do with `addLinks`, `a
 ```ts
 import { decorate } from "@bluelibs/nova";
 
-const decorated = decorate<EnhancedUserType>(users);
+const decorated = decorate<EnhancedUserType, UserType>(users);
 decorated.query({
   // Your query here
 });
