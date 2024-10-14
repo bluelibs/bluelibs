@@ -270,7 +270,7 @@ addLinks(Users, {
   // Don't use the `Comment._id` field as a foreign field for the lookup but `Comment.anotherField`
   comments: {
     collection: () => Comment,
-    foreignField: 'anotherField'
+    foreignField: "anotherField",
   },
 });
 ```
@@ -916,6 +916,26 @@ Let's assume we have 100 posts, and the total number of categories is 4. Hyperno
 and fetches 100 posts and 4 categories. If you would have used `JOIN` functionality in SQL, you would have received
 the full category names for each post.
 
+## Decorate
+
+For ease of use you can just import your collection and query it for there. At the same time your relational model can be different from the document model.
+
+Decoration enables you to do most of the things you would do with `addLinks`, `addExpanders`, `addReducers` but directly working with the collection and without needing to specify it.
+
+```ts
+import { decorate } from "@bluelibs/nova";
+
+const decorated = decorate<EnhancedUserType>(users);
+decorated.query({
+  // Your query here
+});
+decorated.addLinks({});
+decorated.addExpanders({});
+decorated.addReducers({});
+decorated.queryFromAST({});
+decorated.querySecurely(securityOptions, {}); // From the Secure the Body section.
+```
+
 ## Geographical Queries
 
 If you would try to pass any of the following filters to a field, in the standard way (`$geoNear, $near, and $nearSphere`), it will fail saying: `$geoNear, $near, and $nearSphere are not allowed in this context`. The reason this happens is because our filters get transformed into a `$match` inside pipeline, and these ones aren't allowed.
@@ -986,7 +1006,6 @@ query(
 Deeper queries are run in parallel, so make sure you have a connection `poolSize` of at least 10. This can be configured when creating your `MongoClient`. An even larger `poolSize` might increase performance, but it can also decrease it.
 
 If you have a lot of nested fields, you also have the `$all: true` option at your disposal: sending out a large projection to MongoDB can sometimes make it slower than getting all the data. If you specify any collection fields and `$all: true`, all fields will be fetched, but your result will still be projected in the final result of the query.
-
 
 ## Meta
 
