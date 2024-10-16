@@ -231,19 +231,4 @@ describe("Smart Class and Hooks", () => {
       "No context found for Function. Ensure your component is wrapped with the appropriate Provider."
     );
   });
-
-  test("should throw an error when invalid context is provided", () => {
-    class DummySmart extends Smart {}
-
-    const TestComponent: React.FC = () => {
-      const counter = useSmart(DummySmart);
-      return <div>Test</div>;
-    };
-
-    const WrappedComponent = withSmart(DummySmart)(TestComponent);
-
-    expect(() => render(<WrappedComponent />)).toThrow(
-      "Please implement static getContext() in your Smart subclass."
-    );
-  });
 });

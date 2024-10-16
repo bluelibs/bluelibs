@@ -13,6 +13,8 @@ export type SetStateOptions = {
 export abstract class Smart<StateModel = any, Config = null> {
   public state!: StateModel;
   public config!: Config;
+  private static _context: React.Context<any> | null = null;
+
   protected subscribers: SmartSubscriber<any>[] = [];
   protected previousState?: StateModel;
 
@@ -53,10 +55,12 @@ export abstract class Smart<StateModel = any, Config = null> {
     this.subscribers = this.subscribers.filter((s) => s !== subscriber);
   }
 
-  static getContext<T extends Smart>(): React.Context<any> {
-    throw new Error(
-      "Please implement static getContext() in your Smart subclass."
-    );
+  // Automatically create context when needed
+  static getContext<T extends Smart<any>>(): React.Context<any> {
+    if (!this._context) {
+      this._context = React.createContext(null as any);
+    }
+    return this._context as React.Context<T>;
   }
 
   // For testing purposes: expose subscribers length
