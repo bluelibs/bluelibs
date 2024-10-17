@@ -70,8 +70,9 @@ export abstract class Smart<StateModel = any, Config = null> {
 }
 
 // Custom Hook to use Smart model
-export function useSmart<T extends Smart<any, any>>(modelClass: {
-  getContext(): React.Context<T>;
+export function useSmart<T extends Smart<S, C>, S, C>(modelClass: {
+  new (): T;
+  getContext(): React.Context<any>;
 }): T {
   const Context = modelClass.getContext();
   const model = useContext(Context);
