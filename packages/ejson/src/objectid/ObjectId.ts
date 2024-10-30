@@ -130,7 +130,7 @@ export class ObjectId implements ObjectIdLike {
   }
 
   /** @internal */
-  serializeInto(uint8array: Uint8Array, index: number): 12 {
+  serializeInto?(uint8array: Uint8Array, index: number): 12 {
     uint8array[index] = this.id[0];
     uint8array[index + 1] = this.id[1];
     uint8array[index + 2] = this.id[2];
