@@ -204,7 +204,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
             options,
           })
         );
-        const element = await collection.findOneAndUpdate(
+        const element = await collection.collection.findOneAndUpdate(
           filter,
           update,
           options
