@@ -204,19 +204,20 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
             options,
           })
         );
-        const element = await collection.collection.findOneAndUpdate(
+
+        result = await collection.collection.findOneAndUpdate(
           filter,
           update,
           options
         );
 
-        if (!element.value) {
-          // No element was found
+        if (!result.value) {
+          // No document was found
           return;
         }
 
         // Test if the update worked and is consistent
-        const document = await collection.findOne({ _id: element.value._id });
+        const document = await collection.findOne({ _id: result.value._id });
         await validatorService.validate(document, {
           ...behaviorOptions.options,
           model: behaviorOptions.model,
