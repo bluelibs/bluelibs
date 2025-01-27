@@ -121,12 +121,15 @@ export class DatabaseService {
     try {
       await session.withTransaction(async () => {
         try {
-          const result = await fn(session);
+          await fn(session);
         } catch (e) {
-          await session.abortTransaction();
+          this.logger.error(`Transaction error: ${e.toString()}`);
           throw e;
         }
       }, transactionOptions);
+    } catch (e) {
+      this.logger.error(`Transaction failed: ${e.toString()}`);
+      throw e;
     } finally {
       await session.endSession();
     }
