@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/apollo-bundle",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Zero-config Apollo/GraphQL solution for BlueLibs Framework",
   "main": "dist/index.js",
   "repository": {
