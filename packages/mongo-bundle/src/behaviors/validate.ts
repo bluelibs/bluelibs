@@ -86,7 +86,8 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
         }
 
         result = await collection.collection.updateOne(
-          { _id: element._id },
+          // The reason we pass-on filter is to ensure that positional array pushes still work.
+          { ...filter, _id: element._id },
           update,
           {
             ...options,
@@ -211,11 +212,6 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
           options
         );
 
-        if (!result.value) {
-          // No document was found
-          return;
-        }
-
         // Test if the update worked and is consistent
         const document = await collection.findOne({ _id: result.value._id });
         await validatorService.validate(document, {
@@ -224,8 +220,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
         });
       });
 
-      // No exception occured
-      collection.emit(
+      await collection.emit(
         new AfterUpdateEvent({
           filter,
           update,

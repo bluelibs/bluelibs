@@ -1,4 +1,3 @@
-import { EventManager } from "@bluelibs/core";
 import { ITimestampableBehaviorOptions, BehaviorType } from "../defs";
 import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";
 import { Collection } from "../models/Collection";
@@ -38,8 +37,22 @@ export default function timestampable(
         }
 
         Object.assign(update.$set, {
-          [fields.updatedAt]: update.$set[fields.updatedAt] || new Date(),
+          [fields.updatedAt]: new Date(),
         });
+
+        if (e.data.options && e.data.options.upsert) {
+          if (!update.$setOnInsert) {
+            update.$setOnInsert = {};
+          }
+
+          Object.assign(update.$setOnInsert, {
+            [fields.createdAt]: new Date(),
+          });
+
+          Object.assign(update.$set, {
+            [fields.updatedAt]: new Date(),
+          });
+        }
       }
     );
   };
