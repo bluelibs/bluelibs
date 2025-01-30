@@ -48,10 +48,6 @@ export default function timestampable(
           Object.assign(update.$setOnInsert, {
             [fields.createdAt]: new Date(),
           });
-
-          Object.assign(update.$set, {
-            [fields.updatedAt]: new Date(),
-          });
         }
       }
     );
