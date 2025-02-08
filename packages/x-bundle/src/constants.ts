@@ -6,14 +6,18 @@ import type { ClientOpts } from "redis";
 import { ICacheManagerConfig } from "./cache/defs";
 import { CacheService } from "./cache/CacheService";
 
-export const MESSENGER = new Token<IMessenger>("MESSENGER");
-export const IS_LIVE_DEBUG = new Token<boolean>("IS_LIVE_DEBUG");
-export const REDIS_OPTIONS = new Token<ClientOpts>("REDIS_OPTIONS");
-export const X_SETTINGS = new Token<IXBundleConfig>();
-export const APP_ROUTER = new Token<Router>();
-export const ROOT_ROUTER = new Token<Router>();
-export const CACHE_CONFIG = new Token<ICacheManagerConfig>();
-export const CACHE_SERVICE_TOKEN = new Token<CacheService>();
+export const MESSENGER = new Token<IMessenger>("X_BUNDLE::MESSENGER");
+export const IS_LIVE_DEBUG = new Token<boolean>("X_BUNDLE::IS_LIVE_DEBUG");
+export const REDIS_OPTIONS = new Token<ClientOpts>("X_BUNDLE::REDIS_OPTIONS");
+export const X_SETTINGS = new Token<IXBundleConfig>("X_BUNDLE::X_SETTINGS");
+export const APP_ROUTER = new Token<Router>("X_BUNDLE::APP_ROUTER");
+export const ROOT_ROUTER = new Token<Router>("X_BUNDLE::ROOT_ROUTER");
+export const CACHE_CONFIG = new Token<ICacheManagerConfig>(
+  "X_BUNDLE::CACHE_CONFIG"
+);
+export const CACHE_SERVICE_TOKEN = new Token<CacheService>(
+  "X_BUNDLE::CACHE_SERVICE_TOKEN"
+);
 
 export const X_FRAMEWORK_LOGO = String.raw`
 xxxxxxx      xxxxxxx

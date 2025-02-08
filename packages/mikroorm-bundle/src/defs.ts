@@ -11,5 +11,5 @@ export type MikroORMBundleConfigType = {
 };
 
 export const ORM = new Token<MikroORM<IDatabaseDriver<Connection>>>(
-  "MIKRO_ORM_TOKEN"
+  "MIKROORM_BUNDLE::MIKRO_ORM_TOKEN"
 );
