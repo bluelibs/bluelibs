@@ -3,6 +3,11 @@ export interface ILoggerBundleConfig {
    * Should we print on the console the events that are logged?
    */
   console?: boolean;
+
+  /**
+   * Minimum log level to be displayed
+   */
+  level?: LogLevel;
 }
 
 export interface ILog<TContext = any> {
@@ -23,4 +28,13 @@ export enum LogLevel {
   ERROR = "error",
   WARNING = "warning",
   INFO = "info",
+  DEBUG = "debug",
 }
+
+export const LogLevelOrder = [
+  LogLevel.CRITICAL,
+  LogLevel.ERROR,
+  LogLevel.WARNING,
+  LogLevel.INFO,
+  LogLevel.DEBUG,
+];
