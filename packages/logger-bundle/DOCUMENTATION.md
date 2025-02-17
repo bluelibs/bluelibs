@@ -89,6 +89,26 @@ logger.send(new UserLog("message", LogLevel.INFO, { userId: "XXX" }));
 
 You can identify in your log listeners where this is a `UserLog` via `instanceof`.
 
+## Configuration
+
+You can configure the `LoggerBundle` by passing an options object to the constructor. The available options are:
+
+- `console`: A boolean indicating whether to print logs to the console. Default is `true`.
+- `level`: The minimum log level to be displayed. Default is `LogLevel.INFO`.
+
+Example:
+
+```typescript
+const kernel = new Kernel({
+  bundles: [
+    new LoggerBundle({
+      console: true,
+      level: LogLevel.ERROR,
+    }),
+  ],
+});
+```
+
 ## Meta
 
 ### Summary
