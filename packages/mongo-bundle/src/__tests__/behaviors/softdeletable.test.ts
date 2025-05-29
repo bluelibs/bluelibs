@@ -119,6 +119,28 @@ describe("Softdeletable behavior", () => {
     expect(obj.title).toEqual("Hello my friend");
   });
 
+  it("Should create an index on the isDeleted field", async () => {
+    const { container } = await getEcosystem();
+
+    class SoftdeletableCollectionIndexed extends Collection<any> {
+      static behaviors = [softdeletable()];
+      static collectionName = "softdeletable_indexed_test";
+    }
+
+    const collection = container.get<SoftdeletableCollectionIndexed>(
+      SoftdeletableCollectionIndexed
+    );
+
+    // Ensure collection is initialized, which should create the index
+    await collection.countDocuments({});
+
+    const indexes = await collection.collection.listIndexes().toArray();
+    const isDeletedIndex = indexes.find((idx) => idx.key?.isDeleted === 1);
+
+    expect(isDeletedIndex).toBeDefined();
+    expect(isDeletedIndex?.name).toBe("isDeleted_1");
+  });
+
   // TODO:
   // Test events dispatching correctly, not update but remove
 });
