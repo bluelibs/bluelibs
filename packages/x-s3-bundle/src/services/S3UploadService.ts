@@ -30,8 +30,7 @@ export class S3UploadService {
     protected readonly imageService: ImageService
   ) {
     const { s3 } = config;
-    const { bucket, endpoint, ...restS3 } = s3;
-    this.s3 = new S3(restS3);
+    this.s3 = new S3(s3);
   }
 
   /**
