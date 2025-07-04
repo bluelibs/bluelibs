@@ -119,6 +119,7 @@ export interface IQueryBody {
 export interface IQueryOptions<T = any> {
   limit?: number;
   skip?: number;
+  hint?: any;
   sort?:
     | Array<[string, number]>
     | {

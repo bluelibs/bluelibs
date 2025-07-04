@@ -317,7 +317,7 @@ export default class CollectionNode implements INode {
    * Fetches the data accordingly
    */
   public async toArray(additionalFilters = {}, parentObject?: any) {
-    const pipeline = this.getAggregationPipeline(
+    const { pipeline, hint } = this.getAggregationPipeline(
       additionalFilters,
       parentObject
     );
@@ -329,13 +329,14 @@ export default class CollectionNode implements INode {
       );
     }
 
-    return this.collection
-      .aggregate(pipeline, {
-        allowDiskUse: true,
-        batchSize: 1_000_000,
-        session: this.session,
-      })
-      .toArray();
+    const pipelineOptions = {
+      allowDiskUse: true,
+      batchSize: 1000000,
+      session: this.session,
+      hint,
+    };
+
+    return this.collection.aggregate(pipeline, pipelineOptions).toArray();
   }
 
   /**
@@ -374,7 +375,7 @@ export default class CollectionNode implements INode {
   public getAggregationPipeline(
     additionalFilters = {},
     parentObject?: any
-  ): any[] {
+  ): { pipeline: any[]; hint: any } {
     const {
       filters,
       options,
@@ -426,7 +427,10 @@ export default class CollectionNode implements INode {
       });
     }
 
-    return pipeline;
+    return {
+      pipeline,
+      hint: options.hint,
+    };
   }
 
   /**
