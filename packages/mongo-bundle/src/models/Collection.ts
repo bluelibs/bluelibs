@@ -157,16 +157,16 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     filter: MongoDB.Filter<Clean<T>> = {},
     options?: MongoDB.FindOptions<T extends T ? T : T>
   ): MongoDB.FindCursor<MongoDB.WithId<T>> {
-  // Ensure collection initialisation (indexes / behaviors) finished
-  // before performing operations.
-  // Note: find returns a cursor immediately, but we ensure init before
-  // interacting with the underlying collection.
-  const cursor = this.collection.find(filter, options);
+    // Ensure collection initialisation (indexes / behaviors) finished
+    // before performing operations.
+    // Note: find returns a cursor immediately, but we ensure init before
+    // interacting with the underlying collection.
+    const cursor = this.collection.find(filter, options);
 
     const oldToArray = cursor.toArray.bind(cursor);
     cursor.toArray = async (...rest) => {
-  await this.ensureInitialised();
-  const result = await oldToArray(...rest);
+      await this.ensureInitialised();
+      const result = await oldToArray(...rest);
       return this.toModel(result);
     };
 
@@ -183,8 +183,8 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     filter: MongoDB.Filter<Clean<T>> = {},
     options?: MongoDB.CountOptions
   ): Promise<number> {
-  await this.ensureInitialised();
-  return this.collection.countDocuments(filter, options);
+    await this.ensureInitialised();
+    return this.collection.countDocuments(filter, options);
   }
 
   /**
@@ -209,10 +209,10 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     query: MongoDB.Filter<Clean<T>> = {},
     options?: MongoDB.FindOptions<T extends T ? T : T>
   ): Promise<T> {
-  await this.ensureInitialised();
-  const result = await this.collection.findOne(query, options);
+    await this.ensureInitialised();
+    const result = await this.collection.findOne(query, options);
 
-  return this.toModel(result);
+    return this.toModel(result);
   }
 
   /**
@@ -461,12 +461,10 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       })
     );
 
-    const result = await this.collection.findOneAndDelete(filters, 
-      {
-        ...options,
-        includeResultMetadata: true,
-      }
-    );
+    const result = await this.collection.findOneAndDelete(filters, {
+      ...options,
+      includeResultMetadata: true,
+    });
 
     await this.emit(
       new AfterDeleteEvent({
@@ -506,14 +504,10 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       })
     );
 
-    const result = await this.collection.findOneAndUpdate(
-      filters,
-      update,
-      {
-        ...options,
-        includeResultMetadata: true,
-      }
-    );
+    const result = await this.collection.findOneAndUpdate(filters, update, {
+      ...options,
+      includeResultMetadata: true,
+    });
 
     await this.emit(
       new AfterUpdateEvent({
