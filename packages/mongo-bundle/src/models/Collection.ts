@@ -78,6 +78,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
 
   public isInitialised: boolean = false;
   protected onInitFunctions: Function[] = [];
+  protected initializationPromise: Promise<void> | null = null;
   public collection: MongoDB.Collection<T>;
   /**
    * Refers to the event manager that is only within this collection's context
@@ -109,26 +110,42 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   }
 
   protected initialise() {
-    // attach behaviors
-    this.attachBehaviors();
+    // run initialisation steps inside a promise so callers can wait for
+    // behavior onInit hooks and index creation to finish (avoids races)
+    this.initializationPromise = (async () => {
+      // attach behaviors (they may register onInit functions)
+      this.attachBehaviors();
 
-    this.collection = this.databaseService.getMongoCollection(
-      this.getStaticVariable("collectionName")
-    ) as unknown as MongoDB.Collection<T>;
+      this.collection = this.databaseService.getMongoCollection(
+        this.getStaticVariable("collectionName")
+      ) as unknown as MongoDB.Collection<T>;
 
-    this.collection[MONGO_BUNDLE_COLLECTION] = this;
+      this.collection[MONGO_BUNDLE_COLLECTION] = this;
 
-    // Create the links, reducers, expanders
-    this.initialiseNova();
+      // Create the links, reducers, expanders
+      this.initialiseNova();
 
-    // ensure indexes
-    const indexes = this.getStaticVariable("indexes");
-    if (indexes.length) {
-      this.collection.createIndexes(indexes);
+      // ensure indexes declared statically
+      const indexes = this.getStaticVariable("indexes");
+      if (indexes.length) {
+        await this.collection.createIndexes(indexes);
+      }
+
+      // call any onInit functions registered by behaviors and await them
+      if (this.onInitFunctions.length) {
+        await Promise.all(this.onInitFunctions.map((fn) => fn()));
+        this.onInitFunctions = [];
+      }
+
+      this.isInitialised = true;
+    })();
+  }
+
+  protected async ensureInitialised() {
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+      this.initializationPromise = null;
     }
-
-    this.isInitialised = true;
-    this.onInitFunctions.forEach((fn) => fn());
   }
 
   /**
@@ -140,11 +157,16 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     filter: MongoDB.Filter<Clean<T>> = {},
     options?: MongoDB.FindOptions<T extends T ? T : T>
   ): MongoDB.FindCursor<MongoDB.WithId<T>> {
-    const cursor = this.collection.find(filter, options);
+  // Ensure collection initialisation (indexes / behaviors) finished
+  // before performing operations.
+  // Note: find returns a cursor immediately, but we ensure init before
+  // interacting with the underlying collection.
+  const cursor = this.collection.find(filter, options);
 
     const oldToArray = cursor.toArray.bind(cursor);
     cursor.toArray = async (...rest) => {
-      const result = await oldToArray(...rest);
+  await this.ensureInitialised();
+  const result = await oldToArray(...rest);
       return this.toModel(result);
     };
 
@@ -161,7 +183,8 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     filter: MongoDB.Filter<Clean<T>> = {},
     options?: MongoDB.CountOptions
   ): Promise<number> {
-    return this.collection.countDocuments(filter, options);
+  await this.ensureInitialised();
+  return this.collection.countDocuments(filter, options);
   }
 
   /**
@@ -186,9 +209,10 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     query: MongoDB.Filter<Clean<T>> = {},
     options?: MongoDB.FindOptions<T extends T ? T : T>
   ): Promise<T> {
-    const result = await this.collection.findOne(query, options);
+  await this.ensureInitialised();
+  const result = await this.collection.findOne(query, options);
 
-    return this.toModel(result);
+  return this.toModel(result);
   }
 
   /**

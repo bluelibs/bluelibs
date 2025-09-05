@@ -45,9 +45,6 @@ npm run start:admin # Start after API has started
 
 We have designed a custom [documentation](https://www.bluelibs.com/docs) experience with custom code snippets and challenges.
 
-- [Introduction to BlueLibs](https://www.youtube.com/watch?v=uXmiC3LogYw)
-- [BlueSessions (Live Coding with Theo)](https://www.youtube.com/watch?v=6ooKaI6KyA8&list=PLZjXvs8vDYPzBAjFbTGSp49Nu3_Vj2IzN)
-
 ## Security Vulnerabilities
 
 If you discover a security vulnerability within BlueLibs packages, please send an e-mail to Theodor Diaconu via [theodor@bluelibs.com](mailto:theodor@bluelibs.com). All security vulnerabilities will be promptly addressed.
