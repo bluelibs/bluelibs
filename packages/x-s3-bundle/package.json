@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/x-s3-bundle",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "This bundle allows you easily upload files to AWS S3",
   "main": "dist/index.js",
   "repository": {

@@ -30,8 +30,7 @@ export class S3UploadService {
     protected readonly imageService: ImageService
   ) {
     const { s3 } = config;
-    const { bucket, endpoint, ...restS3 } = s3;
-    this.s3 = new S3(restS3);
+    this.s3 = new S3(s3);
   }
 
   /**
@@ -219,15 +218,13 @@ export class S3UploadService {
    * @returns
    */
   getUrl(key: string): string {
-    let urlPath = this.config.s3.endpoint;
-    if (urlPath[urlPath.length - 1] !== "/") {
-      urlPath = urlPath + "/";
-    }
-    if (key[0] === "/") {
-      key = key.slice(1);
-    }
-    // urlPath ends with '/', key surely doesn't
-    return urlPath + key;
+    // Remove leading/trailing slashes from key, endpoint, and bucket
+
+    const urlPath = this.config.s3.endpoint.replace(/^\/+|\/+$/g, "");
+    const bucket = this.config.s3.bucket.replace(/^\/+|\/+$/g, "");
+    const fileName = key.replace(/^\/+|\/+$/g, "");
+
+    return [urlPath, bucket, fileName].join("/");
   }
 
   /**
