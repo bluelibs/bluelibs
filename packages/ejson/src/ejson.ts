@@ -95,6 +95,20 @@ export class EJSON {
    * @locus Anywhere
    * @param {JSONCompatible} val A value to deserialize into EJSON.
    */
+  static _fromJSONValueInPlace(item) {
+    let changed = fromJSONValueHelper(item);
+    if (changed === item && isObject(item)) {
+      // No clone! Directly modify the object tree from JSON.parse.
+      adjustTypesFromJSONValue(changed);
+    }
+    return changed;
+  }
+
+  /**
+   * @summary Deserialize an EJSON value from its plain JSON representation.
+   * @locus Anywhere
+   * @param {JSONCompatible} val A value to deserialize into EJSON.
+   */
   static fromJSONValue(item) {
     let changed = fromJSONValueHelper(item);
     if (changed === item && isObject(item)) {
@@ -148,7 +162,7 @@ export class EJSON {
     if (typeof item !== "string") {
       throw new Error("EJSON.parse argument should be a string");
     }
-    return EJSON.fromJSONValue(JSON.parse(item));
+    return EJSON._fromJSONValueInPlace(JSON.parse(item));
   }
 
   /**
