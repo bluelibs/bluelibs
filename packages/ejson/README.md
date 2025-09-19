@@ -55,11 +55,40 @@ const parsedObject = EJSON.parse(ejsonString);
 console.log(parsedObject.createdAt instanceof Date);
 // true
 // The date is a true Date object! 👍
+
+// EJSON is already an instance, no extra import needed
 ```
 
 ---
 
 ## API & Examples
+
+### Instances & Isolation
+
+`EJSON` is an isolated instance by default. If you need multiple independent registries, create them via `EJSONModule`:
+
+```ts
+import { EJSON, EJSONModule } from "@bluelibs/ejson";
+
+const ctxA = new EJSONModule();
+const ctxB = new EJSONModule();
+
+// Register a custom type only in ctxA
+class Foo {
+  constructor(public x: number) {}
+  typeName() { return "Foo"; }
+  toJSONValue() { return { x: this.x }; }
+}
+ctxA.addType("Foo", (v) => new Foo(v.x));
+
+const s = ctxA.stringify({ f: new Foo(1) });
+
+// OK in ctxA
+ctxA.parse(s);
+
+// Fails in ctxB because Foo is not registered there
+// ctxB.parse(s); // throws: Custom EJSON type Foo is not defined
+```
 
 ### Supported Types
 
