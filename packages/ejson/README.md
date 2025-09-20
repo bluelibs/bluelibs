@@ -186,18 +186,91 @@ _Note: For advanced transformation needs, consider more powerful libraries like 
 
 ## Benchmarks
 
-We take performance seriously. `@bluelibs/ejson` is optimized for common use cases, and our `EJSON.parse` method is significantly faster than other EJSON libraries that rely on deep cloning.
+We take performance and size seriously. `@bluelibs/ejson` includes a classic EJSON serializer and a new batch encoder for uniform arrays that removes repeated keys and per-item wrappers.
 
-Here are the results from our benchmark suite, comparing against the native `JSON` methods. The benchmark uses a complex, nested object with various EJSON types. (Higher ops/sec is better).
+- Single complex object (ops/sec; higher is better)
+  - `JSON.stringify`: ~250k
+  - `EJSON.stringify`: ~100k
+  - `JSON.parse`: ~470k
+  - `EJSON.parse`: ~105k
 
-| Operation         | ops/sec            |
-| ----------------- | ------------------ |
-| `JSON.stringify`  | ~272,000 ops/s     |
-| `EJSON.stringify` | ~110,000 ops/s     |
-| `JSON.parse`      | ~483,000 ops/s     |
-| `EJSON.parse`     | **~112,000 ops/s** |
+- 1000 rows: batch vs non-batch (ops/sec; higher is better)
+  - `JSON.stringify[1000]`: ~1,100
+  - `EJSON.stringify[1000]`: ~290–840 (varies by dataset)
+  - `EJSON.stringifyBatch[1000]`: ~580–880
+  - `JSON.parse[1000]`: ~1,300–3,300
+  - `EJSON.parse[1000]`: ~220–380
+  - `EJSON.parseBatch[1000]`: ~440–630
 
-_These benchmarks were run on a standard development machine. Results may vary based on hardware and data structure complexity._
+- 1000 rows: size comparison (bytes; lower is better)
+  - Raw bytes
+    - JSON: ~228k
+    - EJSON: ~294k
+    - Batch: ~135k (−54% vs EJSON, −41% vs JSON)
+  - Gzip
+    - JSON: ~45.0k
+    - EJSON: ~37.0k
+    - Batch: ~23.6k (−36% vs EJSON, −48% vs JSON)
+  - Brotli
+    - JSON: ~20.0k
+    - EJSON: ~20.4k
+    - Batch: ~13.2k (−35% vs EJSON, −34% vs JSON)
+
+Notes
+- Batch numbers use a flat, uniform object with: `_id` (ObjectId), `createdAt` (Date), `active` (boolean), `name` (string), `score` (number), `re` (RegExp), a `dist` custom type, and an 8-byte binary column, repeated 1000 times.
+- Results vary with hardware and data shape. Run `npm run benchmark` to reproduce on your machine.
+- JSON serves as a baseline, but it does less work (no type restoration). Batch compares EJSON vs EJSON in a realistic uniform-array setting.
+
+### Batch Encoding (Uniform Arrays)
+
+For arrays of flat objects with the same keys, batch encoding drastically reduces size by:
+- Writing the schema once (keys and column types).
+- Storing per-column arrays of values instead of full objects per row.
+- Lifting EJSON typing to columns (for example, Date/ObjectId) instead of per-value wrappers.
+- Optionally packing fixed-width types (ObjectId) into a compact hex blob.
+
+Usage
+
+```ts
+import { EJSON, ObjectId } from "@bluelibs/ejson";
+
+// Optional: register a custom type for richer rows
+class Distance {
+  constructor(public value: number, public unit: string) {}
+  typeName() { return "Distance"; }
+  toJSONValue() { return { value: this.value, unit: this.unit }; }
+}
+EJSON.addType("Distance", (json: any) => new Distance(json.value, json.unit));
+
+const rows = [
+  { _id: new ObjectId(), createdAt: new Date(), active: true, name: "A", score: 10, re: /abc/gi, dist: new Distance(100, "km"), bin: new Uint8Array([1,2,3,4,5,6,7,8]) },
+  { _id: new ObjectId(), createdAt: new Date(), active: false, name: "B", score: 20, re: /abc/gi, dist: new Distance(101, "km"), bin: new Uint8Array([2,3,4,5,6,7,8,9]) },
+  // ... (uniform keys)
+];
+
+// Encode as batch
+const s = EJSON.stringifyBatch(rows, { preferPackedObjectId: true });
+
+// Decode
+const back = EJSON.parseBatch(s);
+```
+
+Behavior
+- Auto-detects schema from the first element’s keys and each column’s first non-null value.
+- Requires flat, uniform objects (same keys); otherwise `stringifyBatch` falls back to classic EJSON.stringify.
+- Supported column types: string, number, boolean, null, date, objectId, regexp, binary (values), and custom (via EJSON.addType factory).
+
+Options
+- `preferPackedObjectId` (default: true): packs ObjectIds into a hex blob (smaller and faster to parse back).
+- `minArrayLength` (default: 1): threshold to consider batch encoding (future heuristic hook).
+- `dictionary`, `deltaForDates`: reserved for future improvements (dictionary and delta encoding).
+
+Run the benchmarks locally
+```bash
+npm run benchmark
+```
+
+_Numbers shown are from a standard development machine and the example dataset above. Your results may vary._
 
 The overhead for `EJSON.stringify` and `EJSON.parse` is the price for handling custom types, but as you can see, the performance is still excellent for real-world applications.
 

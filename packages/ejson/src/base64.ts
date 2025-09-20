@@ -64,4 +64,36 @@ export const Base64 = {
 
     return result;
   },
+
+  // Optimized helpers for Uint8Array <-> base64 that avoid intermediate
+  // per-byte string concatenation when possible (Node fast path).
+  encodeU8(u8: Uint8Array): string {
+    // Node.js fast path
+    if (typeof Buffer !== "undefined" && Buffer.from) {
+      return Buffer.from(u8).toString("base64");
+    }
+    // Browser fallback: build a latin1 string and reuse encode
+    // Construct in chunks to avoid large argument lists
+    let out = "";
+    const CHUNK = 0x8000;
+    for (let i = 0; i < u8.length; i += CHUNK) {
+      const slice = u8.subarray(i, i + CHUNK);
+      out += String.fromCharCode.apply(null, Array.from(slice) as any);
+    }
+    return Base64.encode(out);
+  },
+
+  decodeToU8(b64: string): Uint8Array {
+    // Node.js fast path
+    if (typeof Buffer !== "undefined" && Buffer.from) {
+      const buf = Buffer.from(b64, "base64");
+      // Buffer is a Uint8Array subclass; return a Uint8Array view
+      return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
+    }
+    // Browser fallback: decode to a binary string, then map to bytes
+    const bin = Base64.decode(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  },
 };

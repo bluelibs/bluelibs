@@ -106,6 +106,9 @@ export const buildBuiltinConvertersFor = (ctx: any) => {
       );
     },
     toJSONValue(obj) {
+      if (typeof Uint8Array !== "undefined" && obj instanceof Uint8Array) {
+        return { $binary: Base64.encodeU8(obj) };
+      }
       return { $binary: Base64.encode(obj) };
     },
     fromJSONValue(obj) {
@@ -274,6 +277,9 @@ export const builtinConverters = [
       );
     },
     toJSONValue(obj) {
+      if (typeof Uint8Array !== "undefined" && obj instanceof Uint8Array) {
+        return { $binary: Base64.encodeU8(obj) };
+      }
       return { $binary: Base64.encode(obj) };
     },
     fromJSONValue(obj) {
