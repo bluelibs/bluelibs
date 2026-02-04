@@ -317,7 +317,7 @@ export default class CollectionNode implements INode {
    * Fetches the data accordingly
    */
   public async toArray(additionalFilters = {}, parentObject?: any) {
-    const { pipeline, hint } = this.getAggregationPipeline(
+    const { pipeline, aggregateOptions } = this.getAggregationPipeline(
       additionalFilters,
       parentObject
     );
@@ -332,8 +332,8 @@ export default class CollectionNode implements INode {
     const pipelineOptions = {
       allowDiskUse: true,
       batchSize: 1000000,
+      ...aggregateOptions,
       session: this.session,
-      hint,
     };
 
     return this.collection.aggregate(pipeline, pipelineOptions).toArray();
@@ -375,7 +375,7 @@ export default class CollectionNode implements INode {
   public getAggregationPipeline(
     additionalFilters = {},
     parentObject?: any
-  ): { pipeline: any[]; hint: any } {
+  ): { pipeline: any[]; aggregateOptions: any } {
     const {
       filters,
       options,
@@ -384,6 +384,7 @@ export default class CollectionNode implements INode {
 
     const pipeline = [];
     Object.assign(filters, additionalFilters);
+    const { limit, skip, sort, projection, ...aggregateOptions } = options;
 
     if (!_.isEmpty(filters)) {
       pipeline.push({ $match: filters });
@@ -393,43 +394,41 @@ export default class CollectionNode implements INode {
 
     pipeline.push(...pipelineFromProps);
 
-    if (options.sort) {
-      pipeline.push({ $sort: options.sort });
+    if (sort) {
+      pipeline.push({ $sort: sort });
     }
 
     this.reducerNodes.forEach((reducerNode) => {
       pipeline.push(...reducerNode.pipeline);
     });
 
-    let limit = options.limit;
+    let effectiveLimit = limit;
     if (this.forceSingleResult) {
-      limit = 1;
+      effectiveLimit = 1;
     }
 
-    if (limit) {
-      if (!options.skip) {
-        options.skip = 0;
-      }
+    const effectiveSkip = skip ?? 0;
+    if (effectiveLimit) {
       pipeline.push({
-        $limit: limit + options.skip,
+        $limit: effectiveLimit + effectiveSkip,
       });
     }
 
-    if (options.skip) {
+    if (effectiveSkip) {
       pipeline.push({
-        $skip: options.skip,
+        $skip: effectiveSkip,
       });
     }
 
-    if (options.projection) {
+    if (projection) {
       pipeline.push({
-        $project: options.projection,
+        $project: projection,
       });
     }
 
     return {
       pipeline,
-      hint: options.hint,
+      aggregateOptions,
     };
   }
 
