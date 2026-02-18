@@ -2,6 +2,7 @@ import { Bundle, EventManager } from "@bluelibs/core";
 import { createKernel } from "./ecosystem";
 import { LoggerService } from "../services/LoggerService";
 import { LogEvent } from "../events";
+import { LogLevel } from "../defs";
 
 test("Initialises and works", async () => {
   const kernel = createKernel();
@@ -35,5 +36,27 @@ test("Initialises and works", async () => {
   await logger.warning("hello", "context");
   await logger.critical("hello");
   await logger.critical("hello", "context");
+  expect(inEvent).toBe(true);
+});
+
+test("LoggerBundle filters log events based on level option", async () => {
+  const kernel = createKernel();
+  kernel.config.bundles[0].config.level = LogLevel.ERROR;
+
+  await kernel.init();
+
+  const logger = kernel.container.get(LoggerService);
+  const eventManager = kernel.container.get(EventManager);
+  let inEvent = false;
+  eventManager.addListener(LogEvent, (log) => {
+    if (log.data.log.level === LogLevel.ERROR) {
+      inEvent = true;
+    }
+  });
+
+  await logger.info("info log");
+  await logger.warning("warning log");
+  await logger.error("error log");
+
   expect(inEvent).toBe(true);
 });
