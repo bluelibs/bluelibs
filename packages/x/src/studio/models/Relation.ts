@@ -46,7 +46,7 @@ export class Relation extends BaseModel<Relation> {
    * Keep in mind that this field should be in the fields: [] as well
    * @cleanable
    */
-  field?: Resolvable<Field>;
+  field?: Resolvable<Field> | string;
 
   /**
    * This refers to the field that is represented by the collection
@@ -115,6 +115,14 @@ export class Relation extends BaseModel<Relation> {
     }
 
     if (this.isDirect) {
+      if (typeof this.field === "string") {
+        this.field = fieldFactory({
+          id: this.field,
+          type: fieldFactory.types.OBJECT_ID,
+          isArray: this.isMany,
+        });
+      }
+      this.field = this.field as Resolvable<Field>;
       if (!this.field) {
         // If no field has been specified we automatically add and infer it
         this.field = fieldFactory({
