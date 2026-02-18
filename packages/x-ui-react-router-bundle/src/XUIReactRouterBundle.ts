@@ -1,4 +1,5 @@
 import { Bundle, EventManager, KernelAfterInitEvent } from "@bluelibs/core";
+import { XUII18NBundle } from "@bluelibs/x-ui-i18n-bundle";
 import { XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { XRouter } from ".";
 import { IXUIReactRouterBundleType } from "./defs";
@@ -8,7 +9,7 @@ import { XBrowserRouter } from "./react/XBrowserRouter";
 export class XUIReactRouterBundle extends Bundle<IXUIReactRouterBundleType> {
   async prepare() {
     // this.container.set(XRouter, new XRouter());
-    this.warmup([XRouter]);
+    this.warmup([XRouter, XUII18NBundle]);
     const xuiReactBundle = this.container.get(XUIReactBundle);
 
     xuiReactBundle.addWrapper({

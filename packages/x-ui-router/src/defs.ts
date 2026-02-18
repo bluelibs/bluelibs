@@ -1,3 +1,5 @@
+import Polyglot from "node-polyglot";
+
 export interface IRoute<T = IRouteParams, Q = IRouteParams> {
   name?: string;
   /**
@@ -5,6 +7,8 @@ export interface IRoute<T = IRouteParams, Q = IRouteParams> {
    */
   roles?: string[];
   path: string;
+  defaultLocale?: string;
+  http?: boolean;
 }
 
 export type RouteMap = {
@@ -12,8 +16,9 @@ export type RouteMap = {
 };
 
 export interface IRouteGenerationProps<T = any, Q = any> {
-  params?: T;
+  params?: T | { locale: string };
   query?: Q;
+  locale?: string;
 }
 
 export interface IRouteParams {
