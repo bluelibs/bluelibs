@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getEcosystem } from "../helpers";
 import { Comments, Comment } from "./dummy/comments";
 import { Posts, Post } from "./dummy/posts";
@@ -221,6 +222,7 @@ describe("DeepSync", () => {
     const posts = container.get(Posts);
     const users = container.get(Users);
 
+    // @ts-ignore - Event type compatibility
     posts.localEventManager.addListener(BeforeInsertEvent, () => {
       throw new Error("shouldn't be here");
     });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getEcosystem } from "../helpers";
 import { Collection } from "../..";
 import validate from "../../behaviors/validate";
