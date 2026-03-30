@@ -9,7 +9,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { UICollectionWriter } from "../writers/UICollectionWriter";
 import { UICollectionModel } from "../models/UICollectionModel";
-import { UICRUDModel } from "../models/UICrudModel";
+import { UICRUDModel } from "../models/UICRUDModel";
 import { UICollectionCRUDWriter } from "../writers/UICollectionCRUDWriter";
 import { XBridge } from "./bridge/XBridge";
 import { Fixturizer } from "./bridge/Fixturizer";

@@ -110,6 +110,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   private async setupApolloServer() {
     const apolloServerConfig = this.getApolloConfig();
+    // @ts-ignore - express Application is compatible with http.createServer
     this.httpServer = http.createServer(this.app);
     const { enableSubscriptions } = this.config;
 
@@ -204,7 +205,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         `,
         resolvers: {
           Upload: GraphQLUpload,
-        },
+        } as any,
       });
     }
 
@@ -235,8 +236,8 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
   protected async instantiateExpress() {
     const app = express();
-    app.use(
-      (_req, res, next) => {
+    (app as any).use(
+      (_req: any, res: any, next: any) => {
         res.setHeader("X-Framework", "BlueLibs");
         next();
       },
@@ -245,6 +246,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     );
 
     if (this.config.useJSONMiddleware) {
+      // @ts-ignore - express middleware type compatibility with TS 5.9
       app.use(express.json());
     }
 
@@ -268,13 +270,14 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     const { app } = this;
 
     if (this.config.uploads !== false) {
+      // @ts-ignore - express middleware type compatibility with TS 5.9
       app.use("/graphql", graphqlUploadExpress(this.config.uploads));
     }
 
     if (!this.config.serverless) {
       await apolloServer.start();
 
-      app.use(
+      (app as any).use(
         "/graphql",
         cors<cors.CorsRequest>(),
         bodyParser.json(),
@@ -379,7 +382,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   protected async printError(e: unknown) {
     if (e instanceof GraphQLError) {
-      const stackTrace: string[] = (e.extensions.stacktrace as any[]) || [];
+      const stackTrace: string[] = (e.extensions?.stacktrace as any[]) || [];
       const rootPath = __dirname.split("/").slice(0, -1).join("/");
       const replacement = "";
 
@@ -399,7 +402,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       }
 
       await this.logger.error(
-        `${e.extensions.code}\n${e.message}\nPath: ${pathsString}`,
+        `${e.extensions?.code}\n${e.message}\nPath: ${pathsString}`,
         logCtx
       );
 

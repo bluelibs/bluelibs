@@ -17,6 +17,7 @@ export type EasyRouteCallback = (
   next: express.NextFunction
 ) => void | Promise<void>;
 
+// @ts-ignore - abstract class with decorator for DI
 @Service()
 export abstract class PassportAuthenticator {
   public strategy: passport.Strategy;
@@ -59,8 +60,8 @@ export abstract class PassportAuthenticator {
   protected get(path: string, options: object, callback: EasyRouteCallback) {
     this.app.get(path, (req, res, next) => {
       passport.authenticate(this.name, options, (err: any, user: any) => {
-        callback(err, user, req, res, next);
-      })(req, res, next);
+        callback(err, user, req, res, next!);
+      })(req, res, next!);
     });
   }
 

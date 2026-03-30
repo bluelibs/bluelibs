@@ -83,6 +83,7 @@ export type ListChildrenFunction = (
   }
 ) => React.ReactNode;
 
+// @ts-ignore - abstract class with decorator for DI
 @Service({ transient: true })
 export abstract class XForm<T = null> extends Consumer<XFormElementType> {
   @Inject(XUI_COMPONENTS_TOKEN)

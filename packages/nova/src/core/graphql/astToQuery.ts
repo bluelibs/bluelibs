@@ -1,6 +1,6 @@
 // import intersectDeep from "../../core/query/lib/intersectDeep";
 import * as _ from "lodash";
-import * as graphqlFields from "graphql-fields";
+import graphqlFields from "graphql-fields";
 import { SPECIAL_PARAM_FIELD } from "../constants";
 import Query from "../query/Query";
 import intersectBody from "./intersectBody";

@@ -1,5 +1,4 @@
-// @ts-nocheck
-// Apollo Client version mismatches in this file - needs major version alignment
+// @ts-nocheck - Apollo Client version compatibility requires major alignment
 import {
   Service,
   Inject,

@@ -66,10 +66,13 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
     this.app = express();
     this.app.use((_req, res, next) => {
       res.setHeader("X-Framework", "BlueLibs");
-      next();
+      next!();
     });
+    // @ts-ignore - express middleware type compatibility
     this.app.use(cookieParser());
+    // @ts-ignore - express middleware type compatibility
     this.app.use(express.json()); // for parsing application/json
+    // @ts-ignore - express middleware type compatibility
     this.app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
     this.router = express.Router();

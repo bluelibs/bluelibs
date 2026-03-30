@@ -138,9 +138,9 @@ export class EventManager {
   /**
    * Removes the handler from this event.
    */
-  public removeListener(
-    eventClass: IEventConstructor,
-    handler: EventHandlerType
+  public removeListener<T>(
+    eventClass: IEventConstructor<T>,
+    handler: EventHandlerType<T>
   ): EventManager {
     let listeners = this.listeners.get(eventClass);
 

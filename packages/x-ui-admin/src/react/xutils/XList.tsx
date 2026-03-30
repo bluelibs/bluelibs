@@ -8,6 +8,7 @@ import { Inject, Service } from "@bluelibs/core";
 import { ColumnType } from "antd/lib/table";
 import { Consumer } from "../models";
 
+// @ts-ignore - abstract class with decorator for DI
 @Service()
 export abstract class XList<T = any> extends Consumer<
   { id: string; order?: number } & ColumnType<T>

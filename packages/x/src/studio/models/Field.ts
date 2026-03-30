@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { FieldValueKind } from "./FieldValueKind";
 import { BaseModel } from "./App";
 import { Collection } from "./Collection";
@@ -36,7 +35,7 @@ export class Field extends BaseModel<Field> {
   /**
    * Variable name
    */
-  id: string;
+  declare id: string;
 
   /**
    * This represents whether a field value is mandatory to exit.
@@ -95,7 +94,7 @@ export class Field extends BaseModel<Field> {
   /**
    * What does this field do, what is its purpose?
    */
-  description: string;
+  declare description: string;
 
   /**
    * Mock info how to generate the field in a custom fashion. Keep in mind this won't work with when `isRelationStorageField` is true

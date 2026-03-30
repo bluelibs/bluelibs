@@ -1,5 +1,4 @@
-// @ts-nocheck
-import * as shortid from "shortid";
+import shortid from "shortid";
 import { FileUpload } from "graphql-upload/processRequest.mjs";
 import {
   PutObjectCommandInput,
@@ -7,7 +6,7 @@ import {
   PutObjectRequest,
   S3,
 } from "@aws-sdk/client-s3";
-import * as moment from "moment";
+import moment from "moment";
 import { XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";
 import { Inject, EventManager } from "@bluelibs/core";

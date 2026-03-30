@@ -25,8 +25,8 @@ This project and everyone participating in it is governed by our commitment to:
 
 ### Prerequisites
 
-- Node.js 18.x or higher
-- npm 9.x or higher
+- Node.js 20.x or higher
+- npm 10.x or higher
 - Git
 
 ### Setup
@@ -39,7 +39,7 @@ cd bluelibs
 # Install dependencies
 npm install
 
-# Bootstrap all packages
+# Bootstrap all packages (links cross-dependencies)
 npm run bootstrap
 
 # Build all packages

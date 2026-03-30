@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getEcosystem } from "../helpers";
 import { Comments } from "./dummy/comments";
 import { Posts } from "./dummy/posts";

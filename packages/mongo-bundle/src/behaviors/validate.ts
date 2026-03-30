@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Collection } from "../models/Collection";
 import { IValidateBehaviorOptions, IContextAware } from "../defs";
 import { ValidatorService } from "@bluelibs/validator-bundle";
@@ -24,7 +23,9 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       collection.container.get<DatabaseService>(DatabaseService);
 
     collection.localEventManager.addListener(
+      // @ts-ignore - TS 5.9 generic inference limitation with event constructors
       BeforeInsertEvent,
+      // @ts-ignore - handler uses CollectionEvent subclass
       async (e: BeforeInsertEvent) => {
         let document = e.data.document;
         if (behaviorOptions.cast) {
@@ -51,6 +52,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
     // If we were to implement this I would imagine a `strategy` option for the behavior so someone that knows can understand the impact
     // and decide which use-case is best for them.
 
+    // @ts-ignore - Method reassignment for validation behavior
     collection.updateOne = async (
       filter: MongoDB.Filter<any>,
       update: MongoDB.UpdateFilter<any>,
@@ -121,6 +123,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       return result as any;
     };
 
+    // @ts-ignore - Method reassignment for validation behavior
     collection.updateMany = async (
       filter: MongoDB.Filter<any>,
       update: MongoDB.UpdateFilter<any>,
@@ -186,6 +189,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       return result as any;
     };
 
+    // @ts-ignore - Method reassignment for validation behavior
     collection.findOneAndUpdate = async (
       filter: MongoDB.Filter<any> = {},
       update: MongoDB.UpdateFilter<any>,

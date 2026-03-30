@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Observable from "zen-observable";
 import { EJSON } from "@bluelibs/ejson";
 import {

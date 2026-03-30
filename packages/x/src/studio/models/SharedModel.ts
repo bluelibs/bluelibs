@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Field } from "./Field";
 import { BaseModel } from "./App";
 import * as _ from "lodash";
@@ -13,12 +12,12 @@ export class SharedModel extends BaseModel<SharedModel> {
   /**
    * The model name (eg: User)
    */
-  id: string;
+  declare id: string;
 
   /**
    * What does this model do, what is its purpose?
    */
-  description: string;
+  declare description: string;
 
   /**
    * The collection of fields it contains

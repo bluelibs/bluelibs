@@ -5,13 +5,13 @@ export enum ExecutionContext {
 }
 
 export function getExecutionContext(): ExecutionContext {
-  // @ts-expect-error
+  // @ts-ignore - document may not exist in non-browser environments
   if (typeof document != "undefined") {
     return ExecutionContext.WEB;
   } else if (
-    // @ts-expect-error
+    // @ts-ignore - navigator may not exist in non-browser environments
     typeof navigator != "undefined" &&
-    // @ts-expect-error
+    // @ts-ignore - navigator.product may not exist
     navigator.product == "ReactNative"
   ) {
     return ExecutionContext.REACT_NATIVE;

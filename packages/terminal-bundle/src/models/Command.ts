@@ -1,10 +1,10 @@
-// @ts-nocheck
 import { Inject, Service } from "@bluelibs/core";
 import { PrompterService } from "../services/PrompterService";
 import { CommanderService } from "../services/CommanderService";
 import { IExecutor } from "../defs";
 
 // TODO:
+// @ts-ignore - abstract class with decorator for DI
 @Service()
 export abstract class Command<T = any> implements IExecutor<T> {
   @Inject(() => PrompterService)

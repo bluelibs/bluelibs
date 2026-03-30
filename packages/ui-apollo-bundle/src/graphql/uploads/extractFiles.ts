@@ -1,5 +1,4 @@
 // @ts-nocheck
-// @ts-check
 
 // @deno-types="is-plain-obj/index.d.ts"
 function isPlainObject(value) {

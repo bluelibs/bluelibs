@@ -21,6 +21,7 @@ let criticalCount = 0;
 let highCount = 0;
 let moderateCount = 0;
 let lowCount = 0;
+const packagesWithVulnerabilities = new Set();
 
 packages.forEach((pkg) => {
   const pkgPath = path.join(PACKAGES_DIR, pkg);
@@ -47,6 +48,7 @@ packages.forEach((pkg) => {
 
     if (pkgTotal > 0) {
       console.log(`${pkg.padEnd(35)} ⚠️  ${pkgTotal} vulnerabilities`);
+      packagesWithVulnerabilities.add(pkg);
     } else {
       console.log(`${pkg.padEnd(35)} ✅ Clean`);
     }
@@ -67,6 +69,7 @@ packages.forEach((pkg) => {
 
       if (pkgTotal > 0) {
         console.log(`${pkg.padEnd(35)} ⚠️  ${pkgTotal} vulnerabilities`);
+        packagesWithVulnerabilities.add(pkg);
       } else {
         console.log(`${pkg.padEnd(35)} ✅ Clean`);
       }
@@ -83,12 +86,7 @@ console.log(`  High: ${highCount}`);
 console.log(`  Moderate: ${moderateCount}`);
 console.log(`  Low: ${lowCount}`);
 console.log(
-  `\nPackages with vulnerabilities: ${
-    packages.filter((p) => {
-      // This is a simplified check - in reality we'd track per-package status
-      return totalVulnerabilities > 0;
-    }).length
-  }`
+  `\nPackages with vulnerabilities: ${packagesWithVulnerabilities.size}/${packages.length}`
 );
 
 process.exit(totalVulnerabilities > 0 ? 1 : 0);

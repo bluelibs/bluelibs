@@ -15,4 +15,5 @@ packages/graphql-final
 packages/x-cell-bundle
 packages/apollo-lambda-bundle
 .env
+.env.*
 .aider*

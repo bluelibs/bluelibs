@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Field } from "./Field";
 import { Relation } from "./Relation";
 import { BaseModel } from "./App";
@@ -23,12 +22,12 @@ export class Collection extends BaseModel<Collection> {
   /**
    * The database name (eg: Users)
    */
-  id: string;
+  declare id: string;
 
   /**
    * What does this collection do, what is its purpose?
    */
-  description: string;
+  declare description: string;
 
   /**
    * The singular form of the database name (eg: User)

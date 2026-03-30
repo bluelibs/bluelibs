@@ -23,7 +23,7 @@ export type IXUIGuardianProviderProps = {
 declare module "@bluelibs/x-ui-react-bundle" {
   export interface IComponents<Error = any, NOT_AUTHORIZED = any> {
     Error: React.ComponentType<Error>;
-    ErrorBoundary: React.ComponentType;
+    ErrorBoundary: React.ComponentType<{ children?: React.ReactNode }>;
     Loading: React.ComponentType;
     NotAuthorized: React.ComponentType<NOT_AUTHORIZED>;
     NotFound: React.ComponentType;

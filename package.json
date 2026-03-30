@@ -3,8 +3,12 @@
   "private": true,
   "version": "0.0.2",
   "description": "BlueLibs - Collection of open-source products for building scalable web applications",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "install:all": "node scripts/install-all.js",
+    "install:all": "npm install",
+    "bootstrap": "npm install",
     "build": "lerna run compile",
     "build:watch": "lerna run --parallel watch",
     "test": "lerna run test",
@@ -26,6 +30,7 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-security": "^3.0.0",
     "husky": "^9.0.11",
     "lerna": "^9.0.7",
     "lint-staged": "^15.2.2",
@@ -33,8 +38,8 @@
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

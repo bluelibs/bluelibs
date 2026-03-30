@@ -24,14 +24,14 @@ export function injectRestAuthRoutes(
             try {
               let input;
               if (api.type !== "get") {
-                input = req.body;
+                input = (req as any).body;
               }
               const service = await container.get(XAuthService);
               const data = await service[api.service](input);
-              return res.json(data);
+              return (res as any).json(data);
             } catch (err) {
               console.log(err);
-              res.json({
+              (res as any).json({
                 message: `something wen wrong! with route ${api.name}`,
               });
             }

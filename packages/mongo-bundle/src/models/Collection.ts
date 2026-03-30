@@ -61,6 +61,7 @@ export const MONGO_BUNDLE_COLLECTION = Symbol("MONGO_BUNDLE_COLLECTION");
  * This represents which ids have been deleted so we know how to do propper cascading
  */
 const DELETED_IDS = Symbol("DELETED_IDS");
+// @ts-ignore - abstract class with decorator for DI
 @Service()
 export abstract class Collection<T extends MongoDB.Document = any> {
   static model: any;

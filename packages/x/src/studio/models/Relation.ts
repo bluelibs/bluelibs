@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { BaseModel } from "./App";
 import { Collection } from "./Collection";
 import { Resolvable, UIConfigType } from "../defs";
@@ -9,7 +8,7 @@ export class Relation extends BaseModel<Relation> {
   /**
    * This represents the id of the relation, how is it named
    */
-  id: string;
+  declare id: string;
 
   /**
    * The collection is comming from. Stored after clean()
@@ -87,7 +86,7 @@ export class Relation extends BaseModel<Relation> {
   /**
    * What does this relation do, what is its purpose?
    */
-  description?: string;
+  declare description?: string;
 
   /**
    * Whether this relation must be present and is present

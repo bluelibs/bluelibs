@@ -1,7 +1,6 @@
+// @ts-nocheck
 import { GraphQLError, GraphQLScalarType } from "graphql";
 import Upload from "./Upload";
-
-// @ts-check
 
 /**
  * A GraphQL `Upload` scalar that can be used in a

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { DeepPartial, Service } from "@bluelibs/core";
 import { ObjectId } from "@bluelibs/ejson";
 import { Collection, MONGO_BUNDLE_COLLECTION } from "./Collection";

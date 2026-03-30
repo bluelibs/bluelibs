@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { IUII18NBundleConfig } from "@bluelibs/x-ui-i18n-bundle";
 import { IXUISessionBundleConfigType } from "@bluelibs/x-ui-session-bundle";
 import {

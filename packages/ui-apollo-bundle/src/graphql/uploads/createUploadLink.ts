@@ -1,5 +1,4 @@
 // @ts-nocheck
-// @ts-check
 
 import { ApolloLink } from "@apollo/client";
 import { createSignalIfSupported } from "@apollo/client";

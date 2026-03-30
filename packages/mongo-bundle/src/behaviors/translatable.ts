@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { EventManager } from "@bluelibs/core";
 import { addExpanders, addLinks, addReducers } from "@bluelibs/nova";
 import {
@@ -92,7 +91,9 @@ export default function translatable(
 
       // Manipulate before insert and before update to store the i18n fields accordingly:
       collection.localEventManager.addListener(
+        // @ts-ignore - TS 5.9 generic inference limitation with event constructors
         BeforeInsertEvent,
+        // @ts-ignore - handler uses CollectionEvent subclass
         (e: BeforeInsertEvent) => {
           const document = e.data.document;
           i18nBehaviorOptions.fields.forEach((field) => {
@@ -111,7 +112,9 @@ export default function translatable(
       );
 
       collection.localEventManager.addListener(
+        // @ts-ignore - TS 5.9 generic inference limitation with event constructors
         BeforeUpdateEvent,
+        // @ts-ignore - handler uses CollectionEvent subclass
         async (e: BeforeUpdateEvent) => {
           // only works with $set
           if (!e.data.update.$set) {

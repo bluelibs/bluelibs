@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Inject, EventManager, Service } from "@bluelibs/core";
 import {
   NODEMAILER_INSTANCE,
@@ -89,7 +88,7 @@ export class EmailService {
    * Extends email to render its component to html
    * @param email
    */
-  protected renderEmail(emailTemplate: IEmailSendingTemplateConfig): string {
+  protected renderEmail(emailTemplate: IEmailSendingTemplateConfig<any>): string {
     return renderToStaticMarkup(
       React.createElement(emailTemplate.component, emailTemplate.props)
     );
@@ -99,7 +98,7 @@ export class EmailService {
    * This method is used to apply the defaults specified in the bundle configuration
    */
   protected applyDefaults(
-    emailTemplate: IEmailSendingTemplateConfig,
+    emailTemplate: IEmailSendingTemplateConfig<any>,
     mailOptions: MailOptions
   ) {
     if (!mailOptions.from) {

@@ -3,7 +3,8 @@
 </p>
 
 <p align="center">
-  <a href="https://circleci.com/gh/bluelibs/bluelibs/tree/main"><img src="https://circleci.com/gh/bluelibs/bluelibs/tree/main.svg?style=svg" alt="coverage" /></a>
+  <a href="https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml"><img src="https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg?branch=main" alt="CI" /></a>
+  <a href="https://github.com/bluelibs/bluelibs/actions/workflows/security-audit.yml"><img src="https://github.com/bluelibs/bluelibs/actions/workflows/security-audit.yml/badge.svg?branch=main" alt="Security Audit" /></a>
   <a href="https://github.com/bluelibs/bluelibs/blob/main/LICENSE.md"><img alt="GitHub license" src="https://img.shields.io/github/license/bluelibs/bluelibs"></a>
   <a href="https://github.com/bluelibs/bluelibs/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/bluelibs/bluelibs?label=stars"></a>
   <a href="https://discord.com/invite/GmNeRDqxvp" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>

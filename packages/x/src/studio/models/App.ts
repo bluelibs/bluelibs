@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as _ from "lodash";
 import { Collection } from "./Collection";
 import { DeepPartial, Resolved } from "../defs";
@@ -110,7 +109,7 @@ export class App extends BaseModel<App> {
   /**
    * The name of your app
    */
-  id: string;
+  declare id: string;
   collections: Collection[] = [];
   collectionsToWrite: Collection[] = [];
   sharedModels: Array<SharedModel> = [];

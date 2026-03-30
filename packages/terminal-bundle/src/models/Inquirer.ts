@@ -1,9 +1,9 @@
-// @ts-nocheck
 import { IInquirer, IPrompt, IInquiryPromptOptions } from "../defs";
 import { Inject, Service, EventManager } from "@bluelibs/core";
 import { PrompterService } from "../services/PrompterService";
 import { BeforePromptEvent, AfterPromptEvent } from "../events";
 
+// @ts-ignore - abstract class with decorator for DI
 @Service({
   transient: true,
 })
@@ -40,7 +40,7 @@ export abstract class Inquirer<T = any> implements IInquirer<T> {
     // Currently we do not support default values for "many"
     // This should be easily changeable in the future
     const newPrompt = {
-      default: this.model ? this.model[field] : null,
+      default: this.model ? (this.model as any)[field] : null,
       ...prompt,
     };
 
@@ -60,7 +60,7 @@ export abstract class Inquirer<T = any> implements IInquirer<T> {
       })
     );
 
-    this.model[field] = value;
+    (this.model as any)[field] = value;
   }
 
   filesMatching() {

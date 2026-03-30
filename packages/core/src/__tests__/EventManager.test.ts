@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { assert, expect } from "chai";
 import { Event, EventManager } from "../models/EventManager";
 import { Listener, On } from "../models/Listener";
