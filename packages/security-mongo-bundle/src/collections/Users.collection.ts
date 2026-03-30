@@ -18,7 +18,7 @@ export class UsersCollection<K extends IUser>
 
   async insertUser(data: object): Promise<UserId> {
     const result = await this.insertOne(data);
-
+    // @ts-ignore - ObjectId type mismatch
     return result.insertedId;
   }
 

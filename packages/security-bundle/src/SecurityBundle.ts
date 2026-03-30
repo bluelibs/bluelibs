@@ -18,7 +18,7 @@ import {
 } from "./constants";
 import { PermissionGraph } from "./services/PermissionGraph";
 import { ISessionPersistance } from "./defs";
-import * as ms from "ms";
+import ms from "ms";
 import { SecurityService } from "./services/SecurityService";
 import { UserPersistanceService } from "./__tests__/services/mocks/UserPersistanceService.mock";
 import { SessionPersistanceService } from "./__tests__/services/mocks/SessionPersistanceService.mock";

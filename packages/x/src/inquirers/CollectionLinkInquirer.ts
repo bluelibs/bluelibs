@@ -1,40 +1,22 @@
 import { Inquirer, Shortcuts } from "@bluelibs/terminal-bundle";
-import { CreateBundleModel, GenericModel } from "../models";
-import { FSUtils } from "../utils/FSUtils";
-import { CollectionModel } from "../models/CollectionModel";
-import { GenericModelInquirer } from "./GenericModelInquirer";
-import * as _ from "lodash";
-import { ContainerInstance, Inject } from "@bluelibs/core";
 import { InquiryUtils } from "../utils/InquiryUtils";
-import { GraphQLInputModel } from "../models/GraphQLInputModel";
-import { ModelRaceEnum, GenericFieldTypeEnum } from "../models/defs";
-import { GraphQLCollectionMutationOperation } from "../models/GraphQLMutationModel";
-import { XElements, XElementType } from "../utils/XElements";
 import { CollectionLinkModel } from "../models/CollectionLinkModel";
-import {
-  GraphQLMutationModel,
-  MutationDelegateType,
-} from "../models/GraphQLMutationModel";
+import { XElementType } from "../utils/XElements";
 
 export class CollectionLinkInquirer extends Inquirer<CollectionLinkModel> {
-  @Inject(() => ContainerInstance)
-  protected container: ContainerInstance;
-
   model = new CollectionLinkModel();
 
   async inquire() {
     await InquiryUtils.inquireXElement(
       this,
       "collectionAElement",
-      XElementType.COLLECTION,
-      "Select collection A"
+      XElementType.COLLECTION
     );
 
     await InquiryUtils.inquireXElement(
       this,
       "collectionBElement",
-      XElementType.COLLECTION,
-      "Select collection B"
+      XElementType.COLLECTION
     );
 
     const { collectionAElement, collectionBElement } = this.model;

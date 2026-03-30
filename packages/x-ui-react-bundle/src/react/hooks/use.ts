@@ -15,6 +15,9 @@ export const use = <T = any>(
   options?: UseOptionsType
 ): T => {
   const container = useContainer();
+  if (!container) {
+    throw new Error("Container is not available");
+  }
   if (options?.transient) {
     return container.get(id);
   }

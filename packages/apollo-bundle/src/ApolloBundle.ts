@@ -40,7 +40,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     url: "http://localhost:4000",
     apollo: {},
     enableSubscriptions: true,
-    middlewares: [],
+    middlewares: [] as any[],
     uploads: {
       maxFileSize: 1000000000,
       maxFiles: 10,
@@ -50,19 +50,19 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     serverless: false,
   };
 
-  public httpServer: http.Server;
-  public app: express.Application;
-  public server: ApolloServer;
-  public subscriptionServer: WebSocketServer;
+  public httpServer!: http.Server;
+  public app!: express.Application;
+  public server!: ApolloServer;
+  public subscriptionServer!: WebSocketServer;
   /**
    * This is used to creating the serverless handler
    */
   public serverlessHandler: any;
-  protected logger: LoggerService;
-  protected currentSchema: ISchemaResult;
+  protected logger!: LoggerService;
+  protected currentSchema!: ISchemaResult;
 
-  async validate(config) {
-    const keys = Object.keys(config.apollo);
+  async validate(config: ApolloBundleConfigType) {
+    const keys = Object.keys(config.apollo || {});
     if (
       keys.includes("typeDefs") ||
       keys.includes("schemaDirectives") ||
@@ -78,8 +78,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   async prepare() {
     // We add the container to the context in the preparation phase
     // As loading should be done in initial phase and we have the container as the first reducer
-    const loader = this.get<Loader>(Loader);
-
     // JIT works fine when the same dataset is being loaded, for serverless it just becomes too much
     if (this.config.serverless) {
       this.config.jit = false;
@@ -100,7 +98,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         logger.info(`Serverless Apollo handler ready.`);
       } else {
         logger.info(`HTTP Server listening on port: ${this.config.port}`);
-        let url = this.config.url;
+        let url = this.config.url ?? "";
         url += url.endsWith("/") ? "graphql" : "/graphql";
         logger.info(`GraphQL endpoint ready: ${url}`);
       }
@@ -120,14 +118,16 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     } else {
       // Hand in the schema we just created and have the
       // WebSocketServer start listening.
-      let serverCleanup;
+      let serverCleanup: { dispose(): void | Promise<void> } | undefined;
       if (enableSubscriptions) {
         this.attachSubscriptionService(apolloServerConfig, this.httpServer);
 
         serverCleanup = useServer(
           {
             schema: apolloServerConfig.schema,
-            context: this.createContext(this.currentSchema.contextReducers),
+            context: this.createContext(
+              this.currentSchema.contextReducers as any
+            ),
           },
           this.subscriptionServer
         );
@@ -144,7 +144,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
             async serverWillStart() {
               return {
                 async drainServer() {
-                  enableSubscriptions && (await serverCleanup.dispose());
+                  if (enableSubscriptions && serverCleanup) {
+                    await serverCleanup.dispose();
+                  }
                 },
               };
             },
@@ -234,7 +236,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   protected async instantiateExpress() {
     const app = express();
     app.use(
-      (req, res, next) => {
+      (_req, res, next) => {
         res.setHeader("X-Framework", "BlueLibs");
         next();
       },
@@ -246,8 +248,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       app.use(express.json());
     }
 
-    for (const middleware of this.config.middlewares) {
-      app.use.apply(app, Array.isArray(middleware) ? middleware : [middleware]);
+    for (const middleware of this.config.middlewares ?? []) {
+      const args = Array.isArray(middleware) ? middleware : [middleware];
+      (app.use as any).apply(app, args);
     }
 
     this.app = app;
@@ -257,7 +260,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    * This function purely initialises the server
    */
   protected async prepareApolloServer(
-    apolloServerConfig: ApolloServerOptions<any>,
+    _apolloServerConfig: ApolloServerOptions<any>,
     apolloServer: ApolloServer,
     httpServer: http.Server
   ) {
@@ -303,7 +306,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   }
 
   private attachSubscriptionService(
-    apolloServerConfig: ApolloServerOptions<any>,
+    _apolloServerConfig: ApolloServerOptions<any>,
     httpServer: http.Server
   ) {
     this.subscriptionServer = new WebSocketServer({
@@ -325,8 +328,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    * Returns the ApolloConfiguration for ApolloServer
    */
   protected getApolloConfig(): ApolloServerOptions<any> {
+    const typeDefs = this.currentSchema.typeDefs ?? "";
     const schema = makeExecutableSchema({
-      typeDefs: this.currentSchema.typeDefs,
+      typeDefs,
       resolvers: this.currentSchema.resolvers,
     });
 
@@ -386,7 +390,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       const pathsString = e.path?.join(" -> ");
 
       const logCtx = `GraphQL`;
-      const humanReadableTimestamp = new Date().toLocaleString();
 
       if (e.originalError instanceof Exception) {
         await this.logger.error(
@@ -424,12 +427,12 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     }
 
     try {
-      await this.logger.error(e.toString());
-    } catch {
+      await this.logger.error((e as Error).toString());
+    } catch (err: any) {
       await this.logger.error(
         "Failed to print error. Printing raw error below."
       );
-      console.error(e);
+      console.error(err);
     }
 
     return;
@@ -438,8 +441,8 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Creates the function for handling GraphQL contexts
    */
-  protected createContext(contextReducers = []) {
-    const contextHandler = async (context) => {
+  protected createContext(contextReducers: any[] = []) {
+    const contextHandler = async (context: any) => {
       return await this.applyContextReducers(context, contextReducers);
     };
 
@@ -453,7 +456,11 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     const manager = this.container.get(EventManager);
 
     return {
-      onConnect: async (connectionParams, webSocket, context) => {
+      onConnect: async (
+        connectionParams: any,
+        webSocket: any,
+        context: any
+      ) => {
         context = await this.applyContextReducers(
           Object.assign({ connectionParams }, context),
           contextReducers
@@ -469,7 +476,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
         return context;
       },
-      onDisconnect: async (webSocket, context) => {
+      onDisconnect: async (webSocket: any, context: any) => {
         await manager.emit(
           new WebSocketOnDisconnectEvent({
             webSocket,
@@ -503,7 +510,8 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Add a middleware for express() before server initialises
    */
-  public addMiddleware(middleware) {
+  public addMiddleware(middleware: any) {
+    this.config.middlewares = this.config.middlewares ?? [];
     this.config.middlewares.push(middleware);
   }
 

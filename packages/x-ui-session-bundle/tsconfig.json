@@ -1,21 +1,17 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "lib": ["esnext", "dom"],
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "noImplicitAny": false,
-    "rootDir": "./src",
     "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
-    "pretty": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": true,
-    "typeRoots": ["node_modules/@types"],
-    "jsx": "react"
+    "rootDir": "./src",
+    "lib": ["ES2022", "DOM"]
   },
-
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
 }

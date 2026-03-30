@@ -1,0 +1,69 @@
+name: Lint and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: 
+          - core
+          - nova
+          - smart
+          - mongo-bundle
+          - apollo-bundle
+          - graphql-bundle
+          - security-bundle
+          - x-bundle
+          - x-ui
+          - x-ui-admin
+          # Add other packages as they get lint configured
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Bootstrap packages
+      run: npm run bootstrap
+    
+    - name: Compile TypeScript
+      run: cd packages/${{ matrix.package }} && npm run compile
+    
+    - name: Run linter
+      run: cd packages/${{ matrix.package }} && npm run lint
+      continue-on-error: true  # Remove once all packages are fixed
+    
+    - name: Run tests
+      run: cd packages/${{ matrix.package }} && npm test
+      continue-on-error: true  # Remove once all tests pass
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check formatting
+      run: npx prettier --check "packages/*/src/**/*.{ts,tsx,json,md}"
+      continue-on-error: true

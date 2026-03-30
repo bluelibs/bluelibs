@@ -1,5 +1,4 @@
 import * as _ from "lodash";
-import * as dot from "dot-object";
 import CollectionNode from "../nodes/CollectionNode";
 import { LinkStrategy } from "../Linker";
 

@@ -77,7 +77,7 @@ export interface IReducerOption<
   ParentType = any
 > {
   dependency: DeepOmit<QueryBodyType, "$">;
-  pipeline?: any[];
+  pipeline?: any[] | ((context: IQueryContext) => any[]);
   projection?: any;
   reduce?: (
     object: ParentType,
@@ -125,6 +125,13 @@ export interface IQueryOptions<T = any> {
         [key in keyof T]?: number | boolean;
       }
     | { [key: string]: number | boolean };
+  /**
+   * MongoDB index hint to force the query to use a specific index. The value can be
+   * either the index name (string) or an object specifying the index keys.
+   * It will be forwarded to the MongoDB driver when Nova executes the aggregation
+   * pipeline corresponding to this node.
+   */
+  hint?: any;
 }
 
 export interface ICollectionQueryConfig<T = any> {

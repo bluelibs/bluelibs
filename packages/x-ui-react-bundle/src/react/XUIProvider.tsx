@@ -1,6 +1,5 @@
 import * as React from "react";
-import { createContext, useContext } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { Kernel, ContainerInstance } from "@bluelibs/core";
 import { listen, useContainer } from "./hooks";
 import { useUIComponents } from "./hooks/useUIComponents";
@@ -9,7 +8,7 @@ import { XUIReactBundle } from "..";
 import { ChildrenContext, generateWrapperTree } from "./utils";
 import { Components } from ".";
 
-export const ContainerContext = createContext<ContainerInstance>(null);
+export const ContainerContext = createContext<ContainerInstance | null>(null);
 ContainerContext.displayName = "BlueLibsContainer";
 
 export interface IXUIProviderProps {
@@ -19,7 +18,12 @@ export interface IXUIProviderProps {
 }
 
 type IChildrenProviderProps = {
-  finalChildren: JSX.Element;
+  finalChildren: React.ReactNode;
+};
+
+type ChildrenState = {
+  children: React.ReactNode;
+  setChildren: (children: React.ReactNode) => void;
 };
 
 export const XUIProvider = (props: IXUIProviderProps) => {
@@ -64,14 +68,17 @@ const XUIProviderInitialised: React.FC = () => {
 
   // We do this to trigger re-rendering
   const [_, setLocale] = useState<string>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handler = useMemo(() => (e: any) => setLocale(e.data.locale), []);
 
   listen(LocaleChangedEvent, handler);
 
-  const WrapperComponents = useMemo(
-    () => generateWrapperTree(container.get(XUIReactBundle).wrappers),
-    []
-  );
+  const WrapperComponents = useMemo(() => {
+    if (!container) {
+      return null;
+    }
+    return generateWrapperTree(container.get(XUIReactBundle).wrappers);
+  }, [container]);
 
   return (
     <UIComponents.ErrorBoundary>{WrapperComponents}</UIComponents.ErrorBoundary>
@@ -79,14 +86,25 @@ const XUIProviderInitialised: React.FC = () => {
 };
 
 export const ChildrenProvider: React.FC<IChildrenProviderProps> = (props) => {
-  const [children, setChildren] = useState(null);
+  const [childrenState, setChildrenState] = useState<React.ReactNode>(null);
+
+  const setChildren = useMemo(() => {
+    return (children: React.ReactNode) => {
+      setChildrenState(children);
+    };
+  }, []);
 
   useEffect(() => {
-    setChildren(props.finalChildren);
+    setChildrenState(props.finalChildren);
   }, [props.finalChildren]);
 
+  const contextValue: ChildrenState = {
+    children: childrenState,
+    setChildren,
+  };
+
   return (
-    <ChildrenContext.Provider value={{ setChildren, children }}>
+    <ChildrenContext.Provider value={contextValue}>
       {props.children}
     </ChildrenContext.Provider>
   );

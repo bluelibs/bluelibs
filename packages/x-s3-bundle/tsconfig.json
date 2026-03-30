@@ -1,21 +1,30 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2020",
-    "module": "commonjs",
-    "lib": ["esnext"],
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "noImplicitAny": false,
-    "rootDir": "./src",
     "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
-    "pretty": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": true,
+    "rootDir": "./src",
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
     "skipLibCheck": true,
-    "typeRoots": ["node_modules/@types"]
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
-
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
 }

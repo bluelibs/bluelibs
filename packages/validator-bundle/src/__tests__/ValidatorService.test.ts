@@ -184,7 +184,7 @@ describe("ValidatorService", () => {
     @Schema()
     class SubUser extends User {
       @Is(a.string())
-      lastName: string;
+      declare lastName: string;
     }
 
     const container = new ContainerInstance(Math.random().toString());

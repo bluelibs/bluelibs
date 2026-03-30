@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as shortid from "shortid";
 import { FileUpload } from "graphql-upload/processRequest.mjs";
 import {

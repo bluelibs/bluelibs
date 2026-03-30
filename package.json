@@ -1,8 +1,53 @@
 {
   "name": "root",
   "private": true,
-  "devDependencies": {
-    "lerna": "^3.19.0"
+  "version": "0.0.2",
+  "description": "BlueLibs - Collection of open-source products for building scalable web applications",
+  "scripts": {
+    "install:all": "node scripts/install-all.js",
+    "build": "lerna run compile",
+    "build:watch": "lerna run --parallel watch",
+    "test": "lerna run test",
+    "test:dev": "lerna run --parallel test:dev",
+    "lint": "lerna run lint",
+    "lint:fix": "lerna run lint:fix",
+    "clean": "lerna clean && rm -rf node_modules packages/*/node_modules",
+    "audit": "npm audit && lerna exec -- npm audit",
+    "audit:fix": "npm audit fix && lerna exec -- npm audit fix",
+    "outdated": "npm outdated && lerna exec -- npm outdated",
+    "publish": "lerna publish",
+    "version": "lerna version"
   },
-  "version": "0.0.2"
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "husky": "^9.0.11",
+    "lerna": "^9.0.7",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  }
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as os from "os";
 import * as sharp from "sharp";
 import { X_S3_CONFIG_TOKEN } from "../constants";

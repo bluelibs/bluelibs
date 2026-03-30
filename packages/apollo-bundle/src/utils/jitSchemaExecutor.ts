@@ -1,15 +1,25 @@
-import { GraphQLSchema } from "graphql";
 const LRU = require("tiny-lru");
-import {
-  CompiledQuery,
-  compileQuery,
-  CompilerOptions,
-  isCompiledQuery,
-} from "graphql-jit";
+import { compileQuery, isCompiledQuery } from "graphql-jit";
 
-export function jitSchemaExecutor(schema, cacheSize = 1024, compilerOpts = {}) {
+export function jitSchemaExecutor(
+  schema: any,
+  cacheSize = 1024,
+  compilerOpts: any = {}
+) {
   const cache = LRU(cacheSize);
-  return async ({ context, document, operationName, request, queryHash }) => {
+  return async ({
+    context,
+    document,
+    operationName,
+    request,
+    queryHash,
+  }: {
+    context: any;
+    document: any;
+    operationName: string;
+    request: any;
+    queryHash: string;
+  }) => {
     const prefix = operationName || "NotParametrized";
     const cacheKey = `${prefix}-${queryHash}`;
     let compiledQuery = cache.get(cacheKey);

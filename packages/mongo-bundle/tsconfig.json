@@ -1,19 +1,24 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "noImplicitAny": false,
-    "rootDir": "./src",
     "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
-    "pretty": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": true,
-    "typeRoots": ["node_modules/@types"],
+    "rootDir": "./src",
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "../amphetamine-bundle/src/executors.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
 }

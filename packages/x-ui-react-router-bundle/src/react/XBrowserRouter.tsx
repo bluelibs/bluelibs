@@ -49,6 +49,10 @@ export const XBrowserRouter: React.FC<IProps> = (props) => {
                   );
                 }
 
+                if (!component) {
+                  return null;
+                }
+
                 return React.createElement(component, elementProps);
               }}
             />

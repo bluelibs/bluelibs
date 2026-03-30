@@ -1,9 +1,11 @@
 import { Event } from "@bluelibs/core";
 
-export class AuthenticationTokenUpdateEvent extends Event<{ token: string }> {}
+export class AuthenticationTokenUpdateEvent extends Event<{
+  token: string | null;
+}> {}
 
 export class UserLoggedInEvent extends Event<{ token: string }> {}
 
 export class UserLoggedOutEvent extends Event<{
-  userId: string | number | object;
+  userId: string | number | object | null | undefined;
 }> {}

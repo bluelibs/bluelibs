@@ -1,7 +1,5 @@
 import {
-  EventManager,
   Service,
-  Event,
   Inject,
   ExecutionContext,
 } from "@bluelibs/core";
@@ -58,7 +56,7 @@ export class UISessionStorage {
 }
 
 class DummyLocalStorage implements Storage {
-  length: number;
+  length = 0;
   store: {
     [key: string]: any;
   } = {};

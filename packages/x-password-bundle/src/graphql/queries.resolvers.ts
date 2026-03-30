@@ -26,7 +26,7 @@ export default (config: IXPasswordBundleConfig) => {
       X.CheckLoggedIn(),
       (_, args, context, ast) => {
         const userId = (context as any).userId;
-        const container = context.container as ContainerInstance;
+        const container = (context as any).container as ContainerInstance;
 
         const usersCollection = container.get<UsersCollection<any>>(
           USERS_COLLECTION_TOKEN

@@ -10,8 +10,8 @@ export interface IBundle<T = any> {
   init(): Promise<void>;
   get<K>(service: any): K;
   getConfig(): T;
-  updateConfig(config: Partial<T>);
-  setConfig(config: T);
+  updateConfig(config: Partial<T>): void;
+  setConfig(config: T): void;
 }
 
 export interface Constructor<T> {

@@ -1,5 +1,4 @@
 import * as _ from "lodash";
-import { LinkStrategy } from "../Linker";
 import CollectionNode from "../nodes/CollectionNode";
 
 /**

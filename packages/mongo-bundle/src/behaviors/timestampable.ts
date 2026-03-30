@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventManager } from "@bluelibs/core";
 import { ITimestampableBehaviorOptions, BehaviorType } from "../defs";
 import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";

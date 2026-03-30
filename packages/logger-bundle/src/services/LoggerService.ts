@@ -1,4 +1,4 @@
-import { EventManager, Inject, Service } from "@bluelibs/core";
+import { EventManager, Service } from "@bluelibs/core";
 import { ILogger, LogLevel } from "../defs";
 import { Log } from "../models";
 import { LogEvent } from "../events";

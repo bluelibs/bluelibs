@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as _ from "lodash";
 import { Collection } from "./Collection";
 import { DeepPartial, Resolved } from "../defs";

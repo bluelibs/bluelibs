@@ -50,7 +50,6 @@ export default class FieldNode implements INode {
 
   public project(results: unknown[], parentPrefix: string = "") {
     if (this.scheduledForDeletion) {
-      const name = parentPrefix + this.name;
       results.forEach((result) => _.unset(result, parentPrefix + this.name));
     } else {
       this.subfields.forEach((subfield) => {

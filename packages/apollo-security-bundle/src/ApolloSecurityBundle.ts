@@ -1,4 +1,4 @@
-import { Bundle, EventManager, BundleAfterPrepareEvent } from "@bluelibs/core";
+import { Bundle } from "@bluelibs/core";
 import { Loader, ApolloBundle, IGraphQLContext } from "@bluelibs/apollo-bundle";
 import { SecurityService, SecurityBundle } from "@bluelibs/security-bundle";
 import { ApolloInvalidTokenException } from "./exceptions";
@@ -60,13 +60,17 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
       `,
       resolvers: {
         Mutation: {
-          async reissueToken(_, { token }, ctx) {
+          async reissueToken(
+            _: any,
+            { token }: { token: string },
+            ctx: IGraphQLContext
+          ) {
             const securityService = ctx.container.get(SecurityService);
 
             return securityService.reissueSessionToken(token);
           },
         },
-      } as IResolverMap,
+      } as unknown as IResolverMap,
     });
   }
 
@@ -85,9 +89,8 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
         }
 
         if (token) {
-          const securityService: SecurityService = container.get(
-            SecurityService
-          );
+          const securityService: SecurityService =
+            container.get(SecurityService);
           const session = await securityService.getSession(token);
           if (session) {
             // We check if the user still exists and is enabled
@@ -116,21 +119,21 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
    * @param req
    * @param connection
    */
-  identifyToken(req, connection) {
+  identifyToken(req: any, connection: any): string | undefined {
     const { support, identifiers } = this.config;
 
-    let token;
+    let token: string | undefined;
     if (connection) {
-      if (support.websocket) {
-        token = connection.context?.connectionParams[identifiers.websocket];
+      if (support.websocket && identifiers.websocket) {
+        token = connection.context?.connectionParams?.[identifiers.websocket];
       }
     } else {
       if (req) {
-        if (support.headers) {
+        if (support.headers && identifiers.headers) {
           token = req.headers[identifiers.headers];
         }
 
-        if (!token && support.cookies && req.cookies) {
+        if (!token && support.cookies && req.cookies && identifiers.cookies) {
           token = req.cookies[identifiers.cookies];
         }
       }

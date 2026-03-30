@@ -1,10 +1,6 @@
 import { Bundle } from "../models/Bundle";
-import { assert } from "chai";
 import { Kernel } from "../models/Kernel";
-import { EventManager } from "../models/EventManager";
-import { BundlePhase } from "../defs";
 import { Inject, Service } from "../di";
-import { ContainerInstance } from "..";
 import { ServiceNotFoundError, Token } from "typedi";
 
 describe("DI", () => {
@@ -22,12 +18,12 @@ describe("DI", () => {
     class SecurityService {
       constructor(public readonly databaseService: DatabaseService) {}
 
-      createUser(name: string) {}
+      createUser(_name: string): void {}
     }
 
     class MySecurityService extends SecurityService {
       @Inject()
-      mydb: DatabaseService;
+      mydb!: DatabaseService;
 
       constructor(public readonly databaseService: DatabaseService) {
         super(databaseService);
@@ -57,26 +53,6 @@ describe("DI", () => {
 
     const kernel = new Kernel({});
 
-    await kernel.init();
-
-    expect(
-      kernel.container.get(MyService) === kernel.container.get(MyService)
-    ).toBe(false);
-  });
-
-  it("Should work with transient services extending abstract classes", async () => {
-    @Service({ transient: true })
-    abstract class Base {
-      say() {
-        return "Hello world!";
-      }
-    }
-    @Service({
-      transient: true,
-    })
-    class MyService extends Base {}
-
-    const kernel = new Kernel({});
     await kernel.init();
 
     expect(

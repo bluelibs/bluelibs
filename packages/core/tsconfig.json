@@ -1,24 +1,16 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "lib": ["es6", "esnext"],
-    "noImplicitAny": false,
-    "allowJs": false,
-    "rootDir": "./src",
     "outDir": "./dist",
-    "strictNullChecks": true,
-    "allowSyntheticDefaultImports": true,
-    "pretty": true,
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
-    "declaration": true,
-    "typeRoots": ["node_modules/@types"]
+    "rootDir": "./src"
   },
-
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
 }

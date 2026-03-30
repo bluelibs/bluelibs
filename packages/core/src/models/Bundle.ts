@@ -24,13 +24,13 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
    * We haven't made defaultConfig static because we want by default to use Partial<T>
    * and static variables cannot reference class type parameters (TS2302)
    */
-  protected defaultConfig: DeepPartial<T>;
+  protected defaultConfig!: DeepPartial<T>;
   /**
    * The config provided by the instantiation of the bundle is stored inside requiredConfig
    */
-  protected requiredConfig: R | DeepPartial<T>;
-  protected config: T;
-  protected kernel: Kernel;
+  protected requiredConfig!: R | DeepPartial<T>;
+  protected config!: T;
+  protected kernel!: Kernel;
   protected phase: BundlePhase = BundlePhase.DORMANT;
 
   /**
@@ -98,7 +98,8 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
   public async extend() {}
 
   // validate this.config, based on T
-  public async validate(config?: T) {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async validate(_config?: T) {}
 
   // Gives the chance to: listen to other bundle events
   public async hook(): Promise<void> {}

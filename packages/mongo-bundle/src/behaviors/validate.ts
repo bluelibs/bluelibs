@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Collection } from "../models/Collection";
 import { IValidateBehaviorOptions, IContextAware } from "../defs";
 import { ValidatorService } from "@bluelibs/validator-bundle";

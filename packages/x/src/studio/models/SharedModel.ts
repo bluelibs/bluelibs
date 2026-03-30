@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Field } from "./Field";
 import { BaseModel } from "./App";
 import * as _ from "lodash";

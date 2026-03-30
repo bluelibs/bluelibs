@@ -12,7 +12,6 @@ import {
   IKernelOptions,
   IKernelParameters,
   KernelContext,
-  IBundle,
   IBundleConstructor,
   KernelPhase,
   BundlePhase,

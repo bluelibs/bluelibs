@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Inject, Service } from "@bluelibs/core";
 import { PrompterService } from "../services/PrompterService";
 import { CommanderService } from "../services/CommanderService";

@@ -3,7 +3,6 @@ import {
   Service,
   Event,
   Inject,
-  ExecutionContext,
 } from "@bluelibs/core";
 import { useEffect, useState } from "react";
 import { UI_SESSION_BUNDLE_CONFIG_TOKEN } from "../../constants";
@@ -25,7 +24,8 @@ export type UISessionEventChangeHandler = (
 
 @Service()
 export class UISessionService {
-  protected _state: IXUISessionStore;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected _state: IXUISessionStore = {} as any;
 
   constructor(
     protected readonly eventManager: EventManager,
@@ -74,7 +74,11 @@ export class UISessionService {
       this.onSet(fieldName, handler);
 
       return () => {
-        this.eventManager.removeListener(UISessionStateChangeEvent, handler);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const em = this.eventManager as any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const eventClass = UISessionStateChangeEvent as any;
+        em.removeListener(eventClass, handler);
       };
     }, []);
 
@@ -115,13 +119,21 @@ export class UISessionService {
   onSet<T extends keyof IXUISessionStore>(
     fieldName: T,
     handler: UISessionEventChangeHandler
-  ) {
-    this.eventManager.addListener(UISessionStateChangeEvent, handler, {
-      filter: (e) => e.data.fieldName === fieldName,
+  ): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const em = this.eventManager as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const eventClass = UISessionStateChangeEvent as any;
+    em.addListener(eventClass, handler, {
+      filter: (e: Event<UISessionStateChangeEventProps>) => e.data.fieldName === fieldName,
     });
   }
 
-  onSetRemove(handler: UISessionEventChangeHandler) {
-    this.eventManager.removeListener(UISessionStateChangeEvent, handler);
+  onSetRemove(handler: UISessionEventChangeHandler): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const em = this.eventManager as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const eventClass = UISessionStateChangeEvent as any;
+    em.removeListener(eventClass, handler);
   }
 }

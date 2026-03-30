@@ -12,7 +12,7 @@ export default class ReducerNode implements INode {
   public isSpread: boolean = false;
 
   public reduceFunction?: any;
-  public pipeline: any[];
+  public pipeline: any[] | ((context: IQueryContext) => any[]);
   public projection: any;
 
   // This refers to the graph dependency

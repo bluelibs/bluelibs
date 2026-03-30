@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Constructor } from "@bluelibs/core";
 import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";

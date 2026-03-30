@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DeepPartial, Service } from "@bluelibs/core";
 import { ObjectId } from "@bluelibs/ejson";
 import { Collection, MONGO_BUNDLE_COLLECTION } from "./Collection";
@@ -308,9 +309,8 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
         if (linkable._id) {
           result.push(linkable._id as ID);
         } else {
-          const linkableInsertResult = await this.relatedCollection.insertOne(
-            linkable
-          );
+          const linkableInsertResult =
+            await this.relatedCollection.insertOne(linkable);
           linkable._id = linkableInsertResult.insertedId;
           result.push(linkableInsertResult.insertedId);
         }

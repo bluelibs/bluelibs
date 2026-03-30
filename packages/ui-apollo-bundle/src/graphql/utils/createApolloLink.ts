@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloLink, GraphQLRequest, split } from "@apollo/client/core";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";

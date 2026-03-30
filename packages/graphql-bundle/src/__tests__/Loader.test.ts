@@ -41,7 +41,7 @@ describe("Loader", () => {
     ]);
 
     loader.load({
-      resolvers: null,
+      resolvers: undefined,
     });
 
     const schema = loader.getSchema();

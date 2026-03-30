@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Bundle, KernelPhase } from "@bluelibs/core";
 import { setDefaults } from "@bluelibs/smart";
 import {

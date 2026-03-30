@@ -9,9 +9,9 @@ export type FindOrCreateResponse = {
   user: Partial<IUser>;
 };
 
-export type EasyRouteCallback<T = IUser> = (
-  err,
-  user,
+export type EasyRouteCallback = (
+  err: any,
+  user: any,
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -38,6 +38,9 @@ export abstract class PassportAuthenticator {
   abstract createStrategy(): passport.Strategy;
 
   get name(): string {
+    if (!this.strategy?.name) {
+      throw new Error("Strategy name is not available");
+    }
     return this.strategy.name;
   }
 
@@ -55,7 +58,7 @@ export abstract class PassportAuthenticator {
    */
   protected get(path: string, options: object, callback: EasyRouteCallback) {
     this.app.get(path, (req, res, next) => {
-      passport.authenticate(this.name, options, (err, user) => {
+      passport.authenticate(this.name, options, (err: any, user: any) => {
         callback(err, user, req, res, next);
       })(req, res, next);
     });
@@ -68,15 +71,14 @@ export abstract class PassportAuthenticator {
    * @returns
    */
   protected async findOrCreate(
-    profileId,
-    authenticationField: string = null
-  ): Promise<FindOrCreateResponse> {
-    if (authenticationField === null) {
-      authenticationField = `${this.name}Id`;
-    }
+    profileId: any,
+    authenticationField?: string
+  ): Promise<FindOrCreateResponse | undefined> {
+    const name = this.name;
+    const authField = authenticationField ?? `${name}Id`;
 
     const user = await this.securityService.findUser({
-      [authenticationField]: profileId,
+      [authField]: profileId,
     });
 
     if (user) {
@@ -86,21 +88,22 @@ export abstract class PassportAuthenticator {
       };
     }
 
-    if (!user) {
-      const userId = await this.securityService.createUser();
+    const userId = await this.securityService.createUser();
 
-      // We store the profile id so we can later find the user by it
-      await this.securityService.updateUser(userId, {
-        [authenticationField]: profileId,
-      });
+    // We store the profile id so we can later find the user by it
+    await this.securityService.updateUser(userId, {
+      [authField]: profileId,
+    });
 
-      const user = await this.securityService.findUserById(userId);
-
-      return {
-        isNew: true,
-        user,
-      };
+    const newUser = await this.securityService.findUserById(userId);
+    if (!newUser) {
+      return undefined;
     }
+
+    return {
+      isNew: true,
+      user: newUser,
+    };
   }
 
   /**
@@ -108,7 +111,7 @@ export abstract class PassportAuthenticator {
    * @param userId
    * @returns
    */
-  protected async getToken(userId): Promise<string> {
+  protected async getToken(userId: string): Promise<string> {
     return this.securityService.login(userId, {
       authenticationStrategy: this.name,
     });

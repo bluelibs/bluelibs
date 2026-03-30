@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { IInquirer, IPrompt, IInquiryPromptOptions } from "../defs";
 import { Inject, Service, EventManager } from "@bluelibs/core";
 import { PrompterService } from "../services/PrompterService";

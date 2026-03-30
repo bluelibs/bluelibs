@@ -37,7 +37,7 @@ export abstract class XCoreRouter<
       return found;
     }
 
-    return this.store.find((r) => r.name === routeNameOrPath);
+    return this.store.find((r) => r.name === routeNameOrPath) || null;
   }
 
   /**
@@ -83,16 +83,17 @@ export abstract class XCoreRouter<
   /**
    * This method is used to ensure that you do not have duplicated routes
    */
-  protected checkRouteConsistency(route: RT) {
+  protected checkRouteConsistency(route: RT): void {
     // Ensure that there isn't another route with the same path or name
     const found = this.store.find((r) => {
       if (r.path === route.path) {
-        return r;
+        return true;
       }
       // Name can often be null
       if (route.name && r.name === route.name) {
-        return r;
+        return true;
       }
+      return false;
     });
 
     if (!found) {

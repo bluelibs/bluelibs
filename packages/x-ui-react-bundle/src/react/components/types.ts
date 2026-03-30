@@ -3,7 +3,7 @@ import * as Components from "./index";
 
 export interface IComponents<Error = any, NOT_AUTHORIZED = any> {
   Error: React.ComponentType<Error>;
-  ErrorBoundary: React.ComponentType;
+  ErrorBoundary: React.ComponentType<{ children?: React.ReactNode }>;
   Loading: React.ComponentType;
   NotAuthorized: React.ComponentType<NOT_AUTHORIZED>;
   NotFound: React.ComponentType;

@@ -70,7 +70,8 @@ export interface IResolverMap {
     | {
         [key: string]: PrimitiveType;
       }
-    | GroupedResolvers;
+    | GroupedResolvers
+    | undefined;
 }
 
 export interface IGraphQLModule {

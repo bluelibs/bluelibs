@@ -1,0 +1,41 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sundays
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18.x
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run security audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: false
+    
+    - name: Check for high/critical vulnerabilities
+      run: |
+        audit_output=$(npm audit --json)
+        high_count=$(echo "$audit_output" | jq '.metadata.vulnerabilities.high // 0')
+        critical_count=$(echo "$audit_output" | jq '.metadata.vulnerabilities.critical // 0')
+        
+        if [ "$high_count" -gt 0 ] || [ "$critical_count" -gt 0 ]; then
+          echo "Found $high_count high and $critical_count critical vulnerabilities"
+          exit 1
+        fi
+        
+        echo "No high or critical vulnerabilities found"

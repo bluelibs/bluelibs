@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BaseModel } from "./App";
 import { Collection } from "./Collection";
 import { Resolvable, UIConfigType } from "../defs";

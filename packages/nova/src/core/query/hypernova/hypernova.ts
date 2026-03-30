@@ -1,7 +1,6 @@
 import prepareForDelivery from "../lib/prepareForDelivery";
 import storeHypernovaResults from "./storeHypernovaResults";
 import CollectionNode from "../nodes/CollectionNode";
-import { performance } from "perf_hooks";
 
 async function hypernovaRecursive(collectionNode: CollectionNode) {
   if (collectionNode.collectionNodes.length === 0) {

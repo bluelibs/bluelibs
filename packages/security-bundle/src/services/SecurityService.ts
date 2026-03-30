@@ -1,6 +1,6 @@
 import { UserBeforeCreateEvent } from "./../events";
 import { Service, Inject, EventManager } from "@bluelibs/core";
-import * as ms from "ms";
+import ms from "ms";
 import {
   ISecurityService,
   IUser,

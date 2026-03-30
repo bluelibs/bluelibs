@@ -1,6 +1,5 @@
 import { Inquirer, Shortcuts } from "@bluelibs/terminal-bundle";
-import { CreateBundleModel, GenericModel } from "../models";
-import { FSUtils } from "../utils/FSUtils";
+import { GenericModel } from "../models";
 import { CollectionModel } from "../models/CollectionModel";
 import { GenericModelInquirer } from "./GenericModelInquirer";
 import * as _ from "lodash";
@@ -16,7 +15,7 @@ export class CollectionInquirer extends Inquirer<CollectionModel> {
     await this.prompt(
       "collectionName",
       Shortcuts.input("Enter the name of your collection (ex: users)", {
-        validate(value) {
+        validate(value: any) {
           return Boolean(value);
         },
       })

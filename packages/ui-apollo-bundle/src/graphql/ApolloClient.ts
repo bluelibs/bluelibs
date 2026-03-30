@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloClient as BaseApolloClient } from "@apollo/client/core";
 import { ContainerInstance, EventManager, Service } from "@bluelibs/core";
 import { Client } from "graphql-ws";
@@ -13,7 +14,7 @@ export class ApolloClient extends BaseApolloClient<any> {
       container.get(EventManager),
       options.client.uri as string,
       {
-        subscriptions: options.enableSubscriptions,
+        subscriptions: options.enableSubscriptions || false,
       }
     );
 

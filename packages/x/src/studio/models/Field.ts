@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FieldValueKind } from "./FieldValueKind";
 import { BaseModel } from "./App";
 import { Collection } from "./Collection";

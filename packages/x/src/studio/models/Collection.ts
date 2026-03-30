@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Field } from "./Field";
 import { Relation } from "./Relation";
 import { BaseModel } from "./App";

@@ -6,7 +6,7 @@ export class CreateBundleInquirer extends Inquirer<CreateBundleModel> {
   model = new CreateBundleModel();
 
   async inquire() {
-    const nearest = FSUtils.getNearest("microservice");
+    FSUtils.getNearest("microservice");
 
     await this.prompt(
       "bundleName",

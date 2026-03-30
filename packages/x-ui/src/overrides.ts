@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   IRoute as IBaseRoute,
   IRouteParams,

@@ -1,0 +1,69 @@
+version: 2
+updates:
+  # Root package.json
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "theodor-diaconu"
+    assignees:
+      - "theodor-diaconu"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "security"
+
+  # All packages
+  - package-ecosystem: "npm"
+    directory: "/packages/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 20
+    reviewers:
+      - "theodor-diaconu"
+    assignees:
+      - "theodor-diaconu"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+    groups:
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "ts-*"
+      testing:
+        patterns:
+          - "jest"
+          - "@types/jest"
+          - "chai"
+          - "@types/chai"
+      linting:
+        patterns:
+          - "eslint*"
+          - "prettier"
+          - "@typescript-eslint/*"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "ci/cd"
+      - "dependencies"

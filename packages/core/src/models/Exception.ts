@@ -1,7 +1,7 @@
 const STANDARD_ERROR_MESSAGE = "An error has occured";
 
 export abstract class Exception<T = null> extends Error {
-  public readonly data: T;
+  public readonly data!: T;
   public static readonly code: string;
 
   constructor(...args: T extends null ? [] : [T]) {

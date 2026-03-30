@@ -1,6 +1,4 @@
 import { Inquirer, Shortcuts } from "@bluelibs/terminal-bundle";
-import { EmailTemplateModel } from "../models/EmailTemplateModel";
-import { InquiryUtils } from "../utils";
 import { BlueprintCollectionModel } from "../models/BlueprintCollectionModel";
 
 export class BlueprintCollectionInquirer extends Inquirer<BlueprintCollectionModel> {

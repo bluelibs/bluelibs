@@ -1,4 +1,4 @@
-import { isObject, keysOf, isInfOrNaN, hasOwn, lengthOf } from "../utilities";
+import { keysOf, isInfOrNaN, hasOwn, lengthOf } from "../utilities";
 import { Base64 } from "../base64";
 import { EJSON } from "../ejson";
 import { ObjectId } from "../objectid";

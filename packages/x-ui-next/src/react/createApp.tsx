@@ -1,4 +1,3 @@
-import * as React from "react";
 import type { AppProps } from "next/app";
 import { useMemo } from "react";
 import { CreateAppProps } from "../defs";

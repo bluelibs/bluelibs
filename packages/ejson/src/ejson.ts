@@ -5,7 +5,6 @@ import {
   hasOwn,
   convertMapToObject,
   isArguments,
-  handleError,
   checkError,
 } from "./utilities";
 import canonicalStringify from "./stringify";

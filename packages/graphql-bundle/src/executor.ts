@@ -13,7 +13,7 @@ export function getResult(object: any) {
 }
 
 export function execute(map: IFunctionMap): IFunctionMap {
-  const newMap = {};
+  const newMap: IFunctionMap = {};
 
   for (const key in map) {
     newMap[key] = craftFunction(map[key]);
@@ -27,12 +27,12 @@ export function group(
   map: IFunctionMap = {},
   after: GraphQLResolverType[] = []
 ): IResolverMap {
-  const newMap = {};
+  const newMap: IFunctionMap = {};
   for (const key in map) {
     newMap[key] = craftFunction(map[key], before, after);
   }
 
-  return newMap;
+  return newMap as unknown as IResolverMap;
 }
 
 export function craftFunction(
@@ -51,12 +51,13 @@ export function craftFunction(
     definition = [definition];
   }
 
-  definition = [...before, ...definition, ...after];
+  const defs = [...before, ...definition, ...after];
 
-  return async (...resolverArguments) => {
+  return async (...resolverArguments: any[]) => {
     let result;
-    for (const i in definition) {
-      result = await definition[i].call(null, ...resolverArguments);
+    for (const i in defs) {
+      const index = Number(i);
+      result = await (defs[index] as (...args: any[]) => any).apply(null, resolverArguments);
       // Adapt the context and store the result inside ResultSymbol
       if (result) {
         resolverArguments[2] && (resolverArguments[2][ResultSymbol] = result);

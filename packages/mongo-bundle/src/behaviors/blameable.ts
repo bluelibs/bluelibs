@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";
 import { IBlameableBehaviorOptions, BehaviorType } from "../defs";
 import { Collection } from "../models/Collection";

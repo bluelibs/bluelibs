@@ -73,9 +73,8 @@ export class ValidatorService {
   }
 
   addTransformer(transformerClass: { new (): IValidationTransformer }) {
-    const transformer = this.container.get<IValidationTransformer>(
-      transformerClass
-    );
+    const transformer =
+      this.container.get<IValidationTransformer>(transformerClass);
     let { parent, name } = transformer;
 
     if (!parent) {
@@ -83,7 +82,7 @@ export class ValidatorService {
     }
 
     addMethod<any>(parent, name, function (config?: any) {
-      return this.transform(function (value, originalValue) {
+      return this.transform(function (this: any, value, originalValue) {
         return transformer.transform(value, originalValue, config, this);
       });
     });

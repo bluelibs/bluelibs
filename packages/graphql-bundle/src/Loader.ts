@@ -2,13 +2,14 @@ import {
   IContextReducer,
   ILoadOptions,
   ISchemaDirectiveMap,
-  IGraphQLModule,
   IResolverMap,
   ISchemaResult,
   IFunctionMapSimple,
+  ISubscriptionFunctionMap,
+  OneOrMore,
+  SubscriptionResolver,
 } from "./defs";
 import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
-import { OneOrMore, SubscriptionResolver } from "./defs";
 import { group, execute, craftFunction } from "./executor";
 import { Service } from "@bluelibs/core";
 
@@ -30,9 +31,12 @@ export class Loader {
     }
 
     for (const key in options) {
-      if (this[key]) {
-        const value = this.getAsArray(options[key]);
-        this[key].push(...value);
+      const loaderKey = key as keyof Loader;
+      const loaderValue = this[loaderKey];
+      if (Array.isArray(loaderValue)) {
+        const value = this.getAsArray(options[key as keyof ILoadOptions]);
+        const arr = loaderValue as unknown[];
+        arr.push(...value);
       }
     }
   }
@@ -49,7 +53,7 @@ export class Loader {
         commentDescriptions: true,
         reverseDirectives: true,
       }),
-      resolvers: (mergeResolvers(resolvers) as unknown) as IFunctionMapSimple,
+      resolvers: (mergeResolvers(resolvers as any) as unknown) as IFunctionMapSimple,
       schemaDirectives: this.mergeSchemaDirectives(),
       contextReducers: this.contextReducers,
     };
@@ -67,27 +71,34 @@ export class Loader {
           let newRootResolver;
           if (Array.isArray(resolverMapRootType)) {
             newRootResolver = { [rootType]: group(...resolverMapRootType) };
-          } else {
+          } else if (resolverMapRootType) {
             newRootResolver = { [rootType]: execute(resolverMapRootType) };
           }
 
-          newResolvers.push(newRootResolver);
+          if (newRootResolver) {
+            newResolvers.push(newRootResolver as unknown as IResolverMap);
+          }
         } else if (rootType === "Subscription") {
           // Subscriptions resolvers are composed of two parts, resolve & subscribe
           // We only need to allow subscribe to work well
-          const newResolverMap = {};
-          for (const key in resolverMap[rootType]) {
-            let newResolver: Partial<SubscriptionResolver> = Object.assign(
-              {
-                resolve: (payload) => payload,
-              },
-              resolverMap[rootType][key]
-            );
+          const newResolverMap: Record<string, Partial<SubscriptionResolver>> = {};
+          const subscriptionResolvers = resolverMap[rootType];
+          if (subscriptionResolvers) {
+            for (const key in subscriptionResolvers) {
+              let newResolver: Partial<SubscriptionResolver> = Object.assign(
+                {
+                  resolve: (payload: any) => payload,
+                },
+                subscriptionResolvers[key]
+              );
 
-            newResolver.subscribe = craftFunction(newResolver.subscribe);
-            newResolverMap[key] = newResolver;
+              if (newResolver.subscribe) {
+                newResolver.subscribe = craftFunction(newResolver.subscribe);
+              }
+              newResolverMap[key] = newResolver;
+            }
           }
-          newResolvers.push({ Subscription: newResolverMap });
+          newResolvers.push({ Subscription: newResolverMap as unknown as ISubscriptionFunctionMap });
         } else {
           newResolvers.push(resolverMap);
         }
@@ -113,7 +124,7 @@ export class Loader {
    * If the object is not array it returns you the object as array
    * @param obj
    */
-  protected getAsArray(obj) {
+  protected getAsArray<T>(obj: T | T[]): T[] {
     if (!obj) {
       return [];
     }

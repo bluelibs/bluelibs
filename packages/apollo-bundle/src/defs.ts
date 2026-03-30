@@ -2,8 +2,14 @@ import { ApolloServerOptions } from "@apollo/server";
 import { ContainerInstance } from "@bluelibs/core";
 import * as express from "express";
 import { RequestHandler } from "express";
-import { UploadOptions } from "graphql-upload/GraphQLUpload.mjs";
 import { Context } from "graphql-ws";
+
+// Upload options type definition (graphql-upload doesn't provide types for .mjs)
+export type UploadOptions = {
+  maxFieldSize?: number;
+  maxFileSize?: number;
+  maxFiles?: number;
+};
 
 export type ApolloBundleConfigType = {
   port?: number;

@@ -24,7 +24,7 @@ import Linker from "../Linker";
 import { INode } from "./INode";
 import FieldNode from "./FieldNode";
 import ReducerNode from "./ReducerNode";
-import { Collection, ObjectId } from "mongodb";
+import { Collection } from "mongodb";
 import { ALL_FIELDS } from "../../constants";
 
 export interface CollectionNodeOptions {
@@ -205,7 +205,9 @@ export default class CollectionNode implements INode {
    * Returns the filters and options needed to fetch this node
    * The argument parentObject is given when we perform recursive fetches
    */
-  public getPropsForQuerying(parentObject?: any): {
+  public getPropsForQuerying(
+    parentObject?: any
+  ): {
     filters: any;
     options: any;
     pipeline: any[];
@@ -215,7 +217,7 @@ export default class CollectionNode implements INode {
         ? this.props(parentObject)
         : _.cloneDeep(this.props);
 
-    let { filters = {}, options = {}, pipeline = [], decoder } = props;
+    let { filters = {}, options = {}, pipeline = [], decoder: _decoder } = props;
 
     if (!this.queryAllFields) {
       options.projection = this.blendInProjection(options.projection);
@@ -329,13 +331,23 @@ export default class CollectionNode implements INode {
       );
     }
 
-    return this.collection
-      .aggregate(pipeline, {
-        allowDiskUse: true,
-        batchSize: 1_000_000,
-        session: this.session,
-      })
-      .toArray();
+    // Build aggregation options, forwarding the `hint` parameter if provided by the user
+    const { options: nodeOptions } = this.getFiltersAndOptions(
+      additionalFilters,
+      parentObject
+    );
+
+    const aggregateOptions: any = {
+      allowDiskUse: true,
+      batchSize: 1_000_000,
+      session: this.session,
+    };
+
+    if (nodeOptions && nodeOptions.hint) {
+      aggregateOptions.hint = nodeOptions.hint;
+    }
+
+    return this.collection.aggregate(pipeline, aggregateOptions).toArray();
   }
 
   /**
@@ -397,7 +409,10 @@ export default class CollectionNode implements INode {
     }
 
     this.reducerNodes.forEach((reducerNode) => {
-      pipeline.push(...reducerNode.pipeline);
+      const nodePipeline = reducerNode.pipeline;
+      if (Array.isArray(nodePipeline)) {
+        pipeline.push(...nodePipeline);
+      }
     });
 
     let limit = options.limit;

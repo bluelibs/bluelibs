@@ -3,7 +3,8 @@
  * @param item
  * @returns {boolean}
  */
-export function isObject(item) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isObject(item: any): boolean {
   return (
     item &&
     typeof item === "object" &&
@@ -17,7 +18,8 @@ export function isObject(item) {
  * @param target
  * @param ...sources
  */
-export function mergeDeep(target, ...sources) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mergeDeep(target: any, ...sources: any[]): any {
   if (!sources.length) return target;
   const source = sources.shift();
 
@@ -46,7 +48,8 @@ export function mergeDeep(target, ...sources) {
  * @param value
  * @returns
  */
-export function isClassInstance(value: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isClassInstance(value: any): boolean {
   return (
     typeof value?.constructor === "function" && value.constructor !== Object
   );

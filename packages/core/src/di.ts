@@ -3,7 +3,6 @@ import {
   ServiceIdentifier,
   ServiceNotFoundError,
   Container,
-  Service as BaseService,
   ServiceOptions,
   Constructable,
   ServiceMetadata,
@@ -14,44 +13,51 @@ export { Inject, Token } from "typedi";
 
 const SERVICE_META_STORAGE = Symbol("ServiceInfo");
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Constructor = new (...args: any[]) => unknown;
+
 export function Service<T = unknown>(
   options?: ServiceOptions<T>
-): ClassDecorator {
-  return targetConstructor => {
-    options = options || {};
+): (target: Constructor) => void {
+  return (targetConstructor): void => {
+    const opts = options || {};
 
     const serviceMetadata: ServiceMetadata<T> = {
-      id: options.id || targetConstructor,
-      type: (targetConstructor as unknown) as Constructable<T>,
-      factory: (options as any).factory || undefined,
-      multiple: options.multiple || false,
-      eager: options.eager || false,
-      // @ts-ignore
+      id: opts.id || targetConstructor,
+      type: targetConstructor as unknown as Constructable<T>,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      factory: (opts as any).factory || undefined,
+      multiple: opts.multiple || false,
+      eager: opts.eager || false,
+      // @ts-expect-error typedi internal property
       scope:
-        // @ts-ignore
-        options.scope ||
-        (options.transient ? "transient" : null) ||
+        // @ts-expect-error typedi internal property
+        opts.scope ||
+        (opts.transient ? "transient" : null) ||
         "container",
-      transient: options.transient || false,
+      transient: opts.transient || false,
 
-      // @ts-ignore
+      // @ts-expect-error typedi internal property
       referencedBy: new Map().set(Container.id, Container),
     };
 
-    targetConstructor[SERVICE_META_STORAGE] = serviceMetadata;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (targetConstructor as any)[SERVICE_META_STORAGE] = serviceMetadata;
   };
 }
 
 export class ContainerInstance extends BaseContainerInstance {
   get<T>(id: ServiceIdentifier<T>): T {
-    // @ts-ignore
+    // @ts-expect-error accessing internal method
     if (!this.has(id)) {
-      if (id[SERVICE_META_STORAGE]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((id as any)[SERVICE_META_STORAGE]) {
         // It's clearly a constructor
         this.set({
-          ...id[SERVICE_META_STORAGE],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ...(id as any)[SERVICE_META_STORAGE],
           id,
-          type: id,
+          type: id as unknown as Constructable<T>,
         });
 
         return super.get(id);
@@ -60,11 +66,11 @@ export class ContainerInstance extends BaseContainerInstance {
 
     try {
       return super.get(id);
-    } catch (e) {
+    } catch (e: unknown) {
       // The reason we do this is to allow services that don't specify @Service()
       if (
         e instanceof ServiceNotFoundError ||
-        e.toString() === "ServiceNotFoundError"
+        (e as Error).toString() === "ServiceNotFoundError"
       ) {
         if (typeof id === "function") {
           // console.warn(
@@ -72,6 +78,7 @@ export class ContainerInstance extends BaseContainerInstance {
           // );
           this.set({
             id: id as Function,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             type: id as any,
           });
           return super.get(id);

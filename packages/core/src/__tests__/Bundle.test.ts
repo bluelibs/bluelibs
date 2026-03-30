@@ -85,7 +85,7 @@ describe("Bundle", () => {
 
   it("Ensure a bundle can get other bundle", done => {
     const kernel = new Kernel();
-    let aBundle;
+    let aBundle: ABundle;
     class ABundle extends Bundle {}
     class BBundle extends Bundle {
       async init() {

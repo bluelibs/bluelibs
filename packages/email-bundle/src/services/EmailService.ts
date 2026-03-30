@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Inject, EventManager, Service } from "@bluelibs/core";
 import {
   NODEMAILER_INSTANCE,

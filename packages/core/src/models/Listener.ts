@@ -5,20 +5,23 @@ import {
   EventHandlerType,
   IEventHandlerOptions,
 } from "..";
-import { Inject, Service } from "../di";
+import { Inject } from "../di";
 import { HandlerOptionsDefaults } from "./EventManager";
 
-@Service()
-export abstract class Listener {
+// @Service() - Abstract classes should not be decorated as services
+// Subclasses will use @Service()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export abstract class Listener implements Record<string, any> {
   @Inject(() => EventManager)
-  protected eventManager: EventManager;
+  protected eventManager!: EventManager;
 
   @Inject(() => ContainerInstance)
-  protected container: ContainerInstance;
+  protected container!: ContainerInstance;
 
   public init() {
     for (const member of getAllFuncs(this)) {
-      const method = (this[member] as any) as EventHandlerType;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const method = (this[member as keyof this] as any) as EventHandlerType;
       // Not inherited
       const metadata = Reflect.getMetadata(eventHandlerMetadata, this, member);
       if (metadata) {
@@ -64,14 +67,17 @@ export function On<T>(
   return Reflect.metadata(eventHandlerMetadata, { eventClass, eventOptions });
 }
 
-function getAllFuncs(toCheck) {
+function getAllFuncs(toCheck: unknown): string[] {
   var props: string[] = [];
-  var obj = toCheck;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  var obj: any = toCheck;
   do {
     props = props.concat(Object.getOwnPropertyNames(obj));
   } while ((obj = Object.getPrototypeOf(obj)));
 
   return props.sort().filter(function(e, i, arr) {
-    if (e != arr[i + 1] && typeof toCheck[e] == "function") return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (e != arr[i + 1] && typeof (toCheck as any)[e] == "function") return true;
+    return false;
   });
 }

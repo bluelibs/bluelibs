@@ -4,7 +4,6 @@ import {
   QueryBodyType,
   IReducerOption,
   IReducerOptions,
-  IAstToQueryOptions,
   IQueryContext,
 } from "./defs";
 
@@ -20,7 +19,6 @@ import Query from "./query/Query";
 import astToQuery, { secureBody } from "./graphql/astToQuery";
 import { IGetLookupOperatorOptions } from "./query/Linker";
 import { Collection } from "mongodb";
-import CollectionNode from "./query/nodes/CollectionNode";
 import { ISecureOptions } from "./defs";
 
 export { secureBody, Linker };
@@ -68,7 +66,7 @@ export function addLinks<T = any>(
   _.forEach(data, (linkConfig, linkName) => {
     if (collection[LINK_STORAGE][linkName]) {
       throw new Error(
-        `You cannot add the link with name: ${linkName} because it was already added to ${this.collectionName} collection`
+        `You cannot add the link with name: ${linkName} because it was already added to ${(collection as { collectionName?: string }).collectionName || 'unknown'} collection`
       );
     }
 
@@ -141,19 +139,21 @@ export function lookup(
 export function getReducerConfig(
   collection: Collection<any>,
   name: string
-): IReducerOption {
+): IReducerOption | undefined {
   if (collection[REDUCER_STORAGE]) {
     return collection[REDUCER_STORAGE][name];
   }
+  return undefined;
 }
 
 export function getExpanderConfig(
   collection: Collection<any>,
   name: string
-): QueryBodyType {
+): QueryBodyType | undefined {
   if (collection[EXPANDER_STORAGE]) {
     return collection[EXPANDER_STORAGE][name];
   }
+  return undefined;
 }
 
 export function addReducers<T = any>(

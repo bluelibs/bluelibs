@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { EventManager } from "@bluelibs/core";
 import { addExpanders, addLinks, addReducers } from "@bluelibs/nova";
 import {

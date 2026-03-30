@@ -39,7 +39,7 @@ export function shouldProcessRecursively(childCollectionNode: CollectionNode) {
     return true;
   }
 
-  const { filters, options } = childCollectionNode.getPropsForQuerying();
+  const { options } = childCollectionNode.getPropsForQuerying();
 
   // When we have a many relationship with limit/skip
   if (!childCollectionNode.isOneResult) {
@@ -50,4 +50,6 @@ export function shouldProcessRecursively(childCollectionNode: CollectionNode) {
       return true;
     }
   }
+  
+  return false;
 }

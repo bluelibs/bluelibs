@@ -6,7 +6,7 @@ import * as path from "path";
  * You extract files within the current folder that end in .graphql, User.resolvers.ts and resolvers.ts
  * extract(__dirname) should be used.
  */
-export function extract(dir): ILoadOptions {
+export function extract(dir: string): ILoadOptions {
   const EXT = "!(.d).(ts|js|tsx|jsx)";
 
   const resolversArray = loadFilesSync(

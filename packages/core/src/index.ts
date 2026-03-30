@@ -1,5 +1,5 @@
-import { KernelContext } from "./defs";
 import "reflect-metadata";
+import { KernelContext } from "./defs";
 
 import { Kernel } from "./models/Kernel";
 import { Bundle } from "./models/Bundle";

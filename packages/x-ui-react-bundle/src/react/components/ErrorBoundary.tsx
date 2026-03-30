@@ -4,7 +4,7 @@ import { ContainerInstance } from "@bluelibs/core";
 import { Error } from "./Error";
 
 export type ErrorBoundaryProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 export class ErrorBoundary extends React.Component<
@@ -15,11 +15,11 @@ export class ErrorBoundary extends React.Component<
   },
   ContainerInstance
 > {
-  context: ContainerInstance;
-  currentError: Error;
-  currentErrorInfo: React.ErrorInfo;
+  declare context: ContainerInstance;
+  currentError: Error | null = null;
+  currentErrorInfo: React.ErrorInfo | null = null;
 
-  constructor(props) {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
       hasError: false,
@@ -27,12 +27,12 @@ export class ErrorBoundary extends React.Component<
     };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     // Update state so the next render will show the fallback UI.
     return { hasError: true, errorMessage: error.toString() };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.currentError = error;
     this.currentErrorInfo = errorInfo;
     // You can also log the error to an error reporting service

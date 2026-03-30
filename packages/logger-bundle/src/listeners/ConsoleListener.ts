@@ -5,10 +5,10 @@ import { LogLevel } from "../defs";
 
 @Service()
 export class ConsoleListener extends Listener {
-  lastLogDate: Date;
+  lastLogDate?: Date;
 
   init() {
-    this.on(LogEvent, (e: LogEvent) => {
+    this.on(LogEvent as any, (e: LogEvent) => {
       const log = e.data.log;
 
       let color: any;

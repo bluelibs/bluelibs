@@ -1,6 +1,7 @@
 import { EventManager, Inject, Service } from "@bluelibs/core";
 
-import * as Polyglot from "node-polyglot";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Polyglot = require("node-polyglot");
 import { IXUII18NBundleConfig } from "../../defs";
 import { I18N_CONFIG_TOKEN } from "../../constants";
 import { LocaleChangedEvent } from "../events";
@@ -8,13 +9,15 @@ import { LocaleChangedEvent } from "../events";
 export type I18NConfig = Record<string, I18NMessages>;
 
 export type I18NMessages = {
-  [key: string]: string | I18NMessages;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: string | I18NMessages | any;
 };
 
 @Service()
 export class I18NService {
   // locale, polyglot
-  public polyglots = new Map<string, Polyglot>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public polyglots = new Map<string, any>();
 
   constructor(
     @Inject(I18N_CONFIG_TOKEN)
@@ -30,7 +33,7 @@ export class I18NService {
     this.setLocale(config.defaultLocale);
   }
 
-  protected activePolyglot: Polyglot = null;
+  protected activePolyglot: typeof Polyglot | null = null;
 
   /**
    * Add or update messages for the specific locale
@@ -39,7 +42,8 @@ export class I18NService {
    * @param messages
    * @param prefix
    */
-  extend(locale: string, messages: any, prefix?: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  extend(locale: string, messages: any, prefix?: string): void {
     this.getPolyglot(locale).extend(messages, prefix);
   }
 
@@ -50,7 +54,7 @@ export class I18NService {
    * @param configs
    * @returns
    */
-  store(configs: I18NConfig | I18NConfig[]) {
+  store(configs: I18NConfig | I18NConfig[]): void {
     if (!Array.isArray(configs)) {
       return this.store([configs]);
     }
@@ -66,9 +70,10 @@ export class I18NService {
    * Sets the current locale
    * @param locale
    */
-  setLocale(locale: string) {
+  setLocale(locale: string): void {
     this.activePolyglot = this.getPolyglot(locale);
-    this.eventManager.emit(new LocaleChangedEvent({ locale }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (this.eventManager.emit as any)(new LocaleChangedEvent({ locale }));
   }
 
   /**
@@ -77,7 +82,8 @@ export class I18NService {
    * @param options
    * @returns
    */
-  t = (string: string, options?: Polyglot.InterpolationOptions) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t = (string: string, options?: any) => {
     return this.activePolyglot.t(string, options);
   };
 
@@ -86,7 +92,8 @@ export class I18NService {
    * @param locale
    * @returns
    */
-  getPolyglot(locale: string): Polyglot {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getPolyglot(locale: string): any {
     let polyglot = this.polyglots.get(locale);
 
     if (!polyglot) {
@@ -98,6 +105,7 @@ export class I18NService {
   }
 
   getCurrentPolyglot(): string {
-    return this.activePolyglot["currentLocale"] || this.config?.defaultLocale;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (this.activePolyglot as any)["currentLocale"] || this.config?.defaultLocale;
   }
 }

@@ -10,7 +10,7 @@ import {
 export const HandlerOptionsDefaults = { order: 0 };
 
 export class Event<T = null> {
-  public data: T;
+  public data!: T;
 
   constructor(...args: T extends null ? [] : [T]) {
     if (args[0] !== undefined) {

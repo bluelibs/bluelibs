@@ -28,7 +28,7 @@ export type State<UserType = GuardianUserType> = {
    * When the user has an expired token or one that couldn't retrieve the user
    */
   hasInvalidToken: boolean;
-  user: UserType;
+  user: UserType | null;
   /**
    * This is done the first time when the token is read and user is fetched. After that it will stay initialised.
    */
@@ -61,9 +61,9 @@ export type GuardianUserRegistrationType = {
 };
 export class GuardianSmart<
   TUserType extends IUserMandatory = GuardianUserType,
-  TUserRegistrationType = GuardianUserRegistrationType
+  TUserRegistrationType = GuardianUserRegistrationType,
 > extends Smart<State<TUserType>, any> {
-  protected authenticationToken: string;
+  protected authenticationToken: string | null = null;
 
   state: State<TUserType> = {
     fetchingUserData: false,
@@ -74,10 +74,10 @@ export class GuardianSmart<
   };
 
   @Inject()
-  apolloClient: ApolloClient;
+  apolloClient!: ApolloClient;
 
   @Inject()
-  eventManager: EventManager;
+  eventManager!: EventManager;
 
   @Inject(GUARDIAN_IS_MULTIPLEFACTOR_AUTH)
   isMultipleFactorAuth?: boolean;
@@ -148,7 +148,7 @@ export class GuardianSmart<
   }
 
   public async reissueToken(token: string) {
-    const newToken = await this.apolloClient
+    const newToken = await (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation ($token: String!) {
@@ -159,14 +159,14 @@ export class GuardianSmart<
           token,
         },
       })
-      .then((response) => response.data.reissueToken as string);
+      .then((response: any) => response.data.reissueToken as string);
 
     await this.storeToken(newToken);
     await this.load();
   }
 
   protected async retrieveUser(): Promise<TUserType> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .query({
         query: gql`
           query me {
@@ -183,7 +183,7 @@ export class GuardianSmart<
         `,
         fetchPolicy: "network-only",
       })
-      .then(async (response) => {
+      .then(async (response: any) => {
         let user = Object.assign({}, response.data.me);
 
         try {
@@ -202,8 +202,7 @@ export class GuardianSmart<
   }
 
   protected async retrieveToken() {
-    this.authenticationToken =
-      localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) || null;
+    this.authenticationToken = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     await this.eventManager.emit(
       new AuthenticationTokenUpdateEvent({ token: this.authenticationToken })
     );
@@ -229,7 +228,7 @@ export class GuardianSmart<
     });
     await this.storeToken(null);
 
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: this.isMultipleFactorAuth
           ? gql`
@@ -254,7 +253,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response) => {
+      .then(async (response: any) => {
         const { token, redirectUrl } = response.data.login;
         if (redirectUrl) {
           window.location.replace(redirectUrl);
@@ -276,7 +275,7 @@ export class GuardianSmart<
    * @param user
    */
   async register(user: TUserRegistrationType): Promise<string | null> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation register($input: RegistrationInput!) {
@@ -289,7 +288,7 @@ export class GuardianSmart<
           input: user,
         },
       })
-      .then(async (response) => {
+      .then(async (response: any) => {
         const { token } = response.data.register;
         if (token) {
           await this.storeToken(token);
@@ -300,7 +299,7 @@ export class GuardianSmart<
   }
 
   async verifyEmail(emailToken: string): Promise<string> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation verifyEmail($input: VerifyEmailInput!) {
@@ -315,7 +314,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response) => {
+      .then(async (response: any) => {
         const { token } = response.data.verifyEmail;
         await this.storeToken(token);
 
@@ -324,7 +323,7 @@ export class GuardianSmart<
   }
 
   async forgotPassword(email: string): Promise<void> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation forgotPassword($input: ForgotPasswordInput!) {
@@ -347,7 +346,7 @@ export class GuardianSmart<
     token: string,
     newPassword: string
   ): Promise<string> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation resetPassword($input: ResetPasswordInput!) {
@@ -364,7 +363,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response) => {
+      .then(async (response: any) => {
         const { token } = response.data.resetPassword;
         await this.storeToken(token);
 
@@ -381,7 +380,7 @@ export class GuardianSmart<
     oldPassword: string,
     newPassword: string
   ): Promise<void> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation changePassword($input: ChangePasswordInput!) {
@@ -404,7 +403,7 @@ export class GuardianSmart<
    * Logs the user out and cleans up the tokens
    */
   async logout(): Promise<void> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation logout {
@@ -413,10 +412,10 @@ export class GuardianSmart<
         `,
       })
       .then(async () => {
-        const { _id } = this.state.user;
+        const userId = this.state.user?._id ?? "unknown";
         await this.eventManager.emit(
           new UserLoggedOutEvent({
-            userId: _id,
+            userId: userId,
           })
         );
         await this.storeToken(null);
@@ -439,7 +438,7 @@ export class GuardianSmart<
     method?: string;
     userId: string;
   }): Promise<any> {
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: gql`
           mutation requestLoginLink($input: RequestLoginLinkInput!) {
@@ -475,7 +474,7 @@ export class GuardianSmart<
     });
     await this.storeToken(null);
 
-    return this.apolloClient
+    return (this.apolloClient as any)
       .mutate({
         mutation: this.isMultipleFactorAuth
           ? gql`

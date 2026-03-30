@@ -7,8 +7,8 @@ export class RabbitMQBundle extends Bundle<
   RabbitMQBundleConfigType,
   RabbitMQBundleConfigType
 > {
-  public connection: Connection;
-  public channel: Channel;
+  public connection!: Connection;
+  public channel!: Channel;
 
   protected defaultConfig = {
     url: "amqp://localhost:5672/",
@@ -51,16 +51,21 @@ export class RabbitMQBundle extends Bundle<
    * @param handler
    * @param options
    */
-  public consume(queue: string, handler, options?: Options.Consume) {
+  public consume(
+    queue: string,
+    handler: (message: any) => void | Promise<void>,
+    options?: Options.Consume
+  ) {
     if (!this.config.consume) {
       return;
     }
 
     this.channel.consume(
       queue,
-      async (msg) => {
+      async (msg: any) => {
+        if (!msg) return;
         await handler(EJSON.parse(msg.content.toString()));
-        if (!options.noAck) {
+        if (!options?.noAck) {
           this.channel.ack(msg);
         }
       },

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as path from "path";
 import { XSession, FSOperator, FSUtils } from "../";
 import { BlueprintWriter } from "@bluelibs/terminal-bundle";

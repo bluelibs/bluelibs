@@ -4,7 +4,7 @@ import { CacheOptions } from "./defs";
 import * as CacheManager from "cache-manager";
 import { LoggerService } from "@bluelibs/logger-bundle";
 import * as Hash from "node-object-hash";
-const Hasher = Hash({ sort: true, coerce: true });
+const Hasher = (Hash as any)({ sort: true, coerce: true });
 
 @Service()
 export class CacheService {
