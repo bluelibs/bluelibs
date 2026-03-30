@@ -10,7 +10,7 @@ export type AddRoutingArguments<T> = {
 @Service()
 export abstract class XCoreRouter<
   RT extends IRoute,
-  RP extends IRouteParams = IRouteParams
+  RP extends IRouteParams = IRouteParams,
 > {
   store: RT[] = [];
 

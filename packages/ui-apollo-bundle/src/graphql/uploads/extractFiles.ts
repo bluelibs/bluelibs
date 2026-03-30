@@ -2,14 +2,19 @@
 
 // @deno-types="is-plain-obj/index.d.ts"
 function isPlainObject(value) {
-	if (typeof value !== 'object' || value === null) {
-		return false;
-	}
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
 
-	const prototype = Object.getPrototypeOf(value);
-	return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in value) && !(Symbol.iterator in value);
+  const prototype = Object.getPrototypeOf(value);
+  return (
+    (prototype === null ||
+      prototype === Object.prototype ||
+      Object.getPrototypeOf(prototype) === null) &&
+    !(Symbol.toStringTag in value) &&
+    !(Symbol.iterator in value)
+  );
 }
-
 
 /** @typedef {import("./isExtractableFile.mjs").default} isExtractableFile */
 
@@ -132,9 +137,9 @@ export default function extractFiles(value, isExtractable, path = "") {
         clone = valueIsList
           ? []
           : // Replicate if the plain object is an `Object` instance.
-          value instanceof /** @type {any} */ (Object)
-          ? {}
-          : Object.create(null);
+            value instanceof /** @type {any} */ (Object)
+            ? {}
+            : Object.create(null);
 
         clones.set(value, /** @type {Clone} */ (clone));
       }

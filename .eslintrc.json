@@ -31,10 +31,5 @@
     "es2022": true,
     "jest": true
   },
-  "ignorePatterns": [
-    "dist/",
-    "node_modules/",
-    "*.js",
-    "*.d.ts"
-  ]
+  "ignorePatterns": ["dist/", "node_modules/", "*.js", "*.d.ts"]
 }

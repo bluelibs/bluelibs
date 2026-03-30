@@ -16,6 +16,7 @@ Thank you for your interest in contributing to BlueLibs! This document provides 
 ## Code of Conduct
 
 This project and everyone participating in it is governed by our commitment to:
+
 - Being respectful and inclusive
 - Welcoming newcomers
 - Focusing on constructive feedback
@@ -62,6 +63,7 @@ Use the following branch naming conventions:
 - `refactor/{package}/short-description` - Code refactoring
 
 Examples:
+
 - `feature/mongo-bundle/143-add-transaction-support`
 - `fix/core/256-memory-leak-fix`
 - `docs/nova/update-readme`
@@ -154,14 +156,14 @@ describe("FeatureName", () => {
     it("should do something when condition", async () => {
       // Arrange
       const input = {};
-      
+
       // Act
       const result = await feature.method(input);
-      
+
       // Assert
       expect(result).to.equal(expected);
     });
-    
+
     it("should throw error when invalid input", async () => {
       // Test error cases
     });
@@ -211,6 +213,7 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/):
 ### Scopes
 
 Use package names as scopes:
+
 - `core`
 - `mongo-bundle`
 - `x-ui`
@@ -245,15 +248,18 @@ refactor(security-bundle): simplify permission checking
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Checklist
+
 - [ ] Tests pass
 - [ ] Code follows style guidelines
 - [ ] Self-review completed
@@ -261,6 +267,7 @@ Brief description of changes
 - [ ] Changes are backward compatible (or marked as breaking)
 
 ## Related Issues
+
 Fixes #(issue number)
 ```
 
