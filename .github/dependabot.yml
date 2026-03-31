@@ -18,10 +18,9 @@ updates:
       - "dependencies"
     groups:
       security-updates:
+        applies-to: security-updates
         patterns:
           - "*"
-        update-types:
-          - "security"
 
   # --- Packages ---
 
