@@ -4,7 +4,10 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
 
 # Cancel in-progress runs for the same branch/PR
 concurrency:
@@ -12,9 +15,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ──────────────────────────────────────────
-  # 1. Install dependencies and compile once
-  # ──────────────────────────────────────────
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      lint: ${{ steps.matrix.outputs.lint }}
+      lint_count: ${{ steps.matrix.outputs.lint_count }}
+      test_unit: ${{ steps.matrix.outputs.test_unit }}
+      test_unit_count: ${{ steps.matrix.outputs.test_unit_count }}
+      test_mongo: ${{ steps.matrix.outputs.test_mongo }}
+      test_mongo_count: ${{ steps.matrix.outputs.test_mongo_count }}
+      test_rabbitmq: ${{ steps.matrix.outputs.test_rabbitmq }}
+      test_rabbitmq_count: ${{ steps.matrix.outputs.test_rabbitmq_count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: matrix
+        name: Generate package matrices
+        run: node scripts/generate-ci-matrix.js
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -23,10 +45,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-node-20-${{ hashFiles('package.json', 'lerna.json', 'packages/*/package.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-node-20-
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm install --no-audit --prefer-offline --package-lock=false
 
       - name: Compile all packages
         run: npx lerna run compile
@@ -38,11 +67,8 @@ jobs:
             node_modules
             packages/*/node_modules
             packages/*/dist
-          key: workspace-${{ github.sha }}
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
 
-  # ──────────────────────────────────────────
-  # 2. Formatting check
-  # ──────────────────────────────────────────
   format:
     needs: build
     runs-on: ubuntu-latest
@@ -53,63 +79,31 @@ jobs:
         with:
           node-version: 20
 
-      - name: Restore workspace
+      - id: restore-workspace
+        name: Restore workspace
         uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             packages/*/node_modules
             packages/*/dist
-          key: workspace-${{ github.sha }}
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
 
       - name: Check formatting
         run: npx prettier --check "packages/*/src/**/*.{ts,tsx,json,md}"
 
-  # ──────────────────────────────────────────
-  # 3. Lint all packages
-  # ──────────────────────────────────────────
   lint:
-    needs: build
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.lint_count != '0' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        package:
-          - core
-          - ejson
-          - nova
-          - smart
-          - mongo-bundle
-          - apollo-bundle
-          - apollo-security-bundle
-          - graphql-bundle
-          - http-bundle
-          - email-bundle
-          - logger-bundle
-          - mikroorm-bundle
-          - password-bundle
-          - security-bundle
-          - security-mongo-bundle
-          - validator-bundle
-          - terminal-bundle
-          - rabbitmq-bundle
-          - ui-apollo-bundle
-          - x
-          - x-bundle
-          - x-auth-bundle
-          - x-cron-bundle
-          - x-password-bundle
-          - x-s3-bundle
-          - x-ui
-          - x-ui-admin
-          - x-ui-collections-bundle
-          - x-ui-guardian-bundle
-          - x-ui-i18n-bundle
-          - x-ui-next
-          - x-ui-react-bundle
-          - x-ui-react-router-bundle
-          - x-ui-router
-          - x-ui-session-bundle
+        package: ${{ fromJSON(needs.discover.outputs.lint) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -117,54 +111,31 @@ jobs:
         with:
           node-version: 20
 
-      - name: Restore workspace
+      - id: restore-workspace
+        name: Restore workspace
         uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             packages/*/node_modules
             packages/*/dist
-          key: workspace-${{ github.sha }}
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
 
       - name: Lint ${{ matrix.package }}
         run: cd packages/${{ matrix.package }} && npm run lint
 
-  # ──────────────────────────────────────────
-  # 4. Unit tests (no external services)
-  # ──────────────────────────────────────────
   test-unit:
-    needs: build
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.test_unit_count != '0' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        package:
-          - core
-          - ejson
-          - smart
-          - apollo-bundle
-          - apollo-security-bundle
-          - graphql-bundle
-          - http-bundle
-          - email-bundle
-          - logger-bundle
-          - password-bundle
-          - security-bundle
-          - validator-bundle
-          - terminal-bundle
-          - ui-apollo-bundle
-          - x
-          - x-password-bundle
-          - x-ui
-          - x-ui-admin
-          - x-ui-collections-bundle
-          - x-ui-guardian-bundle
-          - x-ui-i18n-bundle
-          - x-ui-next
-          - x-ui-react-bundle
-          - x-ui-react-router-bundle
-          - x-ui-router
-          - x-ui-session-bundle
+        package: ${{ fromJSON(needs.discover.outputs.test_unit) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -172,23 +143,26 @@ jobs:
         with:
           node-version: 20
 
-      - name: Restore workspace
+      - id: restore-workspace
+        name: Restore workspace
         uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             packages/*/node_modules
             packages/*/dist
-          key: workspace-${{ github.sha }}
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
 
       - name: Test ${{ matrix.package }}
-        run: cd packages/${{ matrix.package }} && npm test
+        run: cd packages/${{ matrix.package }} && npm run test:ci
 
-  # ──────────────────────────────────────────
-  # 5. Integration tests (MongoDB required)
-  # ──────────────────────────────────────────
   test-mongo:
-    needs: build
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.test_mongo_count != '0' }}
     runs-on: ubuntu-latest
     services:
       mongodb:
@@ -198,15 +172,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package:
-          - mongo-bundle
-          - mikroorm-bundle
-          - nova
-          - security-mongo-bundle
-          - x-bundle
-          - x-auth-bundle
-          - x-cron-bundle
-          - x-s3-bundle
+        package: ${{ fromJSON(needs.discover.outputs.test_mongo) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -214,14 +180,19 @@ jobs:
         with:
           node-version: 20
 
-      - name: Restore workspace
+      - id: restore-workspace
+        name: Restore workspace
         uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             packages/*/node_modules
             packages/*/dist
-          key: workspace-${{ github.sha }}
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
 
       - name: Wait for MongoDB
         run: |
@@ -235,13 +206,11 @@ jobs:
           done
 
       - name: Test ${{ matrix.package }}
-        run: cd packages/${{ matrix.package }} && npm test
+        run: cd packages/${{ matrix.package }} && npm run test:ci
 
-  # ──────────────────────────────────────────
-  # 6. Integration tests (RabbitMQ required)
-  # ──────────────────────────────────────────
   test-rabbitmq:
-    needs: build
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.test_rabbitmq_count != '0' }}
     runs-on: ubuntu-latest
     services:
       rabbitmq:
@@ -249,6 +218,10 @@ jobs:
         ports:
           - 5672:5672
           - 15672:15672
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.test_rabbitmq) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -256,14 +229,19 @@ jobs:
         with:
           node-version: 20
 
-      - name: Restore workspace
+      - id: restore-workspace
+        name: Restore workspace
         uses: actions/cache/restore@v4
         with:
           path: |
             node_modules
             packages/*/node_modules
             packages/*/dist
-          key: workspace-${{ github.sha }}
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
 
       - name: Wait for RabbitMQ
         run: |
@@ -276,5 +254,5 @@ jobs:
             sleep 2
           done
 
-      - name: Test rabbitmq-bundle
-        run: cd packages/rabbitmq-bundle && npm test
+      - name: Test ${{ matrix.package }}
+        run: cd packages/${{ matrix.package }} && npm run test:ci
