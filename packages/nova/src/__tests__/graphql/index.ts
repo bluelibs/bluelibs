@@ -88,7 +88,7 @@ describe("GraphQL", function () {
           a: 1,
         },
       },
-      embody(body, getArguments) {
+      embody(_body, getArguments) {
         const profileArguments = getArguments("profile");
         assert.equal(profileArguments.withPrefix, true);
       },

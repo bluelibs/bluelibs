@@ -2,7 +2,7 @@
 import { query, clear, lookup, addReducers } from "../../core/api";
 import { getRandomCollection, idsEqual } from "../integration/helpers";
 import { Collection } from "mongodb";
-import { oneToMany, manyToMany, oneToOne, manyToOne } from "../../core/quickLinkers";
+import { manyToMany, oneToOne, manyToOne } from "../../core/quickLinkers";
 import { assert } from "chai";
 
 describe("Relational Filtering", () => {
@@ -42,17 +42,17 @@ describe("Relational Filtering", () => {
     const b2 = await B.insertOne({ name: "B2", number: 10 });
     const b3 = await B.insertOne({ name: "B3", number: 50 });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       name: "A1",
       bsIds: [b1.insertedId, b2.insertedId],
     });
 
-    const a2 = await A.insertOne({
+    await A.insertOne({
       name: "A2",
       bsIds: [b2.insertedId, b3.insertedId],
     });
 
-    const a3 = await A.insertOne({
+    await A.insertOne({
       name: "A3",
       bsIds: [b1.insertedId],
     });
@@ -120,7 +120,7 @@ describe("Relational Filtering", () => {
       number: 5,
       bankAccountId: b1.insertedId,
     });
-    const u2 = await Users.insertOne({
+    await Users.insertOne({
       name: "B1",
       number: 5,
       bankAccountId: b2.insertedId,
@@ -177,7 +177,7 @@ describe("Relational Filtering", () => {
 
     const p1 = await Posts.insertOne({ name: "John Post" });
 
-    const comments = await Comments.insertMany([
+    await Comments.insertMany([
       { title: "1", postId: p1.insertedId },
       { title: "1", postId: p1.insertedId },
       { title: "1", postId: p1.insertedId },
@@ -335,14 +335,14 @@ describe("Relational Filtering", () => {
 
     const c1 = await Companies.insertOne({ name: "ACME" });
     const c2 = await Companies.insertOne({ name: "JOHNSON" });
-    const c3 = await Companies.insertOne({ name: "WAFFLE" });
+    await Companies.insertOne({ name: "WAFFLE" });
 
     const u1 = await Users.insertOne({
       index: 1,
       name: "D",
       companyId: c1.insertedId,
     });
-    const u2 = await Users.insertOne({
+    await Users.insertOne({
       index: 2,
       name: "U",
       companyId: c2.insertedId,
@@ -352,13 +352,13 @@ describe("Relational Filtering", () => {
       name: "D",
       companyId: c2.insertedId,
     });
-    const u4 = await Users.insertOne({
+    await Users.insertOne({
       index: 4,
       name: "U",
       companyId: c1.insertedId,
     });
 
-    Companies.updateOne(
+    await Companies.updateOne(
       { _id: c1.insertedId },
       {
         $set: {
@@ -366,7 +366,7 @@ describe("Relational Filtering", () => {
         },
       }
     );
-    Companies.updateOne(
+    await Companies.updateOne(
       { _id: c2.insertedId },
       {
         $set: {
@@ -420,7 +420,7 @@ describe("Relational Filtering", () => {
 
     const p1 = await Posts.insertOne({ name: "John Post" });
 
-    const comments = await Comments.insertMany([
+    await Comments.insertMany([
       { title: "1", postId: p1.insertedId },
       { title: "2", postId: p1.insertedId },
       { title: "3", postId: p1.insertedId },
@@ -481,7 +481,7 @@ describe("Relational Filtering", () => {
 
     const p1 = await Posts.insertOne({ name: "John Post" });
 
-    const comments = await Comments.insertMany([
+    await Comments.insertMany([
       { title: "1", postId: p1.insertedId, authorId: a1.insertedId },
       { title: "2", postId: p1.insertedId, authorId: a2.insertedId },
       { title: "3", postId: p1.insertedId, authorId: a3.insertedId },

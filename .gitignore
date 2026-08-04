@@ -16,3 +16,5 @@ packages/apollo-lambda-bundle
 .env
 .env.*
 .aider*
+# jest-junit reporter output
+junit.xml

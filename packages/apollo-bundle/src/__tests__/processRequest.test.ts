@@ -168,4 +168,26 @@ describe("processRequest (vendored graphql-upload)", () => {
       processRequest(request, response, { maxFiles: 1 })
     ).rejects.toThrow(/max file uploads exceeded/i);
   });
+
+  // The busboy `filesLimit` event (parser.once("filesLimit", ...)) can never
+  // reject the returned promise: processRequest resolves it while parsing the
+  // `map` field, which always precedes file parts in a spec-compliant body.
+  // By the time an extra file part trips busboy's limit, resolve() has already
+  // settled the promise, so exit()'s reject() is a no-op. The reachable
+  // maxFiles enforcement is the map-entries guard above, covered by the
+  // "rejects the request when maxFiles is exceeded" test.
+  it.skip("rejects when extra file parts trip the busboy filesLimit event", async () => {
+    const { request, response } = buildMultipart({
+      operations: UPLOAD_OPERATION,
+      map: { "0": ["variables.f"] },
+      files: {
+        "0": { filename: "one.txt", contentType: "text/plain", content: "one" },
+        "1": { filename: "two.txt", contentType: "text/plain", content: "two" },
+      },
+    });
+
+    await expect(
+      processRequest(request, response, { maxFiles: 1 })
+    ).rejects.toThrow(/max file uploads exceeded/i);
+  });
 });

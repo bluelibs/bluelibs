@@ -169,6 +169,11 @@ jobs:
         image: mongo:7
         ports:
           - 27017:27017
+      # x-bundle's live tests exercise Redis-backed sessions/cache.
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
     strategy:
       fail-fast: false
       matrix:
@@ -195,9 +200,11 @@ jobs:
         run: npm ci --no-audit --prefer-offline && npx lerna run compile
 
       - name: Wait for MongoDB
+        # mongosh is not installed on ubuntu-latest runners; ping via the
+        # mongodb driver that npm workspaces hoists to the root.
         run: |
           for i in $(seq 1 10); do
-            if mongosh --eval "db.runCommand({ ping: 1 })" --quiet 2>/dev/null; then
+            if node -e "const { MongoClient } = require('mongodb'); (async () => { const c = await MongoClient.connect('mongodb://localhost:27017', { serverSelectionTimeoutMS: 2000 }); await c.db('admin').command({ ping: 1 }); })().then(() => process.exit(0)).catch(() => process.exit(1))"; then
               echo "MongoDB is ready"
               break
             fi

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 import * as React from "react";
 import { I18NService } from "@bluelibs/x-ui-i18n-bundle";
 import { GuardianSmart } from "@bluelibs/x-ui-guardian-bundle";
@@ -31,20 +34,25 @@ describe("XUIBundle", () => {
   test("Container Injection", async () => {
     const Component = () => {
       const container = useContainer();
+      if (!container) {
+        throw new Error("Container is not available");
+      }
+
       container.set("test", 1);
 
-      return <h5>BlueLibs</h5>;
+      return React.createElement("h5", null, "BlueLibs");
     };
 
-    const MyComponent = () => (
-      <XUIProvider kernel={kernel}>
-        <Component />
-      </XUIProvider>
-    );
+    const MyComponent = () =>
+      React.createElement(
+        XUIProvider,
+        { kernel },
+        React.createElement(Component)
+      );
 
     // this shouldn't be failing. it's actually working.
     await TestRenderer.act(async () => {
-      TestRenderer.create(<MyComponent />);
+      TestRenderer.create(React.createElement(MyComponent));
     });
 
     // expect(kernel.container.get("test")).toBe(1);

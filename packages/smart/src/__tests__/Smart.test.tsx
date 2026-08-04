@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jsdom
+ */
 // Smart.test.tsx
 import * as React from "react";
 import "@testing-library/jest-dom";
@@ -20,7 +23,7 @@ class CounterSmart extends Smart<{ count: number }> {
     this.updateState({ count: this.state.count - 1 });
   }
 
-  static context = React.createContext<CounterSmart>(null);
+  static context = React.createContext<CounterSmart>(null!);
 
   static getContext() {
     return this.context;
@@ -81,7 +84,7 @@ describe("Smart Class and Hooks", () => {
     };
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = useNewSmart(CounterSmart);
+      const [, Provider] = useNewSmart(CounterSmart);
       return (
         <Provider>
           <CounterComponent />
@@ -108,7 +111,7 @@ describe("Smart Class and Hooks", () => {
     };
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = useNewSmart(CounterSmart);
+      const [, Provider] = useNewSmart(CounterSmart);
       return (
         <Provider>
           <TestComponent />
@@ -142,7 +145,7 @@ describe("Smart Class and Hooks", () => {
     };
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = useNewSmart(CounterSmart);
+      const [, Provider] = useNewSmart(CounterSmart);
       return (
         <Provider>
           <TestComponent />
@@ -152,15 +155,16 @@ describe("Smart Class and Hooks", () => {
 
     const { unmount } = render(<Wrapper />);
 
-    expect(capturedModel).not.toBeNull();
-    if (capturedModel) {
-      expect(capturedModel.getSubscriberCount()).toBe(1);
+    const model = capturedModel as CounterSmart | null;
+    expect(model).not.toBeNull();
+    if (model) {
+      expect(model.getSubscriberCount()).toBe(1);
     }
 
     unmount();
 
-    if (capturedModel) {
-      expect(capturedModel.getSubscriberCount()).toBe(0);
+    if (model) {
+      expect(model.getSubscriberCount()).toBe(0);
     }
   });
 
@@ -201,8 +205,7 @@ describe("Smart Class and Hooks", () => {
     const destroySpy = jest.spyOn(CounterSmart.prototype, "destroy");
 
     const Wrapper: React.FC = () => {
-      const [model, Provider] = useNewSmart(CounterSmart);
-      console.log(Provider);
+      const [, Provider] = useNewSmart(CounterSmart);
       return (
         <Provider>
           <div>Test</div>
@@ -223,7 +226,7 @@ describe("Smart Class and Hooks", () => {
 
   test("should throw an error when using smart without a provider", () => {
     const TestComponent: React.FC = () => {
-      const counter = useSmart(CounterSmart);
+      useSmart(CounterSmart);
       return <div>Test</div>;
     };
 

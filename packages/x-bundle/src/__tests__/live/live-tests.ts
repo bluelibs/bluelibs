@@ -158,6 +158,7 @@ test("Test changes are detected for top-fields", async () => {
     title: "Hello",
     ok: true,
   });
+  const finisher = createTestFinisher();
 
   const subscriptionStore = container.get(SubscriptionStore);
   const subscription = await subscriptionStore.createSubscription(
@@ -173,14 +174,17 @@ test("Test changes are detected for top-fields", async () => {
     },
     {
       onChanged(documentId, set) {
-        expect(set.title).toBe("Goodbye");
-        subscription.stop();
-        // done();
+        try {
+          expect(set.title).toBe("Goodbye");
+          finisher.done();
+        } catch (error) {
+          finisher.done(error.message);
+        }
       },
     }
   );
 
-  postsCollection.updateOne(
+  await postsCollection.updateOne(
     { _id: result.insertedId },
     {
       $set: {
@@ -188,6 +192,9 @@ test("Test changes are detected for top-fields", async () => {
       },
     }
   );
+
+  await finisher.callback;
+  await subscription.stop();
 });
 
 test("Test changes are detected for nested fields also", async () => {
@@ -215,11 +222,13 @@ test("Test changes are detected for nested fields also", async () => {
     },
     {
       onChanged(documentId, set) {
-        expect(set.profile.age).toBe(99);
-        expect(set.profile.name).toBe("123");
-
-        subscription.stop();
-        finisher.done();
+        try {
+          expect(set.profile.age).toBe(99);
+          expect(set.profile.name).toBe("123");
+          finisher.done();
+        } catch (error) {
+          finisher.done(error.message);
+        }
       },
     }
   );
@@ -234,6 +243,7 @@ test("Test changes are detected for nested fields also", async () => {
   );
 
   await finisher.callback;
+  await subscription.stop();
 });
 
 test("Test whether limit-sort respects the propper 'collection view' after insertion, change, change-non-interesting, removed", async () => {
@@ -279,12 +289,19 @@ test("Test whether limit-sort respects the propper 'collection view' after inser
   );
 
   subscription.onRemoved((document) => {
-    expect(document._id.toString()).toBe(result5.insertedId.toString());
+    try {
+      expect(document._id.toString()).toBe(result5.insertedId.toString());
+    } catch (error) {
+      finisher.done(error.message);
+    }
   });
   subscription.onAdded((document) => {
-    expect(document._id.toString()).toBe(result2.insertedId.toString());
-    subscription.stop();
-    finisher.done();
+    try {
+      expect(document._id.toString()).toBe(result2.insertedId.toString());
+      finisher.done();
+    } catch (error) {
+      finisher.done(error.message);
+    }
   });
 
   await postsCollection.updateOne(
@@ -297,6 +314,7 @@ test("Test whether limit-sort respects the propper 'collection view' after inser
   );
 
   await finisher.callback;
+  await subscription.stop();
 });
 
 test("Ensure that if you're following certain fields and I change another field I will not be notified", async () => {
@@ -308,6 +326,7 @@ test("Ensure that if you're following certain fields and I change another field 
   });
 
   const subscriptionStore = container.get(SubscriptionStore);
+  let wasNotified = false;
   const subscription = await subscriptionStore.createSubscription(
     postsCollection,
     {
@@ -321,8 +340,7 @@ test("Ensure that if you're following certain fields and I change another field 
     },
     {
       onChanged() {
-        subscription.stop();
-        throw new Error("Should not be triggered");
+        wasNotified = true;
       },
     }
   );
@@ -336,7 +354,12 @@ test("Ensure that if you're following certain fields and I change another field 
     }
   );
 
-  await sleep(100);
+  // Give any erroneous change event time to propagate through the messenger
+  // before asserting it never fired.
+  await sleep(150);
+
+  await subscription.stop();
+  expect(wasNotified).toBe(false);
 });
 
 test("Check update with positional property", async () => {
@@ -370,22 +393,25 @@ test("Check update with positional property", async () => {
     },
     {
       onChanged(document) {
-        expect(document._id.toString()).toBe(result.insertedId.toString());
-        document.bom.forEach((element) => {
-          expect(Object.keys(element).length).toBe(2);
-          if (element.stockId === 1) {
-            expect(element.quantity).toBe(30);
-          } else {
-            expect(element.quantity).toBe(element.stockId);
-          }
-        });
-        subscription.stop();
-        finisher.done();
+        try {
+          expect(document._id.toString()).toBe(result.insertedId.toString());
+          document.bom.forEach((element) => {
+            expect(Object.keys(element).length).toBe(2);
+            if (element.stockId === 1) {
+              expect(element.quantity).toBe(30);
+            } else {
+              expect(element.quantity).toBe(element.stockId);
+            }
+          });
+          finisher.done();
+        } catch (error) {
+          finisher.done(error.message);
+        }
       },
     }
   );
 
-  postsCollection.updateOne(
+  await postsCollection.updateOne(
     { _id: result.insertedId, "bom.stockId": 1 },
     {
       $set: { "bom.$.quantity": 30 },
@@ -393,6 +419,7 @@ test("Check update with positional property", async () => {
   );
 
   await finisher.callback;
+  await subscription.stop();
 });
 
 test("Should be able to skip live changes", async () => {
@@ -402,9 +429,9 @@ test("Should be able to skip live changes", async () => {
     title: "Hello",
     context,
   });
-  const finisher = createTestFinisher();
 
   const subscriptionStore = container.get(SubscriptionStore);
+  let wasNotified = false;
   const subscription = await subscriptionStore.createSubscription(
     postsCollection,
     {
@@ -418,13 +445,12 @@ test("Should be able to skip live changes", async () => {
     },
     {
       onChanged() {
-        finisher.done("Should not be triggered");
-        subscription.stop();
+        wasNotified = true;
       },
     }
   );
 
-  postsCollection.updateOne(
+  await postsCollection.updateOne(
     { _id: result.insertedId },
     {
       $set: { title: "Goodbye" },
@@ -438,8 +464,13 @@ test("Should be able to skip live changes", async () => {
     }
   );
 
-  finisher.done();
-  await finisher.callback;
+  // The live behavior must skip this update entirely; give any erroneous
+  // event time to propagate through the messenger before asserting it never
+  // fired.
+  await sleep(150);
+
+  await subscription.stop();
+  expect(wasNotified).toBe(false);
 });
 
 test("Ensure multi-update multi-removed are detected properly", async () => {
@@ -465,14 +496,17 @@ test("Ensure multi-update multi-removed are detected properly", async () => {
     },
     {
       onChanged(document, set) {
-        expect(set.title).toBe("Goodbye");
-        subscription.stop();
-        finisher.done();
+        try {
+          expect(set.title).toBe("Goodbye");
+          finisher.done();
+        } catch (error) {
+          finisher.done(error.message);
+        }
       },
     }
   );
 
-  postsCollection.updateMany(
+  await postsCollection.updateMany(
     {
       context,
     },
@@ -482,6 +516,7 @@ test("Ensure multi-update multi-removed are detected properly", async () => {
   );
 
   await finisher.callback;
+  await subscription.stop();
 });
 
 // If you specify the field "profile.name", and what changes is "profile.age", we shouldn't receive a changed event
