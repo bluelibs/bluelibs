@@ -1,5 +1,6 @@
 import { IHasherService } from "../defs";
 import { sha512 } from "js-sha512";
+import { randomInt } from "crypto";
 
 export class HasherService implements IHasherService {
   public generateSalt(_userId?: any): string {
@@ -19,7 +20,6 @@ const SPACE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 function randomString(length, chars = SPACE) {
   let result = "";
-  for (let i = length; i > 0; --i)
-    result += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = length; i > 0; --i) result += chars[randomInt(0, chars.length)];
   return result;
 }

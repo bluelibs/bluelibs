@@ -42,7 +42,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     enableSubscriptions: true,
     middlewares: [] as any[],
     uploads: {
-      maxFileSize: 1000000000,
+      // 1GB per file is a DoS vector: a handful of concurrent multipart
+      // requests can exhaust memory. 10MB covers legitimate file uploads.
+      maxFileSize: 10000000,
       maxFiles: 10,
     },
     jit: true,

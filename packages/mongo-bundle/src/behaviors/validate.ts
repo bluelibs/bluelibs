@@ -232,29 +232,41 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       // Keep the original document so we can restore it if validation fails.
       const element = await collection.collection.findOne(filter);
 
+      // includeResultMetadata must be forced: the raw driver defaults it to
+      // false (returning the document directly), which would make result.value
+      // undefined and silently skip validation.
       const result = await collection.collection.findOneAndUpdate(
         filter,
         update,
-        options
+        { ...options, includeResultMetadata: true }
       );
 
-      // Test if the update worked and is consistent
-      if (result.value) {
-        const document = await collection.findOne({ _id: result.value._id });
+      // Validate the POST-update state. result.value is the pre-image
+      // (returnDocument defaults to "before"); for an upsert-insert there is
+      // no pre-image, so fall back to the filter's _id.
+      const documentId =
+        (result.value as { _id?: unknown } | null)?._id ??
+        (filter as { _id?: unknown })._id ??
+        (element as { _id?: unknown } | null)?._id;
 
-        try {
-          await validatorService.validate(document, {
-            ...behaviorOptions.options,
-            model: behaviorOptions.model,
-          });
-        } catch (error) {
-          if (element) {
-            await collection.collection.replaceOne(
-              { _id: element._id },
-              element
-            );
+      if (documentId) {
+        const document = await collection.findOne({ _id: documentId as any });
+
+        if (document) {
+          try {
+            await validatorService.validate(document, {
+              ...behaviorOptions.options,
+              model: behaviorOptions.model,
+            });
+          } catch (error) {
+            if (element) {
+              await collection.collection.replaceOne(
+                { _id: element._id },
+                element
+              );
+            }
+            throw error;
           }
-          throw error;
         }
       }
 

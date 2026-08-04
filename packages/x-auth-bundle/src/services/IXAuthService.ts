@@ -39,8 +39,9 @@ export interface IXAuthService {
   /**
    * Generates the token for email validation and maybe others
    * @param length
+   * @param chars Optional alphabet; defaults to alphanumeric
    */
-  generateToken(length): any;
+  generateToken(length: number, chars?: string[]): string;
   requestLoginLink(input: RequestLoginLinkInput): any;
   verifyMagicCode(input: VerifyMagicLinkInput): any;
   sendEmailMagicLink(

@@ -129,7 +129,7 @@ export class EventManager {
    */
   public removeGlobalListener(handler: EventHandlerType) {
     this.globalListeners = this.globalListeners.filter((listener) => {
-      listener.handler !== handler;
+      return listener.handler !== handler;
     });
 
     return this;

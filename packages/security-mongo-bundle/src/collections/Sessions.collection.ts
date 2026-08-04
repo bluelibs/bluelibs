@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import {
   ISession,
   ISessionPersistance,
@@ -86,11 +87,10 @@ export class SessionsCollection
 
 const ALLOWED_CHARS =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
-function generateToken(length) {
+function generateToken(length: number): string {
   const b = [];
   for (let i = 0; i < length; i++) {
-    const j = (Math.random() * (ALLOWED_CHARS.length - 1)).toFixed(0);
-    b[i] = ALLOWED_CHARS[j];
+    b[i] = ALLOWED_CHARS[randomInt(0, ALLOWED_CHARS.length)];
   }
   return b.join("");
 }

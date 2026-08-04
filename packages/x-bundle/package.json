@@ -36,7 +36,7 @@
     "node-object-hash": "^2.3.10",
     "queue": "^6.0.2",
     "redis": "^3.0.2",
-    "uuid": "^8.3.2",
+    "uuid": "^11.1.1",
     "ws": "^8.13.0"
   },
   "peerDependencies": {

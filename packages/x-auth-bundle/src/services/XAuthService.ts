@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import { SecurityService, UserId } from "@bluelibs/security-bundle";
 import { PasswordService } from "@bluelibs/password-bundle";
 import { EmailService } from "@bluelibs/email-bundle";
@@ -362,14 +363,10 @@ export class XAuthService implements IXAuthService {
    * Generates the token for email validation and maybe others
    * @param length
    */
-  generateToken(length, chars?: string[]) {
+  generateToken(length: number, chars: string[] = ALLOWED_CHARS): string {
     const b = [];
-    if (!chars) {
-      chars = ALLOWED_CHARS;
-    }
     for (let i = 0; i < length; i++) {
-      const j = (Math.random() * (chars.length - 1)).toFixed(0);
-      b[i] = chars[j];
+      b[i] = chars[randomInt(0, chars.length)];
     }
     return b.join("");
   }
