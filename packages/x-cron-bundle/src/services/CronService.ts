@@ -1,4 +1,4 @@
-import { Service, Inject, ContainerInstance } from "@bluelibs/core";
+import { Service, ContainerInstance } from "@bluelibs/core";
 import { ICronConfig, ICronEntry } from "../defs";
 import { CronsCollection } from "../collections/Crons.collection";
 import { parse, schedule, ScheduleData, date } from "later";
@@ -66,11 +66,10 @@ export class CronService {
    * @param cronfig
    * @returns
    */
-  protected createRunnerFunction(cronfig: ICronConfig): Function {
-    let self = this;
+  protected createRunnerFunction(cronfig: ICronConfig): IntentFunction {
     const log = this.logger;
 
-    return async function (intendedAt) {
+    return async (intendedAt) => {
       intendedAt = new Date(intendedAt.getTime());
       intendedAt.setMilliseconds(0);
 
@@ -86,7 +85,7 @@ export class CronService {
         // If we have a dup key error, another instance has already tried to run
         // this job.
         try {
-          const newEntry = await self.cronsCollection.insertOne(jobHistory);
+          const newEntry = await this.cronsCollection.insertOne(jobHistory);
           jobHistory._id = newEntry.insertedId;
         } catch (e) {
           // http://www.mongodb.org/about/contributors/error-codes/
@@ -103,11 +102,11 @@ export class CronService {
       // run and record the job
       try {
         log.info('Starting cronjob "' + cronfig.name + '".');
-        let output = await cronfig.job(self.container); // <- Run the actual job
+        const output = await cronfig.job(this.container); // <- Run the actual job
 
         log.info('Finished cronjob "' + cronfig.name + '".');
         if (cronfig.persist) {
-          await self.cronsCollection.updateOne(
+          await this.cronsCollection.updateOne(
             { _id: jobHistory._id },
             {
               $set: {
@@ -122,7 +121,7 @@ export class CronService {
           'Exception "' + cronfig.name + '" ' + (e && e.stack ? e.stack : e)
         );
         if (cronfig.persist) {
-          await self.cronsCollection.updateOne(
+          await this.cronsCollection.updateOne(
             { _id: jobHistory._id },
             {
               $set: {
@@ -142,7 +141,10 @@ export class CronService {
    * @param cronSchedule
    * @returns
    */
-  protected setLaterInterval(runner: Function, cronSchedule: ScheduleData) {
+  protected setLaterInterval(
+    runner: IntentFunction,
+    cronSchedule: ScheduleData
+  ) {
     let clearableTimeout = this.setLaterTimeout(scheduleTimeout, cronSchedule);
     let done = false;
 
@@ -150,6 +152,7 @@ export class CronService {
      * Executes the specified function and then sets the timeout for the next
      * interval.
      */
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- needed inside the hoisted `function` callback below
     const self = this;
     async function scheduleTimeout(intendedAt) {
       if (!done) {
@@ -177,7 +180,7 @@ export class CronService {
   }
 
   protected setLaterTimeout(fn: IntentFunction, cronSchedule: ScheduleData) {
-    let s = schedule(cronSchedule);
+    const s = schedule(cronSchedule);
     let timeoutElementId;
 
     scheduleTimeout();

@@ -6,10 +6,9 @@ import astToQuery, {
   astQueryToInfo,
 } from "../../core/graphql/astToQuery";
 import gql from "graphql-tag";
-import { log, getRandomCollection } from "../integration/helpers";
-import { query, clear } from "../../core/api";
+import { getRandomCollection } from "../integration/helpers";
+import { clear } from "../../core/api";
 import { Collection } from "mongodb";
-import { client } from "../connection";
 import { SPECIAL_PARAM_FIELD } from "../../core/constants";
 import { enforceMaxLimit } from "../../core/graphql/astToQuery";
 import Query from "../../core/query/Query";

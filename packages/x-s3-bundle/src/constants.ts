@@ -1,6 +1,5 @@
 import { Token } from "@bluelibs/core";
-import { Collection } from "@bluelibs/mongo-bundle";
-import { AWSS3Config, XS3BundleConfigType } from "./defs";
+import { XS3BundleConfigType } from "./defs";
 import { AppFileGroupsCollection } from "./collections/appFileGroups/AppFileGroups.collection";
 import { AppFilesCollection } from "./collections/appFiles/AppFiles.collection";
 

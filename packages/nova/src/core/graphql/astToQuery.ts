@@ -25,7 +25,7 @@ export function astToBody(ast): QueryBodyType {
 function replaceArgumentsWithOurs(body: any) {
   _.forEach(body, (value, key) => {
     if (key === "__arguments") {
-      let args = {};
+      const args = {};
       (value as any[]).forEach((argument) => {
         _.forEach(argument, (value, key) => {
           args[key] = value.value;
@@ -144,7 +144,7 @@ export function getMaxDepth(body) {
  */
 export function deny(body, fields) {
   fields.forEach((field) => {
-    let parts = field.split(".");
+    const parts = field.split(".");
     let accessor = body;
     while (parts.length !== 0) {
       if (parts.length === 1) {
@@ -164,7 +164,7 @@ export function deny(body, fields) {
 
 export function clearEmptyObjects(body) {
   // clear empty nodes then back-propagate
-  for (let key in body) {
+  for (const key in body) {
     if (_.isObject(body[key])) {
       const shouldDelete = clearEmptyObjects(body[key]);
       if (shouldDelete) {
@@ -225,7 +225,7 @@ export function createGetArguments(body) {
     const parts = path.split(".");
     let stopped = false;
     let accessor = body;
-    for (var i = 0; i < parts.length; i++) {
+    for (let i = 0; i < parts.length; i++) {
       if (!accessor) {
         stopped = true;
         break;

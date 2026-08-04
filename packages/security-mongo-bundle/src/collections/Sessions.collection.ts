@@ -1,14 +1,10 @@
 import {
-  IUserPersistance,
-  IFieldMap,
-  IUser,
   ISession,
-  FindAuthenticationStrategyResponse,
   ISessionPersistance,
   UserId,
 } from "@bluelibs/security-bundle";
-import { Collection, ObjectID, Behaviors } from "@bluelibs/mongo-bundle";
-export class SessionsCollection<T extends ISession>
+import { Collection } from "@bluelibs/mongo-bundle";
+export class SessionsCollection
   extends Collection<ISession>
   implements ISessionPersistance
 {
@@ -91,9 +87,9 @@ export class SessionsCollection<T extends ISession>
 const ALLOWED_CHARS =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
 function generateToken(length) {
-  var b = [];
-  for (var i = 0; i < length; i++) {
-    var j = (Math.random() * (ALLOWED_CHARS.length - 1)).toFixed(0);
+  const b = [];
+  for (let i = 0; i < length; i++) {
+    const j = (Math.random() * (ALLOWED_CHARS.length - 1)).toFixed(0);
     b[i] = ALLOWED_CHARS[j];
   }
   return b.join("");

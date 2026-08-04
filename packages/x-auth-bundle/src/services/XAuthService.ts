@@ -1,9 +1,4 @@
-import {
-  SecurityService,
-  UserId,
-  ICreateSessionOptions,
-  ISession,
-} from "@bluelibs/security-bundle";
+import { SecurityService, UserId } from "@bluelibs/security-bundle";
 import { PasswordService } from "@bluelibs/password-bundle";
 import { EmailService } from "@bluelibs/email-bundle";
 import { Service, Inject, ContainerInstance } from "@bluelibs/core";

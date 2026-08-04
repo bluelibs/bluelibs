@@ -79,7 +79,7 @@ export class PermissionsCollection<T extends IPermission>
    * @param search
    */
   protected createMongoFilters(filters: IPermissionSearchFilters) {
-    let mongoFilters: any = {};
+    const mongoFilters: any = {};
     const { userId, domain, domainIdentifier, permission, createdById } =
       filters;
 

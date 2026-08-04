@@ -1,11 +1,9 @@
-import { ContainerInstance, Kernel } from "@bluelibs/core";
-import { S3UploadService } from "../services/S3UploadService";
+import { Kernel } from "@bluelibs/core";
 import { createKernel } from "./ecosystem";
 
-let kernel: Kernel, container: ContainerInstance;
+let kernel: Kernel;
 beforeAll(async () => {
   kernel = createKernel();
-  container = kernel.container;
 
   try {
     await kernel.init();

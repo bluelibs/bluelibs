@@ -1,8 +1,4 @@
-import {
-  PASSWORD_STRATEGY,
-  SOCIAL_AUTH_STRATEGY,
-  X_AUTH_SETTINGS,
-} from "../constants";
+import { PASSWORD_STRATEGY, X_AUTH_SETTINGS } from "../constants";
 import { IXAuthBundleConfig } from "../defs";
 import { Inject, Service, ContainerInstance } from "@bluelibs/core";
 import { HTTPBundle } from "@bluelibs/http-bundle";
@@ -103,7 +99,7 @@ export class SocialLoginService {
     });
 
     //loop thourgh the services for setup
-    for (let service of Object.keys(this.config.socialAuth.services)) {
+    for (const service of Object.keys(this.config.socialAuth.services)) {
       this.setupService(service, this.config.socialAuth.services[service]);
     }
   }
@@ -120,7 +116,7 @@ export class SocialLoginService {
       this.socialCustomConfig[service] &&
       this.socialCustomConfig[service].credentialsKeys
     ) {
-      for (let varname in this.socialCustomConfig[service].credentialsKeys) {
+      for (const varname in this.socialCustomConfig[service].credentialsKeys) {
         const buffer = passportSetup[varname];
         passportSetup[
           this.socialCustomConfig[service].credentialsKeys[varname]
@@ -133,7 +129,7 @@ export class SocialLoginService {
       this.socialCustomConfig[service] &&
       this.socialCustomConfig[service].extraCredentialsKeys
     ) {
-      for (let varname in this.socialCustomConfig[service]
+      for (const varname in this.socialCustomConfig[service]
         .extraCredentialsKeys) {
         passportSetup[varname] =
           this.socialCustomConfig[service].extraCredentialsKeys[varname](
@@ -197,7 +193,7 @@ export class SocialLoginService {
         failureRedirect: setting.url.fail,
         failureFlash: true,
       }),
-      (req, res, next) => {
+      (req, res, _next) => {
         //here in our callback method we return return token of teh user
         if (req.user.token)
           res.redirect(setting.url?.success + "?token=" + req.user?.token);
@@ -217,6 +213,7 @@ export class SocialLoginService {
 
   getStrategy(socialServie: any) {
     if (typeof this.importStrategyMap[socialServie] == "string")
+      // eslint-disable-next-line @typescript-eslint/no-var-requires -- strategies are loaded dynamically by name from config
       return require(this.importStrategyMap[socialServie]).Strategy;
     return this.importStrategyMap[socialServie];
   }
@@ -224,9 +221,8 @@ export class SocialLoginService {
   getProfileFields(profile: any) {
     const cleanProfile: any = {};
     const wantedFields = Object.keys(this.fieldsValues);
-    for (let wantedField of wantedFields) {
-      let fieldValue: any;
-      fieldValue = Object.keys(profile).find((profileKey) =>
+    for (const wantedField of wantedFields) {
+      const fieldValue: any = Object.keys(profile).find((profileKey) =>
         this.fieldsValues[wantedField].some((f: string) =>
           profileKey?.toLowerCase().includes(f?.toLowerCase())
         )
@@ -252,7 +248,6 @@ export class SocialLoginService {
     done
   ) {
     let userId = await this.passwordService.findUserIdByUsername(profile.email);
-    let token;
     let updateBody: any = {
       socialAccounts: [{ service, id: profile[uniqueProperty] }],
     };

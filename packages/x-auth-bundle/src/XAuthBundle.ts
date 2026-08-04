@@ -7,9 +7,7 @@ import { HTTPBundle } from "@bluelibs/http-bundle";
 import { IXAuthBundleConfig } from "./defs";
 import {
   AUTH_CODE_COLLECTION_TOKEN,
-  MAGIC_AUTH_STRATEGY,
   MULTIPLE_FACTORS_AUTH,
-  PASSWORD_STRATEGY,
   SOCIAL_AUTH_SERVICE_TOKEN,
   X_AUTH_SETTINGS,
 } from "./constants";

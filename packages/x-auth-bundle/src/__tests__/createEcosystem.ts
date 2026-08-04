@@ -1,5 +1,5 @@
-import { Bundle, ContainerInstance, Kernel } from "@bluelibs/core";
-import { GraphQLBundle, Loader } from "@bluelibs/graphql-bundle";
+import { ContainerInstance, Kernel } from "@bluelibs/core";
+import { GraphQLBundle } from "@bluelibs/graphql-bundle";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
 import { XBundle } from "@bluelibs/x-bundle";
 import { MongoBundle, DatabaseService } from "@bluelibs/mongo-bundle";

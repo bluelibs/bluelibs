@@ -19,9 +19,9 @@ export interface IXAuthService {
   changePassword(input: ChangePasswordInput, userId: UserId): any;
   login(input: LoginInput): any;
   logout(input): any;
-  resetPassword(input: ResetPasswordInput): {};
+  resetPassword(input: ResetPasswordInput): Record<string, any>;
   forgotPassword(input: ForgotPasswordInput): any;
-  verifyEmail(input: VerifyEmailInput): {};
+  verifyEmail(input: VerifyEmailInput): Record<string, any>;
   /**
    * This function will generate a token and send for validation via email verification. It can be later verified using verifyEmail method
    * @param userId The id of the user
@@ -47,5 +47,5 @@ export interface IXAuthService {
     userId: UserId,
     name: string,
     input: RequestLoginLinkInput
-  ): {};
+  ): Record<string, any>;
 }

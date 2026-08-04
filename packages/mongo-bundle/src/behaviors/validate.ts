@@ -136,7 +136,6 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       update: MongoDB.UpdateFilter<any>,
       options: IContextAware & MongoDB.UpdateOptions = {}
     ) => {
-      let result;
       const fields = dbService.getFields(update);
 
       // first we find it so we can retrieve it later
@@ -168,7 +167,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
             .toArray()
         : [];
 
-      result = await collection.collection.updateMany(
+      const result = await collection.collection.updateMany(
         { _id: { $in: elementsIds } },
         update,
         options
@@ -217,7 +216,6 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       update: MongoDB.UpdateFilter<any>,
       options: IContextAware & MongoDB.FindOneAndUpdateOptions = {}
     ) => {
-      let result;
       const fields = dbService.getFields(update);
 
       await collection.emit(
@@ -234,7 +232,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       // Keep the original document so we can restore it if validation fails.
       const element = await collection.collection.findOne(filter);
 
-      result = await collection.collection.findOneAndUpdate(
+      const result = await collection.collection.findOneAndUpdate(
         filter,
         update,
         options

@@ -194,10 +194,10 @@ export default class CollectionNode implements INode {
     options: any;
     pipeline: any[];
   } {
-    let props =
+    const props =
       typeof this.props === "function" ? this.props(parentObject) : _.cloneDeep(this.props);
 
-    let { filters = {}, options = {}, pipeline = [], decoder: _decoder } = props;
+    const { filters = {}, options = {}, pipeline = [] } = props;
 
     if (!this.queryAllFields) {
       options.projection = this.blendInProjection(options.projection);

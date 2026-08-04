@@ -4,12 +4,8 @@ import {
   AUTH_CODE_COLLECTION_TOKEN,
   InvalidPasswordException,
   InvalidUsernameException,
-  MAGIC_AUTH_STRATEGY,
-  PASSWORD_STRATEGY,
   UsernameAlreadyExistsException,
-  XAuthBundle,
   XAuthService,
-  X_AUTH_SETTINGS,
 } from "../..";
 import { createEcosystem, shutdownKernel } from "../createEcosystem";
 

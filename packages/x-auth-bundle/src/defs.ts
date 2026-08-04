@@ -18,7 +18,6 @@ import {
 } from "./social-passport/defs";
 import { SocialLoginService } from "./social-passport/SocialLoginService";
 import { UserId } from "@bluelibs/security-bundle";
-import { MultipleFactorService } from "./multipleAuthFactor/MultipleFactorService";
 import { IMultipleFactorService } from "./multipleAuthFactor/IMultipleFactorService";
 
 declare module "@bluelibs/security-bundle" {

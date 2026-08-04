@@ -1,6 +1,5 @@
 import { client } from "../connection";
 import { Collection } from "mongodb";
-import { addLinks } from "../../core/api";
 
 function generateRandomId() {
   return Math.random().toString().slice(2);

@@ -1,4 +1,4 @@
-import fs, { read } from "fs";
+import fs from "fs";
 import { nanoid } from "nanoid";
 import os from "os";
 // import { Promise } from 'meteor/promise';

@@ -1,11 +1,6 @@
 import { nanoid } from "nanoid";
 import { FileUpload } from "graphql-upload/processRequest.mjs";
-import {
-  PutObjectCommandInput,
-  PutObjectOutput,
-  PutObjectRequest,
-  S3,
-} from "@aws-sdk/client-s3";
+import { PutObjectCommandInput, PutObjectOutput, S3 } from "@aws-sdk/client-s3";
 import moment from "moment";
 import { XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";

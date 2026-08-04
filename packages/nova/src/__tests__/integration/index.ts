@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars -- fixture data is created via insertOne side effects; the returned bindings are intentionally unused */
 import { assert, expect } from "chai";
 import * as _ from "lodash";
 import { getRandomCollection, log } from "./helpers";
@@ -63,7 +64,7 @@ describe("Main tests", function () {
       bsIds: [b1, b2, b3].map((b) => b.insertedId),
     });
 
-    let result = await query(A, {
+    const result = await query(A, {
       bs: {
         number: 1,
       },
@@ -133,7 +134,7 @@ describe("Main tests", function () {
       number: 200,
     });
 
-    let result: any = await query(A, {
+    const result: any = await query(A, {
       b: {
         name: 1,
       },
@@ -243,7 +244,7 @@ describe("Main tests", function () {
       number: 200,
     });
 
-    let result: any = await query(A, {
+    const result: any = await query(A, {
       b: {
         name: {},
       },
@@ -677,7 +678,6 @@ describe("Main tests", function () {
           },
         },
         async reduce(obj, { context }) {
-          // @ts-ignore
           assert.equal(context.test, 1);
           return `${obj.profile.firstName} ${obj.profile.lastName}`;
         },
@@ -717,7 +717,6 @@ describe("Main tests", function () {
           },
         },
         async reduce(obj, { context }) {
-          // @ts-ignore
           assert.equal(context.test, 1);
           return `${obj.profile.firstName} ${obj.profile.lastName}`;
         },

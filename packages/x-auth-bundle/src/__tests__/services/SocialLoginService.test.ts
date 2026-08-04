@@ -1,19 +1,11 @@
-import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
-import { XAuthService } from "../..";
 import { createEcosystem, shutdownKernel } from "../createEcosystem";
 import * as superagent from "superagent";
-import { HTTPBundle } from "@bluelibs/http-bundle";
 import userData from "../mocks/userData";
 import StrategyMock from "../mocks/mockStrategy";
 
 describe("SocialLoginService.test ", () => {
-  let securityService,
-    passwordService,
-    xAuthService,
-    container,
-    app,
-    userId: any;
+  let securityService, container, userId: any;
 
   beforeEach(async () => {
     container = await createEcosystem({
@@ -56,9 +48,6 @@ describe("SocialLoginService.test ", () => {
     });
 
     securityService = container.get(SecurityService);
-    passwordService = container.get(PasswordService);
-    xAuthService = container.get(XAuthService);
-    app = container.get(HTTPBundle).app;
   });
 
   afterEach(async () => {
@@ -71,7 +60,7 @@ describe("SocialLoginService.test ", () => {
   test("test mock passport strategy", async () => {
     await superagent
       .get("http://localhost:5000/auth/mock")
-      .end((res, err) => {});
+      .end((_res, _err) => {});
     userId = await securityService.findUser({
       "password.username": userData.email,
       "profile.firstName": userData.firstName,

@@ -2,7 +2,6 @@ import { IXAuthBundleConfig } from "../defs";
 import { REST_APIS } from "./apis";
 import { XAuthService } from "../services/XAuthService";
 import { HTTPBundle } from "@bluelibs/http-bundle";
-import * as X from "@bluelibs/x-bundle";
 
 const authPrefix = "/api/users";
 
@@ -13,7 +12,7 @@ export function injectRestAuthRoutes(
   //add routes just on demand
   const apis = REST_APIS.filter((api) => config.rest[api.name]);
   if (apis.length > 0) {
-    for (let api of apis) {
+    for (const api of apis) {
       httpBundle.addRoute({
         type: api.type,
         path: authPrefix + api.path,

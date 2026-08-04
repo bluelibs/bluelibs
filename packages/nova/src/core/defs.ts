@@ -206,7 +206,7 @@ export type QueryBodyType<T = null> = BodyCustomise<T> &
 export type QuerySubBodyType<T = null> = SubBodyCustomise<T> &
   (T extends null ? AnyBody : RootSpecificBody<T>);
 
-type Primitive = string | Function | number | boolean | Symbol | undefined | null;
+type Primitive = string | ((...args: any[]) => any) | number | boolean | symbol | undefined | null;
 
 type DeepOmitHelper<T, K extends keyof T> = {
   [P in K]: T[P] extends infer TP //extra level of indirection needed to trigger homomorhic behavior // distribute over unions

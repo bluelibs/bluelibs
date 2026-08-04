@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars -- fixture data is created via insertOne side effects; the returned bindings are intentionally unused */
 import { query, clear, lookup, addReducers } from "../../core/api";
 import { getRandomCollection, idsEqual } from "../integration/helpers";
 import { Collection } from "mongodb";

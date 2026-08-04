@@ -1,4 +1,3 @@
-import * as _ from "lodash";
 import { Collection } from "mongodb";
 import { LINK_STORAGE } from "../constants";
 import { ILinkCollectionOptions, HardwiredFiltersOptions } from "../defs";
@@ -173,7 +172,7 @@ export default class Linker<T = any> {
     const localField = this.isVirtual() ? this.linkForeignStorageField : this.linkStorageField;
     const foreignField = this.isVirtual() ? this.linkStorageField : this.linkForeignStorageField;
 
-    let matches = this.createAggregationMatches(foreignField);
+    const matches = this.createAggregationMatches(foreignField);
 
     const result: any = {
       from: this.getLinkedCollection().collectionName,
@@ -201,7 +200,7 @@ export default class Linker<T = any> {
    * @param foreignField
    */
   private createAggregationMatches(foreignField: any) {
-    let matches = [];
+    const matches = [];
     if (this.isVirtual()) {
       if (this.isMany()) {
         matches.push(

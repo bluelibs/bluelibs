@@ -47,7 +47,7 @@ export default (config: IXAuthBundleConfig) => {
   if (mutations.logout) {
     resolvers.logout = [
       X.CheckLoggedIn(),
-      X.ToService(XAuthService, "logout", (args, ctx, any) => {
+      X.ToService(XAuthService, "logout", (args, ctx, _any) => {
         return [ctx.authenticationToken];
       }),
     ];

@@ -10,8 +10,6 @@ import {
   RequestLoginLinkInput,
   VerifyMagicLinkInput,
 } from "../inputs/RequestMagicLinkInput";
-import * as X from "@bluelibs/x-bundle";
-import { SecurityService } from "@bluelibs/security-bundle";
 
 export const REST_APIS: {
   name: string;
@@ -87,7 +85,7 @@ export const REST_APIS: {
     name: "me",
     type: "get",
     path: "/me",
-    handler: async (container, req, res, next) => {
+    handler: async (container, req, res, _next) => {
       try {
       } catch (err) {
         console.log(err);

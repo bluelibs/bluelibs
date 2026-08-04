@@ -18,7 +18,6 @@ export class UsersCollection<K extends IUser>
 
   async insertUser(data: object): Promise<UserId> {
     const result = await this.insertOne(data);
-    // @ts-ignore - ObjectId type mismatch
     return result.insertedId;
   }
 
@@ -86,7 +85,7 @@ export class UsersCollection<K extends IUser>
   async findThroughAuthenticationStrategy<T = any>(
     strategyName: string,
     filters: any,
-    fields?: IFieldMap
+    _fields?: IFieldMap
   ): Promise<FindAuthenticationStrategyResponse<T> | null> {
     const methodFilters = {};
     for (const key in filters) {
