@@ -1,17 +1,5 @@
 <h1 align="center">BlueLibs CORE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/core">
-    <img src="https://api.travis-ci.org/bluelibs/core.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/core?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/core/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
-
 A powerful and lightweight module composition strategy responsible for orchestrating your logic, enabling you to easily respect SOLID principles within your infinitely-scalable app.
 
 ## Install
