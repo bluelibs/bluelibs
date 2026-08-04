@@ -18,9 +18,7 @@ export interface ISecureOptions<T = null> {
   /**
    * Enforce filters
    */
-  filters?: T extends null
-    ? FilterQuery<any>
-    : FilterQuery<AnyifyFieldsWithIDs<T>>;
+  filters?: T extends null ? FilterQuery<any> : FilterQuery<AnyifyFieldsWithIDs<T>>;
   options?: any;
   /**
    * This gets deeply merged with the body (useful for $ argument)
@@ -65,17 +63,11 @@ export interface ILinkCollectionOptions {
    */
   inversedBy?: string;
   index?: boolean;
-  filters?:
-    | FilterQuery<any>
-    | ((options: HardwiredFiltersOptions) => FilterQuery<any>);
+  filters?: FilterQuery<any> | ((options: HardwiredFiltersOptions) => FilterQuery<any>);
 }
 
 type AnyObject = { [key: string]: any };
-export interface IReducerOption<
-  ReturnType = any,
-  ParamsType = AnyObject,
-  ParentType = any
-> {
+export interface IReducerOption<ReturnType = any, ParamsType = AnyObject, ParentType = any> {
   dependency: DeepOmit<QueryBodyType, "$">;
   pipeline?: any[] | ((context: IQueryContext) => any[]);
   projection?: any;
@@ -140,9 +132,7 @@ export interface IQueryOptions<T = any> extends AggregateOptions {
 }
 
 export interface ICollectionQueryConfig<T = any> {
-  filters?: T extends null
-    ? FilterQuery<any>
-    : FilterQuery<AnyifyFieldsWithIDs<T>>;
+  filters?: T extends null ? FilterQuery<any> : FilterQuery<AnyifyFieldsWithIDs<T>>;
   options?: IQueryOptions<T>;
   pipeline?: any[];
 }
@@ -200,11 +190,7 @@ export type AnyBody = {
   $alias?: string;
   /** @deprecated */
   $schema?: any;
-  [key: string]:
-    | string
-    | SimpleFieldValue
-    | ValueOrValueResolver<ICollectionQueryConfig>
-    | AnyBody;
+  [key: string]: string | SimpleFieldValue | ValueOrValueResolver<ICollectionQueryConfig> | AnyBody;
 };
 
 type RootSpecificBody<T> = {
@@ -220,22 +206,15 @@ export type QueryBodyType<T = null> = BodyCustomise<T> &
 export type QuerySubBodyType<T = null> = SubBodyCustomise<T> &
   (T extends null ? AnyBody : RootSpecificBody<T>);
 
-type Primitive =
-  | string
-  | Function
-  | number
-  | boolean
-  | Symbol
-  | undefined
-  | null;
+type Primitive = string | Function | number | boolean | Symbol | undefined | null;
 
 type DeepOmitHelper<T, K extends keyof T> = {
   [P in K]: T[P] extends infer TP //extra level of indirection needed to trigger homomorhic behavior // distribute over unions
     ? TP extends Primitive
       ? TP // leave primitives and functions alone
       : TP extends any[]
-      ? DeepOmitArray<TP, K> // Array special handling
-      : DeepOmit<TP, K>
+        ? DeepOmitArray<TP, K> // Array special handling
+        : DeepOmit<TP, K>
     : never;
 };
 
@@ -243,6 +222,4 @@ type DeepOmitArray<T extends any[], K> = {
   [P in keyof T]: DeepOmit<T[P], K>;
 };
 
-type DeepOmit<T, K> = T extends Primitive
-  ? T
-  : DeepOmitHelper<T, Exclude<keyof T, K>>;
+type DeepOmit<T, K> = T extends Primitive ? T : DeepOmitHelper<T, Exclude<keyof T, K>>;

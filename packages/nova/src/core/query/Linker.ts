@@ -22,11 +22,7 @@ export default class Linker<T = any> {
    * @param linkName
    * @param linkConfig
    */
-  constructor(
-    mainCollection: Collection<T>,
-    linkName: string,
-    linkConfig: ILinkCollectionOptions
-  ) {
+  constructor(mainCollection: Collection<T>, linkName: string, linkConfig: ILinkCollectionOptions) {
     this.mainCollection = mainCollection;
 
     this.linkConfig = {
@@ -174,12 +170,8 @@ export default class Linker<T = any> {
    * Returns the aggregation pipeline
    */
   public getLookupAggregationPipeline(options: IGetLookupOperatorOptions = {}) {
-    const localField = this.isVirtual()
-      ? this.linkForeignStorageField
-      : this.linkStorageField;
-    const foreignField = this.isVirtual()
-      ? this.linkStorageField
-      : this.linkForeignStorageField;
+    const localField = this.isVirtual() ? this.linkForeignStorageField : this.linkStorageField;
+    const foreignField = this.isVirtual() ? this.linkStorageField : this.linkForeignStorageField;
 
     let matches = this.createAggregationMatches(foreignField);
 
@@ -248,9 +240,7 @@ export default class Linker<T = any> {
    */
   private _validateAndClean() {
     if (!this.linkConfig.collection) {
-      throw new Error(
-        `For the link ${this.linkName} you did not provide a collection.`
-      );
+      throw new Error(`For the link ${this.linkName} you did not provide a collection.`);
     }
 
     if (this.linkConfig.field == this.linkName) {

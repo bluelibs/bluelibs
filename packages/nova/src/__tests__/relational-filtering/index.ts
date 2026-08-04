@@ -1,12 +1,7 @@
 import { query, clear, lookup, addReducers } from "../../core/api";
 import { getRandomCollection, idsEqual } from "../integration/helpers";
 import { Collection } from "mongodb";
-import {
-  oneToMany,
-  manyToMany,
-  oneToOne,
-  manyToOne,
-} from "../../core/quickLinkers";
+import { oneToMany, manyToMany, oneToOne, manyToOne } from "../../core/quickLinkers";
 import { assert } from "chai";
 
 describe("Relational Filtering", () => {
@@ -318,8 +313,7 @@ describe("Relational Filtering", () => {
     assert.lengthOf(result, 6);
     result.forEach((user) => {
       assert.isTrue(
-        idsEqual(user.companyId, c1.insertedId) ||
-          idsEqual(user.companyId, c2.insertedId)
+        idsEqual(user.companyId, c1.insertedId) || idsEqual(user.companyId, c2.insertedId)
       );
     });
   });
@@ -402,8 +396,7 @@ describe("Relational Filtering", () => {
 
     assert.lengthOf(result, 4);
     result.forEach((user) => {
-      const isDirector =
-        idsEqual(user._id, u1.insertedId) || idsEqual(user._id, u3.insertedId);
+      const isDirector = idsEqual(user._id, u1.insertedId) || idsEqual(user._id, u3.insertedId);
 
       if (isDirector) {
         assert.isObject(user.company);

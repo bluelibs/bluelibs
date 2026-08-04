@@ -1,5 +1,10 @@
 import { assert } from "chai";
-import astToQuery, { deny, getMaxDepth, astToBody, astQueryToInfo } from "../../core/graphql/astToQuery";
+import astToQuery, {
+  deny,
+  getMaxDepth,
+  astToBody,
+  astQueryToInfo,
+} from "../../core/graphql/astToQuery";
 import gql from "graphql-tag";
 import { log, getRandomCollection } from "../integration/helpers";
 import { query, clear } from "../../core/api";
@@ -9,7 +14,7 @@ import { SPECIAL_PARAM_FIELD } from "../../core/constants";
 import { enforceMaxLimit } from "../../core/graphql/astToQuery";
 import Query from "../../core/query/Query";
 
-describe("GraphQL", function() {
+describe("GraphQL", function () {
   let A: Collection;
   let B: Collection;
   let C: Collection;
@@ -100,7 +105,7 @@ describe("GraphQL", function() {
     assert.isUndefined(query.body.profile.b);
   });
 
-  it("#deny()", function() {
+  it("#deny()", function () {
     const body = {
       test: 1,
       testDeny: 1,
@@ -127,7 +132,13 @@ describe("GraphQL", function() {
       },
     };
 
-    deny(body, ["testDeny", "nested.testDeny", "nestedEmpty.disallow", "nestedDeny", "heavy.nest.ting.wup.denyThis"]);
+    deny(body, [
+      "testDeny",
+      "nested.testDeny",
+      "nestedEmpty.disallow",
+      "nestedDeny",
+      "heavy.nest.ting.wup.denyThis",
+    ]);
 
     assert.isDefined(body.test);
     assert.isUndefined(body.testDeny);
@@ -137,7 +148,7 @@ describe("GraphQL", function() {
     assert.isUndefined(body.heavy);
   });
 
-  it("#getMaxDepth()", function() {
+  it("#getMaxDepth()", function () {
     let body: any = {
       a: 1,
       b: 2,
@@ -197,7 +208,7 @@ describe("GraphQL", function() {
     assert.equal(getMaxDepth(body), 6);
   });
 
-  it("#enforceMaxLimit()", function() {
+  it("#enforceMaxLimit()", function () {
     let props: any = {
       options: {
         limit: 5,

@@ -14,7 +14,9 @@ declare module "../" {
   }
 }
 
-const containerContextProvider = ({ children }: React.PropsWithChildren<{}>) => {
+const containerContextProvider = ({
+  children,
+}: React.PropsWithChildren<{}>) => {
   return (
     <ContainerContext.Provider value={container}>
       {children}

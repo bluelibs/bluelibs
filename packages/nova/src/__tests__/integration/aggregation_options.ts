@@ -47,4 +47,3 @@ describe("Aggregation options", function () {
     expect(lastAggregateOptions.readPreference).to.equal("secondaryPreferred");
   });
 });
-

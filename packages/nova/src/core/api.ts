@@ -23,11 +23,7 @@ import { ISecureOptions } from "./defs";
 
 export { secureBody, Linker };
 
-export function query<T>(
-  collection: Collection<T>,
-  body: QueryBodyType,
-  context?: IQueryContext
-) {
+export function query<T>(collection: Collection<T>, body: QueryBodyType, context?: IQueryContext) {
   return new Query(collection, body, context);
 }
 
@@ -55,10 +51,7 @@ export function clear(collection: Collection<any>) {
   collection[EXPANDER_STORAGE] = {};
 }
 
-export function addLinks<T = any>(
-  collection: Collection<T>,
-  data: ILinkOptions
-) {
+export function addLinks<T = any>(collection: Collection<T>, data: ILinkOptions) {
   if (!collection[LINK_STORAGE]) {
     collection[LINK_STORAGE] = {};
   }
@@ -66,7 +59,7 @@ export function addLinks<T = any>(
   _.forEach(data, (linkConfig, linkName) => {
     if (collection[LINK_STORAGE][linkName]) {
       throw new Error(
-        `You cannot add the link with name: ${linkName} because it was already added to ${(collection as { collectionName?: string }).collectionName || 'unknown'} collection`
+        `You cannot add the link with name: ${linkName} because it was already added to ${(collection as { collectionName?: string }).collectionName || "unknown"} collection`
       );
     }
 
@@ -81,10 +74,7 @@ export function addLinks<T = any>(
   });
 }
 
-export function addExpanders<T = any>(
-  collection: Collection<T>,
-  data: IExpanderOptions
-) {
+export function addExpanders<T = any>(collection: Collection<T>, data: IExpanderOptions) {
   if (!collection[EXPANDER_STORAGE]) {
     collection[EXPANDER_STORAGE] = {};
   }
@@ -100,23 +90,15 @@ export function addExpanders<T = any>(
   });
 }
 
-export function getLinker<T = any>(
-  collection: Collection<T>,
-  name: string
-): Linker {
+export function getLinker<T = any>(collection: Collection<T>, name: string): Linker {
   if (collection[LINK_STORAGE] && collection[LINK_STORAGE][name]) {
     return collection[LINK_STORAGE][name];
   } else {
-    throw new Error(
-      `Link "${name}" is not found in collection: "${collection.collectionName}"`
-    );
+    throw new Error(`Link "${name}" is not found in collection: "${collection.collectionName}"`);
   }
 }
 
-export function hasLinker<T = any>(
-  collection: Collection<T>,
-  name: string
-): boolean {
+export function hasLinker<T = any>(collection: Collection<T>, name: string): boolean {
   if (collection[LINK_STORAGE]) {
     return Boolean(collection[LINK_STORAGE][name]);
   } else {
@@ -156,10 +138,7 @@ export function getExpanderConfig(
   return undefined;
 }
 
-export function addReducers<T = any>(
-  collection: Collection<T>,
-  data: IReducerOptions
-) {
+export function addReducers<T = any>(collection: Collection<T>, data: IReducerOptions) {
   if (!collection[REDUCER_STORAGE]) {
     collection[REDUCER_STORAGE] = {};
   }
@@ -202,11 +181,7 @@ export type CollectionDecorations<T> = {
    * @param context
    * @returns
    */
-  queryFromAST: (
-    ast: any,
-    options: ISecureOptions,
-    context?: IQueryContext
-  ) => Query<T>;
+  queryFromAST: (ast: any, options: ISecureOptions, context?: IQueryContext) => Query<T>;
 };
 
 /**
@@ -228,11 +203,8 @@ export function decorate<TEnhanced, TCModel>(
       body: QueryBodyType<TEnhanced>,
       context?: IQueryContext
     ) => query(collection, secureBody(body, config), context),
-    queryFromAST: (
-      ast: any,
-      options: ISecureOptions,
-      context?: IQueryContext
-    ) => astToQuery(collection, ast, options, context),
+    queryFromAST: (ast: any, options: ISecureOptions, context?: IQueryContext) =>
+      astToQuery(collection, ast, options, context),
   });
 
   return collection as Collection<TCModel> & CollectionDecorations<TEnhanced>;

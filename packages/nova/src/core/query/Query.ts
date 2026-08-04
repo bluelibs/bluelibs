@@ -16,11 +16,7 @@ export default class Query<T = any> {
    * @param collection
    * @param body
    */
-  constructor(
-    collection: Collection<T>,
-    body: QueryBodyType,
-    context?: IQueryContext
-  ) {
+  constructor(collection: Collection<T>, body: QueryBodyType, context?: IQueryContext) {
     this.collection = collection;
     this.queryName = collection.collectionName;
     this.body = body;

@@ -15,31 +15,15 @@ export function createFilters(childCollectionNode: CollectionNode) {
 
   if (isVirtual) {
     if (isMany) {
-      return createManyVirtual(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createManyVirtual(parentResults, linkStorageField, linkForeignStorageField);
     } else {
-      return createOneVirtual(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createOneVirtual(parentResults, linkStorageField, linkForeignStorageField);
     }
   } else {
     if (isMany) {
-      return createManyDirect(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createManyDirect(parentResults, linkStorageField, linkForeignStorageField);
     } else {
-      return createOneDirect(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createOneDirect(parentResults, linkStorageField, linkForeignStorageField);
     }
   }
 }
@@ -72,10 +56,7 @@ function createOneVirtual(
 ) {
   return {
     [linkStorageField]: {
-      $in: _.uniqBy(
-        _.map(parentResults, linkForeignStorageField),
-        uniqIdsComparator
-      ),
+      $in: _.uniqBy(_.map(parentResults, linkForeignStorageField), uniqIdsComparator),
     },
   };
 }

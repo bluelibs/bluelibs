@@ -60,7 +60,7 @@ export class XS3Bundle extends Bundle<XS3BundleConfigType> {
     const loader = this.container.get(Loader);
     loader.load({
       typeDefs: [GraphQLAppFile, GraphQLAppFileGroup],
-      resolvers: [GraphQLAppFileResolvers]
+      resolvers: [GraphQLAppFileResolvers],
     });
 
     this.warmup([AppFileListener, S3UploadService]);

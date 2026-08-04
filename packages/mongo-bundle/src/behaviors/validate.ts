@@ -86,7 +86,9 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       }
 
       // Keep the original document so we can restore it if validation fails.
-      const original = await collection.collection.findOne({ _id: element._id });
+      const original = await collection.collection.findOne({
+        _id: element._id,
+      });
 
       result = await collection.collection.updateOne(
         // The reason we pass-on filter is to ensure that positional array pushes still work.
@@ -105,7 +107,10 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
       } catch (error) {
         // Restore the original document so we don't persist invalid data.
         if (original) {
-          await collection.collection.replaceOne({ _id: element._id }, original);
+          await collection.collection.replaceOne(
+            { _id: element._id },
+            original
+          );
         }
         throw error;
       }

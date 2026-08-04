@@ -22,8 +22,7 @@ export default function processDirectNode(childCollectionNode: CollectionNode) {
   }
 
   const resultsByKeyId = _.groupBy(childCollectionNode.results, (r) => {
-    const linkForeignStorageFieldDot =
-      linkForeignStorageField.indexOf(".") >= 0;
+    const linkForeignStorageFieldDot = linkForeignStorageField.indexOf(".") >= 0;
 
     const value = linkForeignStorageFieldDot
       ? _.get(r, linkForeignStorageField)

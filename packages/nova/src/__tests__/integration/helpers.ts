@@ -3,9 +3,7 @@ import { Collection } from "mongodb";
 import { addLinks } from "../../core/api";
 
 function generateRandomId() {
-  return Math.random()
-    .toString()
-    .slice(2);
+  return Math.random().toString().slice(2);
 }
 
 export function idsEqual(id1, id2) {

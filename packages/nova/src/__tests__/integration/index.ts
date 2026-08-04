@@ -1,21 +1,10 @@
 import { assert, expect } from "chai";
 import * as _ from "lodash";
 import { getRandomCollection, log } from "./helpers";
-import {
-  addLinks,
-  query,
-  clear,
-  addExpanders,
-  addReducers,
-} from "../../core/api";
+import { addLinks, query, clear, addExpanders, addReducers } from "../../core/api";
 import { client } from "../connection";
 import { Collection } from "mongodb";
-import {
-  manyToMany,
-  manyToOne,
-  oneToOne,
-  oneToMany,
-} from "../../core/quickLinkers";
+import { manyToMany, manyToOne, oneToOne, oneToMany } from "../../core/quickLinkers";
 
 // Read: https://mongodb.github.io/node-mongodb-native/3.3/api/
 declare module "../../core/defs" {

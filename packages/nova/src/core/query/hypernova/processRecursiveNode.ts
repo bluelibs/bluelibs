@@ -7,9 +7,7 @@ import CollectionNode from "../nodes/CollectionNode";
  *
  * @param childCollectionNode
  */
-export default async function processRecursiveNode(
-  childCollectionNode: CollectionNode
-) {
+export default async function processRecursiveNode(childCollectionNode: CollectionNode) {
   const parentResults = childCollectionNode.parent.results;
   const allResults = [];
   const linkStorageField = childCollectionNode.linkStorageField;
@@ -38,9 +36,7 @@ export default async function processRecursiveNode(
         continue;
       }
 
-      const $in = isMany
-        ? parentResult[linkStorageField]
-        : [parentResult[linkStorageField]];
+      const $in = isMany ? parentResult[linkStorageField] : [parentResult[linkStorageField]];
 
       const results = await childCollectionNode.toArray(
         {

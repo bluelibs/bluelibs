@@ -9,9 +9,7 @@ export function idsEqual(id1, id2) {
  *
  * @param childCollectionNode
  */
-export default function processVirtualNode(
-  childCollectionNode: CollectionNode
-) {
+export default function processVirtualNode(childCollectionNode: CollectionNode) {
   const parentResults = childCollectionNode.parent.results;
   const linkStorageField = childCollectionNode.linkStorageField;
   const linkForeignStorageField = childCollectionNode.linkForeignStorageField;
@@ -32,21 +30,18 @@ export default function processVirtualNode(
     parentResults.forEach((parentResult) => {
       const foreignStorage = getForeignStorageValue(parentResult);
 
-      parentResult[linkName] = childCollectionNode.results.filter(
-        (childResult) => {
-          const linkingStorage = getStorageValue(childResult);
+      parentResult[linkName] = childCollectionNode.results.filter((childResult) => {
+        const linkingStorage = getStorageValue(childResult);
 
-          if (linkingStorage && foreignStorage) {
-            return linkingStorage.find((l) => idsEqual(l, foreignStorage));
-          }
+        if (linkingStorage && foreignStorage) {
+          return linkingStorage.find((l) => idsEqual(l, foreignStorage));
         }
-      );
+      });
     });
   } else {
     const group = _.groupBy(childCollectionNode.results, linkStorageField);
     parentResults.forEach((parentResult) => {
-      parentResult[linkName] =
-        group[getForeignStorageValue(parentResult).toString()] || [];
+      parentResult[linkName] = group[getForeignStorageValue(parentResult).toString()] || [];
     });
   }
 }

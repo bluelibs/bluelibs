@@ -61,9 +61,9 @@ export async function createEcosystem(configXAuthBundle = {}, port = PORT) {
 export async function shutdownKernel(container: ContainerInstance) {
   try {
     const client: any = container.get(DatabaseService).client;
-    const server = (
-      client.topology?.s?.servers as Map<string, any> | undefined
-    )?.values()?.next()?.value;
+    const server = (client.topology?.s?.servers as Map<string, any> | undefined)
+      ?.values()
+      ?.next()?.value;
     const pool: any = server?.pool;
     const deadline = Date.now() + 2000;
     while (pool?.checkedOut?.size > 0 && Date.now() < deadline) {

@@ -5,8 +5,10 @@ import { Alert, Select, SelectProps, Spin } from "antd";
 import { ObjectId } from "@bluelibs/ejson";
 import * as debounce from "lodash.debounce";
 
-export interface DebounceSelectProps<ValueType = any>
-  extends Omit<SelectProps<ValueType>, "options" | "children"> {
+export interface DebounceSelectProps<ValueType = any> extends Omit<
+  SelectProps<ValueType>,
+  "options" | "children"
+> {
   fetchOptions: (search: string) => Promise<ValueType[]>;
   debounceTimeout?: number;
 }
@@ -16,7 +18,7 @@ function DebounceSelect<
     key?: string;
     label: React.ReactNode;
     value: string | number;
-  } = any
+  } = any,
 >({ fetchOptions, debounceTimeout = 250, ...props }: DebounceSelectProps) {
   const [fetching, setFetching] = React.useState(false);
   const [options, setOptions] = React.useState<ValueType[]>([]);

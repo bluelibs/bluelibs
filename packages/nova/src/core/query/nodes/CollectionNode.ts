@@ -2,24 +2,10 @@ import * as _ from "lodash";
 import { ClientSession } from "mongodb";
 import * as dot from "dot-object";
 
-import {
-  SPECIAL_PARAM_FIELD,
-  ALIAS_FIELD,
-  CONTEXT_FIELD,
-} from "../../constants";
-import {
-  QueryBodyType,
-  IReducerOption,
-  QuerySubBodyType,
-  IQueryContext,
-} from "../../defs";
+import { SPECIAL_PARAM_FIELD, ALIAS_FIELD, CONTEXT_FIELD } from "../../constants";
+import { QueryBodyType, IReducerOption, QuerySubBodyType, IQueryContext } from "../../defs";
 
-import {
-  getLinker,
-  getReducerConfig,
-  getExpanderConfig,
-  hasLinker,
-} from "../../api";
+import { getLinker, getReducerConfig, getExpanderConfig, hasLinker } from "../../api";
 import Linker from "../Linker";
 import { INode } from "./INode";
 import FieldNode from "./FieldNode";
@@ -164,9 +150,7 @@ export default class CollectionNode implements INode {
   }
 
   get collectionNodes(): CollectionNode[] {
-    return this.nodes.filter(
-      (n) => n instanceof CollectionNode
-    ) as CollectionNode[];
+    return this.nodes.filter((n) => n instanceof CollectionNode) as CollectionNode[];
   }
 
   get fieldNodes(): FieldNode[] {
@@ -205,17 +189,13 @@ export default class CollectionNode implements INode {
    * Returns the filters and options needed to fetch this node
    * The argument parentObject is given when we perform recursive fetches
    */
-  public getPropsForQuerying(
-    parentObject?: any
-  ): {
+  public getPropsForQuerying(parentObject?: any): {
     filters: any;
     options: any;
     pipeline: any[];
   } {
     let props =
-      typeof this.props === "function"
-        ? this.props(parentObject)
-        : _.cloneDeep(this.props);
+      typeof this.props === "function" ? this.props(parentObject) : _.cloneDeep(this.props);
 
     let { filters = {}, options = {}, pipeline = [], decoder: _decoder } = props;
 
@@ -325,10 +305,7 @@ export default class CollectionNode implements INode {
     );
 
     if (this.explain) {
-      console.log(
-        `[${this.name}] Pipeline:\n`,
-        JSON.stringify(pipeline, null, 2)
-      );
+      console.log(`[${this.name}] Pipeline:\n`, JSON.stringify(pipeline, null, 2));
     }
 
     const pipelineOptions = {
@@ -462,9 +439,7 @@ export default class CollectionNode implements INode {
 
       let linkType = this.getLinkingType(alias);
 
-      scheduleForDeletion = fromReducerNode
-        ? true
-        : Boolean(scheduleForDeletion);
+      scheduleForDeletion = fromReducerNode ? true : Boolean(scheduleForDeletion);
 
       /**
        * This allows us to have reducer with the same name as the field
@@ -529,9 +504,7 @@ export default class CollectionNode implements INode {
             // When we spread the body of that other reducer we also need to add it to its deps
             if (fromReducerNode) {
               const reducerNode = this.getReducerNode(fieldName);
-              if (
-                !fromReducerNode.dependencies.find((n) => n === reducerNode)
-              ) {
+              if (!fromReducerNode.dependencies.find((n) => n === reducerNode)) {
                 fromReducerNode.dependencies.push(reducerNode);
               }
             }
@@ -602,10 +575,7 @@ export default class CollectionNode implements INode {
       // In case it contains some sub fields
       const fieldNode = this.getFirstLevelField(fieldName);
 
-      if (
-        scheduleForDeletion === false &&
-        fieldNode.scheduledForDeletion === true
-      ) {
+      if (scheduleForDeletion === false && fieldNode.scheduledForDeletion === true) {
         fieldNode.scheduledForDeletion = false;
       }
 

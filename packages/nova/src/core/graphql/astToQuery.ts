@@ -4,12 +4,7 @@ import graphqlFields from "graphql-fields";
 import { SPECIAL_PARAM_FIELD } from "../constants";
 import Query from "../query/Query";
 import intersectBody from "./intersectBody";
-import {
-  QueryBodyType,
-  IAstToQueryOptions,
-  IQueryContext,
-  ISecureOptions,
-} from "../defs";
+import { QueryBodyType, IAstToQueryOptions, IQueryContext, ISecureOptions } from "../defs";
 import { mergeDeep } from "./mergeDeep";
 import { Collection } from "mongodb";
 
@@ -20,11 +15,7 @@ const Errors = {
 };
 
 export function astToBody(ast): QueryBodyType {
-  const body = graphqlFields(
-    ast,
-    {},
-    { processArguments: true, excludedFields: ["__typename"] }
-  );
+  const body = graphqlFields(ast, {}, { processArguments: true, excludedFields: ["__typename"] });
 
   replaceArgumentsWithOurs(body);
 
@@ -78,10 +69,7 @@ export default function astToQuery<T = any>(
  * @param config
  * @returns
  */
-export function secureBody<T = null>(
-  body: QueryBodyType<T>,
-  config: ISecureOptions<T> = {}
-) {
+export function secureBody<T = null>(body: QueryBodyType<T>, config: ISecureOptions<T> = {}) {
   body = Object.assign({}, body) as QueryBodyType<T>;
 
   if (!body.$) {
@@ -215,9 +203,7 @@ export function enforceMaxLimit(props: any, maxLimit: number) {
 
 // The converter function
 export function astQueryToInfo(astToInfo) {
-  const operation = astToInfo.definitions.find(
-    ({ kind }) => kind === "OperationDefinition"
-  );
+  const operation = astToInfo.definitions.find(({ kind }) => kind === "OperationDefinition");
   const fragments = astToInfo.definitions
     .filter(({ kind }) => kind === "FragmentDefinition")
     .reduce(

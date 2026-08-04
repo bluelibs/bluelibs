@@ -42,9 +42,7 @@ export default class ProjectionNode {
 
     const newObject = {};
     this.nodes.forEach((node) => {
-      newObject[node.name] = node.isLeaf
-        ? object[node.name]
-        : node.project(object[node.name]);
+      newObject[node.name] = node.isLeaf ? object[node.name] : node.project(object[node.name]);
     });
 
     return newObject;

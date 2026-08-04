@@ -36,10 +36,7 @@ export default class FieldNode implements INode {
           fieldNode.scheduledForDeletion = scheduleForDeletion;
           this.subfields.push(fieldNode);
         } else {
-          if (
-            subfield.scheduledForDeletion === true &&
-            scheduleForDeletion === false
-          ) {
+          if (subfield.scheduledForDeletion === true && scheduleForDeletion === false) {
             subfield.scheduledForDeletion = false;
           }
           subfield.spread(fieldBody);

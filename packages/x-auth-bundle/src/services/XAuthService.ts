@@ -200,9 +200,8 @@ export class XAuthService implements IXAuthService {
       return;
     }
 
-    const token = await this.passwordService.createTokenForPasswordReset(
-      userId
-    );
+    const token =
+      await this.passwordService.createTokenForPasswordReset(userId);
 
     this.sendResetPasswordEmail(input.email, input.email, token);
   }
