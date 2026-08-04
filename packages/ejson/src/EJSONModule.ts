@@ -27,9 +27,6 @@ import {
 export class EJSONModule {
   customTypes = new Map<string, (value: any) => any>();
   private _converters = buildBuiltinConvertersFor(this);
-  // Lazily created fast JSON replacer/reviver for default stringify/parse paths
-  private _fastReplacer?: (this: any, key: string, value: any) => any;
-  private _fastReviver?: (this: any, key: string, value: any) => any;
 
   // ----- Custom types -----
   addType(name: string, factory: (value: any) => any) {
@@ -242,13 +239,6 @@ export class EJSONModule {
       throw new Error(`Unsupported value for batch column '${k}'`);
     };
 
-    // Byte helpers
-    const u8ToString = (u8: Uint8Array): string => {
-      let s = "";
-      for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
-      return s;
-    };
-
     const toHex = (u8: Uint8Array) => {
       if (typeof Buffer !== "undefined" && Buffer.from) {
         return Buffer.from(u8).toString("hex");
@@ -315,6 +305,7 @@ export class EJSONModule {
    * Convert a batch EJSON JSON value back into an array of objects.
    */
   fromBatchJSONValue<T = any>(value: EJSONBatchJSON, options?: EJSONBatchDecodeOptions): T[] {
+    void options;
     if (!value || typeof value !== "object" || !("$batch" in value)) {
       throw new Error("fromBatchJSONValue expects a {$batch: ...} object");
     }
@@ -336,7 +327,6 @@ export class EJSONModule {
     for (const k of order) {
       const colSchema = schema.columns[k] as EJSONBatchColumnSchema;
       const colData = data[k];
-      const nullsSet: Set<number> = new Set(colData && colData.nulls ? colData.nulls : []);
       switch (colSchema.type) {
         case "string":
         case "number":
@@ -604,102 +594,6 @@ export class EJSONModule {
       return ret;
     }
     return new Uint8Array(new ArrayBuffer(len));
-  }
-
-  // Build a monomorphic fast replacer that performs EJSON conversions inline.
-  private _buildFastReplacer() {
-    const self = this;
-    const isBin = (obj: any) => !!(
-      (typeof Uint8Array !== "undefined" && obj instanceof Uint8Array) ||
-      (obj && obj.$Uint8ArrayPolyfill)
-    );
-    const shouldEscape = (obj: any) => {
-      if (!obj || typeof obj !== "object" || Array.isArray(obj)) return false;
-      const ks = Object.keys(obj);
-      if (ks.length === 0 || ks.length > 2) return false;
-      for (let i = 0; i < ks.length; i++) if (ks[i].charCodeAt(0) !== 36 /* '$' */) return false;
-      return true; // conservative: escape any 1-2 key $-object
-    };
-    return function (_key: string, value: any) {
-      if (value === null || value === undefined) return value;
-      const t = typeof value;
-      if (t === "number") {
-        if (Number.isNaN(value)) return { $InfNaN: 0 };
-        if (value === Infinity) return { $InfNaN: 1 };
-        if (value === -Infinity) return { $InfNaN: -1 };
-        return value;
-      }
-      if (t !== "object") return value;
-      if (value instanceof Date) return { $date: value.getTime() };
-      if (value instanceof RegExp) return { $regexp: value.source, $flags: value.flags };
-      if (ObjectId.isValid(value) || (value && value._bsontype === "ObjectID")) {
-        const oid = value instanceof ObjectId ? value : new ObjectId(value);
-        return { $objectId: oid.toString() };
-      }
-      if (isBin(value)) {
-        // Encode to base64 using optimized path
-        return { $binary: Base64.encodeU8(value) } as any;
-      }
-      // Custom
-      if (
-        value &&
-        isFunction((value as any).toJSONValue) &&
-        isFunction((value as any).typeName) &&
-        self.customTypes.has((value as any).typeName())
-      ) {
-        const typeName = (value as any).typeName();
-        const jsonValue = (value as any).toJSONValue();
-        return { $type: typeName, $value: jsonValue };
-      }
-      if (shouldEscape(value)) {
-        return { $escape: value };
-      }
-      return value;
-    };
-  }
-
-  // Build a monomorphic fast reviver for parse
-  private _buildFastReviver() {
-    const self = this;
-    return function (_key: string, value: any) {
-      if (!value || typeof value !== "object") return value;
-      const ks = Object.keys(value);
-      if (ks.length === 1) {
-        const k = ks[0];
-        switch (k) {
-          case "$date":
-            return new Date(value.$date);
-          case "$objectId":
-            return new ObjectId(value.$objectId);
-          case "$InfNaN":
-            return value.$InfNaN / 0;
-          case "$binary":
-            // Keep compatibility: decode to string of bytes for non-batch use? historically returns string.
-            // Use Uint8Array for better perf; most callers can accept it. Fallback: return decodeToU8.
-            return Base64.decodeToU8(value.$binary);
-          case "$escape": {
-            const inner = value.$escape;
-            // JSON.parse will already have revived children; simply unwrap
-            return inner;
-          }
-          default:
-            break;
-        }
-      }
-      if (ks.length === 2 && "$regexp" in value && "$flags" in value) {
-        const flags = String(value.$flags).slice(0, 50).replace(/[^gimuy]/g, "").replace(/(.)(?=.*\1)/g, "");
-        return new RegExp(value.$regexp, flags);
-      }
-      if (ks.length === 2 && "$type" in value && "$value" in value) {
-        const typeName = value.$type;
-        if (!self.customTypes.has(typeName)) {
-          throw new Error(`Custom EJSON type ${typeName} is not defined`);
-        }
-        const factory = self.customTypes.get(typeName)!;
-        return factory(value.$value);
-      }
-      return value;
-    };
   }
 
   // Shared hex LUT for browser hex encoding

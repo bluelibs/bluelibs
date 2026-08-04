@@ -50,7 +50,11 @@ export const GraphQLEJSON = new GraphQLScalarType({
       return EJSON.fromJSONValue(value);
     }
 
-    return EJSON.parse(value);
+    if (typeof value === "string") {
+      return EJSON.parse(value);
+    }
+
+    return value;
   },
   parseLiteral(valueNode) {
     if (valueNode.kind === Kind.STRING) {

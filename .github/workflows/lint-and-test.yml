@@ -55,7 +55,7 @@ jobs:
             npm-${{ runner.os }}-node-20-
 
       - name: Install dependencies
-        run: npm install --no-audit --prefer-offline --package-lock=false
+        run: npm ci --no-audit --prefer-offline
 
       - name: Compile all packages
         run: npx lerna run compile
@@ -91,7 +91,7 @@ jobs:
 
       - name: Rebuild workspace if cache is missing
         if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
-        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
 
       - name: Check formatting
         run: npx prettier --check "packages/*/src/**/*.{ts,tsx,json,md}"
@@ -123,7 +123,7 @@ jobs:
 
       - name: Rebuild workspace if cache is missing
         if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
-        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
 
       - name: Lint ${{ matrix.package }}
         run: cd packages/${{ matrix.package }} && npm run lint
@@ -155,7 +155,7 @@ jobs:
 
       - name: Rebuild workspace if cache is missing
         if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
-        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
 
       - name: Test ${{ matrix.package }}
         run: cd packages/${{ matrix.package }} && npm run test:ci
@@ -192,7 +192,7 @@ jobs:
 
       - name: Rebuild workspace if cache is missing
         if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
-        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
 
       - name: Wait for MongoDB
         run: |
@@ -241,7 +241,7 @@ jobs:
 
       - name: Rebuild workspace if cache is missing
         if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
-        run: npm install --no-audit --prefer-offline --package-lock=false && npx lerna run compile
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
 
       - name: Wait for RabbitMQ
         run: |

@@ -327,7 +327,7 @@ export const builtinConverters = [
         hasOwn(obj, "$type") && hasOwn(obj, "$value") && lengthOf(obj) === 2
       );
     },
-    matchObject(obj) {
+    matchObject(_obj) {
       // The global list cannot resolve custom types without an instance.
       return false;
     },

@@ -35,6 +35,10 @@ export class UISessionStorage {
   getItem(key: string) {
     const value = this.storage.getItem(key);
 
+    if (value === null) {
+      return null;
+    }
+
     try {
       return EJSON.parse(value);
     } catch (_) {

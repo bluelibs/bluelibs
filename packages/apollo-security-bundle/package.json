@@ -51,7 +51,7 @@
     "babel-jest": "^29.5.0",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
-    "jest-junit": "^16.0.0",
+    "jest-junit": "^17.0.0",
     "node-fetch": "^2.6.1",
     "passport": "^0.6.0",
     "passport-facebook": "^3.0.0",

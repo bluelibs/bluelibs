@@ -1,6 +1,5 @@
 import { ObjectId } from "./objectid";
 import { toModel, ToModelOptions } from "./toModel";
-import { EJSON } from "./ejson";
 import { EJSONModule } from "./EJSONModule";
 import type {
   EJSONBatchJSON,

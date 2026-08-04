@@ -1,4 +1,4 @@
-import shortid from "shortid";
+import { nanoid } from "nanoid";
 import { FileUpload } from "graphql-upload/processRequest.mjs";
 import {
   PutObjectCommandInput,
@@ -149,7 +149,7 @@ export class S3UploadService {
     mimetype: string,
     buffer: Buffer
   ) {
-    const id = shortid.generate();
+    const id = nanoid();
     const fileName = `${id}-${filename}`;
     const fileKey = this.generateKey(fileName);
 
@@ -238,7 +238,7 @@ export class S3UploadService {
       .locale("en")
       .format("MM")}/${moment().locale("en").format("DD")}`;
 
-    let key = `${dateFolder}/${shortid.generate()}`;
+    let key = `${dateFolder}/${nanoid()}`;
 
     if (context !== "") {
       key += `-${context}`;

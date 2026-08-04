@@ -1,5 +1,5 @@
 import fs, { read } from 'fs';
-import shortid from 'shortid';
+import { nanoid } from 'nanoid';
 import os from 'os';
 // import { Promise } from 'meteor/promise';
 
@@ -9,7 +9,7 @@ export const storeFS = ({ stream, filename }): Promise<{
   filepath: string
   id: string
 }> => {
-  const id = shortid.generate();
+  const id = nanoid();
   const filepath = `${uploadDir}/${id}-${filename}`;
 
   return new Promise((resolve, reject) =>
