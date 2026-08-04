@@ -2,13 +2,13 @@ import { ObjectId } from "../objectid/ObjectId";
 import { isObject, keysOf, isInfOrNaN } from "../utilities";
 import { toJSONValueHelper } from "./toJSONValueHelper";
 // for both arrays and objects, in-place modification.
-export const adjustTypesToJSONValue = (obj) => {
+export const adjustTypesToJSONValue = (obj, converters?) => {
   // Is it an atom that we need to adjust?
   if (obj === null) {
     return null;
   }
 
-  const maybeChanged = toJSONValueHelper(obj);
+  const maybeChanged = toJSONValueHelper(obj, converters);
   if (maybeChanged !== undefined) {
     return maybeChanged;
   }
@@ -30,7 +30,7 @@ export const adjustTypesToJSONValue = (obj) => {
       return; // continue
     }
 
-    const changed = toJSONValueHelper(value);
+    const changed = toJSONValueHelper(value, converters);
 
     if (changed) {
       obj[key] = changed;
@@ -38,7 +38,7 @@ export const adjustTypesToJSONValue = (obj) => {
     }
     // if we get here, value is an object but not adjustable
     // at this level.  recurse.
-    adjustTypesToJSONValue(value);
+    adjustTypesToJSONValue(value, converters);
   });
   return obj;
 };

@@ -51,9 +51,11 @@ describe("Migrations", () => {
 
     await migrationService.migrateTo(1);
     expect(await posts.countDocuments()).toBe(1);
+    expect((await migrationService.getStatus()).version).toBe(1);
 
     await migrationService.migrateTo(0);
     expect(await posts.countDocuments()).toBe(0);
+    expect((await migrationService.getStatus()).version).toBe(0);
 
     await migrationService.migrateToLatest();
     expect(await posts.countDocuments()).toBe(2);
@@ -125,5 +127,38 @@ describe("Migrations", () => {
     expect(await posts.countDocuments({ title: "Post 1" })).toBe(1);
     expect(await posts.countDocuments({ title: "Post 2" })).toBe(1);
     expect(await posts.countDocuments()).toBe(2);
+  });
+
+  test("Should run only the new migration if current version is 3", async () => {
+    const { container } = await getEcosystem();
+    const dbService = container.get(DatabaseService);
+    const posts = container.get<Posts>(Posts);
+    const migrationService = container.get(MigrationService);
+
+    await posts.deleteMany({});
+
+    await dbService.db.collection("migrations").updateOne(
+      // @ts-ignore
+      { _id: "status" },
+      { $set: { version: 3, locked: false } },
+      { upsert: true }
+    );
+
+    for (let i = 1; i <= 4; i++) {
+      migrationService.add({
+        version: i,
+        name: `Migration ${i}`,
+        async up() {
+          await posts.insertOne({ title: `Post ${i}` });
+        },
+        async down() {
+          await posts.deleteOne({ title: `Post ${i}` });
+        },
+      });
+    }
+
+    await migrationService.migrateToLatest();
+    expect(await posts.countDocuments({})).toBe(1);
+    expect(await posts.countDocuments({ title: "Post 4" })).toBe(1);
   });
 });

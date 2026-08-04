@@ -1,4 +1,4 @@
-import { ClientSession, Collection } from "mongodb";
+import { AggregateOptions, ClientSession, Collection } from "mongodb";
 import { Filter as FilterQuery } from "mongodb";
 
 export interface IToArrayable {
@@ -116,7 +116,7 @@ export interface IQueryBody {
     | ICollectionQueryConfig
     | ValueOrValueResolver<ICollectionQueryConfig>;
 }
-export interface IQueryOptions<T = any> {
+export interface IQueryOptions<T = any> extends AggregateOptions {
   limit?: number;
   skip?: number;
   sort?:
@@ -132,6 +132,11 @@ export interface IQueryOptions<T = any> {
    * pipeline corresponding to this node.
    */
   hint?: any;
+  projection?:
+    | {
+        [key in keyof T]?: number | boolean;
+      }
+    | { [key: string]: number | boolean };
 }
 
 export interface ICollectionQueryConfig<T = any> {

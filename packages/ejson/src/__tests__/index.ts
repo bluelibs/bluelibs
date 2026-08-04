@@ -4,6 +4,11 @@ import "./toModel";
 import { assert } from "chai";
 import { ObjectId } from "..";
 import { toModel } from "../toModel";
+import type {
+  EJSONBatchJSON,
+  EJSONBatchSchema,
+  EJSONBatchEncodeOptions,
+} from "..";
 
 test("ejson - keyOrderSensitive", () => {
   assert.isTrue(
@@ -321,4 +326,106 @@ test("should work with parsing object ids and everything", () => {
   const str = EJSON.stringify({ _id });
 
   expect(str).toEqual(`{"_id":{"$objectId":"${_id.toString()}"}}`);
+});
+
+// ----- EJSON Batch (interfaces + API presence) -----
+test("ejson batch - API presence", () => {
+  expect(typeof (EJSON as any).toBatchJSONValue).toBe("function");
+  expect(typeof (EJSON as any).fromBatchJSONValue).toBe("function");
+  expect(typeof (EJSON as any).stringifyBatch).toBe("function");
+  expect(typeof (EJSON as any).parseBatch).toBe("function");
+});
+
+test("ejson batch - schema and payload interface shape compiles", () => {
+  const schema: EJSONBatchSchema = {
+    columns: {
+      _id: { type: "objectId" },
+      createdAt: { type: "date" },
+      active: { type: "boolean" },
+      name: { type: "string", optional: true },
+    },
+    order: ["_id", "createdAt", "active", "name"],
+  };
+
+  const now = Date.now();
+
+  const payload: EJSONBatchJSON = {
+    $batch: {
+      version: 1,
+      schema,
+      count: 2,
+      data: {
+        _id: { v: ["a".repeat(24), "b".repeat(24)] },
+        createdAt: { v: [now, now + 1000] },
+        active: { v: [true, false] },
+        name: { v: ["Alice", null], nulls: [1] },
+      },
+    },
+  };
+
+  expect(payload.$batch.count).toBe(2);
+  expect(Object.keys(payload.$batch.data)).toEqual(
+    expect.arrayContaining(["_id", "createdAt", "active", "name"])
+  );
+  expect(payload.$batch.schema.columns._id.type).toBe("objectId");
+});
+
+test("ejson batch - options type compiles", () => {
+  const opts: EJSONBatchEncodeOptions = {
+    preferPackedObjectId: true,
+    minArrayLength: 50,
+    dictionary: true,
+    deltaForDates: false,
+  };
+  expect(typeof opts).toBe("object");
+});
+
+test("ejson batch - stringifyBatch/parseBatch roundtrip for flat uniform objects", () => {
+  const rows = Array.from({ length: 5 }).map((_, i) => ({
+    _id: new ObjectId(),
+    createdAt: new Date(1700000000000 + i * 1000),
+    active: i % 2 === 0,
+    name: `User ${i}`,
+    score: i * 10,
+    re: /abc/gi,
+  }));
+
+  const s = EJSON.stringifyBatch(rows);
+  const back = EJSON.parseBatch(s);
+  expect(Array.isArray(back)).toBe(true);
+  expect(back.length).toBe(rows.length);
+  for (let i = 0; i < rows.length; i++) {
+    // Check a few fields
+    expect(back[i].name).toBe(rows[i].name);
+    expect(back[i].score).toBe(rows[i].score);
+    expect(back[i].active).toBe(rows[i].active);
+    expect(back[i]._id.toString()).toBe(rows[i]._id.toString());
+    expect(back[i].createdAt instanceof Date).toBe(true);
+    expect(back[i].createdAt.getTime()).toBe(rows[i].createdAt.getTime());
+    expect(back[i].re instanceof RegExp).toBe(true);
+    expect(back[i].re.toString()).toBe(rows[i].re.toString());
+  }
+});
+
+test("ejson batch - chooses packed objectId encoding when option set", () => {
+  const rows = Array.from({ length: 3 }).map(() => ({ _id: new ObjectId() }));
+  const s = (EJSON as any).stringifyBatch(rows, { preferPackedObjectId: true });
+  const parsed = JSON.parse(s);
+  expect(!!parsed.$batch).toBe(true);
+  expect(parsed.$batch.schema.columns._id.encoding).toBe("packed");
+  const back = (EJSON as any).parseBatch(s);
+  expect(back[0]._id.toString()).toBe(rows[0]._id.toString());
+});
+
+test("ejson batch - rejects non-uniform arrays and falls back", () => {
+  const rows: any[] = [{ a: 1, b: 2 }, { a: 2 }];
+  const s = (EJSON as any).stringifyBatch(rows);
+  // Expect fallback to regular stringify (no $batch marker)
+  const parsed = JSON.parse(s);
+  expect(parsed.$batch).toBeUndefined();
+  const back = (EJSON as any).parseBatch(s);
+  expect(Array.isArray(back)).toBe(true);
+  expect(back.length).toBe(2);
+  expect(back[0].a).toBe(1);
+  expect(back[1].a).toBe(2);
 });

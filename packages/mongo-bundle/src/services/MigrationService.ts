@@ -1,5 +1,4 @@
 import { ContainerInstance, Service } from "@bluelibs/core";
-import { LoggerService } from "@bluelibs/logger-bundle";
 import {
   IMigrationStatus,
   MigrationsCollection,
@@ -14,189 +13,240 @@ export interface IMigrationConfig {
 
 @Service()
 export class MigrationService {
+  /**
+   * An array of all the migration configurations.
+   */
   public migrationConfigs: IMigrationConfig[] = [];
 
+  /**
+   * Single doc in migrations collection that tracks the current status.
+   */
+  protected readonly MIGRATION_STATUS_ID = "status";
+
   constructor(
-    protected migrationsCollection: MigrationsCollection,
-    protected logger: LoggerService,
-    protected container: ContainerInstance
+    protected readonly container: ContainerInstance,
+    protected readonly migrationsCollection: MigrationsCollection
   ) {}
 
-  add(config: IMigrationConfig) {
-    if (this.getConfigByVersion(config.version)) {
-      throw new Error(`You already have a migration added with this version.`);
+  /**
+   * Adds a new migration configuration.
+   */
+  public add(config: IMigrationConfig): void {
+    if (config.version <= 0) {
+      throw new Error("Migration version must be a positive number.");
     }
-    if (config.version === 0 || config.version < 0) {
+    const existing = this.getConfigByVersion(config.version);
+    if (existing) {
       throw new Error(
-        `You can't add this version, select a positive number different from 0`
+        `Migration with version ${config.version} already exists.`
       );
     }
+
     this.migrationConfigs.push(config);
-    this.migrationConfigs = this.migrationConfigs.sort((a, b) => {
-      return a.version - b.version;
-    });
+    // Optional: keep them sorted
+    this.migrationConfigs.sort((a, b) => a.version - b.version);
   }
 
-  getConfigByVersion(version: number): IMigrationConfig | null {
-    return this.migrationConfigs.find((config) => {
-      return config.version === version;
-    });
+  /**
+   * Retrieves a migration configuration by its version.
+   */
+  public getConfigByVersion(version: number): IMigrationConfig | null {
+    return this.migrationConfigs.find((m) => m.version === version) ?? null;
   }
 
-  async getVersion() {
-    return (await this.getStatus()).version;
-  }
-
-  async updateStatus(data: Partial<IMigrationStatus>) {
+  /**
+   * Gets the current migration version.
+   */
+  public async getVersion(): Promise<number> {
     const status = await this.getStatus();
+    return status.version;
+  }
+
+  /**
+   * Updates the migration status document with the given data.
+   */
+  public async updateStatus(data: Partial<IMigrationStatus>): Promise<void> {
+    // Fetch current status (or create default if not found).
+    const currentStatus = await this.getStatus();
+
+    const newStatus = {
+      ...currentStatus,
+      ...data,
+      _id: this.MIGRATION_STATUS_ID, // Ensure ID is not overwritten
+    };
+
+    // Upsert the doc
     await this.migrationsCollection.updateOne(
-      {
-        _id: "status" as any,
-      },
-      {
-        $set: data,
-      }
+      // @ts-ignore
+      { _id: this.MIGRATION_STATUS_ID },
+      { $set: newStatus },
+      { upsert: true }
     );
   }
 
-  async getStatus(): Promise<IMigrationStatus> {
-    let control = await this.migrationsCollection.findOne({ _id: "status" as any });
-    if (!control) {
-      const lastMigration =
-        this.migrationConfigs[this.migrationConfigs.length - 1];
-      control = {
-        _id: "status",
-        locked: false,
+  /**
+   * Retrieves the current migration status from the database.
+   * If the document doesn't exist, create a default one.
+   */
+  public async getStatus(): Promise<IMigrationStatus> {
+    let status = await this.migrationsCollection.findOne({
+      // @ts-ignore
+      _id: this.MIGRATION_STATUS_ID,
+    });
+
+    if (!status) {
+      // Create a default migration status
+      status = {
+        _id: this.MIGRATION_STATUS_ID,
         version: 0,
+        locked: false,
       };
-      await this.migrationsCollection.insertOne(control);
+      await this.migrationsCollection.insertOne(status);
     }
 
-    return control;
+    return status;
   }
 
-  async lock() {
-    // This is atomic. The selector ensures only one caller at a time will see
-    // the unlocked control, and locking occurs in the same update's modifier.
-    // All other simultaneous callers will get false back from the update.
-    const result = await this.migrationsCollection.updateOne(
-      { _id: "status" as any, locked: false },
-      { $set: { locked: true, lockedAt: new Date() } }
-    );
-
-    if (result.modifiedCount === 1) {
-      return true;
-    } else {
-      return false;
+  /**
+   * Attempts to lock the migration process to prevent concurrent migrations.
+   */
+  public async lock(): Promise<boolean> {
+    const status = await this.getStatus();
+    if (status.locked) {
+      return false; // Already locked
     }
+
+    // Set locked = true, lockedAt = now
+    await this.updateStatus({ locked: true, lockedAt: new Date() });
+    return true;
   }
 
-  async run(direction: "up" | "down", config: IMigrationConfig) {
-    if (typeof config[direction] !== "function") {
+  /**
+   * Runs a migration in the specified direction.
+   */
+  public async run(
+    direction: "up" | "down",
+    config: IMigrationConfig
+  ): Promise<void> {
+    const fn = direction === "up" ? config.up : config.down;
+    if (typeof fn !== "function") {
       throw new Error(
-        "Cannot migrate " + direction + " on version " + config.version
+        `Migration function for '${direction}' is not defined on version ${config.version}.`
       );
     }
 
-    function maybeName() {
-      return config.name ? " (" + config.name + ")" : "";
+    try {
+      await fn(this.container);
+    } catch (error) {
+      // Record error in status so you can inspect it later
+      await this.updateStatus({
+        lastError: {
+          fromVersion: config.version,
+          message: (error as Error).message || String(error),
+        },
+      });
+
+      // Rethrow for further handling
+      throw error;
     }
-
-    this.logger.info(
-      "Running " + direction + "() on version " + config.version + maybeName()
-    );
-
-    await config[direction](this.container);
   }
 
-  // Side effect: saves version.
-  async unlock(currentVersion: number) {
+  /**
+   * Unlocks the migration process and updates the current version.
+   */
+  public async unlock(currentVersion: number): Promise<void> {
     await this.updateStatus({
       locked: false,
+      lockedAt: undefined,
       version: currentVersion,
-      lastError: null,
     });
   }
 
   /**
-   * Migrates to latest version
+   * Migrates the system to the latest version found in `migrationConfigs`.
    */
-  async migrateToLatest(): Promise<void> {
-    if (this.migrationConfigs.length > 0) {
-      const lastMigration =
-        this.migrationConfigs[this.migrationConfigs.length - 1];
-
-      return this.migrateTo(lastMigration.version);
-    }
+  public async migrateToLatest(): Promise<void> {
+    const maxVersion = this.migrationConfigs.length
+      ? Math.max(...this.migrationConfigs.map((m) => m.version))
+      : 0;
+    await this.migrateTo(maxVersion);
   }
 
-  async rerun(version: number, direction: "up" | "down" = "up") {
-    // We are now in locked mode and we can do our thingie
-    this.logger.info("Rerunning version " + version);
-    await this.run(direction, this.getConfigByVersion(version));
-    this.logger.info("Finished migrating.");
-  }
-
-  async migrateTo(targetVersion: number): Promise<void> {
-    const status = await this.getStatus();
-    let currentVersion = status.version;
-
-    if ((await this.lock()) === false) {
-      this.logger.info("Not migrating, control is locked.");
-      return;
+  /**
+   * Re-runs a specific migration version in the given direction.
+   */
+  public async rerun(
+    version: number,
+    direction: "up" | "down" = "up"
+  ): Promise<void> {
+    const config = this.getConfigByVersion(version);
+    if (!config) {
+      throw new Error(`Migration config for version ${version} not found.`);
     }
 
-    if (currentVersion === targetVersion) {
-      this.logger.info("Not migrating, already at version " + targetVersion);
-      this.unlock(currentVersion);
-      return;
+    // Acquire lock
+    const canLock = await this.lock();
+    if (!canLock) {
+      throw new Error("Could not acquire lock for re-run.");
     }
-
-    var startIdx = this.migrationConfigs.findIndex(
-      (c) => c.version === currentVersion
-    );
-    var endIdx = this.migrationConfigs.findIndex(
-      (c) => c.version === targetVersion
-    );
-
-    this.logger.info(`Bring it to: ${targetVersion}`);
-    this.logger.info("startIdx:" + startIdx + " endIdx:" + endIdx);
-    this.logger.info(`Migrating from ${currentVersion} to ${targetVersion}`);
 
     try {
-      if (currentVersion < targetVersion) {
-        for (var i = startIdx === -1 ? 0 : startIdx; i <= endIdx; i++) {
-          const migration = this.migrationConfigs[i];
-          if (migration) {
-            await this.run("up", migration);
-            currentVersion = migration.version;
-          }
-        }
-      } else {
-        // When you're migrating to a version, you don't want to execute that down() version?
-        for (var i = startIdx; i > endIdx; i--) {
-          const migration = this.migrationConfigs[i];
-          if (migration) {
-            await this.run("down", migration);
-            currentVersion = migration.version;
-          }
-        }
-      }
-    } catch (e) {
-      this.logger.error(
-        `Error while migrating from ${currentVersion}. Aborted migration. ${e.toString()}`
-      );
-      await this.updateStatus({
-        lastError: {
-          fromVersion: currentVersion,
-          message: e.toString(),
-        },
-      });
-      await this.lock();
-      throw e;
+      await this.run(direction, config);
+      // Decide if you change version or not. Typically, re-run doesn’t alter the version
+      const current = await this.getVersion();
+      await this.unlock(current);
+    } catch (error) {
+      // Unlock but do not update version
+      await this.updateStatus({ locked: false, lockedAt: undefined });
+      throw error;
+    }
+  }
+
+  /**
+   * Migrates the system to a specific target version.
+   */
+  public async migrateTo(targetVersion: number): Promise<void> {
+    const currentVersion = await this.getVersion();
+    if (currentVersion === targetVersion) {
+      // Already there, do nothing
+      return;
     }
 
-    await this.unlock(currentVersion);
-    this.logger.info("Finished migrating.");
+    const canLock = await this.lock();
+    if (!canLock) {
+      throw new Error(
+        "Could not acquire lock. Migration is already in progress."
+      );
+    }
+
+    try {
+      if (targetVersion > currentVersion) {
+        // Migrate up in ascending order
+        const toMigrate = this.migrationConfigs.filter(
+          (m) => m.version > currentVersion && m.version <= targetVersion
+        );
+        toMigrate.sort((a, b) => a.version - b.version);
+
+        for (const config of toMigrate) {
+          await this.run("up", config);
+        }
+      } else {
+        // Migrate down in descending order
+        const toMigrate = this.migrationConfigs.filter(
+          (m) => m.version <= currentVersion && m.version > targetVersion
+        );
+        toMigrate.sort((a, b) => b.version - a.version);
+
+        for (const config of toMigrate) {
+          await this.run("down", config);
+        }
+      }
+
+      await this.unlock(targetVersion);
+    } catch (error) {
+      // On error, unlock (but don’t update version)
+      await this.updateStatus({ locked: false, lockedAt: undefined });
+      throw error;
+    }
   }
 }

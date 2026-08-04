@@ -1805,4 +1805,65 @@ describe("Main tests", function () {
       assert.equal(employee.a.b.c.name, "C");
     });
   });
+
+  it("Should work with hint option", async () => {
+    // Create an index on the collection
+    await A.createIndex({ number: 1 }, { name: "number_1" });
+
+    // Sleep to ensure that index has been actually created
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 200);
+    });
+
+    // Insert some test data
+    await A.insertOne({ number: 100, name: "Test 1" });
+    await A.insertOne({ number: 200, name: "Test 2" });
+    await A.insertOne({ number: 300, name: "Test 3" });
+
+    // Query with hint option
+    const result = await query(A, {
+      $: {
+        filters: {
+          number: { $gte: 100 },
+        },
+        options: {
+          hint: "number_1",
+          sort: { number: 1 },
+        },
+      },
+      number: 1,
+      name: 1,
+    }).fetch();
+
+    // Verify results
+    assert.lengthOf(result, 3);
+    assert.equal(result[0].number, 100);
+    assert.equal(result[1].number, 200);
+    assert.equal(result[2].number, 300);
+    assert.equal(result[0].name, "Test 1");
+    assert.equal(result[1].name, "Test 2");
+    assert.equal(result[2].name, "Test 3");
+
+    // Test with hint as index document
+    const result2 = await query(A, {
+      $: {
+        filters: {
+          number: { $gte: 200 },
+        },
+        options: {
+          hint: { number: 1 },
+          sort: { number: 1 },
+        },
+      },
+      number: 1,
+      name: 1,
+    }).fetch();
+
+    // Verify results
+    assert.lengthOf(result2, 2);
+    assert.equal(result2[0].number, 200);
+    assert.equal(result2[1].number, 300);
+  });
 });

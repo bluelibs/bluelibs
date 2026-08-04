@@ -32,6 +32,12 @@ export default function softdeletable(
   const { fields } = options;
 
   return (collection: Collection<any>) => {
+    collection.onInit(async () => {
+      await collection.collection.createIndex({
+        [fields.isDeleted]: 1,
+      });
+    });
+
     collection.deleteOne = async (filter, _options) => {
       return emulateDeletion(collection, filter, _options, options, false);
     };
