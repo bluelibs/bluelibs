@@ -74,7 +74,7 @@ export function ToNovaByResultID<T>(
   optionsResolver?: GraphQLToNovaOptionsResolverType<T>
 ) {
   if (!optionsResolver) {
-    optionsResolver = async (_, args, ctx, ast) => {
+    optionsResolver = async (_, args, ctx) => {
       const graphqlOptions = {
         filters: {
           _id: getResult(ctx),
@@ -140,7 +140,7 @@ export function CheckDocumentExists<T>(
     idResolver = (args) => args._id;
   }
 
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection = ctx.container.get(collectionClass);
 
     const document = await collection.findOne(
@@ -166,7 +166,7 @@ export function ToDocumentInsert<T>(
   field = "document",
   extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
 ) {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection: Collection = ctx.container.get(collectionClass);
     const document = args[field];
     if (extend) {
@@ -195,7 +195,7 @@ export function ToDocumentDeepSync<T>(
   field = "document",
   extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
 ) {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection: Collection = ctx.container.get(collectionClass);
     const document = args[field];
     if (extend) {
@@ -233,7 +233,7 @@ export function ToDocumentUpdateByID<T>(
     };
   }
 
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection: Collection = ctx.container.get(collectionClass);
     const _id = await idArgumentResolver(args);
 
@@ -255,7 +255,7 @@ export function ToDocumentDeleteByID<T>(
     idArgumentResolver = (args) => args._id;
   }
 
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection: Collection<any> = ctx.container.get(collectionClass);
     const _id = await idArgumentResolver(args);
 

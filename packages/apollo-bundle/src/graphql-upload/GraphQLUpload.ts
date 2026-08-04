@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import { GraphQLError, GraphQLScalarType } from "graphql";
 import Upload from "./Upload";

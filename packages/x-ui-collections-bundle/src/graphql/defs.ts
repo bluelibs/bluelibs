@@ -1,6 +1,6 @@
 import { IEventsMap } from "@bluelibs/ui-apollo-bundle";
 
-type Filter<T = any> = {
+type Filter<_T = any> = {
   [key: string]: any;
 };
 

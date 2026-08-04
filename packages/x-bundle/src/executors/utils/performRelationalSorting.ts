@@ -13,7 +13,7 @@ export function performRelationalSorting(
   for (const key in sort) {
     // We detect if the sort is by a link
     const parts = key.split(".");
-    const [linkName, ...restParts] = parts;
+    const [linkName] = parts;
     if ((collectionClass as unknown as typeof Collection).links[linkName]) {
       const collection = container.get<Collection>(collectionClass);
 

@@ -17,9 +17,8 @@ import { X_PASSWORD_SETTINGS } from "../constants";
 import { InvalidUsernameException } from "../exceptions/InvalidUsernameException";
 import { UsernameAlreadyExistsException } from "../exceptions";
 
-const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split(
-  ""
-);
+const ALLOWED_CHARS =
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -174,9 +173,8 @@ export class XPasswordService implements IXPasswordService {
       return;
     }
 
-    const token = await this.passwordService.createTokenForPasswordReset(
-      userId
-    );
+    const token =
+      await this.passwordService.createTokenForPasswordReset(userId);
 
     this.sendResetPasswordEmail(input.email, input.email, token);
   }

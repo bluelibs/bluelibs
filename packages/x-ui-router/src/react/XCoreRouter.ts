@@ -6,6 +6,7 @@ export type AddRoutingArguments<T> = {
   [routeName: string]: T;
 };
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - abstract class with decorator for DI
 @Service()
 export abstract class XCoreRouter<
@@ -38,7 +39,7 @@ export abstract class XCoreRouter<
       return found;
     }
 
-    return this.store.find((r) => r.name === routeNameOrPath) || null;
+    return this.store.find((r) => r.name === routeNameOrPath) ?? null;
   }
 
   /**

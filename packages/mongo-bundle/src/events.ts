@@ -8,7 +8,7 @@ type CollectionEventData = {
 };
 
 export abstract class CollectionEvent<
-  T extends CollectionEventData = CollectionEventData
+  T extends CollectionEventData = CollectionEventData,
 > extends Event<T> {
   protected _collection: Collection<any>;
 
@@ -24,13 +24,13 @@ export abstract class CollectionEvent<
   }
 }
 
-export class BeforeInsertEvent<T = Object> extends CollectionEvent<{
+export class BeforeInsertEvent<T = any> extends CollectionEvent<{
   document: T;
   context: IExecutionContext;
   options: MongoDB.InsertOneOptions;
 }> {}
 
-export class AfterInsertEvent<T = Object> extends CollectionEvent<{
+export class AfterInsertEvent<T = any> extends CollectionEvent<{
   document: T;
   _id: any;
   context: IExecutionContext;

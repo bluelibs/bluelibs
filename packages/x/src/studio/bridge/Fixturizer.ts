@@ -35,7 +35,8 @@ export class Fixturizer {
       }
 
       collection.relations.forEach((relation) => {
-        let { maxCount, minCount, useExistingDocuments } = relation.mock;
+        const { useExistingDocuments } = relation.mock;
+        let { maxCount, minCount } = relation.mock;
         if (!relation.isMany) {
           minCount = minCount === undefined ? 1 : minCount;
           maxCount = maxCount === undefined ? 1 : maxCount;
@@ -84,7 +85,7 @@ export class Fixturizer {
     this.dataSet[collection.getMongoCollectionName()] =
       this.dataSet[collection.getMongoCollectionName()] || [];
 
-    let document: any = {
+    const document: any = {
       _id: new ObjectId(),
     };
 

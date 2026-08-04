@@ -1,9 +1,7 @@
-import { ApolloBundle } from "@bluelibs/apollo-bundle";
 import { ContainerInstance, Kernel } from "@bluelibs/core";
 import { PostsCollection } from "./collections";
 import { createEcosystem } from "./createEcosystem";
 import { SubscriptionStore } from "../../services/SubscriptionStore";
-import { DatabaseService } from "@bluelibs/mongo-bundle";
 
 let container: ContainerInstance;
 
@@ -52,7 +50,7 @@ const createTestFinisher = () => {
 
 test("Should work with default strategy", async () => {
   const postsCollection = container.get(PostsCollection);
-  const result = await postsCollection.insertOne({
+  await postsCollection.insertOne({
     title: "Hello",
     ok: true,
   });
@@ -71,7 +69,7 @@ test("Should work with default strategy", async () => {
       _id: 1,
     },
     {
-      onAdded(document) {
+      onAdded() {
         inAdded = true;
       },
     }
@@ -105,7 +103,7 @@ test("Should work with direct-id strategy", async () => {
       _id: 1,
     },
     {
-      onAdded(document) {
+      onAdded() {
         inAdded = true;
       },
     }
@@ -142,7 +140,7 @@ test("Should work with limit-sort strategy", async () => {
       _id: 1,
     },
     {
-      onAdded(document) {
+      onAdded() {
         inAdded = true;
       },
     }
@@ -242,7 +240,7 @@ test("Test whether limit-sort respects the propper 'collection view' after inser
   const postsCollection = container.get(PostsCollection);
   const finisher = createTestFinisher();
 
-  const result1 = await postsCollection.insertOne({
+  await postsCollection.insertOne({
     number: 1,
     initialNumber: 1,
   });
@@ -250,11 +248,11 @@ test("Test whether limit-sort respects the propper 'collection view' after inser
     number: 2,
     initialNumber: 2,
   });
-  const result3 = await postsCollection.insertOne({
+  await postsCollection.insertOne({
     number: 3,
     initialNumber: 3,
   });
-  const result4 = await postsCollection.insertOne({
+  await postsCollection.insertOne({
     number: 4,
     initialNumber: 4,
   });
@@ -322,7 +320,7 @@ test("Ensure that if you're following certain fields and I change another field 
       title: 1,
     },
     {
-      onChanged(document, set) {
+      onChanged() {
         subscription.stop();
         throw new Error("Should not be triggered");
       },
@@ -371,7 +369,7 @@ test("Check update with positional property", async () => {
       bom: 1,
     },
     {
-      onChanged(document, set) {
+      onChanged(document) {
         expect(document._id.toString()).toBe(result.insertedId.toString());
         document.bom.forEach((element) => {
           expect(Object.keys(element).length).toBe(2);
@@ -419,7 +417,7 @@ test("Should be able to skip live changes", async () => {
       _id: 1,
     },
     {
-      onChanged(document) {
+      onChanged() {
         finisher.done("Should not be triggered");
         subscription.stop();
       },
@@ -447,7 +445,7 @@ test("Should be able to skip live changes", async () => {
 test("Ensure multi-update multi-removed are detected properly", async () => {
   const postsCollection = container.get(PostsCollection);
   const context = Math.random();
-  const result = await postsCollection.insertOne({
+  await postsCollection.insertOne({
     title: "Hello",
     context,
   });

@@ -193,7 +193,7 @@ export class XBridge {
         };
       } else {
         field.type = Models.GenericFieldTypeEnum.MODEL;
-        let modelName = studioField.cleaned.model.id;
+        const modelName = studioField.cleaned.model.id;
 
         field.model = {
           name: modelName + (isInput ? "Input" : ""),
@@ -209,11 +209,11 @@ export class XBridge {
       field.type = Models.GenericFieldTypeEnum.MODEL;
 
       // if it's called items, the modelisation will be suffixed with Item
-      let fieldSuffix = field.isMany
+      const fieldSuffix = field.isMany
         ? Inflected.singularize(studioField.id)
         : studioField.id;
 
-      let suffix = _.upperFirst(fieldSuffix);
+      const suffix = _.upperFirst(fieldSuffix);
       const name =
         (studioField?.collection?.entityName || studioField?.sharedModel?.id) +
         suffix;

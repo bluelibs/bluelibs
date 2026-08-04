@@ -106,6 +106,9 @@ export class I18NService {
 
   getCurrentPolyglot(): string {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (this.activePolyglot as any)["currentLocale"] || this.config?.defaultLocale;
+    return (
+      (this.activePolyglot as any)["currentLocale"] ||
+      this.config?.defaultLocale
+    );
   }
 }

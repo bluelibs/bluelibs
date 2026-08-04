@@ -32,9 +32,7 @@ export function Service<T = unknown>(
       // @ts-expect-error typedi internal property
       scope:
         // @ts-expect-error typedi internal property
-        opts.scope ||
-        (opts.transient ? "transient" : null) ||
-        "container",
+        opts.scope || (opts.transient ? "transient" : null) || "container",
       transient: opts.transient || false,
 
       // @ts-expect-error typedi internal property
@@ -77,7 +75,7 @@ export class ContainerInstance extends BaseContainerInstance {
           //   `You have tried to get from the container a class (${id?.name}) which doesn't have @Service() specified. Please add it to remove this warning.`
           // );
           this.set({
-            id: id as Function,
+            id: id as unknown as Constructable<T>,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             type: id as any,
           });

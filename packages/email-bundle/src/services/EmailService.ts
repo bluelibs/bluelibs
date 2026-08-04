@@ -88,7 +88,9 @@ export class EmailService {
    * Extends email to render its component to html
    * @param email
    */
-  protected renderEmail(emailTemplate: IEmailSendingTemplateConfig<any>): string {
+  protected renderEmail(
+    emailTemplate: IEmailSendingTemplateConfig<any>
+  ): string {
     return renderToStaticMarkup(
       React.createElement(emailTemplate.component, emailTemplate.props)
     );

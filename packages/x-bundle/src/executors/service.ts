@@ -1,4 +1,4 @@
-import { Constructor, Token } from "@bluelibs/core";
+import { Constructor } from "@bluelibs/core";
 
 export function ToService<T>(
   serviceClass: Constructor<T> | any,
@@ -6,7 +6,7 @@ export function ToService<T>(
   argumentMapper?: (args, ctx, ast) => any[]
 ) {
   if (!argumentMapper) {
-    argumentMapper = (args, ctx, ast) => [args.input, ctx.userId];
+    argumentMapper = (args, ctx) => [args.input, ctx.userId];
   }
 
   return async function (_, args, ctx, ast) {

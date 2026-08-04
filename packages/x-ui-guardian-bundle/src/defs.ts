@@ -18,6 +18,7 @@ export type IXUIGuardianProviderProps = {
    * Provide this component
    */
   loadingComponent?: React.ComponentType;
+  children?: React.ReactNode;
 };
 
 declare module "@bluelibs/x-ui-react-bundle" {

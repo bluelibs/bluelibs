@@ -3,7 +3,7 @@ import { CACHE_CONFIG } from "../constants";
 import { CacheOptions } from "./defs";
 import * as CacheManager from "cache-manager";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import * as Hash from "node-object-hash";
+import Hash from "node-object-hash";
 const Hasher = (Hash as any)({ sort: true, coerce: true });
 
 @Service()

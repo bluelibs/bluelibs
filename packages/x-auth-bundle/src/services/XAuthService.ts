@@ -37,7 +37,7 @@ import { ObjectId } from "mongodb";
 import { MultipleFactorRedirect } from "../multipleAuthFactor/defs";
 import { MultipleFactorService } from "../multipleAuthFactor/MultipleFactorService";
 import { AuthenticationCodesCollection } from "../collections/AuthenticationCodes.collection";
-import * as ms from "ms";
+import ms from "ms";
 import { AuthenticationCodes } from "../collections/AuthenticationCodes.model";
 import { CodeSubmissionExceededException } from "../exceptions/CodeSubmissionExceededException";
 
@@ -447,8 +447,10 @@ export class XAuthService implements IXAuthService {
       emails: { regardsName, paths, templates },
     } = this.config;
 
-    // This will run in the background
-    this.emailService.send(
+    // Ensure the email is fully sent before the request is considered complete.
+    // Fire-and-forget sending left a dangling promise that could race with
+    // kernel shutdown (MongoClientClosedError during tests) and swallow errors.
+    await this.emailService.send(
       {
         component: templates.requestMagicLink,
         props: {

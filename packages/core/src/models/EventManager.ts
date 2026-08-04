@@ -37,7 +37,7 @@ export class EventManager {
   public async emit(event: Event<any>): Promise<void> {
     await event.validate();
 
-    let listeners = this.getListeners(
+    const listeners = this.getListeners(
       event.constructor as IEventConstructor
     ).slice(0);
 
@@ -128,7 +128,7 @@ export class EventManager {
    * @param handler
    */
   public removeGlobalListener(handler: EventHandlerType) {
-    this.globalListeners = this.globalListeners.filter(listener => {
+    this.globalListeners = this.globalListeners.filter((listener) => {
       listener.handler !== handler;
     });
 
@@ -148,7 +148,7 @@ export class EventManager {
       return this;
     }
 
-    listeners = listeners.filter(listener => listener.handler !== handler);
+    listeners = listeners.filter((listener) => listener.handler !== handler);
 
     this.listeners.set(eventClass, listeners);
 

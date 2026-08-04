@@ -1,8 +1,4 @@
-import {
-  IFieldMap,
-  FindAuthenticationStrategyResponse,
-  UserId,
-} from "@bluelibs/security-bundle";
+import { IFieldMap, UserId } from "@bluelibs/security-bundle";
 
 export interface IPasswordBundleConfig {
   failedAuthenticationAttempts?: {

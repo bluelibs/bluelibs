@@ -6,7 +6,7 @@ declare module "@bluelibs/x-ui" {
   export interface IComponents {
     AdminTopHeader: React.ComponentType;
     AdminMenu: React.ComponentType;
-    AdminContent: React.ComponentType;
+    AdminContent: React.ComponentType<Components.AdminContentProps>;
     AdminFooter: React.ComponentType;
     AdminLoading: React.ComponentType;
     AdminPageWrapper: React.ComponentType<Components.PageWrapperProps>;
@@ -15,12 +15,8 @@ declare module "@bluelibs/x-ui" {
     AdminLogo: React.ComponentType;
     AdminFilesUpload: React.ComponentType<Components.AdminFilesUploadProps>;
     AdminFileUpload: React.ComponentType<Components.AdminFileUploadProps>;
-    AdminFileGroupUpload: React.ComponentType<
-      Components.AdminFileGroupUploadProps
-    >;
-    AdminListItemRenderer: React.ComponentType<
-      Components.AdminListItemRendererProps
-    >;
+    AdminFileGroupUpload: React.ComponentType<Components.AdminFileGroupUploadProps>;
+    AdminListItemRenderer: React.ComponentType<Components.AdminListItemRendererProps>;
     DatePicker: React.ComponentType<Components.DatePickerProps>;
     RemoteSelect: React.ComponentType<Components.RemoteSelectProps>;
     RemoteSelectLazy: React.ComponentType<Components.RemoteSelectLazyProps>;

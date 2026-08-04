@@ -27,7 +27,7 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
   async hook() {
     const logger = this.container.get(LoggerService);
 
-    this.eventManager.addListener(KernelAfterInitEvent, async (_e) => {
+    this.eventManager.addListener(KernelAfterInitEvent, async () => {
       await this.eventManager.emit(new HTTPServerBeforeInitialisationEvent());
 
       return new Promise((resolve, reject) => {
@@ -68,11 +68,8 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
       res.setHeader("X-Framework", "BlueLibs");
       next!();
     });
-    // @ts-ignore - express middleware type compatibility
     this.app.use(cookieParser());
-    // @ts-ignore - express middleware type compatibility
     this.app.use(express.json()); // for parsing application/json
-    // @ts-ignore - express middleware type compatibility
     this.app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
     this.router = express.Router();

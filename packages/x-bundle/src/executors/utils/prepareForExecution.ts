@@ -1,10 +1,10 @@
 import { IAstToQueryOptions } from "@bluelibs/nova";
-import { Constructor, ContainerInstance } from "@bluelibs/core";
+import { Constructor } from "@bluelibs/core";
 import { detectPipelineInSideBody } from "./detectPipelineInSideBody";
 import { performRelationalSorting } from "./performRelationalSorting";
 import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
-import * as merge from "lodash.merge";
+import merge from "lodash.merge";
 import { NOVA_AST_TO_QUERY_OPTIONS, NOVA_INTERSECTION } from "../security";
 
 export const prepareForExecution = (
@@ -27,7 +27,9 @@ export const prepareForExecution = (
 
   const container = ctx.container;
 
-  let { sideBody, ...cleanedOptions } = astToQueryOptions.options || {};
+  const { sideBody: initialSideBody, ...cleanedOptions } =
+    astToQueryOptions.options || {};
+  let sideBody = initialSideBody;
   if (!sideBody) {
     sideBody = {};
     astToQueryOptions.sideBody = sideBody;

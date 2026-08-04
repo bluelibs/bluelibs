@@ -36,9 +36,13 @@ export class SessionPersistanceService implements ISessionPersistance {
 
   async findSession(userId: UserId, data: any): Promise<ISession> {
     return this.db.find((s) =>
-      Object.keys(data).reduce((prev, key) => {
-        return prev && s.data && data && s.data[key] === data[key];
-      }, s?.userId === userId && new Date(s.expiresAt).getTime() >= new Date().getTime())
+      Object.keys(data).reduce(
+        (prev, key) => {
+          return prev && s.data && data && s.data[key] === data[key];
+        },
+        s?.userId === userId &&
+          new Date(s.expiresAt).getTime() >= new Date().getTime()
+      )
     );
   }
 }

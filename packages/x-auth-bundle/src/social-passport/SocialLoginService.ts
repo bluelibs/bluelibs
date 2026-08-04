@@ -6,7 +6,7 @@ import {
 import { IXAuthBundleConfig } from "../defs";
 import { Inject, Service, ContainerInstance } from "@bluelibs/core";
 import { HTTPBundle } from "@bluelibs/http-bundle";
-import * as passport from "passport";
+import passport from "passport";
 import * as bodyParser from "body-parser";
 import {
   SOCIAL_CUSTOM_CONFIG,

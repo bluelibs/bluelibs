@@ -53,7 +53,7 @@ export class Loader {
         commentDescriptions: true,
         reverseDirectives: true,
       }),
-      resolvers: (mergeResolvers(resolvers as any) as unknown) as IFunctionMapSimple,
+      resolvers: mergeResolvers(resolvers as any) as unknown as IFunctionMapSimple,
       schemaDirectives: this.mergeSchemaDirectives(),
       contextReducers: this.contextReducers,
     };
@@ -85,7 +85,7 @@ export class Loader {
           const subscriptionResolvers = resolverMap[rootType];
           if (subscriptionResolvers) {
             for (const key in subscriptionResolvers) {
-              let newResolver: Partial<SubscriptionResolver> = Object.assign(
+              const newResolver: Partial<SubscriptionResolver> = Object.assign(
                 {
                   resolve: (payload: any) => payload,
                 },
@@ -98,7 +98,9 @@ export class Loader {
               newResolverMap[key] = newResolver;
             }
           }
-          newResolvers.push({ Subscription: newResolverMap as unknown as ISubscriptionFunctionMap });
+          newResolvers.push({
+            Subscription: newResolverMap as unknown as ISubscriptionFunctionMap,
+          });
         } else {
           newResolvers.push(resolverMap);
         }

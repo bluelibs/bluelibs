@@ -10,8 +10,7 @@ import {
   BeforeUpdateEvent,
   AfterUpdateEvent,
 } from "../../events";
-import { EJSON, ObjectId as EjsonObjectId } from "@bluelibs/ejson";
-import { ObjectId } from "mongodb";
+import { ObjectId as EjsonObjectId } from "@bluelibs/ejson";
 
 describe("Collection", () => {
   test("Should dispatch events properly", async () => {
@@ -19,7 +18,7 @@ describe("Collection", () => {
 
     const comments = container.get<Comments>(Comments);
 
-    let lifecycle = {
+    const lifecycle = {
       beforeInsert: false,
       afterInsert: false,
       beforeUpdate: false,
@@ -28,27 +27,27 @@ describe("Collection", () => {
       afterDelete: false,
     };
 
-    comments.on(BeforeInsertEvent, (e: BeforeInsertEvent) => {
+    comments.on(BeforeInsertEvent, (_e: BeforeInsertEvent) => {
       lifecycle.beforeInsert = true;
     });
 
-    comments.on(AfterInsertEvent, (e: AfterInsertEvent) => {
+    comments.on(AfterInsertEvent, (_e: AfterInsertEvent) => {
       lifecycle.afterInsert = true;
     });
 
-    comments.on(BeforeUpdateEvent, (e: BeforeUpdateEvent) => {
+    comments.on(BeforeUpdateEvent, (_e: BeforeUpdateEvent) => {
       lifecycle.beforeUpdate = true;
     });
 
-    comments.on(AfterUpdateEvent, (e: AfterUpdateEvent) => {
+    comments.on(AfterUpdateEvent, (_e: AfterUpdateEvent) => {
       lifecycle.afterUpdate = true;
     });
 
-    comments.on(AfterDeleteEvent, (e: AfterDeleteEvent) => {
+    comments.on(AfterDeleteEvent, (_e: AfterDeleteEvent) => {
       lifecycle.beforeDelete = true;
     });
 
-    comments.on(AfterDeleteEvent, (e: AfterDeleteEvent) => {
+    comments.on(AfterDeleteEvent, (_e: AfterDeleteEvent) => {
       lifecycle.afterDelete = true;
     });
 
@@ -89,13 +88,13 @@ describe("Collection", () => {
       authorId: u1.insertedId,
     });
 
-    const c1 = await comments.insertOne({
+    await comments.insertOne({
       title: "Hello",
       userId: u1.insertedId,
       postId: p1.insertedId,
     });
 
-    const c2 = await comments.insertOne({
+    await comments.insertOne({
       title: "Is it me you're looking for?",
       userId: u1.insertedId,
       postId: p1.insertedId,
@@ -136,7 +135,6 @@ describe("Collection", () => {
     const errorHandler = async () => {
       throw new Error();
     };
-    // @ts-ignore - Event type compatibility
     posts.on(BeforeUpdateEvent, errorHandler);
 
     const p1 = await posts.insertOne({
@@ -171,7 +169,7 @@ describe("Collection", () => {
       _id: p1.insertedId,
     });
 
-    // @ts-ignore - Event type compatibility
+    // @ts-expect-error - Event type compatibility
     posts.localEventManager.removeListener(BeforeUpdateEvent, errorHandler);
   });
 
@@ -191,7 +189,7 @@ describe("Collection", () => {
 
     await posts.deleteMany({});
 
-    const p1 = await posts.insertOne({ title: "hello" });
+    await posts.insertOne({ title: "hello" });
 
     const postObjects = await posts.find({}).toArray();
     expect(postObjects).toHaveLength(1);
@@ -220,7 +218,7 @@ describe("Collection", () => {
 
     expect(result.value).toBeInstanceOf(Post);
 
-    let post = await posts.findOne({});
+    const post = await posts.findOne({});
     expect(post.title).toBe("hello2");
 
     result = await posts.findOneAndDelete({ _id: p1.insertedId });
@@ -338,15 +336,13 @@ describe("Collection", () => {
   test("Should work with nova integration", async () => {
     const { container } = await getEcosystem();
 
-    const comments = container.get<Comments>(Comments);
-    const posts = container.get<Posts>(Posts);
     const users = container.get<Users>(Users);
 
     const u1 = await users.insertOne({
       name: "John",
     });
 
-    const result = await users.queryOne({
+    await users.queryOne({
       $: { filters: { _id: u1.insertedId } },
       _id: 1,
     });
@@ -362,7 +358,7 @@ describe("Collection", () => {
     });
 
     const insertedId = c1.insertedId.toString();
-    let ejsonId = new EjsonObjectId(insertedId);
+    const ejsonId = new EjsonObjectId(insertedId);
     const c2 = await comments.findOne({
       _id: ejsonId,
     });

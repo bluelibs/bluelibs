@@ -19,7 +19,8 @@ export const convertMapToObject = (map: Map<string, unknown>) =>
     return acc;
   }, {});
 
-export const isArguments = (obj: object) => obj != null && hasOwn(obj, "callee");
+export const isArguments = (obj: object) =>
+  obj != null && hasOwn(obj, "callee");
 
 export const isInfOrNaN = (obj: unknown) =>
   Number.isNaN(obj) || obj === Infinity || obj === -Infinity;
@@ -29,8 +30,7 @@ export const checkError = {
     new RegExp("Maximum call stack size exceeded", "g").test(msgError),
 };
 
-export const handleError =
-  (fn: (...args: unknown[]) => unknown) =>
+export const handleError = (fn: (...args: unknown[]) => unknown) =>
   function (this: unknown, ...args: unknown[]) {
     try {
       return fn.apply(this, args);

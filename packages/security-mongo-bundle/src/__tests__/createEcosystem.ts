@@ -11,14 +11,19 @@ export const kernel = new Kernel();
 
 export const container = kernel.container;
 
+// Jest runs each test file in its own worker by default. Because every worker
+// drops the shared database at boot, parallel workers were wiping each other's
+// data mid-test. Scoping the database per worker keeps the files independent.
+const databaseName = `test_${process.env.JEST_WORKER_ID ?? "local"}`;
+
 export async function createEcosystem(init?: any): Promise<{
   container: ContainerInstance;
-  teardown: () => void;
+  teardown: () => Promise<void>;
   cleanup: () => Promise<void>;
 }> {
   kernel.addBundle(
     new MongoBundle({
-      uri: "mongodb://localhost:27017/test",
+      uri: `mongodb://localhost:27017/${databaseName}`,
     })
   );
 
@@ -33,6 +38,13 @@ export async function createEcosystem(init?: any): Promise<{
   kernel.addBundle(
     new SecurityBundle({
       permissionTree: Mocks.PermissionTree,
+      // By default the SecurityBundle registers a setInterval to clean expired
+      // sessions. In tests that timer keeps the jest worker's event loop alive
+      // and the worker is force-exited. Tests manage sessions explicitly, so
+      // automatic cleanup is unnecessary here.
+      session: {
+        cleanup: false,
+      },
     })
   );
   kernel.addBundle(new SecurityMongoBundle());
@@ -41,7 +53,11 @@ export async function createEcosystem(init?: any): Promise<{
   await kernel.init();
 
   const dbService = kernel.container.get<DatabaseService>(DatabaseService);
-  await dbService.client.db("test").dropDatabase();
+  await dbService.client.db(databaseName).dropDatabase();
+
+  // The teardown hook is registered per test file, so it may run more than once
+  // per worker. Closing an already-closed client rejects, so only close once.
+  let teardownCalled = false;
 
   return {
     container: kernel.container,
@@ -50,8 +66,19 @@ export async function createEcosystem(init?: any): Promise<{
       await kernel.container.get(PermissionsCollection).deleteMany({});
       await kernel.container.get(SessionsCollection).deleteMany({});
     },
-    teardown: () => {
-      dbService.client.close();
+    teardown: async () => {
+      if (teardownCalled) {
+        return;
+      }
+      teardownCalled = true;
+
+      try {
+        await dbService.client.close();
+      } catch (err) {
+        // The driver may reject close() if it has to interrupt a connection that
+        // is still checked out from the last operation. There is nothing left to
+        // clean up in that case, so swallow the error.
+      }
     },
   };
 }

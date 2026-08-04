@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
+    "jsx": "react",
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,

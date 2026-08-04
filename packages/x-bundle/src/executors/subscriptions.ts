@@ -14,7 +14,7 @@ export function ToSubscription<T>(
   subscriptionOptionsResolver?: ResolverType<SubscriptionProcessorOptionsType>
 ) {
   if (!bodyResolver) {
-    bodyResolver = async (_, args, ctx: IGraphQLContext, ast) => args.body;
+    bodyResolver = async (_, args) => args.body;
   }
   return async function (_, args, ctx: IGraphQLContext, ast) {
     const { container } = ctx;
@@ -38,8 +38,7 @@ export function ToSubscriptionCount<T>(
   subscriptionOptionsResolver?: ResolverType<SubscriptionProcessorOptionsType>
 ) {
   if (!filtersResolver) {
-    filtersResolver = async (_, args, ctx: IGraphQLContext, ast) =>
-      args.filters;
+    filtersResolver = async (_, args) => args.filters;
   }
   return async function (_, args, ctx: IGraphQLContext, ast) {
     const { container } = ctx;

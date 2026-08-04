@@ -21,7 +21,7 @@ describe("cache manager tests get/set", () => {
     new Promise((resolve) => setTimeout(resolve, sleepTime));
 
   describe("cacheService getter/setter", () => {
-    let data = { a: 1, b: 2 },
+    const data = { a: 1, b: 2 },
       key = "key",
       refresh = true,
       ttl = 1;
@@ -54,7 +54,7 @@ describe("cache manager tests get/set", () => {
   });
 
   describe("cach executor methods", () => {
-    let count, ctx, ast, defaultResolverOptions, options, expiredAt, userId;
+    let count, ctx, ast, defaultResolverOptions, expiredAt, userId;
     beforeEach(async () => {
       defaultResolverOptions =
         container.get(CACHE_CONFIG).resolverDefaultConfig;
@@ -171,7 +171,7 @@ describe("cache manager tests get/set", () => {
           count++;
           return count;
         });
-        const mainAction = async (_: any, args: any, ctx: any, ast: any) => {
+        const mainAction = async () => {
           return await mockedFunction();
         };
         const actions = [mainAction, mainAction];

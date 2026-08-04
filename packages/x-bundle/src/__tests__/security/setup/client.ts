@@ -13,7 +13,7 @@ export const authStorage = {
 
 const httpLink = new HttpLink({
   uri: `http://localhost:${PORT}/graphql`,
-  // @ts-ignore
+  // @ts-expect-error - node-fetch fetch signature differs from HttpLink fetch
   fetch,
 });
 

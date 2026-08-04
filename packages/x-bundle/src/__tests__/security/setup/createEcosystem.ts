@@ -21,7 +21,6 @@ import {
 import { PasswordBundle, PasswordService } from "@bluelibs/password-bundle";
 import { PostsCollection } from "./collections";
 
-import { ApolloProvider, useQuery, gql } from "@apollo/client";
 import { GraphQLBundle } from "@bluelibs/graphql-bundle";
 
 class AppBundle extends BaseBundle {

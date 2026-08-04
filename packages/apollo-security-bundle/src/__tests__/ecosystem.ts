@@ -10,7 +10,8 @@ export function createKernel() {
         port: 6400,
       }),
       new ApolloSecurityBundle(),
-      new SecurityBundle(),
+      // Disable the session cleanup interval so jest can exit after the test.
+      new SecurityBundle({ session: { cleanup: false } }),
     ],
   });
 }

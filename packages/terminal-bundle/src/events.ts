@@ -8,7 +8,7 @@ import {
   IExecutor,
   IBlueprintWriterSession,
 } from "./defs";
-import { CommanderStatic, Command } from "commander";
+import { Command } from "commander";
 
 export interface IBeforePromptEventData {
   field: string;
@@ -37,9 +37,7 @@ export interface IBlueprintWriteEventData {
   writerSession: IBlueprintWriterSession;
 }
 
-export class BeforeBlueprintWriteEvent extends Event<
-  IBlueprintWriteEventData
-> {}
+export class BeforeBlueprintWriteEvent extends Event<IBlueprintWriteEventData> {}
 export class AfterBlueprintWriteEvent extends Event<IBlueprintWriteEventData> {}
 
 export interface IExecutionEventData {

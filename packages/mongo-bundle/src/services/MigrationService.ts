@@ -77,7 +77,7 @@ export class MigrationService {
 
     // Upsert the doc
     await this.migrationsCollection.updateOne(
-      // @ts-ignore
+      // @ts-expect-error - _id filter typed as ObjectId but we pass a string
       { _id: this.MIGRATION_STATUS_ID },
       { $set: newStatus },
       { upsert: true }
@@ -89,19 +89,28 @@ export class MigrationService {
    * If the document doesn't exist, create a default one.
    */
   public async getStatus(): Promise<IMigrationStatus> {
-    let status = await this.migrationsCollection.findOne({
-      // @ts-ignore
+    // Atomic upsert: when several workers boot against an empty migrations
+    // collection, a find-then-insert race would collide with E11000.
+    await this.migrationsCollection.updateOne(
+      // @ts-expect-error - _id filter typed as ObjectId but we pass a string
+      { _id: this.MIGRATION_STATUS_ID },
+      {
+        $setOnInsert: {
+          _id: this.MIGRATION_STATUS_ID,
+          version: 0,
+          locked: false,
+        },
+      },
+      { upsert: true }
+    );
+
+    const status = await this.migrationsCollection.findOne({
+      // @ts-expect-error - _id filter typed as ObjectId but we pass a string
       _id: this.MIGRATION_STATUS_ID,
     });
 
     if (!status) {
-      // Create a default migration status
-      status = {
-        _id: this.MIGRATION_STATUS_ID,
-        version: 0,
-        locked: false,
-      };
-      await this.migrationsCollection.insertOne(status);
+      throw new Error("Failed to read the migration status document.");
     }
 
     return status;

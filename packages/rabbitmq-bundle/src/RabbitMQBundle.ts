@@ -11,7 +11,7 @@ export class RabbitMQBundle extends Bundle<
   public channel!: Channel;
 
   protected defaultConfig = {
-    url: "amqp://localhost:5672/",
+    url: "amqp://localhost:5672/?frameMax=8192",
     consume: true,
   };
 

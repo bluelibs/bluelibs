@@ -1,9 +1,5 @@
 import { Collection } from "./models/Collection";
-import {
-  IAstToQueryOptions,
-  ILinkCollectionOptions,
-  QueryBodyType,
-} from "@bluelibs/nova";
+import { ILinkCollectionOptions } from "@bluelibs/nova";
 import { IValidateOptions } from "@bluelibs/validator-bundle";
 import { ContainerInstance, Constructor } from "@bluelibs/core";
 import { ClientSession } from "mongodb";
@@ -96,8 +92,10 @@ export interface ISoftdeletableBehaviorOptions {
   };
 }
 
-export interface IBundleLinkCollectionOption<T = any>
-  extends Omit<ILinkCollectionOptions, "collection"> {
+export interface IBundleLinkCollectionOption<T = any> extends Omit<
+  ILinkCollectionOptions,
+  "collection"
+> {
   collection: (container: ContainerInstance) => Constructor<T>;
   /**
    * If you want to delete this relationship when this gets deleted, cleaning can only be used for reversed relationships.

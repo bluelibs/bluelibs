@@ -1,5 +1,5 @@
 import { Constructor } from "@bluelibs/core";
-import { TestContext, MixedSchema, string, AnySchema, StringSchema } from "yup";
+import { TestContext, AnySchema } from "yup";
 import { ValidateOptions } from "./yup-decorator";
 
 // Copied from yup beause they don't export it

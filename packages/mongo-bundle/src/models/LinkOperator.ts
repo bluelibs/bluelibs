@@ -1,4 +1,4 @@
-import { DeepPartial, Service } from "@bluelibs/core";
+import { DeepPartial } from "@bluelibs/core";
 import { ObjectId } from "@bluelibs/ejson";
 import { Collection, MONGO_BUNDLE_COLLECTION } from "./Collection";
 import { Linker, LINK_STORAGE } from "@bluelibs/nova";
@@ -16,8 +16,7 @@ type GenericObject = {
 };
 
 type Linkable<T extends DocumentWithID = null> =
-  | ID
-  | (T extends null ? GenericObject : DeepPartial<T>);
+  ID | (T extends null ? GenericObject : DeepPartial<T>);
 
 type CleanOptionsType = {
   /**
@@ -135,7 +134,6 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
     ids: ID[],
     options: UnlinkOptionsType
   ) {
-    let orphanedIds = null;
     if (options.delete) {
       await this.relatedCollection.deleteMany({
         _id: { $in: ids as MongoDB.ObjectId[] },
@@ -148,7 +146,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
           _id: rootId,
         },
         {
-          // @ts-ignore
+          // @ts-expect-error - dynamic $pull key from link storage field
           $pull: {
             [this.linker.linkStorageField]: ids,
           },
@@ -184,7 +182,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
           _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
-          // @ts-ignore
+          // @ts-expect-error - dynamic $pull key from link storage field
           $pull: {
             [this.linker.linkStorageField]: rootId,
           },
@@ -248,7 +246,6 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
           _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
-          // @ts-ignore
           $addToSet: {
             [this.linker.linkStorageField]: rootId,
           },
@@ -397,7 +394,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
             },
           },
           {
-            // @ts-ignore
+            // @ts-expect-error - dynamic $pull key from link storage field
             $pull: {
               [linkStorage]: { $in: [rootId] },
             },

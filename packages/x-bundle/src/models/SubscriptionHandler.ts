@@ -1,5 +1,6 @@
 import { Collection } from "@bluelibs/mongo-bundle";
 import {
+  Callback,
   IDocumentBase,
   ISubscriptionHandler,
   OnDocumentAddedHandler,
@@ -10,16 +11,17 @@ import { DocumentStore } from "./DocumentStore";
 import { SubscriptionProcessor } from "./SubscriptionProcessor";
 import { SubscriptionStore } from "../services/SubscriptionStore";
 
-export class SubscriptionHandler<T extends IDocumentBase>
-  implements ISubscriptionHandler<T> {
+export class SubscriptionHandler<
+  T extends IDocumentBase,
+> implements ISubscriptionHandler<T> {
   protected _ready = false;
   protected _readyPromise: Promise<boolean>;
-  protected _readyPromiseResolve: Function;
+  protected _readyPromiseResolve: Callback;
 
   public readonly addedCallbacks: OnDocumentAddedHandler[] = [];
   public readonly changedCallbacks: OnDocumentChangedHandler<T>[] = [];
   public readonly removedCallbacks: OnDocumentRemovedHandler[] = [];
-  public readonly stopCallbacks: Function[] = [];
+  public readonly stopCallbacks: Callback[] = [];
 
   constructor(
     public readonly processor: SubscriptionProcessor<T>,
@@ -54,7 +56,7 @@ export class SubscriptionHandler<T extends IDocumentBase>
     this.removedCallbacks.push(handler);
   }
 
-  onStop(handler: Function) {
+  onStop(handler: Callback) {
     this.stopCallbacks.push(handler);
   }
 

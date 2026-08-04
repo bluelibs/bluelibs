@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 
 import defaultProcessRequest from "./processRequest";
@@ -18,7 +19,11 @@ export default function graphqlUploadExpress({
    * @param {import("express").Response} response
    * @param {import("express").NextFunction} next
    */
-  function graphqlUploadExpressMiddleware(request: Request, response: Response, next: NextFunction) {
+  function graphqlUploadExpressMiddleware(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
     if (!request.is("multipart/form-data")) return next();
 
     const requestEnd = new Promise((resolve) => request.on("end", resolve));

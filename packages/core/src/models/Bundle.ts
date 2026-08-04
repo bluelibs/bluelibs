@@ -75,7 +75,7 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
     await this.validate(this.config);
 
     // Check dependencies
-    this.dependencies.forEach(dependency => {
+    this.dependencies.forEach((dependency) => {
       if (!this.kernel.hasBundle(dependency)) {
         throw new BundleDependencyException({
           requiredBundle: dependency.name,

@@ -21,7 +21,7 @@ export class EmailBundle extends Bundle<IEmailBundleConfig> {
   };
 
   async prepare() {
-    let { transporter } = this.config;
+    const { transporter } = this.config;
 
     if (transporter === null) {
       this.container.set(NODEMAILER_INSTANCE, null);

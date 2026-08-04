@@ -7,5 +7,5 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  (await ecosystem).teardown();
+  await (await ecosystem).teardown();
 });

@@ -19,6 +19,7 @@ export interface IXUIProviderProps {
 
 type IChildrenProviderProps = {
   finalChildren: React.ReactNode;
+  children?: React.ReactNode;
 };
 
 type ChildrenState = {

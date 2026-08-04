@@ -118,7 +118,7 @@ export class UICRUDModel {
    * @returns
    */
   generateRequestBodyAsString(mode: UIModeType) {
-    let body = {
+    const body = {
       _id: 1,
     };
     this.recursiveBodyExpand(mode, body, this.studioCollection.fields);
@@ -410,7 +410,7 @@ export class UICRUDModel {
     dataIndexParent?: string
   ): void {
     // This refers to how ant prefers rendering items
-    let dataIndexStr = `[ ${dataIndexParent ? `"${dataIndexParent}", ` : ""} "${
+    const dataIndexStr = `[ ${dataIndexParent ? `"${dataIndexParent}", ` : ""} "${
       field.id
     }" ]`;
 

@@ -1,12 +1,11 @@
 import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
 import { XAuthService } from "../..";
-import { createEcosystem } from "../createEcosystem";
+import { createEcosystem, shutdownKernel } from "../createEcosystem";
 import * as superagent from "superagent";
 import { HTTPBundle } from "@bluelibs/http-bundle";
 import userData from "../mocks/userData";
 import StrategyMock from "../mocks/mockStrategy";
-import { Kernel } from "@bluelibs/core";
 
 describe("SocialLoginService.test ", () => {
   let securityService,
@@ -66,8 +65,7 @@ describe("SocialLoginService.test ", () => {
     if (userId) await securityService.deleteUser(userId);
   });
   afterEach(async () => {
-    const kernel = container.get(Kernel);
-    await kernel.shutdown();
+    await shutdownKernel(container);
   });
 
   test("test mock passport strategy", async () => {

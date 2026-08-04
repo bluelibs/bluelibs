@@ -1,3 +1,3 @@
-export * from "./defs"
+export * from "./defs";
 
-export * from "./react"
+export * from "./react";

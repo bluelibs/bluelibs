@@ -38,7 +38,7 @@
     "@bluelibs/security-bundle": "^1.0.0",
     "graphql": "^16.0.0",
     "graphql-upload": "^16.0.2",
-    "sharp": "^0.32.6"
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.21.4",
@@ -54,7 +54,6 @@
     "@types/imagemin": "^7.0.1",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.6",
-    "@types/sharp": "^0.28.4",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.57.0",
@@ -63,6 +62,7 @@
     "graphql": "^16.6.0",
     "graphql-upload": "^16.0.2",
     "jest": "^29.7.0",
+    "sharp": "^0.35.3",
     "jest-junit": "^17.0.0",
     "moment": "^2.29.4",
     "prettier": "^3.2.5",

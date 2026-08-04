@@ -7,10 +7,9 @@ import {
   IValidationMethod,
   yup,
   IValidationTransformer,
-  Nested,
 } from "..";
 import { ContainerInstance } from "@bluelibs/core";
-import { ValidationError, StringSchema, TestContext } from "yup";
+import { ValidationError, TestContext } from "yup";
 import { ITestStringSchema } from "./defs.test";
 
 describe("ValidatorService", () => {
@@ -126,7 +125,7 @@ describe("ValidatorService", () => {
       parent = yup.string; // optional, defaults to yup.mixed
       name = "reverse";
 
-      transform(value: string, originalValue: string, suffix: string, schema) {
+      transform(value: string) {
         return value.split("").reverse().join("");
       }
     }
@@ -190,7 +189,6 @@ describe("ValidatorService", () => {
     const container = new ContainerInstance(Math.random().toString());
     const validator = new ValidatorService(container);
 
-    const yupObject = validator.getSchema(new SubUser());
     await expect(
       validator.validate(
         {

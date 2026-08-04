@@ -21,8 +21,7 @@ export interface IWebSocketOnDisconnectEventData {
   context: any;
 }
 
-export interface IWebSocketOnConnectEventData
-  extends IWebSocketOnDisconnectEventData {
+export interface IWebSocketOnConnectEventData extends IWebSocketOnDisconnectEventData {
   connectionParams: any;
 }
 

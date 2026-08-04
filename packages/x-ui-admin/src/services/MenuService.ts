@@ -1,6 +1,5 @@
 import { Service } from "@bluelibs/core";
 import { IMenuItemConfig } from "../defs";
-// @ts-ignore - lodash import compatibility
 import startCase from "lodash.startcase";
 
 @Service()

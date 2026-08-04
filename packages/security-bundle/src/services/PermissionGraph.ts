@@ -28,7 +28,7 @@ export class PermissionGraph {
    * @param parent
    */
   protected processGraph(tree, parent?: string) {
-    for (let key in tree) {
+    for (const key in tree) {
       const value = tree[key];
       if (!this.graph.hasNode(key)) {
         this.graph.addNode(key);

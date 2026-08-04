@@ -25,7 +25,10 @@ export const SessionCopyOptionsDefaults = {
  * The purpose of this class is to perform FS operations on a Session for a given model that is passed to templates.
  */
 export class FSOperator {
-  constructor(public readonly session: XSession, public readonly model: any) {}
+  constructor(
+    public readonly session: XSession,
+    public readonly model: any
+  ) {}
 
   isTemplate(content: string) {
     return Boolean(content.match("{{(.*)}}"));
@@ -263,7 +266,7 @@ export class FSOperator {
         return;
       }
       const filePath = path.join(src, file);
-      let stat = fs.lstatSync(filePath);
+      const stat = fs.lstatSync(filePath);
       if (stat.isFile()) {
         this.renameFile(filePath);
       } else {

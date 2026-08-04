@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 // eslint-disable
 import { WriteStream } from "./fs-capacitor";

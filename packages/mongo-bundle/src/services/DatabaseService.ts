@@ -72,7 +72,7 @@ export class DatabaseService {
    * This allows us to set the database properly
    * @param fn
    */
-  afterInit(fn: Function) {
+  afterInit(fn: () => void) {
     if (!this.isInitialised) {
       this.afterInitQueue.push(fn);
     } else {
@@ -140,8 +140,8 @@ export class DatabaseService {
    */
   getFields(update: UpdateQuery<any>): IGetFieldsResponse {
     // compute modified fields
-    var fields = [];
-    var topLevelFields = [];
+    const fields = [];
+    const topLevelFields = [];
 
     for (const op in update) {
       const param = update[op];

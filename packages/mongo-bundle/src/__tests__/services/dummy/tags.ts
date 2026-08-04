@@ -1,7 +1,5 @@
 import { Collection } from "../../..";
 import { ObjectId } from "mongodb";
-import { Comment, Comments } from "./comments";
-import { User, Users } from "./users";
 import { Post, Posts } from "./posts";
 
 export class Tag {

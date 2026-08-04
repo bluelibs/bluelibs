@@ -21,8 +21,7 @@ export const NOVA_AST_TO_QUERY_OPTIONS = Symbol("NOVA_AST_TO_QUERY_OPTIONS");
 export const NOVA_INTERSECTION = Symbol("NOVA_INTERSECTION");
 
 export function CheckLoggedIn() {
-  // @ts-ignore - GraphQL resolver parameters
-  return async function (_: any, args: any, ctx: any, ast: any) {
+  return async function (_: any, args: any, ctx: any) {
     if (!ctx.userId) {
       throw new UserNotAuthorizedException();
     }
@@ -123,7 +122,7 @@ Secure.IsUser = function (
   databaseField: string,
   argumentIdField: string
 ): SecureGraphQLResolver<void> {
-  return async function (_: any, args: any, ctx: any, ast: any) {
+  return async function (_: any, args: any, ctx: any) {
     const collection: Collection = ctx.container.get(collectionClass);
     const _id = args[argumentIdField];
     const userId = (ctx as any).userId;
@@ -156,7 +155,7 @@ Secure.ApplyNovaOptions = function (
   options: IAstToQueryOptions | SecureGraphQLResolver<IAstToQueryOptions>
 ): SecureGraphQLResolver<void> {
   return async function (_: any, args: any, ctx: any, ast: any) {
-    let $options =
+    const $options =
       typeof options === "function" ? options(_, args, ctx, ast) : options;
 
     ctx[NOVA_AST_TO_QUERY_OPTIONS] = $options;
@@ -170,7 +169,7 @@ Secure.Match = {
    * @returns
    */
   Roles: function (roles: string | string[]): SecureGraphQLResolver<boolean> {
-    return async function (_: any, args: any, ctx: any, ast: any) {
+    return async function (_: any, args: any, ctx: any) {
       const userId = (ctx as any).userId;
       if (!userId) {
         return false;
@@ -193,7 +192,7 @@ Secure.Match = {
  * @returns
  */
 Secure.RunIf = function (value: any) {
-  return async function (_: any, args: any, ctx: any, ast: any) {
+  return async function (_: any) {
     if (!value) {
       throw new Error(`Security: this request is not allowed to run.`);
     }

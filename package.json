@@ -44,7 +44,21 @@
   "overrides": {
     "mongodb": "^6.21.0",
     "@types/express": "^4.17.25",
-    "tar": "^7.5.22"
+    "tar": "^7.5.22",
+    "nx": {
+      "brace-expansion": "^5.0.9"
+    },
+    "lerna": {
+      "js-yaml": "^4.3.0"
+    },
+    "fast-json-stringify": {
+      "fast-uri": "^3.1.2"
+    },
+    "serverless": {
+      "undici": "^6.28.0"
+    },
+    "tmp": "^0.2.7",
+    "postcss": "^8.5.23"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

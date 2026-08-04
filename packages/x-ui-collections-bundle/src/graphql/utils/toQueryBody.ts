@@ -32,8 +32,8 @@ export const toQueryBody = (dict) => {
         const query = isObjectPrototype(value)
           ? toQueryBody(value)
           : isArrayOfObjects(value)
-          ? arrayToQueryBody(value as any[])
-          : 1;
+            ? arrayToQueryBody(value as any[])
+            : 1;
         //not sure if we have to define the mongo operators with "$" or actually define an array of operations: ["$set","$inc"...]
         if (key.includes("$")) {
           acc = { ...acc, ...query };

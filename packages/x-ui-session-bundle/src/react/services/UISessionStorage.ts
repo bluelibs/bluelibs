@@ -1,8 +1,4 @@
-import {
-  Service,
-  Inject,
-  ExecutionContext,
-} from "@bluelibs/core";
+import { Service, Inject, ExecutionContext } from "@bluelibs/core";
 import { EJSON } from "@bluelibs/ejson";
 
 /**

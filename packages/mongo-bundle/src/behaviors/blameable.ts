@@ -1,7 +1,6 @@
 import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";
 import { IBlameableBehaviorOptions, BehaviorType } from "../defs";
 import { Collection } from "../models/Collection";
-import { MissingContextForBehaviorException } from "../exceptions";
 
 export default function blameable(
   options: IBlameableBehaviorOptions = {}
@@ -33,9 +32,8 @@ export default function blameable(
 
   return (collection: Collection<any>) => {
     collection.localEventManager.addListener(
-      // @ts-ignore - TS 5.9 generic inference limitation with event constructors
       BeforeInsertEvent,
-      // @ts-ignore - handler uses CollectionEvent subclass
+      // @ts-expect-error - handler uses CollectionEvent subclass
       (e: BeforeInsertEvent) => {
         const { context } = e.data;
 
@@ -55,9 +53,8 @@ export default function blameable(
     );
 
     collection.localEventManager.addListener(
-      // @ts-ignore - TS 5.9 generic inference limitation with event constructors
       BeforeUpdateEvent,
-      // @ts-ignore - handler uses CollectionEvent subclass
+      // @ts-expect-error - handler uses CollectionEvent subclass
       (e: BeforeUpdateEvent) => {
         const { context } = e.data;
 

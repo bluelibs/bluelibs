@@ -1,5 +1,4 @@
 import { yup, IValidationMethod } from "@bluelibs/validator-bundle";
-import { yup as kyup } from "@bluelibs/validator-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
 import { ContainerInstance, Constructor, Service } from "@bluelibs/core";
 
@@ -10,9 +9,7 @@ export interface IUniqueFieldValidationConfig {
 }
 
 @Service()
-export class UniqueFieldValidationMethod
-  implements IValidationMethod<IUniqueFieldValidationConfig>
-{
+export class UniqueFieldValidationMethod implements IValidationMethod<IUniqueFieldValidationConfig> {
   parent = yup.string; // optional, defaults to yup.mixed, so to all
   name = "uniqueField";
 
@@ -23,7 +20,8 @@ export class UniqueFieldValidationMethod
     config: IUniqueFieldValidationConfig,
     { createError, path }
   ) {
-    let { collection, field, message } = config;
+    const { collection, message, field: fieldInitial } = config;
+    let field = fieldInitial;
     if (!field) {
       field = path;
     }

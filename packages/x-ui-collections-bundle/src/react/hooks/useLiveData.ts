@@ -65,7 +65,7 @@ export function useLiveDataOne<T>(
   const { data, isLoading, error } = useLiveData(
     collectionClass,
     {
-      // @ts-ignore
+      // @ts-expect-error filters is not part of the typed query body
       filters: {
         _id,
       },

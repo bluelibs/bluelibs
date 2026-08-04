@@ -7,7 +7,7 @@ export const createKernel = (): Kernel => {
     bundles: [
       new LoggerBundle(),
       new RabbitMQBundle({
-        url: "amqp://localhost:5672/",
+        url: "amqp://localhost:5672/?frameMax=8192",
       }),
     ],
   });

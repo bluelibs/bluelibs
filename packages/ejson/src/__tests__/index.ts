@@ -124,7 +124,7 @@ test("ejson - clone", () => {
     const clonedArgs = EJSON.clone(args);
     const shouldBe = [1, 2, "foo", [4]];
     assert.isTrue(clonedArgs.length === shouldBe.length);
-    clonedArgs.forEach((arg, idx) => {
+    clonedArgs.forEach((_arg, idx) => {
       assert.deepEqual(clonedArgs[idx], shouldBe[idx]);
     });
   }
@@ -217,11 +217,10 @@ test("ejson - parse", () => {
 
 test("ejson - regexp", () => {
   assert.deepEqual(EJSON.stringify(/foo/gi), '{"$regexp":"foo","$flags":"gi"}');
-  var d = new RegExp("foo", "gi");
-  var obj = { $regexp: "foo", $flags: "gi" };
+  const obj = { $regexp: "foo", $flags: "gi" };
 
-  var eObj = EJSON.toJSONValue(obj);
-  var roundTrip = EJSON.fromJSONValue(eObj);
+  const eObj = EJSON.toJSONValue(obj);
+  const roundTrip = EJSON.fromJSONValue(eObj);
   assert.deepEqual(obj, roundTrip);
 });
 
@@ -261,9 +260,9 @@ test("ejson - custom types", () => {
   assert.notEqual(a, nakedA as EJSONTest.Address);
   const holder = new EJSONTest.Holder(nakedA);
   assert.deepEqual(holder.toJSONValue(), a.toJSONValue()); // sanity check
-  // @ts-ignore
+  // @ts-expect-error - comparing objects of different types
   assert.notEqual(holder, a);
-  // @ts-ignore
+  // @ts-expect-error - comparing objects of different types
   assert.notEqual(a, holder as EJSONTest.Holder);
 
   const d = new Date();
@@ -301,8 +300,6 @@ test('ejson - handle objects with properties named "length"', () => {
   assert.equal(10, parsedWidget.length);
 
   assert.isFalse(EJSON.isBinary(widget));
-
-  const widget2 = new Widget();
 
   const clonedWidget = EJSON.clone(widget);
 

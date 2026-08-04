@@ -9,32 +9,18 @@ import * as path from "path";
 export function extract(dir: string): ILoadOptions {
   const EXT = "!(.d).(ts|js|tsx|jsx)";
 
-  const resolversArray = loadFilesSync(
-    path.join(dir, `./**/*.resolvers${EXT}`)
-  );
+  const resolversArray = loadFilesSync(path.join(dir, `./**/*.resolvers${EXT}`));
 
-  const resolversTopArray = loadFilesSync(
-    path.join(dir, `./**/resolvers${EXT}`)
-  );
+  const resolversTopArray = loadFilesSync(path.join(dir, `./**/resolvers${EXT}`));
   const typesArray = loadFilesSync(path.join(dir, `./**/*.graphql${EXT}`), {});
-  const modulesArray = loadFilesSync(
-    path.join(dir, `./**/*.graphql-module${EXT}`)
-  );
+  const modulesArray = loadFilesSync(path.join(dir, `./**/*.graphql-module${EXT}`));
 
-  const typesFromModule = modulesArray
-    .map((m) => m.typeDefs)
-    .filter((e) => Boolean(e));
+  const typesFromModule = modulesArray.map((m) => m.typeDefs).filter((e) => Boolean(e));
 
-  const resolversFromModule = modulesArray
-    .map((m) => m.resolvers)
-    .filter((e) => Boolean(e));
+  const resolversFromModule = modulesArray.map((m) => m.resolvers).filter((e) => Boolean(e));
 
   return {
-    resolvers: [
-      ...resolversArray,
-      ...resolversTopArray,
-      ...resolversFromModule,
-    ],
+    resolvers: [...resolversArray, ...resolversTopArray, ...resolversFromModule],
     typeDefs: [...typesArray, ...typesFromModule],
   };
 }

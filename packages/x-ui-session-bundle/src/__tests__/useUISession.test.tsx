@@ -4,13 +4,17 @@ import { UISessionEventChangeHandler, IXUISessionStore } from "../";
 import { useUISession } from "../react/hooks";
 import { sessionsConfig } from "./ecosystem";
 import { UISessionService } from "../react";
-import { ContainerContext, useContainer } from "@bluelibs/x-ui-react-bundle";
+import { ContainerContext } from "@bluelibs/x-ui-react-bundle";
 import { UISessionStorage } from "../react/services/UISessionStorage";
-import { ContainerInstance } from "@bluelibs/core";
 import { container } from "./ecosystem";
-import { EJSON } from "@bluelibs/ejson";
 
-const containerContextProvider = ({ children }) => {
+declare module "../" {
+  export interface IXUISessionStore {
+    locale: string;
+  }
+}
+
+const containerContextProvider = ({ children }: React.PropsWithChildren<{}>) => {
   return (
     <ContainerContext.Provider value={container}>
       {children}
@@ -121,16 +125,12 @@ describe("useUISession", () => {
   test("uses existing values from localStorage, and defaults for rest", () => {
     const sessionHook = getSessionHook();
 
-    const storage = container.get(UISessionStorage);
-    const localStorageState = storage.all();
-    const localStorageStateKeys = Object.keys(localStorageState);
-
     const { defaults } = sessionsConfig;
 
     for (const key of Object.keys(defaults)) {
-      const value = sessionHook.current.state[key];
+      const value = sessionHook.current.state[key as keyof IXUISessionStore];
 
-      expect(value).toStrictEqual(sessionHook.current.state[key]);
+      expect(value).toStrictEqual(defaults[key as keyof typeof defaults]);
     }
   });
 

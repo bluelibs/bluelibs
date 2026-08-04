@@ -1,4 +1,3 @@
-import { Kernel } from "@bluelibs/core";
 import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
 import {
@@ -12,7 +11,7 @@ import {
   MultipleFactorService,
   X_AUTH_SETTINGS,
 } from "../..";
-import { createEcosystem } from "../createEcosystem";
+import { createEcosystem, shutdownKernel } from "../createEcosystem";
 
 describe("MultipleFactorService.test ", () => {
   let securityService,
@@ -25,7 +24,7 @@ describe("MultipleFactorService.test ", () => {
     password: "123456",
     profile: { firstName: "aa", lastName: "bb" },
     lastName: "bb",
-    username: "john@johnny.com",
+    username: "multi-factor@johnny.com",
   };
   beforeEach(async () => {
     container = await createEcosystem({
@@ -62,8 +61,7 @@ describe("MultipleFactorService.test ", () => {
   });
 
   afterEach(async () => {
-    const kernel = container.get(Kernel);
-    await kernel.shutdown();
+    await shutdownKernel(container);
   });
 
   test("test session token login", async () => {

@@ -2,15 +2,9 @@ import { DeepPartial } from "@bluelibs/core";
 import * as MongoDB from "mongodb";
 import { Linker, LINK_STORAGE } from "@bluelibs/nova";
 import { Collection, MONGO_BUNDLE_COLLECTION } from "../../models/Collection";
-import { Collection as MongoCollection, ClientSession } from "mongodb";
+import { Collection as MongoCollection } from "mongodb";
 import { ObjectId } from "@bluelibs/ejson";
 
-/**
- * This represents the fact that the current object has been processed, and on flushing, it should be ignored
- */
-const CREATED = Symbol("CREATED");
-const PERSISTED = Symbol("PERSISTED");
-const IN_FLUSH = Symbol("IN_FLUSH");
 const NODE = Symbol("NODE");
 
 export type DeepSyncOptionsType = {

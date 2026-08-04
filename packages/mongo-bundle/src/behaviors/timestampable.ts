@@ -13,9 +13,8 @@ export default function timestampable(
 
   return (collection: Collection<any>) => {
     collection.localEventManager.addListener(
-      // @ts-ignore - TS 5.9 generic inference limitation with event constructors
       BeforeInsertEvent,
-      // @ts-ignore - handler uses CollectionEvent subclass
+      // @ts-expect-error - handler uses CollectionEvent subclass
       (e: BeforeInsertEvent) => {
         const document = e.data.document;
         const now = new Date();
@@ -30,9 +29,8 @@ export default function timestampable(
     );
 
     collection.localEventManager.addListener(
-      // @ts-ignore - TS 5.9 generic inference limitation with event constructors
       BeforeUpdateEvent,
-      // @ts-ignore - handler uses CollectionEvent subclass
+      // @ts-expect-error - handler uses CollectionEvent subclass
       (e: BeforeUpdateEvent) => {
         const update = e.data.update;
 

@@ -46,7 +46,7 @@ export class MetadataStorage {
    * @returns
    */
   getClassHierarchy(baseClass: Function): Function[] {
-    let constructors: Function[] = [];
+    const constructors: Function[] = [];
     let currentConstructor: Function = baseClass;
     while (currentConstructor != Function.prototype) {
       constructors.push(currentConstructor);
@@ -166,14 +166,6 @@ export interface IValidatePathArguments {
   object: object;
   options?: ValidateOptions;
   path: string;
-}
-
-function getSchema({ object }) {
-  if (object === null || typeof object !== "object") {
-    throw new Error("Cannot validate non object types");
-  }
-
-  return getSchemaByType(object.constructor);
 }
 
 export interface ValidateOptions<TContext = {}> {

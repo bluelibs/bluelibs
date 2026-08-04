@@ -110,7 +110,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   private async setupApolloServer() {
     const apolloServerConfig = this.getApolloConfig();
-    // @ts-ignore - express Application is compatible with http.createServer
     this.httpServer = http.createServer(this.app);
     const { enableSubscriptions } = this.config;
 
@@ -177,7 +176,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
       this.server = new ApolloServer(apolloConfig);
       this.serverlessHandler = startServerAndCreateLambdaHandler(
-        this.server,
+        this.server as any,
         // We will be using the Proxy V2 handler
         handlers.createAPIGatewayProxyEventV2RequestHandler()
       );
@@ -246,7 +245,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     );
 
     if (this.config.useJSONMiddleware) {
-      // @ts-ignore - express middleware type compatibility with TS 5.9
       app.use(express.json());
     }
 
@@ -270,7 +268,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     const { app } = this;
 
     if (this.config.uploads !== false) {
-      // @ts-ignore - express middleware type compatibility with TS 5.9
       app.use("/graphql", graphqlUploadExpress(this.config.uploads));
     }
 

@@ -96,7 +96,7 @@ export class ModelUtils {
     modelClass?: string,
     reuseEnums?: boolean
   ) {
-    let fieldName = field.name;
+    const fieldName = field.name;
     let signature = ModelUtils.getEnumClassName(field, modelClass, reuseEnums);
     if (field.isMany) {
       signature = `[${signature}]`;

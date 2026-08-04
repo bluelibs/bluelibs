@@ -19,6 +19,6 @@
     "node_modules",
     "dist",
     "**/*.test.ts",
-    "**/__tests__/**"
+    "src/__tests__/index.ts"
   ]
 }

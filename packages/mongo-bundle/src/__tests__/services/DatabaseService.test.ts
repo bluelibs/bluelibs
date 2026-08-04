@@ -1,24 +1,21 @@
 import { getEcosystem } from "../helpers";
-import { Comments } from "./dummy/comments";
 import { Posts } from "./dummy/posts";
-import { Users, User } from "./dummy/users";
-import {
-  BeforeInsertEvent,
-  AfterInsertEvent,
-  BeforeUpdateEvent,
-  AfterUpdateEvent,
-} from "../../events";
+import { Users } from "./dummy/users";
+import { AfterInsertEvent } from "../../events";
 import { DatabaseService } from "../../services/DatabaseService";
 
 describe("DatabaseService", () => {
   test("Should work with transaction throwing an exception", async () => {
     const { container } = await getEcosystem();
 
-    const comments = container.get<Comments>(Comments);
     const posts = container.get<Posts>(Posts);
     const users = container.get<Users>(Users);
 
+    // Ensure the collections are fully initialised (indexes created) before the
+    // transaction so no background operation races with client shutdown.
+    await posts.countDocuments({});
     await users.deleteMany({});
+
     const errorHandler = () => {
       throw new Error("oops?");
     };
@@ -27,7 +24,6 @@ describe("DatabaseService", () => {
     const dbService = container.get(DatabaseService);
 
     let u1,
-      p1,
       caught = false;
 
     try {
@@ -40,7 +36,7 @@ describe("DatabaseService", () => {
             session,
           }
         );
-        p1 = await posts.insertOne(
+        await posts.insertOne(
           {
             title: "FAIL AFTER IT",
           },
@@ -56,6 +52,7 @@ describe("DatabaseService", () => {
 
     expect(caught).toBe(true);
 
+    // @ts-expect-error - Event type compatibility
     posts.localEventManager.removeListener(AfterInsertEvent, errorHandler);
   });
 });

@@ -26,7 +26,7 @@ export class BaseModel<T = null> {
       const collection = this.find.collection(collectionId);
       const ids = id.split(".");
       let f: Field;
-      for (let fieldId of ids) {
+      for (const fieldId of ids) {
         f = (f ? f.subfields : collection.fields).find((f) => f.id === fieldId);
       }
 
@@ -43,7 +43,7 @@ export class BaseModel<T = null> {
     finder: (id?: string) => T
   ): T {
     if (typeof element === "string") {
-      let result = finder(element);
+      const result = finder(element);
       if (!result) {
         throw new Error(
           `We could not resolve: "${element}" inside ${this.constructor?.name} "${this.id}". Please make sure it exists.`
@@ -53,7 +53,7 @@ export class BaseModel<T = null> {
       return result;
     }
     if (typeof element === "function") {
-      return (element as Function)();
+      return (element as () => any)();
     }
     return element;
   }

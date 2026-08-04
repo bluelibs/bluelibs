@@ -6,8 +6,9 @@ type SimpleObjectType = { [key: string]: any };
 
 export interface IGlobalEmailProps {}
 
-export interface IReactEmailTemplate<IProps = SimpleObjectType>
-  extends React.FC<IProps & IGlobalEmailProps> {
+export interface IReactEmailTemplate<
+  IProps = SimpleObjectType,
+> extends React.FC<IProps & IGlobalEmailProps> {
   subject?: (props: IProps & IGlobalEmailProps) => string;
 }
 

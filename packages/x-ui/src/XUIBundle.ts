@@ -16,9 +16,7 @@ import {
 } from "@bluelibs/x-ui-guardian-bundle";
 import { XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { IComponents } from "./overrides";
-import {
-  XUIReactRouterBundle,
-} from "@bluelibs/x-ui-react-router-bundle";
+import { XUIReactRouterBundle } from "@bluelibs/x-ui-react-router-bundle";
 import { XUICollectionsBundle } from "@bluelibs/x-ui-collections-bundle";
 import { XUIBundleConfigType } from "./defs";
 

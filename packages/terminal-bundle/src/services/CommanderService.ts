@@ -28,8 +28,6 @@ import {
   AfterBlueprintWriteEvent,
 } from "../events";
 
-const SEPARATOR = ":";
-
 export class CommanderService implements ICommandService {
   protected readonly prompter: PrompterService;
   protected program: CommanderCommand;
@@ -50,6 +48,7 @@ export class CommanderService implements ICommandService {
 
     // Either it was set via the tenant bundle
     program.version(
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       this.config.version || require("../../package.json").version
     );
 
@@ -246,7 +245,7 @@ export class CommanderService implements ICommandService {
       )
       .description("Execute a custom command")
       .action((commandId, data) => {
-        let model: any = {};
+        const model: any = {};
         // Sorry
         if (data.model) {
           eval(`model = ${data.model}`);

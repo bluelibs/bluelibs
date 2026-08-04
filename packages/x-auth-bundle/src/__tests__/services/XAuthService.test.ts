@@ -1,4 +1,3 @@
-import { Kernel } from "@bluelibs/core";
 import { PasswordService } from "@bluelibs/password-bundle";
 import { SecurityService } from "@bluelibs/security-bundle";
 import {
@@ -12,7 +11,7 @@ import {
   XAuthService,
   X_AUTH_SETTINGS,
 } from "../..";
-import { createEcosystem } from "../createEcosystem";
+import { createEcosystem, shutdownKernel } from "../createEcosystem";
 
 describe("XAuthService.test ", () => {
   let securityService, passwordService, xAuthService, container;
@@ -42,8 +41,7 @@ describe("XAuthService.test ", () => {
     await securityService.deleteUser(userId);
   });
   afterEach(async () => {
-    const kernel = container.get(Kernel);
-    await kernel.shutdown();
+    await shutdownKernel(container);
   });
 
   test("register", async () => {

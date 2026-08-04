@@ -5,8 +5,10 @@ import {
 /**
  * We use `IRoute` here for compatibility reasons
  */
-export interface IRoute<T = IRouteParams, Q = IRouteParams>
-  extends IBaseRoute<T, Q> {}
+export interface IRoute<T = IRouteParams, Q = IRouteParams> extends IBaseRoute<
+  T,
+  Q
+> {}
 
 /**
  * The code below is designed to offer backwards compatibility

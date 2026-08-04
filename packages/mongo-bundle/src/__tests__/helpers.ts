@@ -1,4 +1,4 @@
-import { Kernel, Bundle, ContainerInstance } from "@bluelibs/core";
+import { Kernel, ContainerInstance } from "@bluelibs/core";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
 import { MongoBundle } from "../MongoBundle";
 import { DatabaseService } from "../services/DatabaseService";
@@ -10,10 +10,17 @@ const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 // Check if we should skip MongoDB tests
 const skipMongoTests = isCI && !process.env.MONGODB_URI;
 
+// Isolate the database per jest worker so parallel workers (CI runs with
+// --maxWorkers=2) never clean up each other's in-flight documents.
+const mongoUri =
+  process.env.MONGODB_URI ||
+  `mongodb://localhost:27017/test_${process.env.JEST_WORKER_ID ?? "local"}`;
+const databaseName = mongoUri.split("/").pop() || "test";
+
 const kernel = new Kernel({
   bundles: [
     new MongoBundle({
-      uri: process.env.MONGODB_URI || "mongodb://localhost:27017/test",
+      uri: mongoUri,
       automigrate: false,
       options: {
         maxPoolSize: 9999,
@@ -51,7 +58,7 @@ afterAll(async () => {
 beforeEach(async () => {
   if (skipMongoTests) return;
   const dbService = kernel.container.get<DatabaseService>(DatabaseService);
-  const db = dbService.client.db("test");
+  const db = dbService.client.db(databaseName);
 
   await db.collection("posts").deleteMany({});
   await db.collection("users").deleteMany({});

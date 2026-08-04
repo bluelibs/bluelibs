@@ -14,10 +14,9 @@ export type Resolved<T> = {
   [K in keyof T]: T[K] extends Resolvable<infer Q> ? Q : T[K];
 };
 
-export type RequireFields<T, K extends (keyof T)[]> = DeepPartial<T> &
-  {
-    [Z in K[number]]: T[Z];
-  };
+export type RequireFields<T, K extends (keyof T)[]> = DeepPartial<T> & {
+  [Z in K[number]]: T[Z];
+};
 
 export type FactoryFunction<T, RT extends (keyof T)[] = null> = (
   data: RequireFields<T, RT>

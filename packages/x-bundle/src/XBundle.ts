@@ -1,4 +1,4 @@
-import { Bundle, Constructor, MissingParameterException } from "@bluelibs/core";
+import { Bundle, Constructor } from "@bluelibs/core";
 import { ValidatorService } from "@bluelibs/validator-bundle";
 import { MongoBundle } from "@bluelibs/mongo-bundle";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
@@ -11,7 +11,6 @@ import scalars from "./graphql/scalars";
 import {
   X_SETTINGS,
   X_FRAMEWORK_LOGO,
-  RANDOM_GEEKIE_DEV_QUOTES,
   APP_ROUTER,
   ROOT_ROUTER,
   IS_LIVE_DEBUG,
@@ -21,7 +20,7 @@ import {
   CACHE_SERVICE_TOKEN,
 } from "./constants";
 import { IXBundleConfig, IMessenger } from "./defs";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { execSync } from "child_process";
 import { Router } from "./services/Router";
 import { RedisMessenger } from "./services/RedisMessenger";

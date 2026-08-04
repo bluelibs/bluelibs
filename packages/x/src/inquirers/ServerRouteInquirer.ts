@@ -22,7 +22,7 @@ export class ServerRouteInquirer extends Inquirer<ServerRouteModel> {
       })
     );
 
-    let name = this.model.path
+    const name = this.model.path
       .replace(/\//g, " ")
       .split(" ")
       .filter((element) => !element.startsWith(":"))

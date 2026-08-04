@@ -1,4 +1,4 @@
-import { Transporter, Transport } from "nodemailer";
+import { Transport } from "nodemailer";
 
 export const ConsoleTransporter: Transport = {
   name: "Console",

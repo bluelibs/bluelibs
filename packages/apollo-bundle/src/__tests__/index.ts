@@ -7,7 +7,7 @@ import { assert } from "chai";
 import { PubSub } from "graphql-subscriptions";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
 Object.assign(global, { WebSocket: require("ws") });
-let currentKernel;
+let currentKernel: Kernel;
 
 async function createEcosystemWithInit(
   loadable: any,
@@ -53,7 +53,7 @@ describe("ApolloBundle", () => {
   });
 
   it("Should be able to initialise the server", async () => {
-    const kernel = await createEcosystemWithInit({
+    await createEcosystemWithInit({
       typeDefs: `
           type Query {
             sayHello: String
@@ -85,7 +85,7 @@ describe("ApolloBundle", () => {
       const pubsub = new PubSub();
       const CHANNEL = "tick";
 
-      const kernel = await createEcosystemWithInit({
+      await createEcosystemWithInit({
         typeDefs: `
         type Query {
           framework: String
@@ -106,7 +106,7 @@ describe("ApolloBundle", () => {
 
                 return iterator;
               },
-              resolve: (payload) => {
+              resolve: (payload: any) => {
                 return payload;
               },
             },
@@ -155,7 +155,7 @@ describe("ApolloBundle", () => {
   it("Should work with middleware from express", async () => {
     let inMiddleware = false;
 
-    const kernel = await createEcosystemWithInit(
+    await createEcosystemWithInit(
       {
         typeDefs: `
           type Query { something: String }
@@ -169,7 +169,7 @@ describe("ApolloBundle", () => {
       {
         enableSubscriptions: false,
         middlewares: [
-          (req, res, next) => {
+          (_req: any, _res: any, next: any) => {
             inMiddleware = true;
             next();
           },
@@ -179,7 +179,7 @@ describe("ApolloBundle", () => {
 
     const client = createApolloClient(6000);
 
-    const result = await client.query({
+    await client.query({
       query: gql`
         query {
           something
@@ -198,7 +198,7 @@ describe("ApolloBundle", () => {
           `,
         resolvers: {
           Query: {
-            something: (_, args, ctx) => {
+            something: (_: any, _args: any, ctx: any) => {
               try {
                 assert.instanceOf(ctx.container, ContainerInstance);
               } catch (e) {
@@ -208,29 +208,41 @@ describe("ApolloBundle", () => {
             },
           },
         },
-      }).then((kernel) => {
+      }).then(() => {
         const client = createApolloClient(6000);
 
-        client.query({
-          query: gql`
-            query {
-              something
-            }
-          `,
-        });
+        // The first connection right after the previous test's server is
+        // torn down on the same port can be reset (ECONNRESET), so retry.
+        const run = (attemptsLeft = 3) => {
+          client
+            .query({
+              query: gql`
+                query {
+                  something
+                }
+              `,
+            })
+            .catch((error) => {
+              if (attemptsLeft > 0)
+                setTimeout(() => run(attemptsLeft - 1), 100);
+              else reject(error);
+            });
+        };
+
+        run();
       });
     });
   });
 
   it("Should print the exception nicely", async () => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       createEcosystemWithInit({
         typeDefs: `
             type Query { something: String }
           `,
         resolvers: {
           Query: {
-            something: (_, args, ctx) => {
+            something: () => {
               // emulate some function calls so we have some stack traces.
               const a = () => {
                 const b = () => {
@@ -248,7 +260,7 @@ describe("ApolloBundle", () => {
             },
           },
         },
-      }).then((kernel) => {
+      }).then(() => {
         const client = createApolloClient(6000);
 
         client
@@ -259,7 +271,7 @@ describe("ApolloBundle", () => {
               }
             `,
           })
-          .catch((e) => {
+          .catch(() => {
             resolve();
           });
       });

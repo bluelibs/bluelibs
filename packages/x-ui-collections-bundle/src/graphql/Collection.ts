@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck - Apollo Client version compatibility requires major alignment
 import {
   Service,
@@ -31,7 +32,7 @@ type CompiledQueriesTypes = "Count" | "InsertOne" | "UpdateOne" | "DeleteOne";
 
 type TransformPartial<T> = Partial<{ [key in keyof T]: any }>;
 
-type UpdateFilter<T = any> = {
+type UpdateFilter<_T = any> = {
   [key: string]: any;
 };
 
@@ -251,9 +252,9 @@ export abstract class Collection<T = null> {
       Object.assign(computedRefetchBody, refetchBody);
     }
 
-    // @ts-ignore
+    // @ts-expect-error _id is not part of the typed query body
     if (!computedRefetchBody._id) {
-      // @ts-ignore
+      // @ts-expect-error _id is not part of the typed query body
       computedRefetchBody._id = 1;
     }
 
@@ -307,9 +308,9 @@ export abstract class Collection<T = null> {
       Object.assign(computedRefetchBody, refetchBody);
     }
 
-    // @ts-ignore
+    // @ts-expect-error _id is not part of the typed query body
     if (!computedRefetchBody._id) {
-      // @ts-ignore
+      // @ts-expect-error _id is not part of the typed query body
       computedRefetchBody._id = 1;
     }
 

@@ -319,7 +319,7 @@ export class Field extends BaseModel<Field> {
     }
     if (current.type === FieldValueKind.ENUM && current.enumValues.length > 0) {
       enums = {};
-      for (let enum_value of current.enumValues) {
+      for (const enum_value of current.enumValues) {
         const enum_key =
           typeof enum_value === "string" ? enum_value : enum_value?.label;
         enums[enum_key.toLowerCase()] = enum_key;

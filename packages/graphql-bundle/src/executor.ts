@@ -57,7 +57,7 @@ export function craftFunction(
     let result;
     for (const i in defs) {
       const index = Number(i);
-      result = await (defs[index] as (...args: any[]) => any).apply(null, resolverArguments);
+      result = await (defs[index] as (...args: any[]) => any)(...resolverArguments);
       // Adapt the context and store the result inside ResultSymbol
       if (result) {
         resolverArguments[2] && (resolverArguments[2][ResultSymbol] = result);

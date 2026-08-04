@@ -1,5 +1,5 @@
-const LRU = require("tiny-lru");
 import { compileQuery, isCompiledQuery } from "graphql-jit";
+import LRU from "tiny-lru";
 
 export function jitSchemaExecutor(
   schema: any,

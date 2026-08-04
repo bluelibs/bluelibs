@@ -12,7 +12,7 @@ export interface ObjectIdLike {
 export class ObjectId implements ObjectIdLike {
   id: Uint8Array;
   __id?: string;
-  public _bsontype: "ObjectId" = "ObjectId";
+  public _bsontype = "ObjectId" as const;
 
   /**
    * Create a new LightObjectId

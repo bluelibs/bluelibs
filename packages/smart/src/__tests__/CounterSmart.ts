@@ -1,5 +1,4 @@
 // CounterSmart.tsx
-import React, { createContext } from "react";
 import { Smart } from "../";
 
 type CounterState = {

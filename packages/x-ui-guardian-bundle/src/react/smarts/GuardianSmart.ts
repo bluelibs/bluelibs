@@ -184,7 +184,7 @@ export class GuardianSmart<
         fetchPolicy: "network-only",
       })
       .then(async (response: any) => {
-        let user = Object.assign({}, response.data.me);
+        const user = Object.assign({}, response.data.me);
 
         try {
           user._id = new ObjectId(user._id as any);

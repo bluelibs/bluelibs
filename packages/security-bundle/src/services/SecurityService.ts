@@ -20,11 +20,7 @@ import {
   SessionRetrievedEvent,
   SessionBeforeCreateEvent,
 } from "../events";
-import {
-  UserDisabledException,
-  SessionExpiredException,
-  UserNotFoundException,
-} from "../exceptions";
+import { UserDisabledException, SessionExpiredException } from "../exceptions";
 import { UserDisabledEvent, UserEnabledEvent } from "../events";
 import {
   SessionAfterCreateEvent,

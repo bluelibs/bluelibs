@@ -4,7 +4,7 @@ import { CommanderService } from "../services/CommanderService";
 import { IExecutor } from "../defs";
 
 // TODO:
-// @ts-ignore - abstract class with decorator for DI
+// @ts-expect-error - abstract class with decorator for DI
 @Service()
 export abstract class Command<T = any> implements IExecutor<T> {
   @Inject(() => PrompterService)

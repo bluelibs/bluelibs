@@ -1,12 +1,7 @@
 import { ContainerInstance, Constructor, Service } from "@bluelibs/core";
 import { IValidationMethod, IValidateOptions } from "../defs";
 import { SchemaNotIdentifiedException } from "../exceptions";
-import {
-  addMethod,
-  mixed as MixedSchema,
-  ObjectSchema,
-  TestContext,
-} from "yup";
+import { addMethod, mixed as MixedSchema, ObjectSchema } from "yup";
 import { IValidationTransformer } from "../defs";
 import { getSchemaByType } from "../yup-decorator";
 
@@ -14,7 +9,7 @@ import { getSchemaByType } from "../yup-decorator";
 export class ValidatorService {
   constructor(protected readonly container: ContainerInstance) {}
 
-  async validate<T = any>(object: any, options?: IValidateOptions) {
+  async validate(object: any, options?: IValidateOptions) {
     return this.getSchema(object, options).validate(object, options);
   }
 
@@ -54,7 +49,8 @@ export class ValidatorService {
   addMethod(methodClass: Constructor<IValidationMethod>) {
     const method = this.container.get<IValidationMethod>(methodClass);
 
-    let { parent, name } = method;
+    const { name } = method;
+    let { parent } = method;
 
     if (!parent) {
       parent = MixedSchema;
@@ -75,7 +71,8 @@ export class ValidatorService {
   addTransformer(transformerClass: { new (): IValidationTransformer }) {
     const transformer =
       this.container.get<IValidationTransformer>(transformerClass);
-    let { parent, name } = transformer;
+    const { name } = transformer;
+    let { parent } = transformer;
 
     if (!parent) {
       parent = MixedSchema;

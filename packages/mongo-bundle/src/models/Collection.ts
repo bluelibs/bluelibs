@@ -2,12 +2,11 @@ import * as MongoDB from "mongodb";
 import {
   Inject,
   EventManager,
-  Event,
   ContainerInstance,
   Service,
   IEventConstructor,
-  Constructor,
   EventHandlerType,
+  Constructor,
   DeepPartial,
 } from "@bluelibs/core";
 import { DatabaseService } from "../services/DatabaseService";
@@ -26,7 +25,7 @@ import {
   IBundleLinkOptions,
   IExecutionContext,
 } from "../defs";
-import { ObjectId, toModel } from "@bluelibs/ejson";
+import { toModel } from "@bluelibs/ejson";
 import {
   DeepSyncDocumentNode,
   DeepSyncOptionsType,
@@ -42,26 +41,15 @@ import {
   addLinks,
   IAstToQueryOptions,
   AnyifyFieldsWithIDs as Clean,
-  LINK_STORAGE,
-  Linker,
   IQueryContext,
 } from "@bluelibs/nova";
-import {
-  DocumentWithID,
-  ID,
-  LinkOperatorModel,
-  Unpacked,
-} from "./LinkOperator";
+import { DocumentWithID, LinkOperatorModel, Unpacked } from "./LinkOperator";
 
 /**
  * This symbol allows us to access this collection from the MongoCollection
  */
 export const MONGO_BUNDLE_COLLECTION = Symbol("MONGO_BUNDLE_COLLECTION");
-/**
- * This represents which ids have been deleted so we know how to do propper cascading
- */
-const DELETED_IDS = Symbol("DELETED_IDS");
-// @ts-ignore - abstract class with decorator for DI
+// @ts-expect-error - abstract class with decorator for DI
 @Service()
 export abstract class Collection<T extends MongoDB.Document = any> {
   static model: any;
@@ -78,7 +66,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   static collectionName: string;
 
   public isInitialised: boolean = false;
-  protected onInitFunctions: Function[] = [];
+  protected onInitFunctions: Array<() => void> = [];
   protected initializationPromise: Promise<void> | null = null;
   public collection: MongoDB.Collection<T>;
   /**
@@ -631,8 +619,14 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param collectionEvent This is the class of the event
    * @param handler This is the function that is executed
    */
-  on<K>(collectionEvent: IEventConstructor<K>, handler: EventHandlerType<K>) {
-    this.localEventManager.addListener(collectionEvent, handler);
+  on<E extends CollectionEvent<any>>(
+    collectionEvent: Constructor<E>,
+    handler: (event: E) => void | Promise<void>
+  ) {
+    this.localEventManager.addListener(
+      collectionEvent as IEventConstructor<any>,
+      handler as EventHandlerType<any>
+    );
   }
 
   /**
@@ -657,7 +651,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * Override this method to set defaults for insertion.
    * @param plain
    */
-  async setDefaults(plain: Partial<T>, context?: IExecutionContext) {}
+  async setDefaults(_plain: Partial<T>, _context?: IExecutionContext) {}
 
   /**
    * Perform a query directly from GraphQL resolver based on requested fields. Returns an array.
@@ -749,7 +743,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     return new LinkOperatorModel(this, linkName as string);
   }
 
-  onInit(fn: Function) {
+  onInit(fn: () => void) {
     if (this.isInitialised) {
       fn();
     } else {

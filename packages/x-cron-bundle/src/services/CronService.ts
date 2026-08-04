@@ -156,7 +156,7 @@ export class CronService {
         try {
           await runner(intendedAt);
         } catch (e) {
-          this.logger.info(
+          self.logger.info(
             "Exception running scheduled job " + (e && e.stack ? e.stack : e)
           );
         }

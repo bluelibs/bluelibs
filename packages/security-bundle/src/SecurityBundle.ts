@@ -1,7 +1,5 @@
 import {
   Bundle,
-  Token,
-  BundlePhase,
   EventManager,
   KernelAfterInitEvent,
   Constructor,

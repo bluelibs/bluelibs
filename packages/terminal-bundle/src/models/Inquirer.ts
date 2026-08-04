@@ -3,7 +3,7 @@ import { Inject, Service, EventManager } from "@bluelibs/core";
 import { PrompterService } from "../services/PrompterService";
 import { BeforePromptEvent, AfterPromptEvent } from "../events";
 
-// @ts-ignore - abstract class with decorator for DI
+// @ts-expect-error - abstract class with decorator for DI
 @Service({
   transient: true,
 })

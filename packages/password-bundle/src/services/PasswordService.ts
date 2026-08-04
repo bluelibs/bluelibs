@@ -8,7 +8,7 @@ import {
   IPasswordAuthenticationStrategy,
   IHasherService,
 } from "../defs";
-// @ts-ignore - ms import compatibility
+// ms import compatibility
 import ms from "ms";
 import { Inject, Service, EventManager } from "@bluelibs/core";
 import { BUNDLE_CONFIG_TOKEN, HASHER_SERVICE_TOKEN } from "../constants";

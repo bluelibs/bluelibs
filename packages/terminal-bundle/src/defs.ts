@@ -1,6 +1,5 @@
 import { Constructor, ContainerInstance } from "@bluelibs/core";
 import { DistinctQuestion } from "inquirer";
-import { BlueprintWriterSession } from "./models";
 
 export interface ITerminalBundleConfig {
   commands?: ICommand[];
@@ -30,7 +29,7 @@ export interface ICommand {
   description?: string;
   inquirer?: Constructor<IInquirer>;
   writer?: Constructor<IBlueprintWriter>;
-  execute?: Function; // TODO:
+  execute?: (...args: any[]) => any; // TODO:
   executor?: Constructor<IExecutor>;
   sessionFactory?: (container: ContainerInstance) => IBlueprintWriterSession;
 }
@@ -71,7 +70,7 @@ export interface IPrompt {
 
 export interface IBlueprintWriter<
   T = any,
-  SessionType = IBlueprintWriterSession
+  SessionType = IBlueprintWriterSession,
 > {
   write(model: T, session: SessionType);
 }

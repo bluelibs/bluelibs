@@ -1,9 +1,4 @@
-import {
-  EventManager,
-  Service,
-  Event,
-  Inject,
-} from "@bluelibs/core";
+import { EventManager, Service, Event, Inject } from "@bluelibs/core";
 import { useEffect, useState } from "react";
 import { UI_SESSION_BUNDLE_CONFIG_TOKEN } from "../../constants";
 import { IXUISessionBundleConfigType, IXUISessionStore } from "../../defs";
@@ -125,7 +120,8 @@ export class UISessionService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const eventClass = UISessionStateChangeEvent as any;
     em.addListener(eventClass, handler, {
-      filter: (e: Event<UISessionStateChangeEventProps>) => e.data.fieldName === fieldName,
+      filter: (e: Event<UISessionStateChangeEventProps>) =>
+        e.data.fieldName === fieldName,
     });
   }
 

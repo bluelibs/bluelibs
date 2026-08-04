@@ -17,7 +17,7 @@ export class ObjectTemplateBuilder {
   }
 
   merge(data: object) {
-    for (let key in data) {
+    for (const key in data) {
       this.push(key, data[key]);
     }
   }

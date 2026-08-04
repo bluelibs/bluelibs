@@ -48,7 +48,7 @@ describe("Softdeletable behavior", () => {
         },
       }
     );
-    let obj = await collection.findOne({
+    const obj = await collection.findOne({
       _id: result.insertedId,
       isDeleted: true,
     });
@@ -111,7 +111,7 @@ describe("Softdeletable behavior", () => {
       }
     );
 
-    let obj = await collection.findOne({
+    const obj = await collection.findOne({
       _id: result.insertedId,
       isDeleted: true,
     });

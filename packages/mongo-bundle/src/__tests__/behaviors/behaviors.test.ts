@@ -100,7 +100,7 @@ describe("Behaviors", () => {
     const behaviors = container.get(Behaviors);
 
     await behaviors.deleteMany({});
-    const b1 = await behaviors.insertMany(
+    await behaviors.insertMany(
       [
         {
           test: 1,

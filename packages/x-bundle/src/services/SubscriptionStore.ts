@@ -61,7 +61,7 @@ export class SubscriptionStore {
       this.pubSub.publish(channel, { document, event });
     };
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       resolve(this.pubSub.asyncIterator([channel]));
 
       // We have to wait on the resolve to execute
@@ -116,7 +116,7 @@ export class SubscriptionStore {
       this.pubSub.publish(channel, { count });
     };
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       resolve(this.pubSub.asyncIterator([channel]));
 
       let ready = false;
@@ -127,10 +127,10 @@ export class SubscriptionStore {
           _id: 1,
         },
         {
-          onAdded: (document) => {
+          onAdded: () => {
             ready && publish(handler.documentStore.length);
           },
-          onRemoved: (document) => {
+          onRemoved: () => {
             ready && publish(handler.documentStore.length);
           },
         },
@@ -243,7 +243,7 @@ export class SubscriptionStore {
    * @param subscriptionEvents
    * @param subscriptionHandler
    */
-  protected attachEventsToHandlerFromOptions<T>(
+  protected attachEventsToHandlerFromOptions<_T>(
     subscriptionEvents: ISubscriptionEventOptions = {},
     subscriptionHandler: SubscriptionHandler<any>
   ) {

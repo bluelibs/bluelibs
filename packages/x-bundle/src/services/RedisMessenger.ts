@@ -3,7 +3,6 @@ import { IS_LIVE_DEBUG, REDIS_OPTIONS } from "../constants";
 import { ClientOpts, createClient, RedisClient } from "redis";
 import { EJSON } from "@bluelibs/ejson";
 import { IMessenger, ISubscriptionEvent, MessageHandleType } from "../defs";
-import { SubscriptionStore } from "./SubscriptionStore";
 import Queue from "queue";
 import { RedisConnectionResumedEvent } from "../events/RedisConnectionResumedEvent";
 import { LoggerService } from "@bluelibs/logger-bundle";

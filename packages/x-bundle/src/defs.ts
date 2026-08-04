@@ -1,11 +1,9 @@
 export * from "./behaviors/defs";
 
 import { Constructor, ContainerInstance } from "@bluelibs/core";
-import { IAstToQueryOptions } from "@bluelibs/nova";
 import { ClientOpts } from "redis";
 import { ICacheManagerConfig } from "./cache/defs";
 import { DocumentMutationType } from "./constants";
-import { SubscriptionHandler } from "./models/SubscriptionHandler";
 export interface IXBundleConfig {
   /**
    * Application URL is useful as XBundle can be used to route to different part of your web/front-end application
@@ -37,16 +35,18 @@ export interface IMessenger {
   publish(channels: string[], data);
 }
 
-export interface ISubscriptionEvent<T = any> {
+export interface ISubscriptionEvent<_T = any> {
   mutationType: DocumentMutationType;
   documentId: any;
   modifiedFields?: string[];
 }
 
+export type Callback = (...args: any[]) => any;
+
 export interface ISubscriptionEventOptions {
-  onAdded?: Function | Function[];
-  onChanged?: Function | Function[];
-  onRemoved?: Function | Function[];
+  onAdded?: Callback | Callback[];
+  onChanged?: Callback | Callback[];
+  onRemoved?: Callback | Callback[];
 }
 
 export interface IDocumentStore {
@@ -76,7 +76,7 @@ export interface ISubscriptionHandler<T> {
   onAdded(handler: OnDocumentAddedHandler);
   onChanged(handler: OnDocumentChangedHandler<T>);
   onRemoved(handler: OnDocumentRemovedHandler);
-  onStop(handler: Function);
+  onStop(handler: Callback);
   stop(): Promise<void>;
 }
 

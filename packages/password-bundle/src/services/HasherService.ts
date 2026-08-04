@@ -2,7 +2,7 @@ import { IHasherService } from "../defs";
 import { sha512 } from "js-sha512";
 
 export class HasherService implements IHasherService {
-  public generateSalt(userId?: any): string {
+  public generateSalt(_userId?: any): string {
     return randomString(32);
   }
 
@@ -10,7 +10,7 @@ export class HasherService implements IHasherService {
     return sha512(plainPassword + salt);
   }
 
-  public generateToken(userId?: any): string {
+  public generateToken(_userId?: any): string {
     return randomString(16);
   }
 }
@@ -18,8 +18,8 @@ export class HasherService implements IHasherService {
 const SPACE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 function randomString(length, chars = SPACE) {
-  var result = "";
-  for (var i = length; i > 0; --i)
+  let result = "";
+  for (let i = length; i > 0; --i)
     result += chars[Math.floor(Math.random() * chars.length)];
   return result;
 }

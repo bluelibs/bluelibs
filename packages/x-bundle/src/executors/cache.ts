@@ -1,7 +1,7 @@
 import { CacheOptions } from "../cache/defs";
 import { CACHE_SERVICE_TOKEN } from "../constants";
 
-export function Cache<T>(
+export function Cache<_T>(
   actions: ((_: any, args: any, ctx: any, ast: any) => Promise<any>)[],
   options?: CacheOptions
 ) {

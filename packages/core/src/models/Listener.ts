@@ -21,14 +21,14 @@ export abstract class Listener implements Record<string, any> {
   public init() {
     for (const member of getAllFuncs(this)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const method = (this[member as keyof this] as any) as EventHandlerType;
+      const method = this[member as keyof this] as any as EventHandlerType;
       // Not inherited
       const metadata = Reflect.getMetadata(eventHandlerMetadata, this, member);
       if (metadata) {
         const { eventClass, eventOptions } = metadata;
         this.eventManager.addListener(
           eventClass,
-          event => method.call(this, event),
+          (event) => method.call(this, event),
           eventOptions
         );
       }
@@ -68,16 +68,17 @@ export function On<T>(
 }
 
 function getAllFuncs(toCheck: unknown): string[] {
-  var props: string[] = [];
+  let props: string[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  var obj: any = toCheck;
+  let obj: any = toCheck;
   do {
     props = props.concat(Object.getOwnPropertyNames(obj));
   } while ((obj = Object.getPrototypeOf(obj)));
 
-  return props.sort().filter(function(e, i, arr) {
+  return props.sort().filter(function (e, i, arr) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (e != arr[i + 1] && typeof (toCheck as any)[e] == "function") return true;
+    if (e != arr[i + 1] && typeof (toCheck as any)[e] == "function")
+      return true;
     return false;
   });
 }

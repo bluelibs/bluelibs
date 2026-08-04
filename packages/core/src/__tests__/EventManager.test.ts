@@ -6,7 +6,7 @@ import { Bundle } from "../models/Bundle";
 import { Service } from "typedi";
 
 describe("EventManager", () => {
-  it("should work properly", done => {
+  it("should work properly", (done) => {
     const manager = new EventManager();
     class UserAddedEvent extends Event<{ userId: string }> {}
 
@@ -22,7 +22,7 @@ describe("EventManager", () => {
     );
   });
 
-  it("should work properly", done => {
+  it("should work properly", (done) => {
     const manager = new EventManager();
     class UserAddedEvent extends Event<{ userId: string }> {}
 
@@ -38,7 +38,7 @@ describe("EventManager", () => {
     );
   });
 
-  it("should work removing listeners", done => {
+  it("should work removing listeners", (done) => {
     const manager = new EventManager();
     class UserAddedEvent extends Event<{ userId: string }> {}
 
@@ -60,7 +60,7 @@ describe("EventManager", () => {
     done();
   });
 
-  it("should work prioritising listeners", done => {
+  it("should work prioritising listeners", (done) => {
     const manager = new EventManager();
     class UserAddedEvent extends Event<{ userId: string }> {}
 
@@ -110,11 +110,11 @@ describe("EventManager", () => {
     ).to.be.rejectedWith("wheres the user bro?");
   });
 
-  it("should work with global events handlers", done => {
+  it("should work with global events handlers", (done) => {
     const manager = new EventManager();
     class UserAddedEvent extends Event<{ userId: string }> {}
 
-    manager.addGlobalListener(_e => {
+    manager.addGlobalListener((_e) => {
       done();
     });
 
@@ -125,7 +125,7 @@ describe("EventManager", () => {
     );
   });
 
-  it("should work removing global listeners", done => {
+  it("should work removing global listeners", (done) => {
     const manager = new EventManager();
     class UserAddedEvent extends Event<{ userId: string }> {}
 
@@ -144,7 +144,7 @@ describe("EventManager", () => {
     done();
   });
 
-  it("should work instantiating bundle servces", done => {
+  it("should work instantiating bundle servces", (done) => {
     class InvoicePaid extends Event<null> {}
 
     @Service()
@@ -170,7 +170,7 @@ describe("EventManager", () => {
     });
   });
 
-  it("should work with @On decorator", done => {
+  it("should work with @On decorator", (done) => {
     class InvoicePaid extends Event<null> {}
     @Service()
     class InvoiceListener extends Listener {

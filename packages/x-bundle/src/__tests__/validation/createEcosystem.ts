@@ -1,8 +1,7 @@
 // Create a kernel with a bundle
 
-import { Kernel, ContainerInstance } from "@bluelibs/core";
+import { Kernel } from "@bluelibs/core";
 import { MongoBundle } from "@bluelibs/mongo-bundle";
-import { ApolloBundle } from "@bluelibs/apollo-bundle";
 import { XBundle } from "../../XBundle";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
 import { ValidatorBundle } from "@bluelibs/validator-bundle";
