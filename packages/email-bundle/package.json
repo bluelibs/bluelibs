@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/email-bundle",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "Provides easy strategy to send emails using server-side rendered React templates",
   "main": "dist/index.js",
   "repository": {
@@ -34,8 +34,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@bluelibs/core": "^1.0.0",
-    "@bluelibs/logger-bundle": "^1.0.0",
+    "@bluelibs/core": "^1.3.0",
+    "@bluelibs/logger-bundle": "^1.6.0",
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",
     "@types/graphql": "^0.11.3",
@@ -46,6 +46,8 @@
     "@types/react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "chai": "^4.4.1",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
@@ -56,9 +58,7 @@
     "react-dom": "^18.2.0",
     "source-map-support": "^0.5.21",
     "ts-jest": "^29.1.1",
-    "typescript": "^5.3.3",
-    "chai": "^4.4.1",
-    "chai-as-promised": "^7.1.1"
+    "typescript": "^5.3.3"
   },
   "typings": "dist/index.d.ts",
   "typescript": {

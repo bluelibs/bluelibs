@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/core",
-  "version": "1.2.6",
+  "version": "1.3.0",
   "description": "A powerful and lightweight module composition strategy responsible for orchestrating your logic, enabling you to easily respect SOLID principles within your infinitely-scalable app.",
   "main": "dist/index.js",
   "repository": {
