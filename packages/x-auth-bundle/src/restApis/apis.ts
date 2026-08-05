@@ -10,14 +10,21 @@ import {
   RequestLoginLinkInput,
   VerifyMagicLinkInput,
 } from "../inputs/RequestMagicLinkInput";
+import { ContainerInstance, Constructor } from "@bluelibs/core";
+import { Request, Response, NextFunction } from "express";
 
 export const REST_APIS: {
   name: string;
   type: "post" | "get" | "put" | "patch" | "delete" | "all";
   path: string;
   service?: string;
-  inputType?: any;
-  handler?: (container, req, res, next) => any;
+  inputType?: Constructor<object>;
+  handler?: (
+    container: ContainerInstance,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => void;
 }[] = [
   {
     name: "register",

@@ -133,7 +133,7 @@ export class Field extends BaseModel<Field> {
   /**
    * Store a default value for this field. If you want to eval the thing use `eval: new Date()`. If you are using it from an enum just pick it up.
    */
-  defaultValue: any;
+  defaultValue: unknown;
 
   clean() {
     this.storeUIDefaults();
@@ -298,12 +298,12 @@ export class Field extends BaseModel<Field> {
     key: string;
     label: string;
     description?: string;
-    enums?: any;
+    enums?: Record<string, string>;
   } {
     const parents: Field[] = [];
     let current: Field = this;
     //in case of enums
-    let enums: any;
+    let enums: Record<string, string> | undefined;
 
     if (forceParent) {
       current.parent = forceParent;

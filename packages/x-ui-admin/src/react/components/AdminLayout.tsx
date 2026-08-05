@@ -6,7 +6,7 @@ import { useUIComponents } from "@bluelibs/x-ui";
 const { Header, Content, Footer, Sider } = Layout;
 
 export type AdminLayoutProps = {
-  children?: any;
+  children?: React.ReactNode;
   protect?: boolean;
 };
 

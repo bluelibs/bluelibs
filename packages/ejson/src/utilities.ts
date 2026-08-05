@@ -19,8 +19,8 @@ export const convertMapToObject = (map: Map<string, unknown>) =>
     return acc;
   }, {});
 
-export const isArguments = (obj: object) =>
-  obj != null && hasOwn(obj, "callee");
+export const isArguments = (obj: unknown): obj is ArrayLike<unknown> =>
+  obj != null && hasOwn(obj as object, "callee");
 
 export const isInfOrNaN = (obj: unknown) =>
   Number.isNaN(obj) || obj === Infinity || obj === -Infinity;

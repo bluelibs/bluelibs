@@ -1,8 +1,10 @@
 import { IAstToQueryOptions, QueryBodyType } from "@bluelibs/nova";
+import type { DocumentNode } from "graphql";
 import * as MongoDB from "mongodb";
 import {
   BehaviorType,
   IContextAware,
+  IExecutionContext,
   ISoftdeletableBehaviorOptions,
 } from "../defs";
 import { AfterDeleteEvent, BeforeDeleteEvent } from "../events";
@@ -31,6 +33,10 @@ export default function softdeletable(
   );
   const { fields } = options;
 
+  // why: this behavior rewrites methods with heterogeneous signatures (find returns
+  // a cursor, findOne a document, ...) on collections of arbitrary document types,
+  // and sets dynamic field names not present on the schema; a generic collection
+  // type cannot express that without losing the cursor/document return shapes.
   return (collection: Collection<any>) => {
     collection.onInit(async () => {
       await collection.collection.createIndex({
@@ -49,7 +55,10 @@ export default function softdeletable(
     // For all of them the filter field is the first argument
     overridableMethods.forEach((override) => {
       const old = collection[override];
-      collection[override] = (filter: MongoDB.Filter<any>, ...args: any[]) => {
+      collection[override] = (
+        filter: MongoDB.Filter<MongoDB.Document>,
+        ...args: unknown[]
+      ) => {
         return old.call(
           collection,
           getPreparedFiltersForSoftdeletion(filter, fields.isDeleted),
@@ -60,7 +69,7 @@ export default function softdeletable(
 
     const oldAggregate = collection.aggregate;
     collection.aggregate = (
-      pipeline: any[],
+      pipeline: MongoDB.Document[],
       options?: MongoDB.AggregateOptions
     ) => {
       // Search for pipeline a $match containing the isDeleted field
@@ -84,32 +93,38 @@ export default function softdeletable(
     };
 
     const oldQuery = collection.query;
-    collection.query = (request: QueryBodyType<any>): Promise<any[]> => {
+    collection.query = (
+      request: QueryBodyType<MongoDB.Document>
+    ): Promise<Array<Partial<MongoDB.Document>>> => {
       prepareQueryOptions(request, options);
 
       return oldQuery.call(collection, request);
     };
 
     const oldQueryOne = collection.queryOne;
-    collection.queryOne = (request: QueryBodyType<any>): Promise<any> => {
+    collection.queryOne = (
+      request: QueryBodyType<MongoDB.Document>
+    ): Promise<Partial<MongoDB.Document>> => {
       prepareQueryOptions(request, options);
 
       return oldQueryOne.call(collection, request);
     };
 
     const oldQueryGraphQL = collection.queryGraphQL;
-    collection.queryGraphQL = (
-      ast: any,
+    collection.queryGraphQL = <U = null>(
+      ast: DocumentNode,
       config?: IAstToQueryOptions
-    ): Promise<any[]> => {
+    ): Promise<Array<Partial<U>>> => {
       config = prepareQueryGraphQLOptions(config || {}, options);
 
-      return oldQueryGraphQL.call(collection, ast, config);
+      return oldQueryGraphQL.call(collection, ast, config) as Promise<
+        Array<Partial<U>>
+      >;
     };
 
     const oldQueryOneGraphQL = collection.queryOneGraphQL;
     collection.queryOneGraphQL = <T = null>(
-      ast: any,
+      ast: DocumentNode,
       config?: IAstToQueryOptions
     ): Promise<Partial<T>> => {
       config = prepareQueryGraphQLOptions(config || {}, options);
@@ -131,14 +146,14 @@ function prepareQueryGraphQLOptions(
     config.filters = {};
   }
   config.filters = getPreparedFiltersForSoftdeletion(
-    config.filters,
+    config.filters as MongoDB.Filter<MongoDB.Document>,
     fields.isDeleted
   );
   return config;
 }
 
 function prepareQueryOptions(
-  request: QueryBodyType<any>,
+  request: QueryBodyType<MongoDB.Document>,
   options: ISoftdeletableBehaviorOptions
 ) {
   const { fields } = options;
@@ -150,13 +165,13 @@ function prepareQueryOptions(
     }
   }
   request.$.filters = getPreparedFiltersForSoftdeletion(
-    request.$.filters,
+    request.$.filters as MongoDB.Filter<MongoDB.Document>,
     fields.isDeleted
   );
 }
 
 function getPreparedFiltersForSoftdeletion(
-  filter: MongoDB.Filter<any>,
+  filter: MongoDB.Filter<MongoDB.Document>,
   isDeletedField: string
 ) {
   filter = Object.assign({}, filter);
@@ -170,12 +185,12 @@ function getPreparedFiltersForSoftdeletion(
   return filter;
 }
 
-function extractUserID(context: any) {
+function extractUserID(context: IExecutionContext | null) {
   if (!context) {
     return null;
   }
 
-  return context["userId"] || null;
+  return context.userId || null;
 }
 
 /**
@@ -189,7 +204,7 @@ function extractUserID(context: any) {
  */
 async function emulateDeletion(
   collection: Collection<any>,
-  filter: MongoDB.Filter<any>,
+  filter: MongoDB.Filter<MongoDB.Document>,
   options: IContextAware & MongoDB.OperationOptions,
   softdeleteOptions: ISoftdeletableBehaviorOptions,
   isMany: boolean

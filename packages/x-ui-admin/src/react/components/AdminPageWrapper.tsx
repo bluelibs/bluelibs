@@ -3,7 +3,7 @@ import { Layout } from "antd";
 
 export type PageWrapperProps = {
   title: string;
-  children?: any;
+  children?: React.ReactNode;
 };
 
 export function AdminPageWrapper(props: PageWrapperProps) {

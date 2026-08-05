@@ -1,7 +1,7 @@
 import { IEventsMap } from "@bluelibs/ui-apollo-bundle";
 
-type Filter<_T = any> = {
-  [key: string]: any;
+type Filter<_T = unknown> = {
+  [key: string]: unknown;
 };
 
 export interface IQueryOptions<T = any> {
@@ -16,9 +16,9 @@ export interface IQueryOptions<T = any> {
 }
 
 export interface ICollectionQueryConfig<T = any> {
-  filters?: T extends null ? any : Filter<T>;
+  filters?: Filter<T>;
   options?: IQueryOptions<T>;
-  pipeline?: any[];
+  pipeline?: unknown[];
 }
 
 export type { Filter as MongoFilterQuery };
@@ -40,12 +40,12 @@ type SimpleFieldValue =
   // This is the part where a reducer is involved and we pass params to it
   | {
       $: {
-        [key: string]: any;
+        [key: string]: unknown;
       };
     }
   // This is a type of projection operator
   | {
-      $filter: any;
+      $filter: unknown;
     };
 
 type Unpacked<T> = T extends (infer U)[] ? U : T;
@@ -72,11 +72,7 @@ export interface IQueryInput<T = null> {
    * MongoDB Filters
    * @url https://docs.mongodb.com/manual/reference/operator/query/
    */
-  filters?: T extends null
-    ? {
-        [key: string]: any;
-      }
-    : Filter<T>;
+  filters?: Filter<T>;
   /**
    * MongoDB Options
    */
@@ -88,9 +84,7 @@ export interface ISubscriptionOptions extends IEventsMap {
 }
 
 export interface IQueryOptionsInput {
-  sort?: {
-    [key: string]: any;
-  };
+  sort?: IQueryOptions["sort"];
   limit?: number;
   skip?: number;
   sideBody?: QueryBodyType;

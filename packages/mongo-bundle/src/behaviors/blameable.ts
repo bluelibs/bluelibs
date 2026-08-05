@@ -1,6 +1,11 @@
 import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";
-import { IBlameableBehaviorOptions, BehaviorType } from "../defs";
+import {
+  IBlameableBehaviorOptions,
+  BehaviorType,
+  IExecutionContext,
+} from "../defs";
 import { Collection } from "../models/Collection";
+import * as MongoDB from "mongodb";
 
 export default function blameable(
   options: IBlameableBehaviorOptions = {}
@@ -12,17 +17,18 @@ export default function blameable(
   const throwErrorWhenMissing = options.throwErrorWhenMissing || false;
   const nullishUpdatedByAtInsert = options.keepInitialUpdateAsNull || false;
 
-  const userIdFieldInContext = "userId";
-
-  const extractUserID = (context: Record<string, any> | null) => {
+  const extractUserID = (context: IExecutionContext | null) => {
     if (!context) {
       return null;
     }
 
-    return context[userIdFieldInContext];
+    return context.userId;
   };
 
-  const checkUserId = (userId: any, collection: Collection<any>) => {
+  const checkUserId = <T extends MongoDB.Document>(
+    userId: unknown,
+    collection: Collection<T>
+  ) => {
     if (userId === undefined && throwErrorWhenMissing) {
       throw new Error(
         `You have to provide { userId } inside the context when you perform this insert mutation on ${collection.collectionName} collection.`
@@ -30,7 +36,7 @@ export default function blameable(
     }
   };
 
-  return (collection: Collection<any>) => {
+  return <T extends MongoDB.Document>(collection: Collection<T>) => {
     collection.localEventManager.addListener(
       BeforeInsertEvent,
       // @ts-expect-error - handler uses CollectionEvent subclass

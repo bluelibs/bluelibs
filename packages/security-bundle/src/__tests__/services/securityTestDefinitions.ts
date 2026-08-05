@@ -2,10 +2,11 @@ import { SecurityService } from "../..";
 import { UserPersistanceService } from "./mocks/UserPersistanceService.mock";
 import { EventManager } from "@bluelibs/core";
 import { SessionPersistanceService } from "./mocks/SessionPersistanceService.mock";
+import { IUserData } from "../../defs";
 
 declare module "../../defs" {
   interface ISessionData {
-    a: any;
+    a: unknown;
   }
 }
 
@@ -19,7 +20,7 @@ export const securityTestDefinitions = [
         name: "Hello",
       });
 
-      const user: any = await securityService.findUserById(userId);
+      const user = (await securityService.findUserById(userId)) as IUserData;
       expect(user.name).toBe("Hello");
     },
   },

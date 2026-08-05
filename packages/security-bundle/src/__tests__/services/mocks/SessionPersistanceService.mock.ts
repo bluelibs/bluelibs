@@ -1,8 +1,17 @@
-import { ISessionPersistance, ISession, UserId } from "../../../defs";
+import {
+  ISessionPersistance,
+  ISession,
+  ISessionData,
+  UserId,
+} from "../../../defs";
 export class SessionPersistanceService implements ISessionPersistance {
   public db: ISession[] = [];
 
-  async newSession(userId, expiresAt, data): Promise<string> {
+  async newSession(
+    userId: UserId,
+    expiresAt: Date,
+    data?: ISessionData
+  ): Promise<string> {
     const token = Math.random().toString();
     const session = {
       userId,
@@ -34,7 +43,10 @@ export class SessionPersistanceService implements ISessionPersistance {
     this.db = this.db.filter((s) => s.expiresAt.getTime() < now);
   }
 
-  async findSession(userId: UserId, data: any): Promise<ISession> {
+  async findSession(
+    userId: UserId,
+    data: Partial<ISessionData>
+  ): Promise<ISession> {
     return this.db.find((s) =>
       Object.keys(data).reduce(
         (prev, key) => {

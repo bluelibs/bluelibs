@@ -19,8 +19,8 @@ export type UISessionEventChangeHandler = (
 
 @Service()
 export class UISessionService {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected _state: IXUISessionStore = {} as any;
+  // Populated later in init(); the store interface may be augmented with required fields
+  protected _state: IXUISessionStore = {} as IXUISessionStore;
 
   constructor(
     protected readonly eventManager: EventManager,
@@ -69,11 +69,7 @@ export class UISessionService {
       this.onSet(fieldName, handler);
 
       return () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const em = this.eventManager as any;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const eventClass = UISessionStateChangeEvent as any;
-        em.removeListener(eventClass, handler);
+        this.eventManager.removeListener(UISessionStateChangeEvent, handler);
       };
     }, []);
 
@@ -115,21 +111,13 @@ export class UISessionService {
     fieldName: T,
     handler: UISessionEventChangeHandler
   ): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const em = this.eventManager as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const eventClass = UISessionStateChangeEvent as any;
-    em.addListener(eventClass, handler, {
+    this.eventManager.addListener(UISessionStateChangeEvent, handler, {
       filter: (e: Event<UISessionStateChangeEventProps>) =>
         e.data.fieldName === fieldName,
     });
   }
 
   onSetRemove(handler: UISessionEventChangeHandler): void {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const em = this.eventManager as any;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const eventClass = UISessionStateChangeEvent as any;
-    em.removeListener(eventClass, handler);
+    this.eventManager.removeListener(UISessionStateChangeEvent, handler);
   }
 }

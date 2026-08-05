@@ -1,8 +1,8 @@
-import { ObjectSchema, AnySchema } from "yup";
+import { AnyObjectSchema, AnySchema } from "yup";
 import * as yup from "yup";
 
-export type SchemaOrSchemaCreator = AnySchema<any> | (() => AnySchema<any>);
-export type ModelCreator = () => any;
+export type SchemaOrSchemaCreator = AnySchema | (() => AnySchema);
+export type ModelCreator = () => object;
 
 /**
  *
@@ -10,34 +10,42 @@ export type ModelCreator = () => any;
 export class MetadataStorage {
   private _metadataMap = new Map<
     Function,
-    Map<string, SchemaOrSchemaCreator>
+    Map<string | symbol, SchemaOrSchemaCreator>
   >();
 
-  addSchemaMetadata({ target, schema, property }) {
+  addSchemaMetadata({
+    target,
+    schema,
+    property,
+  }: {
+    target: Function;
+    schema: SchemaOrSchemaCreator;
+    property: string | symbol;
+  }) {
     let schemaMap = this._metadataMap.get(target);
     if (!schemaMap) {
-      schemaMap = new Map<string, SchemaOrSchemaCreator>();
+      schemaMap = new Map<string | symbol, SchemaOrSchemaCreator>();
       this._metadataMap.set(target, schemaMap);
     }
     schemaMap.set(property, schema);
   }
 
-  getMetadata(target) {
+  getMetadata(target: Function) {
     return this._metadataMap.get(target);
   }
 
-  findSchemaMetadata(target) {
+  findSchemaMetadata(target: Function) {
     const hierarchy = this.getClassHierarchy(target).reverse();
     const result = hierarchy
       .map((target) => this.getMetadata(target))
       .filter((target) => Boolean(target));
 
-    const entries = [];
+    const entries: Array<[string | symbol, SchemaOrSchemaCreator]> = [];
     result.forEach((r) => {
       entries.push(...r.entries());
     });
 
-    return new Map<string, SchemaOrSchemaCreator>(entries);
+    return new Map<string | symbol, SchemaOrSchemaCreator>(entries);
   }
 
   /**
@@ -59,15 +67,15 @@ export class MetadataStorage {
 
 const metadataStorage = new MetadataStorage();
 
-const yupSchemas = new Map<Function, ObjectSchema<any>>();
-const yupSchemaCreators = new Map<Function, () => ObjectSchema<any>>();
+const yupSchemas = new Map<Function, AnyObjectSchema>();
+const yupSchemaCreators = new Map<Function, () => AnyObjectSchema>();
 
 /**
  * Get the schema by type
  * @param target the object's type (class)
  * @returns The yup schema
  */
-export function getSchemaByType(target: Object): ObjectSchema<any> {
+export function getSchemaByType(target: Object): AnyObjectSchema {
   const constructor = target instanceof Function ? target : target.constructor;
 
   let schema = yupSchemas.get(constructor);
@@ -84,7 +92,7 @@ export function getSchemaByType(target: Object): ObjectSchema<any> {
  * @param objectSchema The initial schema
  */
 export function schema(
-  objectSchema: ObjectSchema<any> = yup.object()
+  objectSchema: AnyObjectSchema = yup.object()
 ): ClassDecorator {
   return (target) => {
     // The idea is that we don't generate the schema on the fly
@@ -106,7 +114,7 @@ function createAndStoreSchema(model: Function) {
   return schema;
 }
 
-schema.from = (model: any): ObjectSchema<any> => {
+schema.from = (model: object): AnyObjectSchema => {
   return getSchemaByType(model);
 };
 
@@ -194,7 +202,7 @@ export interface ValidateOptions<TContext = {}> {
 export const a = yup;
 export const an = yup;
 
-function defineSchema(target, objectSchema: ObjectSchema<any>) {
+function defineSchema(target: Function, objectSchema: AnyObjectSchema) {
   const schemaMap = metadataStorage.findSchemaMetadata(target);
 
   if (!schemaMap) {

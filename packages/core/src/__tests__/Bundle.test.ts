@@ -6,7 +6,10 @@ import { BundlePhase } from "../defs";
 
 describe("Bundle", () => {
   it("Should work with a config and a default config", () => {
-    class A extends Bundle {
+    class A extends Bundle<{
+      number?: number;
+      somethingElse?: number | boolean;
+    }> {
       public defaultConfig = {
         number: 20,
       };

@@ -1,7 +1,9 @@
 import * as _ from "lodash";
 import CollectionNode from "../nodes/CollectionNode";
 
-export function idsEqual(id1, id2) {
+type StringifiableId = { toString(): string };
+
+export function idsEqual(id1: StringifiableId, id2: StringifiableId) {
   return id1.toString() === id2.toString();
 }
 

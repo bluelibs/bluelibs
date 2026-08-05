@@ -3,6 +3,7 @@ import { Route, Router, Switch } from "react-router-dom";
 import * as queryString from "query-string";
 import { XRouter } from "./XRouter";
 import { useUIComponents } from "@bluelibs/x-ui-react-bundle";
+import type { ProtectProps } from "@bluelibs/x-ui-guardian-bundle";
 
 interface IProps {
   router: XRouter;
@@ -37,14 +38,15 @@ export const XBrowserRouter: React.FC<IProps> = (props) => {
                 };
 
                 if (route.roles) {
+                  const protectProps: ProtectProps = {
+                    roles: route.roles,
+                    component,
+                    componentProps: elementProps,
+                  };
+
                   return (
                     <Components.ErrorBoundary>
-                      {/* // TODO: fix type definition, modified by x-ui-guardian-bundle */}
-                      {React.createElement((Components as any).Protect, {
-                        roles: route.roles,
-                        component,
-                        componentProps: elementProps,
-                      })}
+                      {React.createElement(Components.Protect, protectProps)}
                     </Components.ErrorBoundary>
                   );
                 }

@@ -35,7 +35,7 @@ export interface EJSONBatchSchema {
 }
 
 /** Generic "values" payload for a column. Length should equal batch count. */
-export interface EJSONBatchColumnValues<T = any> {
+export interface EJSONBatchColumnValues<T = unknown> {
   v: T[];
   /** Indexes where value is null (optional helper). */
   nulls?: number[];

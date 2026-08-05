@@ -1,5 +1,6 @@
 import { createEcosystem } from "./createEcosystem";
 import { ContainerInstance, Kernel } from "@bluelibs/core";
+import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { CACHE_SERVICE_TOKEN } from "./../..";
 import { CacheService } from "./../../cache/CacheService";
 import { CACHE_CONFIG } from "../../constants";
@@ -113,7 +114,7 @@ describe("cache manager tests get/set", () => {
           cacheService.addUserBoundnessFieldsToKeyObject(
             ["c", "d"],
             { a: 1, b: 2 },
-            { c: 3, d: 4 }
+            { c: 3, d: 4 } as unknown as IGraphQLContext
           )
         ).toEqual({ a: 1, b: 2, c: 3, d: 4 });
         expect(

@@ -10,7 +10,7 @@ export type UseOptionsType = {
   transient?: boolean;
 };
 
-export const use = <T = any>(
+export const use = <T = unknown>(
   id: Constructor<T> | Token<T> | string,
   options?: UseOptionsType
 ): T => {

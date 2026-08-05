@@ -19,6 +19,7 @@ import Query from "./query/Query";
 import astToQuery, { secureBody } from "./graphql/astToQuery";
 import { IGetLookupOperatorOptions } from "./query/Linker";
 import { Collection } from "mongodb";
+import type { DocumentNode } from "graphql";
 import { ISecureOptions } from "./defs";
 
 export { secureBody, Linker };
@@ -27,7 +28,7 @@ export function query<T>(collection: Collection<T>, body: QueryBodyType, context
   return new Query(collection, body, context);
 }
 
-query.securely = function securely<T = any>(
+query.securely = function securely<T = Document>(
   config: ISecureOptions,
   collection: Collection<T>,
   body: QueryBodyType,
@@ -36,22 +37,22 @@ query.securely = function securely<T = any>(
   return query(collection, secureBody(body, config), context);
 };
 
-query.graphql = function graphql<T = any>(
+query.graphql = function graphql<T = Document>(
   collection: Collection<T>,
-  ast: any,
+  ast: DocumentNode,
   options: ISecureOptions,
   context?: IQueryContext
 ) {
   return astToQuery(collection, ast, options, context);
 };
 
-export function clear(collection: Collection<any>) {
+export function clear(collection: Collection) {
   collection[LINK_STORAGE] = {};
   collection[REDUCER_STORAGE] = {};
   collection[EXPANDER_STORAGE] = {};
 }
 
-export function addLinks<T = any>(collection: Collection<T>, data: ILinkOptions) {
+export function addLinks<T = Document>(collection: Collection<T>, data: ILinkOptions) {
   if (!collection[LINK_STORAGE]) {
     collection[LINK_STORAGE] = {};
   }
@@ -74,7 +75,7 @@ export function addLinks<T = any>(collection: Collection<T>, data: ILinkOptions)
   });
 }
 
-export function addExpanders<T = any>(collection: Collection<T>, data: IExpanderOptions) {
+export function addExpanders<T = Document>(collection: Collection<T>, data: IExpanderOptions) {
   if (!collection[EXPANDER_STORAGE]) {
     collection[EXPANDER_STORAGE] = {};
   }
@@ -90,7 +91,7 @@ export function addExpanders<T = any>(collection: Collection<T>, data: IExpander
   });
 }
 
-export function getLinker<T = any>(collection: Collection<T>, name: string): Linker {
+export function getLinker<T = Document>(collection: Collection<T>, name: string): Linker {
   if (collection[LINK_STORAGE] && collection[LINK_STORAGE][name]) {
     return collection[LINK_STORAGE][name];
   } else {
@@ -98,7 +99,7 @@ export function getLinker<T = any>(collection: Collection<T>, name: string): Lin
   }
 }
 
-export function hasLinker<T = any>(collection: Collection<T>, name: string): boolean {
+export function hasLinker<T = Document>(collection: Collection<T>, name: string): boolean {
   if (collection[LINK_STORAGE]) {
     return Boolean(collection[LINK_STORAGE][name]);
   } else {
@@ -111,34 +112,28 @@ export function hasLinker<T = any>(collection: Collection<T>, name: string): boo
  * This is useful for complex searching and filtering
  */
 export function lookup(
-  collection: Collection<any>,
+  collection: Collection,
   linkName: string,
   options?: IGetLookupOperatorOptions
 ) {
   return getLinker(collection, linkName).getLookupAggregationPipeline(options);
 }
 
-export function getReducerConfig(
-  collection: Collection<any>,
-  name: string
-): IReducerOption | undefined {
+export function getReducerConfig(collection: Collection, name: string): IReducerOption | undefined {
   if (collection[REDUCER_STORAGE]) {
     return collection[REDUCER_STORAGE][name];
   }
   return undefined;
 }
 
-export function getExpanderConfig(
-  collection: Collection<any>,
-  name: string
-): QueryBodyType | undefined {
+export function getExpanderConfig(collection: Collection, name: string): QueryBodyType | undefined {
   if (collection[EXPANDER_STORAGE]) {
     return collection[EXPANDER_STORAGE][name];
   }
   return undefined;
 }
 
-export function addReducers<T = any>(collection: Collection<T>, data: IReducerOptions) {
+export function addReducers<T = Document>(collection: Collection<T>, data: IReducerOptions) {
   if (!collection[REDUCER_STORAGE]) {
     collection[REDUCER_STORAGE] = {};
   }
@@ -181,7 +176,7 @@ export type CollectionDecorations<T> = {
    * @param context
    * @returns
    */
-  queryFromAST: (ast: any, options: ISecureOptions, context?: IQueryContext) => Query<T>;
+  queryFromAST: (ast: DocumentNode, options: ISecureOptions, context?: IQueryContext) => Query<T>;
 };
 
 /**
@@ -203,7 +198,7 @@ export function decorate<TEnhanced, TCModel>(
       body: QueryBodyType<TEnhanced>,
       context?: IQueryContext
     ) => query(collection, secureBody(body, config), context),
-    queryFromAST: (ast: any, options: ISecureOptions, context?: IQueryContext) =>
+    queryFromAST: (ast: DocumentNode, options: ISecureOptions, context?: IQueryContext) =>
       astToQuery(collection, ast, options, context),
   });
 

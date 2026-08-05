@@ -38,8 +38,9 @@ export class XUIGuardianBundle extends Bundle<IXUIGuardianBundleConfigType> {
         data: { context },
       } = e;
 
-      context.headers = context.headers || {};
-      context.headers[LOCAL_STORAGE_TOKEN_KEY] = token;
+      const headers = (context.headers || {}) as Record<string, unknown>;
+      headers[LOCAL_STORAGE_TOKEN_KEY] = token;
+      context.headers = headers;
     });
 
     this.eventManager.addListener(

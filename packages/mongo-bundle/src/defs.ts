@@ -2,9 +2,22 @@ import { Collection } from "./models/Collection";
 import { ILinkCollectionOptions } from "@bluelibs/nova";
 import { IValidateOptions } from "@bluelibs/validator-bundle";
 import { ContainerInstance, Constructor } from "@bluelibs/core";
-import { ClientSession } from "mongodb";
+import { ObjectId } from "@bluelibs/ejson";
+import * as MongoDB from "mongodb";
 
-export type BehaviorType = (collectionEventManager: Collection<any>) => void;
+/**
+ * A behavior receives a collection instance of any document type and wires itself onto it.
+ * It is generic over the document type because behaviors apply to arbitrary collections.
+ */
+export type BehaviorType = <T extends MongoDB.Document = MongoDB.Document>(
+  collectionEventManager: Collection<T>
+) => void;
+
+/**
+ * The identifier of the user performing an operation. Mongo supports ObjectIds, strings and
+ * numbers as identifiers; this mirrors what security-bundle's UserId accepts.
+ */
+export type UserId = string | number | ObjectId | MongoDB.ObjectId;
 
 declare module "@bluelibs/nova" {
   export interface IQueryContext {
@@ -21,11 +34,11 @@ export interface IExecutionContext {
   /**
    * This userId is needed for blamable behaviors. You can omit it if it's done by the system
    */
-  userId?: any;
+  userId?: UserId;
   /**
    * Used for transactions
    */
-  session?: ClientSession;
+  session?: MongoDB.ClientSession;
   /**
    * Used for i18n
    */
@@ -62,10 +75,10 @@ export interface ITimestampableBehaviorOptions {
 }
 
 export interface IValidateBehaviorOptions {
-  model: any;
+  model: Constructor<unknown>;
   options?: Omit<IValidateOptions, "model">;
   cast?: boolean;
-  castOptions?: any;
+  castOptions?: Partial<IValidateOptions>;
 }
 
 export interface IBlameableBehaviorOptions {
@@ -92,7 +105,7 @@ export interface ISoftdeletableBehaviorOptions {
   };
 }
 
-export interface IBundleLinkCollectionOption<T = any> extends Omit<
+export interface IBundleLinkCollectionOption<T = unknown> extends Omit<
   ILinkCollectionOptions,
   "collection"
 > {

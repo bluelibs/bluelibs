@@ -118,7 +118,8 @@ export class RedisMessenger implements IMessenger {
   initListener() {
     this.listener.on("message", (channel, _message) => {
       if (this.channelMap[channel]) {
-        const message = EJSON.parse(_message);
+        // Channels only ever carry serialized subscription events.
+        const message = EJSON.parse(_message) as ISubscriptionEvent;
         this.channelMap[channel].forEach((channelHandler) => {
           channelHandler(message);
         });

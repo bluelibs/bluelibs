@@ -1,4 +1,5 @@
 import { toModel, ToModelOptions } from "@bluelibs/ejson";
+import { Constructor } from "@bluelibs/core";
 import { ValidatorService, IValidateOptions } from "@bluelibs/validator-bundle";
 
 export interface IToModelExecutorOptions {
@@ -9,7 +10,10 @@ export interface IToModelExecutorOptions {
   partial?: boolean;
 }
 
-export function ToModel(model: any, options: IToModelExecutorOptions = {}) {
+export function ToModel<T>(
+  model: Constructor<T>,
+  options: IToModelExecutorOptions = {}
+) {
   if (!options.field) {
     options.field = "input";
   }

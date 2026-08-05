@@ -3,10 +3,9 @@
  * @param item
  * @returns {boolean}
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isObject(item: any): boolean {
+export function isObject(item: unknown): item is Record<string, unknown> {
   return (
-    item &&
+    !!item &&
     typeof item === "object" &&
     !isClassInstance(item) &&
     !Array.isArray(item)
@@ -18,8 +17,7 @@ export function isObject(item: any): boolean {
  * @param target
  * @param ...sources
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function mergeDeep(target: any, ...sources: any[]): any {
+export function mergeDeep<T>(target: T, ...sources: unknown[]): T {
   if (!sources.length) return target;
   const source = sources.shift();
 
@@ -48,9 +46,8 @@ export function mergeDeep(target: any, ...sources: any[]): any {
  * @param value
  * @returns
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isClassInstance(value: any): boolean {
-  return (
-    typeof value?.constructor === "function" && value.constructor !== Object
-  );
+export function isClassInstance(value: unknown): boolean {
+  const constructor = (value as { constructor?: unknown } | null | undefined)
+    ?.constructor;
+  return typeof constructor === "function" && constructor !== Object;
 }

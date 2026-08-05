@@ -3,10 +3,10 @@ import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { PermissionService, SecurityService } from "@bluelibs/security-bundle";
 
 export type SecureGraphQLResolver<T> = (
-  _,
-  args,
+  _: unknown,
+  args: unknown,
   ctx: IGraphQLContext,
-  ast
+  ast: unknown
 ) => T | Promise<T>;
 
 export type SecureRuleType = {
@@ -17,7 +17,7 @@ export type SecureRuleType = {
   /**
    * Run additional security validations if the match exists
    */
-  run?: SecureGraphQLResolver<any>[];
+  run?: SecureGraphQLResolver<unknown>[];
 };
 
 @Service()
@@ -29,9 +29,9 @@ export class XGraphQLSecurityService {
 
   async secure(
     rules: SecureRuleType | SecureRuleType[],
-    args: any,
+    args: unknown,
     ctx: IGraphQLContext,
-    ast: any
+    ast: unknown
   ) {
     if (!Array.isArray(rules)) {
       return this.secure(rules, args, ctx, ast);

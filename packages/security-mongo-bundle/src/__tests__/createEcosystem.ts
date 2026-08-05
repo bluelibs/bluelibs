@@ -16,7 +16,9 @@ export const container = kernel.container;
 // data mid-test. Scoping the database per worker keeps the files independent.
 const databaseName = `test_${process.env.JEST_WORKER_ID ?? "local"}`;
 
-export async function createEcosystem(init?: any): Promise<{
+export async function createEcosystem(
+  init?: () => void | Promise<void>
+): Promise<{
   container: ContainerInstance;
   teardown: () => Promise<void>;
   cleanup: () => Promise<void>;

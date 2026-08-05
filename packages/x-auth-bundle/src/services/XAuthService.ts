@@ -1,6 +1,9 @@
 import { randomInt } from "crypto";
 import { SecurityService, UserId } from "@bluelibs/security-bundle";
-import { PasswordService } from "@bluelibs/password-bundle";
+import {
+  IPasswordAuthenticationStrategy,
+  PasswordService,
+} from "@bluelibs/password-bundle";
 import { EmailService } from "@bluelibs/email-bundle";
 import { Service, Inject, ContainerInstance } from "@bluelibs/core";
 import { InvalidPasswordException } from "../exceptions/InvalidPasswordException";
@@ -66,7 +69,7 @@ export class XAuthService implements IXAuthService {
    */
   async register(
     input: RegistrationInput
-  ): Promise<{ token: string; userId: UserId }> {
+  ): Promise<{ token: string | null; userId: UserId }> {
     const existingUserId = await this.passwordService.findUserIdByUsername(
       input.email
     );
@@ -164,7 +167,7 @@ export class XAuthService implements IXAuthService {
     }
   }
 
-  async logout(token) {
+  async logout(token: string) {
     await this.securityService.logout(token);
   }
 
@@ -249,12 +252,13 @@ export class XAuthService implements IXAuthService {
       }
     }
 
-    const result = await this.securityService.findThroughAuthenticationStrategy(
-      PASSWORD_STRATEGY,
-      {
-        emailVerificationToken: input.token,
-      }
-    );
+    const result =
+      await this.securityService.findThroughAuthenticationStrategy<IPasswordAuthenticationStrategy>(
+        PASSWORD_STRATEGY,
+        {
+          emailVerificationToken: input.token,
+        }
+      );
 
     if (!result) {
       throw new InvalidTokenException({
@@ -371,7 +375,12 @@ export class XAuthService implements IXAuthService {
     return b.join("");
   }
 
-  async requestLoginLink(input: RequestLoginLinkInput): Promise<any> {
+  async requestLoginLink(input: RequestLoginLinkInput): Promise<{
+    magicCodeSent: boolean;
+    userId: UserId;
+    method?: "email" | "sms" | "phonecall";
+    confirmationFormat?: "token" | "code" | "qrCode";
+  }> {
     const userId = input.userId
       ? new ObjectId(input.userId)
       : await this.passwordService.findUserIdByUsername(input.username);

@@ -7,6 +7,9 @@ export class FacebookAuthenticator extends PassportAuthenticator {
     this.app.get("/auth/facebook", passport.authenticate("facebook"));
     this.get("/auth/facebook/callback", {}, async (_err, user, _req, res) => {
       // create the token using the user._id
+      if (!user?._id) {
+        throw new Error("Expected an authenticated Facebook user with an _id");
+      }
       const token = await this.getToken(user._id);
       res.cookie("bluelibs-token", token);
       res.json({ hello: "goodbye ", token });
@@ -29,7 +32,8 @@ export class FacebookAuthenticator extends PassportAuthenticator {
           // You can customise the name by overriding get name()
 
           if (isNew) {
-            this.securityService.updateUser(user._id, {
+            // A newly created user is always persisted with an id.
+            this.securityService.updateUser(user._id!, {
               // other things
             });
           }

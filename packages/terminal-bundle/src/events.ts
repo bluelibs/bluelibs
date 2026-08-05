@@ -17,7 +17,7 @@ export interface IBeforePromptEventData {
 }
 
 export interface IAfterPromptEventData extends IBeforePromptEventData {
-  value: any;
+  value: unknown;
 }
 
 export class BeforePromptEvent extends Event<IBeforePromptEventData> {}

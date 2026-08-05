@@ -1,8 +1,14 @@
-import { AggregateOptions, ClientSession, Collection } from "mongodb";
-import { Filter as FilterQuery } from "mongodb";
+import {
+  AggregateOptions,
+  ClientSession,
+  Collection,
+  Document,
+  Filter as FilterQuery,
+  Hint,
+} from "mongodb";
 
 export interface IToArrayable {
-  toArray(): Promise<any[]>;
+  toArray(): Promise<unknown[]>;
 }
 
 export interface IQueryContext {
@@ -18,8 +24,10 @@ export interface ISecureOptions<T = null> {
   /**
    * Enforce filters
    */
+  // why: Filter<T> is invariant; only FilterQuery<any> accepts the filter of a
+  // generic T, and in the null case the filter is arbitrary user input anyway.
   filters?: T extends null ? FilterQuery<any> : FilterQuery<AnyifyFieldsWithIDs<T>>;
-  options?: any;
+  options?: IQueryOptions<T>;
   /**
    * This gets deeply merged with the body (useful for $ argument)
    */
@@ -27,7 +35,7 @@ export interface ISecureOptions<T = null> {
 }
 
 export interface IAstToQueryOptions<T = null> extends ISecureOptions<T> {
-  embody?(body: QueryBodyType<T>, getArguments: (path: string) => any);
+  embody?(body: QueryBodyType<T>, getArguments: (path: string) => Record<string, unknown>);
 }
 
 export interface IStorageData {
@@ -37,7 +45,7 @@ export interface IStorageData {
 }
 
 export interface IFindOptions {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -45,14 +53,16 @@ export interface IFindOptions {
  * @deprecated
  */
 export interface ICollection {
-  aggregate: any;
-  collectionName: any;
+  aggregate: Collection["aggregate"];
+  collectionName: string;
 }
 
 export type HardwiredFiltersOptions = {
-  filters?: FilterQuery<any>;
+  filters?: FilterQuery<Document>;
 };
 export interface ILinkCollectionOptions {
+  // why: the linked collection is typed by the user; Collection<T> is not
+  // assignable to Collection<Document>, so it has to stay Collection<any>.
   collection: () => Collection<any>;
   field?: string;
   foreignField?: string;
@@ -63,14 +73,18 @@ export interface ILinkCollectionOptions {
    */
   inversedBy?: string;
   index?: boolean;
-  filters?: FilterQuery<any> | ((options: HardwiredFiltersOptions) => FilterQuery<any>);
+  filters?: FilterQuery<Document> | ((options: HardwiredFiltersOptions) => FilterQuery<Document>);
 }
 
-type AnyObject = { [key: string]: any };
-export interface IReducerOption<ReturnType = any, ParamsType = AnyObject, ParentType = any> {
+export type AnyObject = { [key: string]: unknown };
+export interface IReducerOption<
+  ReturnType = unknown,
+  ParamsType = AnyObject,
+  ParentType = unknown,
+> {
   dependency: DeepOmit<QueryBodyType, "$">;
-  pipeline?: any[] | ((context: IQueryContext) => any[]);
-  projection?: any;
+  pipeline?: Document[] | ((context: IQueryContext) => Document[]);
+  projection?: Document;
   reduce?: (
     object: ParentType,
     params?: { context: IQueryContext } & ParamsType
@@ -93,7 +107,7 @@ export interface IFieldMapOptions {
   [key: string]: string;
 }
 
-export type ValueOrValueResolver<T> = T | ((...args: any[]) => T);
+export type ValueOrValueResolver<T> = T | ((...args: unknown[]) => T);
 
 /**
  * @deprecated Use QueryBody type instead to ensure type safety.
@@ -108,7 +122,7 @@ export interface IQueryBody {
     | ICollectionQueryConfig
     | ValueOrValueResolver<ICollectionQueryConfig>;
 }
-export interface IQueryOptions<T = any> extends AggregateOptions {
+export interface IQueryOptions<T = Document> extends AggregateOptions {
   limit?: number;
   skip?: number;
   sort?:
@@ -123,7 +137,7 @@ export interface IQueryOptions<T = any> extends AggregateOptions {
    * It will be forwarded to the MongoDB driver when Nova executes the aggregation
    * pipeline corresponding to this node.
    */
-  hint?: any;
+  hint?: Hint;
   projection?:
     | {
         [key in keyof T]?: number | boolean;
@@ -131,10 +145,11 @@ export interface IQueryOptions<T = any> extends AggregateOptions {
     | { [key: string]: number | boolean };
 }
 
-export interface ICollectionQueryConfig<T = any> {
+export interface ICollectionQueryConfig<T = Document> {
+  // why: Filter<T> is invariant; only FilterQuery<any> accepts the filter of a generic T.
   filters?: T extends null ? FilterQuery<any> : FilterQuery<AnyifyFieldsWithIDs<T>>;
   options?: IQueryOptions<T>;
-  pipeline?: any[];
+  pipeline?: Document[];
 }
 
 /**
@@ -147,7 +162,7 @@ type BodyCustomise<T = null> = {
   $?: ICollectionQueryConfig<T>;
   $context?: IQueryContext;
   /** @deprecated No longer used */
-  $schema?: any;
+  $schema?: unknown;
   $all?: boolean;
 };
 
@@ -156,7 +171,7 @@ type SubBodyCustomise<T = null> = {
   $alias?: string;
   $all?: boolean;
   /** @deprecated No longer used */
-  $schema?: any;
+  $schema?: unknown;
 };
 
 type SimpleFieldValue =
@@ -166,12 +181,12 @@ type SimpleFieldValue =
   // This is the part where a reducer is involved and we pass params to it
   | {
       $: {
-        [key: string]: any;
+        [key: string]: unknown;
       };
     }
   // This is a type of projection operator
   | {
-      $filter: any;
+      $filter: Document;
     };
 // Nested field specification
 // | {
@@ -183,13 +198,14 @@ type Unpacked<T> = T extends (infer U)[] ? U : T;
 type HasID<T> = "_id" extends keyof Unpacked<T> ? true : false;
 
 export type AnyifyFieldsWithIDs<T> = {
+  // why: fields that themselves contain an _id must stay fully flexible (arbitrary filter), a mapped type cannot express that
   [K in keyof T]: true extends HasID<T[K]> ? any : T[K];
 };
 
 export type AnyBody = {
   $alias?: string;
   /** @deprecated */
-  $schema?: any;
+  $schema?: unknown;
   [key: string]: string | SimpleFieldValue | ValueOrValueResolver<ICollectionQueryConfig> | AnyBody;
 };
 
@@ -206,19 +222,26 @@ export type QueryBodyType<T = null> = BodyCustomise<T> &
 export type QuerySubBodyType<T = null> = SubBodyCustomise<T> &
   (T extends null ? AnyBody : RootSpecificBody<T>);
 
-type Primitive = string | ((...args: any[]) => any) | number | boolean | symbol | undefined | null;
+/**
+ * The value a field can hold in a query body: a projection flag, a projection
+ * operator, reducer params or a nested sub-body.
+ */
+export type FieldBodyType = SimpleFieldValue | QueryBodyType;
+
+type Primitive =
+  string | ((...args: unknown[]) => unknown) | number | boolean | symbol | undefined | null;
 
 type DeepOmitHelper<T, K extends keyof T> = {
   [P in K]: T[P] extends infer TP //extra level of indirection needed to trigger homomorhic behavior // distribute over unions
     ? TP extends Primitive
       ? TP // leave primitives and functions alone
-      : TP extends any[]
+      : TP extends unknown[]
         ? DeepOmitArray<TP, K> // Array special handling
         : DeepOmit<TP, K>
     : never;
 };
 
-type DeepOmitArray<T extends any[], K> = {
+type DeepOmitArray<T extends unknown[], K> = {
   [P in keyof T]: DeepOmit<T[P], K>;
 };
 

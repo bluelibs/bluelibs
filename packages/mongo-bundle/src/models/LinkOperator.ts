@@ -11,12 +11,10 @@ export type ID = ObjectId | MongoDB.ObjectId;
 
 export type DocumentWithID = { _id?: ID };
 
-type GenericObject = {
-  [key: string]: any;
-};
+type GenericObject = MongoDB.Document;
 
 type Linkable<T extends DocumentWithID = null> =
-  ID | (T extends null ? GenericObject : DeepPartial<T>);
+  ID | ((T extends null ? GenericObject : DeepPartial<T>) & DocumentWithID);
 
 type CleanOptionsType = {
   /**
@@ -49,10 +47,14 @@ export type Unpacked<T> = T extends (infer U)[] ? U : T;
  * This class allows you to properly play with relationships
  */
 export class LinkOperatorModel<T extends DocumentWithID = null> {
+  // why: the related collection is resolved from the linker's runtime metadata
+  // (LINK_STORAGE) and operates on documents of an arbitrary schema.
   protected relatedCollection: Collection<any>;
   protected linker: Linker;
 
   constructor(
+    // why: link operators read/write dynamic link-storage fields on collections
+    // of arbitrary document types.
     protected readonly collection: Collection<any>,
     protected readonly linkName: string
   ) {

@@ -1,5 +1,6 @@
 import { getEcosystem } from "../helpers";
 import { Collection } from "../../models/Collection";
+import { ObjectId } from "@bluelibs/ejson";
 import timestampable from "../../behaviors/timestampable";
 import blameable from "../../behaviors/blameable";
 
@@ -18,7 +19,7 @@ describe("Behaviors", () => {
 
     const behaviors = container.get(Behaviors);
 
-    const getQueryBody = (insertedId: any) => ({
+    const getQueryBody = (insertedId: ObjectId) => ({
       $: {
         filters: {
           _id: insertedId,
@@ -179,7 +180,7 @@ describe("Behaviors", () => {
 
     const behaviors = container.get(Behaviors);
 
-    const getQueryBody = (insertedId: any) => ({
+    const getQueryBody = (insertedId: ObjectId) => ({
       $: {
         filters: {
           _id: insertedId,

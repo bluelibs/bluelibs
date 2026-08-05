@@ -1,6 +1,7 @@
 import * as _ from "lodash";
 import applyReducers from "./computeReducers";
 import CollectionNode from "../nodes/CollectionNode";
+import { Document } from "mongodb";
 
 export default async (node: CollectionNode) => {
   storeOneResults(node, node.results);
@@ -9,7 +10,7 @@ export default async (node: CollectionNode) => {
   node.project();
 };
 
-export function storeOneResults(node: CollectionNode, sameLevelResults: any[]) {
+export function storeOneResults(node: CollectionNode, sameLevelResults: Document[]) {
   if (!sameLevelResults) {
     return;
   }

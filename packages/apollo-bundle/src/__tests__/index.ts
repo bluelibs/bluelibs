@@ -1,18 +1,23 @@
 import { Kernel, Bundle, ContainerInstance } from "@bluelibs/core";
 import { ApolloBundle } from "../ApolloBundle";
-import { Loader } from "@bluelibs/graphql-bundle";
+import { Loader, ILoadOptions } from "@bluelibs/graphql-bundle";
 import createApolloClient from "./apolloClientCreator";
 import { gql } from "@apollo/client";
 import { assert } from "chai";
 import { PubSub } from "graphql-subscriptions";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
+import { NextFunction, Request, Response } from "express";
 import fetch from "isomorphic-fetch";
+import { ApolloBundleConfigType } from "../defs";
 Object.assign(global, { WebSocket: require("ws") });
 let currentKernel: Kernel;
 
 async function createEcosystemWithInit(
-  loadable: any,
-  otherOptions: any = {}
+  loadable: ILoadOptions,
+  // `ApolloServerOptions` is a deep discriminated union; spreading it into the
+  // bundle constructor exceeds the type-instantiation depth limit, and no
+  // test in this file passes `apollo` options anyway.
+  otherOptions: Omit<ApolloBundleConfigType, "apollo"> = {}
 ): Promise<Kernel> {
   class MyBundle extends Bundle {
     async init() {
@@ -107,7 +112,7 @@ describe("ApolloBundle", () => {
 
                 return iterator;
               },
-              resolve: (payload: any) => {
+              resolve: (payload: unknown) => {
                 return payload;
               },
             },
@@ -170,7 +175,7 @@ describe("ApolloBundle", () => {
       {
         enableSubscriptions: false,
         middlewares: [
-          (_req: any, _res: any, next: any) => {
+          (_req: Request, _res: Response, next: NextFunction) => {
             inMiddleware = true;
             next();
           },
@@ -199,7 +204,11 @@ describe("ApolloBundle", () => {
           `,
         resolvers: {
           Query: {
-            something: (_: any, _args: any, ctx: any) => {
+            something: (
+              _: unknown,
+              _args: unknown,
+              ctx: { container: ContainerInstance }
+            ) => {
               try {
                 assert.instanceOf(ctx.container, ContainerInstance);
               } catch (e) {
@@ -291,7 +300,12 @@ describe("ApolloBundle", () => {
         `,
         resolvers: {
           Mutation: {
-            readFile: async (_root: any, args: any) => {
+            readFile: async (
+              _root: unknown,
+              args: {
+                file: Promise<{ createReadStream(): NodeJS.ReadableStream }>;
+              }
+            ) => {
               const file = await args.file;
               const stream = file.createReadStream();
               let size = 0;

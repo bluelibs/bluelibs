@@ -27,6 +27,8 @@ export const SessionCopyOptionsDefaults = {
 export class FSOperator {
   constructor(
     public readonly session: XSession,
+    // why: accepts any studio model to serve as the Handlebars template context
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public readonly model: any
   ) {}
 

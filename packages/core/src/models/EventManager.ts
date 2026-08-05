@@ -27,14 +27,17 @@ export class Event<T = null> {
 
 @Service()
 export class EventManager {
-  protected listeners = new Map<Constructor<Event<any>>, IListenerStorage[]>();
+  protected listeners = new Map<
+    Constructor<Event<unknown>>,
+    IListenerStorage[]
+  >();
   protected globalListeners: IListenerStorage[] = [];
 
   /**
    * Emit to all listeners of this event
    * @param data
    */
-  public async emit(event: Event<any>): Promise<void> {
+  public async emit(event: Event<unknown>): Promise<void> {
     await event.validate();
 
     const listeners = this.getListeners(
@@ -73,10 +76,13 @@ export class EventManager {
   ): EventManager {
     const listeners = this.getListeners(eventClass);
 
+    // why: storage is heterogeneous (handlers for any event type); the cast is safe because
+    // this manager only invokes them with events matching the class they were registered for
     listeners.push({
-      handler,
+      handler: handler as EventHandlerType<unknown>,
       order: options.order || 0,
-      filter: options.filter,
+      filter: options.filter as
+        ((event: Event<unknown>) => boolean) | undefined,
     });
 
     this.sortListeners(listeners);

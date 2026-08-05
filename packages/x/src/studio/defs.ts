@@ -3,7 +3,7 @@ import { UICollectionWriter } from "../writers/UICollectionWriter";
 import { UICollectionCRUDWriter } from "../writers/UICollectionCRUDWriter";
 
 export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends null ? any : DeepPartial<T[P]>;
+  [P in keyof T]?: T[P] extends null ? unknown : DeepPartial<T[P]>;
 };
 
 export type Resolvable<T> = T | (() => T) | string;
@@ -79,7 +79,7 @@ export type UIFieldConfigType =
         /**
          * The props passed to configuring the Ant component
          */
-        props?: any;
+        props?: unknown;
       };
     } & UIModeConfigType);
 

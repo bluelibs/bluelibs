@@ -7,7 +7,7 @@ export type EntityInfoType =
   | string
   | EntityClass<AnyEntity>
   | EntityClassGroup<AnyEntity>
-  | EntitySchema<any>;
+  | EntitySchema<AnyEntity>;
 
 export class MikroORMBundle extends Bundle<MikroORMBundleConfigType> {
   protected entities: EntityInfoType[] = [];

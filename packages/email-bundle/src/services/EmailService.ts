@@ -9,6 +9,7 @@ import {
   IEmailSendingTemplateConfig,
   IEmailBundleConfigDefaults,
   ITransporter,
+  SimpleObjectType,
 } from "../defs";
 import {
   EmailBeforeSendEvent,
@@ -36,7 +37,7 @@ export class EmailService {
    * Send the email
    * @param email
    */
-  async send<Props = any>(
+  async send<Props = SimpleObjectType>(
     emailTemplate: IEmailSendingTemplateConfig<Props>,
     mailOptions: MailOptions
   ): Promise<SentMessageInfo> {
@@ -49,7 +50,7 @@ export class EmailService {
     }
 
     await this.eventManager.emit(
-      new EmailBeforeRenderEvent({
+      new EmailBeforeRenderEvent<Props>({
         emailTemplate,
         mailOptions,
       })
@@ -58,7 +59,7 @@ export class EmailService {
     mailOptions.html = this.renderEmail(emailTemplate);
 
     await this.eventManager.emit(
-      new EmailBeforeSendEvent({
+      new EmailBeforeSendEvent<Props>({
         emailTemplate,
         mailOptions,
       })
@@ -73,7 +74,7 @@ export class EmailService {
       }
 
       await this.eventManager.emit(
-        new EmailSentEvent({
+        new EmailSentEvent<Props>({
           emailTemplate,
           mailOptions,
           response,
@@ -88,8 +89,8 @@ export class EmailService {
    * Extends email to render its component to html
    * @param email
    */
-  protected renderEmail(
-    emailTemplate: IEmailSendingTemplateConfig<any>
+  protected renderEmail<Props = SimpleObjectType>(
+    emailTemplate: IEmailSendingTemplateConfig<Props>
   ): string {
     return renderToStaticMarkup(
       React.createElement(emailTemplate.component, emailTemplate.props)
@@ -99,22 +100,22 @@ export class EmailService {
   /**
    * This method is used to apply the defaults specified in the bundle configuration
    */
-  protected applyDefaults(
-    emailTemplate: IEmailSendingTemplateConfig<any>,
+  protected applyDefaults<Props = SimpleObjectType>(
+    emailTemplate: IEmailSendingTemplateConfig<Props>,
     mailOptions: MailOptions
   ) {
     if (!mailOptions.from) {
       mailOptions.from = this.emailDefaults.from;
     }
     if (!emailTemplate.props) {
-      emailTemplate.props = {};
+      emailTemplate.props = {} as Props;
     }
     if (this.emailDefaults.props) {
       emailTemplate.props = Object.assign(
         {},
         this.emailDefaults.props,
         emailTemplate.props
-      );
+      ) as Props;
     }
   }
 }

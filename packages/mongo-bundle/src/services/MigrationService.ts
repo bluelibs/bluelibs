@@ -5,8 +5,8 @@ import {
 } from "../models/MigrationsCollection";
 
 export interface IMigrationConfig {
-  up: (container: ContainerInstance) => any;
-  down: (container: ContainerInstance) => any;
+  up: (container: ContainerInstance) => void | Promise<void>;
+  down: (container: ContainerInstance) => void | Promise<void>;
   version: number;
   name: string;
 }
@@ -77,7 +77,6 @@ export class MigrationService {
 
     // Upsert the doc
     await this.migrationsCollection.updateOne(
-      // @ts-expect-error - _id filter typed as ObjectId but we pass a string
       { _id: this.MIGRATION_STATUS_ID },
       { $set: newStatus },
       { upsert: true }
@@ -92,7 +91,6 @@ export class MigrationService {
     // Atomic upsert: when several workers boot against an empty migrations
     // collection, a find-then-insert race would collide with E11000.
     await this.migrationsCollection.updateOne(
-      // @ts-expect-error - _id filter typed as ObjectId but we pass a string
       { _id: this.MIGRATION_STATUS_ID },
       {
         $setOnInsert: {
@@ -105,7 +103,6 @@ export class MigrationService {
     );
 
     const status = await this.migrationsCollection.findOne({
-      // @ts-expect-error - _id filter typed as ObjectId but we pass a string
       _id: this.MIGRATION_STATUS_ID,
     });
 

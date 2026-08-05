@@ -5,7 +5,7 @@ import { XCronBundle } from "../XCronBundle";
 import { CronService } from "../services/CronService";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
 
-export async function createEcosystem(init?: any): Promise<{
+export async function createEcosystem(init?: () => unknown): Promise<{
   container: ContainerInstance;
   teardown: () => void;
   cleanup: () => Promise<void>;

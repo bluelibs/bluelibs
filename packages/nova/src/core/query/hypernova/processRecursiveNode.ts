@@ -1,5 +1,6 @@
 import * as _ from "lodash";
 import CollectionNode from "../nodes/CollectionNode";
+import { Document } from "mongodb";
 
 /**
  * This function is called only when the child collection can only be resolved by recursive fetch
@@ -9,7 +10,7 @@ import CollectionNode from "../nodes/CollectionNode";
  */
 export default async function processRecursiveNode(childCollectionNode: CollectionNode) {
   const parentResults = childCollectionNode.parent.results;
-  const allResults = [];
+  const allResults: Document[] = [];
   const linkStorageField = childCollectionNode.linkStorageField;
   const linkForeignStorageField = childCollectionNode.linkForeignStorageField;
   const linkName = childCollectionNode.name;

@@ -7,7 +7,7 @@ import { XUploader, AppFile, AppFileGroup } from "../uploads/XUploader";
 import { useState, useEffect } from "react";
 import { UploadFile } from "antd/lib/upload/interface";
 
-export type AdminFileGroupUploadProps = UploadProps<any> & {
+export type AdminFileGroupUploadProps = UploadProps & {
   value?: ObjectId;
   field: string;
 };

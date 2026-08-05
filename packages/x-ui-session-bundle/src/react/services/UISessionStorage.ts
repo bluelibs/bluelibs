@@ -24,7 +24,7 @@ export class UISessionStorage {
     }
   }
 
-  setItem(key: string, value: any) {
+  setItem(key: string, value: unknown) {
     this.storage.setItem(key, EJSON.stringify(value));
   }
 
@@ -58,7 +58,7 @@ export class UISessionStorage {
 class DummyLocalStorage implements Storage {
   length = 0;
   store: {
-    [key: string]: any;
+    [key: string]: string;
   } = {};
 
   clear(): void {

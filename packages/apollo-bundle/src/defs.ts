@@ -1,4 +1,4 @@
-import { ApolloServerOptions } from "@apollo/server";
+import { ApolloServerOptions, BaseContext } from "@apollo/server";
 import { ContainerInstance } from "@bluelibs/core";
 import * as express from "express";
 import { RequestHandler } from "express";
@@ -14,9 +14,9 @@ export type UploadOptions = {
 export type ApolloBundleConfigType = {
   port?: number;
   url?: string;
-  apollo?: ApolloServerOptions<any>;
+  apollo?: ApolloServerOptions<BaseContext>;
   enableSubscriptions?: boolean;
-  middlewares?: RequestHandler[];
+  middlewares?: (RequestHandler | RequestHandler[])[];
   routes?: IRouteType[];
   uploads?: false | UploadOptions;
   /**
@@ -35,8 +35,8 @@ export interface IRouteType {
     container: ContainerInstance,
     req: express.Request,
     res: express.Response,
-    next: any
-  ) => Promise<any>;
+    next: express.NextFunction
+  ) => Promise<unknown>;
 }
 
 export interface IGraphQLContext {
@@ -48,6 +48,6 @@ export interface IGraphQLContext {
    * Connection Parameters from Websocket
    */
   connectionParams: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }

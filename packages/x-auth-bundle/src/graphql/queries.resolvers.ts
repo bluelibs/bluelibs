@@ -18,14 +18,16 @@ export default (config: IXAuthBundleConfig) => {
     resolvers.me = [
       X.CheckLoggedIn(),
       (_, args, context, ast) => {
-        const userId = (context as any).userId;
+        const userId = (context as { userId?: string }).userId;
         const container = context.container as ContainerInstance;
 
+        // why: the query is GraphQL-driven and targets augmented/dynamic user
+        // fields (email, fullName) that are not part of the typed IUser shape
         const usersCollection = container.get<UsersCollection<any>>(
           USERS_COLLECTION_TOKEN
         );
 
-        return usersCollection.queryOneGraphQL(ast, {
+        return usersCollection.queryOneGraphQL<null>(ast, {
           filters: {
             _id: userId,
           },

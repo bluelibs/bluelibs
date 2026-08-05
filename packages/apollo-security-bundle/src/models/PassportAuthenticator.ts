@@ -1,5 +1,5 @@
 import { Service } from "@bluelibs/core";
-import { IUser, SecurityService } from "@bluelibs/security-bundle";
+import { IUser, SecurityService, UserId } from "@bluelibs/security-bundle";
 import passport from "passport";
 import * as express from "express";
 import { ApolloBundle } from "@bluelibs/apollo-bundle";
@@ -10,8 +10,8 @@ export type FindOrCreateResponse = {
 };
 
 export type EasyRouteCallback = (
-  err: any,
-  user: any,
+  err: unknown,
+  user: Partial<IUser> | undefined,
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -59,9 +59,13 @@ export abstract class PassportAuthenticator {
    */
   protected get(path: string, options: object, callback: EasyRouteCallback) {
     this.app.get(path, (req, res, next) => {
-      passport.authenticate(this.name, options, (err: any, user: any) => {
-        callback(err, user, req, res, next!);
-      })(req, res, next!);
+      passport.authenticate(
+        this.name,
+        options,
+        (err: unknown, user: Partial<IUser> | undefined) => {
+          callback(err, user, req, res, next!);
+        }
+      )(req, res, next!);
     });
   }
 
@@ -72,7 +76,7 @@ export abstract class PassportAuthenticator {
    * @returns
    */
   protected async findOrCreate(
-    profileId: any,
+    profileId: string | number,
     authenticationField?: string
   ): Promise<FindOrCreateResponse | undefined> {
     const name = this.name;
@@ -112,7 +116,7 @@ export abstract class PassportAuthenticator {
    * @param userId
    * @returns
    */
-  protected async getToken(userId: string): Promise<string> {
+  protected async getToken(userId: UserId): Promise<string> {
     return this.securityService.login(userId, {
       authenticationStrategy: this.name,
     });

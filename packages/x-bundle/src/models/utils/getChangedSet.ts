@@ -5,8 +5,11 @@ import { EJSON } from "@bluelibs/ejson";
  * @param old
  * @param update
  */
-export function getChangedSet(old, update): { [key: string]: any } {
-  const final: any = {};
+export function getChangedSet<T>(
+  old: Partial<T>,
+  update: Partial<T>
+): Partial<T> {
+  const final: Partial<T> = {};
   for (const key in update) {
     if (update[key] === old[key]) {
       continue;

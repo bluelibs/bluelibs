@@ -8,7 +8,7 @@ import {
   BehaviorType,
 } from "@bluelibs/mongo-bundle";
 import { DocumentMutationType, MESSENGER } from "../constants";
-import { IMessenger } from "../defs";
+import { IDType, IMessenger } from "../defs";
 import { getFields } from "../utils/getFields";
 export const LIVE_BEHAVIOR_MARKER = Symbol("HasLiveBehavior");
 
@@ -19,7 +19,7 @@ function shouldSkipLive(context) {
 const LiveDataInfoTransfer = Symbol("LiveDataInfoTransfer");
 
 export function Live(): BehaviorType {
-  return (collection: Collection<any>) => {
+  return (collection: Collection) => {
     collection[LIVE_BEHAVIOR_MARKER] = true;
 
     const messenger = collection.container.get<IMessenger>(MESSENGER);
@@ -37,7 +37,9 @@ export function Live(): BehaviorType {
         ];
 
         messenger.publish(channels, {
-          documentId: e.data._id,
+          // The event id is schema-derived and only statically unknown; the
+          // subscription protocol transports a document id on this channel.
+          documentId: e.data._id as IDType,
           mutationType: DocumentMutationType.INSERT,
         });
       }

@@ -38,7 +38,7 @@ export type ViewItemModel = {
   /**
    * The default value the form will initially have in (create) mode only
    */
-  defaultValue?: any;
+  defaultValue?: unknown;
 
   form?: {
     component: string;
@@ -125,7 +125,9 @@ export class UICRUDModel {
 
     this.studioCollection.getRelationshipsByUIMode(mode).forEach((r) => {
       let representedByObject = r.cleaned.representedBy;
-      let representedByField: any = { [r.cleaned.representedBy.id]: 1 };
+      let representedByField: Record<string, unknown> = {
+        [r.cleaned.representedBy.id]: 1,
+      };
       while (representedByObject.parent) {
         representedByField = {
           [representedByObject.parent.id]: representedByField,

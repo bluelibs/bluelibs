@@ -7,7 +7,7 @@ import { BeforePromptEvent, AfterPromptEvent } from "../events";
 @Service({
   transient: true,
 })
-export abstract class Inquirer<T = any> implements IInquirer<T> {
+export abstract class Inquirer<T = unknown> implements IInquirer<T> {
   /**
    * The reason we want to have the model in the class is because we want it hackable via events
    */
@@ -40,7 +40,9 @@ export abstract class Inquirer<T = any> implements IInquirer<T> {
     // Currently we do not support default values for "many"
     // This should be easily changeable in the future
     const newPrompt = {
-      default: this.model ? (this.model as any)[field] : null,
+      default: this.model
+        ? (this.model as unknown as Record<string, unknown>)[field]
+        : null,
       ...prompt,
     };
 
@@ -60,7 +62,7 @@ export abstract class Inquirer<T = any> implements IInquirer<T> {
       })
     );
 
-    (this.model as any)[field] = value;
+    (this.model as unknown as Record<string, unknown>)[field] = value;
   }
 
   filesMatching() {

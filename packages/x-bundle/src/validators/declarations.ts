@@ -23,7 +23,7 @@ declare module "yup" {
   }
 
   export type ObjectIdSchemaConstructor = {
-    new (...args: any[]): typeof ObjectIdSchema;
+    new (...args: unknown[]): typeof ObjectIdSchema;
   };
 
   export const objectId: () => typeof ObjectIdSchema;

@@ -649,7 +649,12 @@ describe("Main tests", function () {
           },
         },
         async reduce(obj) {
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -678,7 +683,7 @@ describe("Main tests", function () {
           name: 1,
         },
         async reduce(obj) {
-          return `${obj.name} world!`;
+          return `${(obj as { name: string }).name} world!`;
         },
       },
     });
@@ -706,7 +711,12 @@ describe("Main tests", function () {
         },
         async reduce(obj, { context }) {
           assert.equal(context.test, 1);
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -745,7 +755,12 @@ describe("Main tests", function () {
         },
         async reduce(obj, { context }) {
           assert.equal(context.test, 1);
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -787,7 +802,12 @@ describe("Main tests", function () {
           },
         },
         async reduce(obj) {
-          return `${obj.b.profile.firstName} ${obj.b.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              b: { profile: { firstName: string; lastName: string } };
+            }
+          ).b.profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -829,7 +849,12 @@ describe("Main tests", function () {
           },
         },
         reduce(obj) {
-          return `${obj.b.profile.firstName} ${obj.b.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              b: { profile: { firstName: string; lastName: string } };
+            }
+          ).b.profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -872,7 +897,12 @@ describe("Main tests", function () {
           },
         },
         reduce(obj) {
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -909,7 +939,7 @@ describe("Main tests", function () {
           notes: true,
         },
         async reduce(deal) {
-          return deal.notes?.length;
+          return (deal as { notes?: string[] }).notes?.length;
         },
       },
       hasNotes: {
@@ -917,7 +947,7 @@ describe("Main tests", function () {
           notesLength: true,
         },
         async reduce(deal) {
-          return deal.notesLength > 0;
+          return (deal as { notesLength: number }).notesLength > 0;
         },
       },
       sureItHasNotes: {
@@ -925,7 +955,7 @@ describe("Main tests", function () {
           hasNotes: true,
         },
         async reduce(deal) {
-          return deal.hasNotes === true; // Edited
+          return (deal as { hasNotes: boolean }).hasNotes === true; // Edited
         },
       },
     });
@@ -953,7 +983,7 @@ describe("Main tests", function () {
           inversedName: 1,
         },
         reduce(obj) {
-          return `prefix ${obj.inversedName}`;
+          return `prefix ${(obj as { inversedName: string }).inversedName}`;
         },
       },
       inversedName: {
@@ -963,7 +993,7 @@ describe("Main tests", function () {
           },
         },
         reduce(obj) {
-          return `inversed ${obj.profile.firstName}`;
+          return `inversed ${(obj as { profile: { firstName: string } }).profile.firstName}`;
         },
       },
     });
@@ -992,7 +1022,7 @@ describe("Main tests", function () {
           inversedName: 1,
         },
         reduce(obj) {
-          return `prefix ${obj.inversedName}`;
+          return `prefix ${(obj as { inversedName: string }).inversedName}`;
         },
       },
       inversedName: {
@@ -1002,7 +1032,7 @@ describe("Main tests", function () {
           },
         },
         reduce(obj) {
-          return `inversed ${obj.profile.firstName}`;
+          return `inversed ${(obj as { profile: { firstName: string } }).profile.firstName}`;
         },
       },
     });
@@ -1034,7 +1064,7 @@ describe("Main tests", function () {
           },
         },
         reduce(obj, params) {
-          return `${obj.profile.firstName} ${params.lastName}`;
+          return `${(obj as { profile: { firstName: string } }).profile.firstName} ${params.lastName}`;
         },
       },
     });
@@ -1069,7 +1099,12 @@ describe("Main tests", function () {
           },
         },
         reduce(obj) {
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });

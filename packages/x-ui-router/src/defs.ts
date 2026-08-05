@@ -11,11 +11,10 @@ export interface IRoute<T = IRouteParams, Q = IRouteParams> {
 }
 
 export type RouteMap = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: IRoute<any>;
+  [key: string]: IRoute;
 };
 
-export interface IRouteGenerationProps<T = any, Q = any> {
+export interface IRouteGenerationProps<T = IRouteParams, Q = IRouteParams> {
   params?: T;
   query?: Q;
 }

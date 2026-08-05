@@ -1,5 +1,5 @@
 import { Bundle } from "./Bundle";
-import { ContainerInstance } from "../di";
+import { ContainerInstance, ServiceIdentifier } from "../di";
 import {
   KernelBeforeInitEvent,
   KernelAfterInitEvent,
@@ -33,7 +33,7 @@ export const KernelDefaultParameters = {
 
 export class Kernel {
   readonly options: IKernelOptions;
-  readonly bundles: Bundle<any>[] = [];
+  readonly bundles: Bundle<unknown>[] = [];
   readonly parameters: IKernelParameters;
   readonly container: ContainerInstance;
   protected phase: KernelPhase = KernelPhase.DORMANT;
@@ -140,7 +140,7 @@ export class Kernel {
    * Useful function to hook in the initialisation of your application
    * @param handler
    */
-  public onInit(handler: (container: ContainerInstance) => any) {
+  public onInit(handler: (container: ContainerInstance) => void) {
     const manager = this.get<EventManager>(EventManager);
     if (this.phase === KernelPhase.INITIALISED) {
       handler(this.container);
@@ -166,7 +166,7 @@ export class Kernel {
   /**
    * @param bundles
    */
-  public addBundle(bundle: Bundle<any>) {
+  public addBundle(bundle: Bundle<unknown>) {
     if (this.phase === KernelPhase.FROZEN) {
       throw new KernelFrozenException();
     }
@@ -187,7 +187,7 @@ export class Kernel {
    * Add multiple bundles
    * @param bundles
    */
-  public addBundles(bundles: Bundle[]) {
+  public addBundles(bundles: Bundle<unknown>[]) {
     bundles.forEach((bundle) => this.addBundle(bundle));
   }
 
@@ -202,7 +202,7 @@ export class Kernel {
    * Returns the service by its id
    * @param serviceId
    */
-  public get<T = any>(serviceId: any) {
+  public get<T = unknown>(serviceId: ServiceIdentifier<T>) {
     return this.container.get<T>(serviceId);
   }
 

@@ -73,7 +73,8 @@ function DebounceSelect<
 
 type RemoteSelectFilterResolver = (searchValue) => any;
 
-export type RemoteSelectLazyProps = SelectProps<any> & {
+export type RemoteSelectLazyProps = SelectProps & {
+  // why: the collection's document type is unknown; `any` keeps every `Collection<T>` assignable
   collectionClass: Constructor<Collection<any>>;
   /**
    * This is recommended to be a reducer or a GraphQL resolver.
@@ -108,7 +109,7 @@ export function RemoteSelectLazy(props: RemoteSelectLazyProps) {
     }
   }
 
-  const collection: Collection<any> = use(collectionClass);
+  const collection = use(collectionClass);
 
   return (
     <DebounceSelect
@@ -176,7 +177,7 @@ function getDefaultLazyFilters(field, value: string) {
 function getLazyFilters(
   lazy: string | string[] | boolean | RemoteSelectFilterResolver,
   field: string,
-  value: any
+  value: string
 ) {
   if (lazy === undefined || value === "" || value === undefined) {
     return {};

@@ -5,7 +5,7 @@ import { QueryBodyType } from "../defs";
  * @mutates
  * @param document
  */
-export function cleanTypename(document: any, body: QueryBodyType) {
+export function cleanTypename(document: unknown, body: QueryBodyType) {
   if (!document) {
     return;
   }
@@ -16,17 +16,19 @@ export function cleanTypename(document: any, body: QueryBodyType) {
     return;
   }
 
+  const documentObj = document as Record<string, unknown>;
+
   if (typeof body === "object") {
     if (!body["__typename"]) {
-      delete document["__typename"];
+      delete documentObj["__typename"];
     }
   } else {
-    delete document["__typename"];
+    delete documentObj["__typename"];
   }
 
-  for (const key in document) {
-    if (typeof document[key] === "object") {
-      cleanTypename(document[key], body[key] as QueryBodyType);
+  for (const key in documentObj) {
+    if (typeof documentObj[key] === "object") {
+      cleanTypename(documentObj[key], body[key] as QueryBodyType);
     }
   }
 }

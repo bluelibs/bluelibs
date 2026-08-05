@@ -388,7 +388,7 @@ describe("Relational Filtering", () => {
         $(parent) {
           return {
             filters: {
-              directorId: parent._id,
+              directorId: (parent as { _id: unknown })._id,
             },
           };
         },

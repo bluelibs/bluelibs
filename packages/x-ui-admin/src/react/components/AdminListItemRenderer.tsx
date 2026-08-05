@@ -10,6 +10,7 @@ import * as _ from "lodash";
 const emptyValue = <>"N/A"</>;
 
 export type AdminListItemRendererProps = {
+  // why: a serialized field value can be a string, number, Date, ObjectId, file or array
   value: any;
   type:
     | "string"

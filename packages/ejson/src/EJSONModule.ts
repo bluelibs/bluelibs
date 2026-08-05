@@ -15,6 +15,7 @@ import { adjustTypesToJSONValue } from "./utils/adjustTypesToJSONValue";
 import { buildBuiltinConvertersFor } from "./utils/builtinConverters";
 import { ObjectId } from "./objectid";
 import { Base64 } from "./base64";
+import { EJSONable, EJSONConverter, EJSONEquals, JsonValue } from "./types";
 import {
   EJSONBatchDecodeOptions,
   EJSONBatchEncodeOptions,
@@ -22,26 +23,28 @@ import {
   EJSONBatchPayload,
   EJSONBatchSchema,
   EJSONBatchColumnSchema,
+  EJSONBatchColumnData,
+  EJSONBatchColumnPacked,
 } from "./batch";
 
 export class EJSONModule {
-  customTypes = new Map<string, (value: any) => any>();
-  private _converters = buildBuiltinConvertersFor(this);
+  customTypes = new Map<string, (value: JsonValue) => unknown>();
+  private _converters: EJSONConverter[] = buildBuiltinConvertersFor(this);
 
   // ----- Custom types -----
-  addType(name: string, factory: (value: any) => any) {
+  addType(name: string, factory: (value: JsonValue) => unknown) {
     if (this.customTypes.has(name)) {
       throw new Error(`Type ${name} already present`);
     }
     this.customTypes.set(name, factory);
   }
 
-  _isCustomType(obj: any) {
-    return (
+  _isCustomType(obj: unknown): boolean {
+    return Boolean(
       obj &&
-      isFunction(obj.toJSONValue) &&
-      isFunction(obj.typeName) &&
-      this.customTypes.has(obj.typeName())
+      isFunction((obj as EJSONable).toJSONValue) &&
+      isFunction((obj as EJSONable).typeName) &&
+      this.customTypes.has((obj as EJSONable).typeName())
     );
   }
 
@@ -54,18 +57,18 @@ export class EJSONModule {
     return this._converters;
   }
 
-  _adjustTypesToJSONValue(obj: any) {
+  _adjustTypesToJSONValue(obj: unknown) {
     return adjustTypesToJSONValue(obj, this._converters);
   }
 
   // ----- Serialization -----
-  toJSONValue(item: any) {
+  toJSONValue(item: unknown) {
     const changed = toJSONValueHelper(item, this._converters);
     if (changed !== undefined) {
       return changed;
     }
 
-    let newItem = item;
+    let newItem: unknown = item;
     if (isObject(item)) {
       newItem = this.clone(item);
       adjustTypesToJSONValue(newItem, this._converters);
@@ -73,11 +76,11 @@ export class EJSONModule {
     return newItem;
   }
 
-  _adjustTypesFromJSONValue(obj: any) {
+  _adjustTypesFromJSONValue(obj: unknown) {
     return adjustTypesFromJSONValue(obj, this._converters);
   }
 
-  _fromJSONValueInPlace(item: any) {
+  _fromJSONValueInPlace(item: unknown) {
     const changed = fromJSONValueHelper(item, this._converters);
     if (changed === item && isObject(item)) {
       adjustTypesFromJSONValue(changed, this._converters);
@@ -85,7 +88,7 @@ export class EJSONModule {
     return changed;
   }
 
-  fromJSONValue(item: any) {
+  fromJSONValue(item: unknown) {
     let changed = fromJSONValueHelper(item, this._converters);
     if (changed === item && isObject(item)) {
       changed = this.clone(item);
@@ -95,7 +98,7 @@ export class EJSONModule {
   }
 
   stringify(
-    item: any,
+    item: unknown,
     options?: { indent?: boolean | number | string; canonical?: boolean }
   ) {
     try {
@@ -105,8 +108,8 @@ export class EJSONModule {
         return canonicalStringify(json, options);
       }
       return JSON.stringify(json);
-    } catch (error: any) {
-      const isMaxStack = checkError.maxStack(error.message);
+    } catch (error: unknown) {
+      const isMaxStack = checkError.maxStack((error as Error).message);
       if (isMaxStack) {
         throw new Error("Converting circular structure to JSON");
       }
@@ -127,7 +130,7 @@ export class EJSONModule {
    * Convert an array of uniform, flat objects to a batch EJSON JSON value.
    * The encoder is schema-aware and may choose column encodings based on options.
    */
-  toBatchJSONValue<T = any>(
+  toBatchJSONValue<T = unknown>(
     rows: ReadonlyArray<T>,
     options?: EJSONBatchEncodeOptions
   ): EJSONBatchJSON {
@@ -148,14 +151,14 @@ export class EJSONModule {
     }
 
     // Infer keys and ensure uniform, flat objects
-    const first = rows[0] as any;
+    const first = rows[0] as Record<string, unknown>;
     if (typeof first !== "object" || first === null || Array.isArray(first)) {
       throw new Error("toBatchJSONValue expects array of flat objects");
     }
     const keys = keysOf(first);
     // Ensure every row has same keys and flat values (O(n*k) without extra arrays)
     for (let i = 1; i < rows.length; i++) {
-      const row = rows[i] as any;
+      const row = rows[i] as Record<string, unknown>;
       if (typeof row !== "object" || row === null || Array.isArray(row)) {
         throw new Error("toBatchJSONValue expects array of flat objects");
       }
@@ -170,26 +173,30 @@ export class EJSONModule {
     // Type inference helper
     const inferType = (
       k: string
-    ): { schema: EJSONBatchColumnSchema; encoder: (values: any[]) => any } => {
+    ): {
+      schema: EJSONBatchColumnSchema;
+      encoder: (values: unknown[]) => EJSONBatchColumnData;
+    } => {
       // find first non-null/undefined value
-      let firstVal: any = undefined;
+      let firstVal: unknown = undefined;
       for (let i = 0; i < rows.length; i++) {
-        const v = (rows[i] as any)[k];
+        const v = (rows[i] as Record<string, unknown>)[k];
         if (v !== null && v !== undefined) {
           firstVal = v;
           break;
         }
       }
-      const optional = rows.some(
-        (r: any) => r[k] === null || r[k] === undefined
-      );
-      const makeValues = (arr: any[]) => ({ v: arr });
+      const optional = rows.some((r) => {
+        const value = (r as Record<string, unknown>)[k];
+        return value === null || value === undefined;
+      });
+      const makeValues = (arr: unknown[]) => ({ v: arr });
 
       // If everything is null/undefined, type is null
       if (firstVal === undefined) {
         return {
           schema: { type: "null", optional: true },
-          encoder: (values: any[]) => ({ v: values.map(() => null) }),
+          encoder: (values: unknown[]) => ({ v: values.map(() => null) }),
         };
       }
 
@@ -204,7 +211,7 @@ export class EJSONModule {
       if (firstVal instanceof Date) {
         return {
           schema: { type: "date", optional },
-          encoder: (values: any[]) => ({
+          encoder: (values: unknown[]) => ({
             v: values.map((v) => (v == null ? null : (v as Date).getTime())),
           }),
         };
@@ -213,15 +220,17 @@ export class EJSONModule {
         // store as base64 strings per value
         return {
           schema: { type: "binary", optional },
-          encoder: (values: any[]) => ({
-            v: values.map((v) => (v == null ? null : Base64.encodeU8(v))),
+          encoder: (values: unknown[]) => ({
+            v: values.map((v) =>
+              v == null ? null : Base64.encodeU8(v as Uint8Array)
+            ),
           }),
         };
       }
       if (firstVal instanceof RegExp) {
         return {
           schema: { type: "regexp", optional },
-          encoder: (values: any[]) => ({
+          encoder: (values: unknown[]) => ({
             v: values.map((v) =>
               v == null
                 ? null
@@ -232,30 +241,35 @@ export class EJSONModule {
       }
       if (
         ObjectId.isValid(firstVal) ||
-        (firstVal && firstVal._bsontype === "ObjectID")
+        (firstVal &&
+          (firstVal as { _bsontype?: unknown })._bsontype === "ObjectID")
       ) {
         const usePacked = !!opts.preferPackedObjectId;
         if (usePacked) {
           return {
             schema: { type: "objectId", optional, encoding: "packed" },
-            encoder: (values: any[]) => packObjectIds(values),
+            encoder: (values: unknown[]) => packObjectIds(values),
           };
         }
         return {
           schema: { type: "objectId", optional },
-          encoder: (values: any[]) => ({
+          encoder: (values: unknown[]) => ({
             v: values.map((v) =>
-              v == null ? null : new ObjectId(v).toString()
+              v == null
+                ? null
+                : new ObjectId(v as string | Uint8Array).toString()
             ),
           }),
         };
       }
       if (this._isCustomType(firstVal)) {
-        const typeName = (firstVal as any).typeName();
+        const typeName = (firstVal as EJSONable).typeName();
         return {
           schema: { type: "custom", optional, customTypeName: typeName },
-          encoder: (values: any[]) => ({
-            v: values.map((v) => (v == null ? null : (v as any).toJSONValue())),
+          encoder: (values: unknown[]) => ({
+            v: values.map((v) =>
+              v == null ? null : (v as EJSONable).toJSONValue()
+            ),
           }),
         };
       }
@@ -274,7 +288,7 @@ export class EJSONModule {
       return out;
     };
 
-    const packObjectIds = (values: any[]) => {
+    const packObjectIds = (values: unknown[]): EJSONBatchColumnPacked => {
       const nulls: number[] = [];
       // Count non-nulls to pre-allocate once
       let nn = 0;
@@ -286,27 +300,29 @@ export class EJSONModule {
         if (v == null) {
           nulls.push(i);
         } else {
-          const oid = v instanceof ObjectId ? v : new ObjectId(v);
+          const oid =
+            v instanceof ObjectId ? v : new ObjectId(v as string | Uint8Array);
           // copy 12 bytes
           bytes.set(oid.id, p);
           p += 12;
         }
       }
       const hex = toHex(bytes);
-      const payload: any = { packed: { hex, width: 12 } };
+      const payload: EJSONBatchColumnPacked = { packed: { hex, width: 12 } };
       if (nulls.length) payload.nulls = nulls;
       return payload;
     };
 
     const schema: EJSONBatchSchema = { columns: {}, order: keys.slice() };
-    const data: Record<string, any> = {};
+    const data: Record<string, EJSONBatchColumnData> = {};
 
     for (const k of keys) {
       const { schema: colSchema, encoder } = inferType(k);
       schema.columns[k] = colSchema;
       // Build column values in a single pass
-      const colValues: any[] = new Array(count);
-      for (let i = 0; i < count; i++) colValues[i] = (rows[i] as any)[k];
+      const colValues: unknown[] = new Array(count);
+      for (let i = 0; i < count; i++)
+        colValues[i] = (rows[i] as Record<string, unknown>)[k];
       const payload = encoder(colValues);
       if (
         colSchema.optional &&
@@ -332,7 +348,7 @@ export class EJSONModule {
   /**
    * Convert a batch EJSON JSON value back into an array of objects.
    */
-  fromBatchJSONValue<T = any>(
+  fromBatchJSONValue<T = unknown>(
     value: EJSONBatchJSON,
     options?: EJSONBatchDecodeOptions
   ): T[] {
@@ -340,9 +356,9 @@ export class EJSONModule {
     if (!value || typeof value !== "object" || !("$batch" in value)) {
       throw new Error("fromBatchJSONValue expects a {$batch: ...} object");
     }
-    const { schema, count, data } = (value as any).$batch as EJSONBatchPayload;
+    const { schema, count, data } = value.$batch;
     const order = schema.order || Object.keys(schema.columns);
-    const rows: any[] = new Array(count);
+    const rows: Array<Record<string, unknown>> = new Array(count);
     for (let i = 0; i < count; i++) rows[i] = {};
 
     const fromHexBulk = (hex: string): Uint8Array => {
@@ -357,24 +373,22 @@ export class EJSONModule {
     };
 
     for (const k of order) {
-      const colSchema = schema.columns[k] as EJSONBatchColumnSchema;
+      const colSchema = schema.columns[k];
       const colData = data[k];
       switch (colSchema.type) {
         case "string":
         case "number":
         case "boolean":
         case "null": {
-          const v =
-            colData && "v" in colData
-              ? (colData as any).v
-              : new Array(count).fill(null);
+          const v: unknown[] =
+            colData && "v" in colData ? colData.v : new Array(count).fill(null);
           for (let i = 0; i < count; i++) rows[i][k] = v[i];
           break;
         }
         case "date": {
           const v: Array<number | null> =
             colData && "v" in colData
-              ? (colData as any).v
+              ? (colData.v as Array<number | null>)
               : new Array(count).fill(null);
           for (let i = 0; i < count; i++)
             rows[i][k] = v[i] == null ? null : new Date(v[i] as number);
@@ -383,10 +397,10 @@ export class EJSONModule {
         case "regexp": {
           const v: Array<{ source: string; flags: string } | null> =
             colData && "v" in colData
-              ? (colData as any).v
+              ? (colData.v as Array<{ source: string; flags: string } | null>)
               : new Array(count).fill(null);
           for (let i = 0; i < count; i++) {
-            const entry: any = v[i];
+            const entry = v[i];
             rows[i][k] =
               entry == null ? null : new RegExp(entry.source, entry.flags);
           }
@@ -395,16 +409,14 @@ export class EJSONModule {
         case "objectId": {
           if (colSchema.encoding === "packed") {
             const packed =
-              colData && "packed" in colData
-                ? (colData as any).packed
-                : undefined;
+              colData && "packed" in colData ? colData.packed : undefined;
             const width = packed?.width || 12;
             const hex: string = packed && packed.hex ? packed.hex : "";
             const all = fromHexBulk(hex);
             let ptr = 0;
             // Use pointer over sorted array of nulls to avoid Set overhead
             const nullsArr: number[] =
-              colData && colData.nulls ? (colData.nulls as number[]) : [];
+              colData && colData.nulls ? colData.nulls : [];
             let np = 0;
             for (let i = 0; i < count; i++) {
               if (np < nullsArr.length && nullsArr[np] === i) {
@@ -419,7 +431,7 @@ export class EJSONModule {
           } else {
             const v: Array<string | null> =
               colData && "v" in colData
-                ? (colData as any).v
+                ? (colData.v as Array<string | null>)
                 : new Array(count).fill(null);
             for (let i = 0; i < count; i++)
               rows[i][k] = v[i] == null ? null : new ObjectId(v[i] as string);
@@ -429,7 +441,7 @@ export class EJSONModule {
         case "binary": {
           const v: Array<string | null> =
             colData && "v" in colData
-              ? (colData as any).v
+              ? (colData.v as Array<string | null>)
               : new Array(count).fill(null);
           for (let i = 0; i < count; i++) {
             const s = v[i];
@@ -445,9 +457,9 @@ export class EJSONModule {
             throw new Error(`Custom EJSON type ${typeName} is not defined`);
           }
           const factory = this.customTypes.get(typeName)!;
-          const v: Array<any | null> =
+          const v: Array<JsonValue | null> =
             colData && "v" in colData
-              ? (colData as any).v
+              ? (colData.v as Array<JsonValue | null>)
               : new Array(count).fill(null);
           for (let i = 0; i < count; i++)
             rows[i][k] = v[i] == null ? null : factory(v[i]);
@@ -464,7 +476,7 @@ export class EJSONModule {
   /**
    * Stringify a uniform array using batch encoding.
    */
-  stringifyBatch<T = any>(
+  stringifyBatch<T = unknown>(
     rows: ReadonlyArray<T>,
     options?: EJSONBatchEncodeOptions
   ): string {
@@ -480,7 +492,10 @@ export class EJSONModule {
   /**
    * Parse a previously batch-encoded string back into an array of objects.
    */
-  parseBatch<T = any>(item: string, options?: EJSONBatchDecodeOptions): T[] {
+  parseBatch<T = unknown>(
+    item: string,
+    options?: EJSONBatchDecodeOptions
+  ): T[] {
     if (typeof item !== "string") {
       throw new Error("EJSON.parseBatch argument should be a string");
     }
@@ -497,14 +512,14 @@ export class EJSONModule {
   }
 
   // ----- Helpers -----
-  isBinary(obj: any) {
+  isBinary(obj: unknown): obj is Uint8Array {
     return !!(
       (typeof Uint8Array !== "undefined" && obj instanceof Uint8Array) ||
-      (obj && obj.$Uint8ArrayPolyfill)
+      (obj && (obj as { $Uint8ArrayPolyfill?: unknown }).$Uint8ArrayPolyfill)
     );
   }
 
-  equals(a: any, b: any, options?: { keyOrderSensitive?: boolean }) {
+  equals(a: unknown, b: unknown, options?: { keyOrderSensitive?: boolean }) {
     let i: number;
     const keyOrderSensitive = !!(options && options.keyOrderSensitive);
     if (a === b) {
@@ -533,11 +548,11 @@ export class EJSONModule {
       }
       return true;
     }
-    if (isFunction(a.equals)) {
-      return a.equals(b, options);
+    if (isFunction((a as EJSONEquals).equals)) {
+      return (a as EJSONEquals).equals(b, options);
     }
-    if (isFunction(b.equals)) {
-      return b.equals(a, options);
+    if (isFunction((b as EJSONEquals).equals)) {
+      return (b as EJSONEquals).equals(a, options);
     }
     if (a instanceof Array) {
       if (!(b instanceof Array)) {
@@ -547,7 +562,7 @@ export class EJSONModule {
         return false;
       }
       for (i = 0; i < a.length; i++) {
-        if (!this.equals(a[i], b[i], options)) {
+        if (!this.equals((a as unknown[])[i], (b as unknown[])[i], options)) {
           return false;
         }
       }
@@ -567,8 +582,8 @@ export class EJSONModule {
     }
     // fall back to structural equality of objects
     let ret: boolean;
-    const aKeys = keysOf(a);
-    const bKeys = keysOf(b);
+    const aKeys = keysOf(a as object);
+    const bKeys = keysOf(b as object);
     if (keyOrderSensitive) {
       i = 0;
       ret = aKeys.every((key) => {
@@ -578,7 +593,13 @@ export class EJSONModule {
         if (key !== bKeys[i]) {
           return false;
         }
-        if (!this.equals(a[key], b[bKeys[i]], options)) {
+        if (
+          !this.equals(
+            (a as Record<string, unknown>)[key],
+            (b as Record<string, unknown>)[bKeys[i]],
+            options
+          )
+        ) {
           return false;
         }
         i++;
@@ -587,10 +608,16 @@ export class EJSONModule {
     } else {
       i = 0;
       ret = aKeys.every((key) => {
-        if (!hasOwn(b, key)) {
+        if (!hasOwn(b as object, key)) {
           return false;
         }
-        if (!this.equals(a[key], b[key], options)) {
+        if (
+          !this.equals(
+            (a as Record<string, unknown>)[key],
+            (b as Record<string, unknown>)[key],
+            options
+          )
+        ) {
           return false;
         }
         i++;
@@ -600,8 +627,7 @@ export class EJSONModule {
     return ret && i === bKeys.length;
   }
 
-  clone(v: any) {
-    let ret: any;
+  clone(v: unknown) {
     if (!isObject(v)) {
       return v;
     }
@@ -614,31 +640,34 @@ export class EJSONModule {
     if (v instanceof RegExp) {
       return v;
     }
-    if (ObjectId.isValid(v) || v._bsontype === "ObjectID") {
-      return new ObjectId(v.toString());
+    if (
+      ObjectId.isValid(v) ||
+      (v as { _bsontype?: unknown })._bsontype === "ObjectID"
+    ) {
+      return new ObjectId((v as { toString(): string }).toString());
     }
     if (this.isBinary(v)) {
-      ret = this.newBinary(v.length);
+      const ret = this.newBinary(v.length);
       for (let i = 0; i < v.length; i++) {
         ret[i] = v[i];
       }
       return ret;
     }
     if (Array.isArray(v)) {
-      return v.map((x) => this.clone(x));
+      return (v as unknown[]).map((x) => this.clone(x));
     }
     if (isArguments(v)) {
       return Array.from(v).map((x) => this.clone(x));
     }
-    if (isFunction((v as any).clone)) {
-      return (v as any).clone();
+    if (isFunction((v as { clone?: unknown }).clone)) {
+      return (v as { clone(): unknown }).clone();
     }
     if (this._isCustomType(v)) {
       return this.fromJSONValue(this.clone(this.toJSONValue(v)));
     }
-    ret = {} as any;
-    keysOf(v).forEach((key) => {
-      ret[key] = this.clone(v[key]);
+    const ret: Record<string, unknown> = {};
+    keysOf(v as object).forEach((key) => {
+      ret[key] = this.clone((v as Record<string, unknown>)[key]);
     });
     return ret;
   }
@@ -648,11 +677,11 @@ export class EJSONModule {
       typeof Uint8Array === "undefined" ||
       typeof ArrayBuffer === "undefined"
     ) {
-      const ret: any = [];
+      const ret: number[] = [];
       for (let i = 0; i < len; i++) {
         ret.push(0);
       }
-      (ret as any).$Uint8ArrayPolyfill = true;
+      (ret as { $Uint8ArrayPolyfill?: boolean }).$Uint8ArrayPolyfill = true;
       return ret;
     }
     return new Uint8Array(new ArrayBuffer(len));

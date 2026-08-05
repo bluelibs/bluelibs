@@ -4,7 +4,7 @@ import { CronsCollection } from "../collections/Crons.collection";
 import { parse, schedule, ScheduleData, date } from "later";
 import { LoggerService } from "@bluelibs/logger-bundle";
 
-type IntentFunction = (intendedAt: Date) => any;
+type IntentFunction = (intendedAt: Date) => void | Promise<void>;
 
 @Service()
 export class CronService {

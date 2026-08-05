@@ -65,7 +65,12 @@ export class UICollectionModel {
     return this.studioCollection.relations.some((r) => r.isFileRelated());
   }
 
-  links(): any[] {
+  links(): Array<{
+    collectionClass: string;
+    name: string;
+    many: boolean;
+    field?: string;
+  }> {
     // const isNotFile = (relation: Relation) => !relation.isFileRelated();
 
     const directLinks = this.studioCollection.relations

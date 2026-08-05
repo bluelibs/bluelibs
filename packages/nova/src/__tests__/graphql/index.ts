@@ -12,6 +12,7 @@ import { Collection } from "mongodb";
 import { SPECIAL_PARAM_FIELD } from "../../core/constants";
 import { enforceMaxLimit } from "../../core/graphql/astToQuery";
 import Query from "../../core/query/Query";
+import { QueryBodyType, IQueryOptions } from "../../core/defs";
 
 describe("GraphQL", function () {
   let A: Collection;
@@ -100,8 +101,9 @@ describe("GraphQL", function () {
     assert.instanceOf(query, Query);
 
     // console.log(query.body);
-    assert.isUndefined(query.body.b);
-    assert.isUndefined(query.body.profile.b);
+    const deniedBody = query.body as { b?: unknown; profile?: { b?: unknown } };
+    assert.isUndefined(deniedBody.b);
+    assert.isUndefined(deniedBody.profile.b);
   });
 
   it("#deny()", function () {
@@ -148,7 +150,7 @@ describe("GraphQL", function () {
   });
 
   it("#getMaxDepth()", function () {
-    let body: any = {
+    let body: QueryBodyType = {
       a: 1,
       b: 2,
     };
@@ -208,7 +210,7 @@ describe("GraphQL", function () {
   });
 
   it("#enforceMaxLimit()", function () {
-    let props: any = {
+    let props: { options?: IQueryOptions } = {
       options: {
         limit: 5,
       },

@@ -7,13 +7,14 @@ import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
 import { XPasswordService } from "../services/XPasswordService";
 import { ChangePasswordInput } from "../inputs/ChangePasswordInput";
 import { IXPasswordBundleConfig } from "../defs";
+import { IFunctionMap } from "@bluelibs/graphql-bundle";
 
 export default (config: IXPasswordBundleConfig) => {
   const {
     graphql: { mutations },
   } = config;
 
-  const resolvers: any = {};
+  const resolvers: IFunctionMap = {};
 
   if (mutations.register) {
     resolvers.register = [

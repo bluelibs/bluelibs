@@ -1,4 +1,9 @@
-import { Inject, ContainerInstance, Service } from "@bluelibs/core";
+import {
+  Inject,
+  ContainerInstance,
+  Service,
+  Constructor,
+} from "@bluelibs/core";
 import {
   MongoClient,
   Db,
@@ -6,6 +11,7 @@ import {
   UpdateFilter as UpdateQuery,
   TransactionOptions,
   ClientSession,
+  Document,
 } from "mongodb";
 import { MONGO_CONNECTION_OPTIONS, MONGO_URL } from "../constants";
 import { Collection } from "../models/Collection";
@@ -15,7 +21,7 @@ import { LoggerService } from "@bluelibs/logger-bundle";
 @Service()
 export class DatabaseService {
   public readonly client: MongoClient;
-  protected afterInitQueue = [];
+  protected afterInitQueue: Array<() => void> = [];
   protected _db: Db;
 
   constructor(
@@ -91,8 +97,10 @@ export class DatabaseService {
    * Retrieve the collection from the database service
    * @param collectionBaseClass The collection class
    */
-  getCollection(collectionBaseClass): Collection<any> {
-    return this.container.get<Collection<any>>(collectionBaseClass);
+  getCollection<T extends Collection = Collection>(
+    collectionBaseClass: Constructor<T>
+  ): T {
+    return this.container.get<T>(collectionBaseClass);
   }
 
   /**
@@ -138,10 +146,10 @@ export class DatabaseService {
   /**
    * @param mutator
    */
-  getFields(update: UpdateQuery<any>): IGetFieldsResponse {
+  getFields(update: UpdateQuery<Document>): IGetFieldsResponse {
     // compute modified fields
-    const fields = [];
-    const topLevelFields = [];
+    const fields: string[] = [];
+    const topLevelFields: string[] = [];
 
     for (const op in update) {
       const param = update[op];

@@ -7,7 +7,7 @@ export interface ICronConfig {
   schedule: (parser: ParseStatic) => ScheduleData;
   job: (container: ContainerInstance) => void | Promise<void>;
   persist?: boolean;
-  _timer?: any;
+  _timer?: { clear(): void };
 }
 
 export interface ICronEntry {
@@ -16,7 +16,7 @@ export interface ICronEntry {
   name: string;
   startedAt: Date;
   finishedAt?: Date;
-  result?: any;
+  result?: unknown;
 }
 
 export type XCronBundleConfigType = {

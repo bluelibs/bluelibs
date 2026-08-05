@@ -5,13 +5,12 @@ import {
   EventHandlerType,
   IEventHandlerOptions,
 } from "..";
-import { Inject } from "../di";
+import { Inject, ServiceIdentifier } from "../di";
 import { HandlerOptionsDefaults } from "./EventManager";
 
 // @Service() - Abstract classes should not be decorated as services
 // Subclasses will use @Service()
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export abstract class Listener implements Record<string, any> {
+export abstract class Listener {
   @Inject(() => EventManager)
   protected eventManager!: EventManager;
 
@@ -20,8 +19,7 @@ export abstract class Listener implements Record<string, any> {
 
   public init() {
     for (const member of getAllFuncs(this)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const method = this[member as keyof this] as any as EventHandlerType;
+      const method = this[member as keyof this] as unknown as EventHandlerType;
       // Not inherited
       const metadata = Reflect.getMetadata(eventHandlerMetadata, this, member);
       if (metadata) {
@@ -41,10 +39,10 @@ export abstract class Listener implements Record<string, any> {
    * @param handler This is the function that handles the event emission
    * @param options Options
    */
-  protected on(
-    eventClass: IEventConstructor,
-    handler: EventHandlerType,
-    options: IEventHandlerOptions = HandlerOptionsDefaults
+  protected on<T>(
+    eventClass: IEventConstructor<T>,
+    handler: EventHandlerType<T>,
+    options: IEventHandlerOptions<T> = HandlerOptionsDefaults
   ) {
     this.eventManager.addListener(eventClass, handler, options);
   }
@@ -53,7 +51,7 @@ export abstract class Listener implements Record<string, any> {
    * Returns the service by its id
    * @param serviceId
    */
-  public get<T = any>(serviceId: any): T {
+  public get<T = unknown>(serviceId: ServiceIdentifier<T>): T {
     return this.container.get<T>(serviceId);
   }
 }
@@ -69,15 +67,16 @@ export function On<T>(
 
 function getAllFuncs(toCheck: unknown): string[] {
   let props: string[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let obj: any = toCheck;
+  let obj: object | null = toCheck as object | null;
   do {
     props = props.concat(Object.getOwnPropertyNames(obj));
   } while ((obj = Object.getPrototypeOf(obj)));
 
   return props.sort().filter(function (e, i, arr) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (e != arr[i + 1] && typeof (toCheck as any)[e] == "function")
+    if (
+      e != arr[i + 1] &&
+      typeof (toCheck as Record<string, unknown>)[e] == "function"
+    )
       return true;
     return false;
   });

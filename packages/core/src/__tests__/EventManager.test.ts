@@ -129,7 +129,7 @@ describe("EventManager", () => {
     const manager = new EventManager();
     class UserAddedEvent extends Event<{ userId: string }> {}
 
-    const listener = (_e: Event<any>) => {
+    const listener = (_e: Event<unknown>) => {
       done("error");
     };
     manager.addGlobalListener(listener);

@@ -22,26 +22,26 @@ describe("XUICollectionsBundle", () => {
   });
 
   test("Transform", async () => {
-    class AppFileGroupsCollection extends Collection<any> {
+    class AppFileGroupsCollection extends Collection<unknown> {
       getName() {
         return "AppFileGroups";
       }
     }
 
-    class TestCollection extends Collection<any> {
+    class TestCollection extends Collection<Record<string, unknown>> {
       getName() {
         return "test";
       }
 
       // Return here how you want to transform certain fields
-      getTransformMap(): CollectionTransformMap<any> {
+      getTransformMap(): CollectionTransformMap<Record<string, unknown>> {
         return {
           createdAt: (v) => new Date(v),
           updatedAt: (v) => new Date(v),
         };
       }
 
-      getLinks(): CollectionLinkConfig<any>[] {
+      getLinks(): CollectionLinkConfig<Record<string, unknown>>[] {
         return [
           {
             collection: () => AppFileGroupsCollection,
@@ -58,7 +58,7 @@ describe("XUICollectionsBundle", () => {
 
     cleanTypename(data, richResponseBody);
     testCollection.transform(data);
-    let filtered: any[] = data.map((d) =>
+    let filtered: unknown[] = data.map((d) =>
       d.attachments?.files?.map((f) => f.thumbs)
     );
     filtered = filtered.flat(5);

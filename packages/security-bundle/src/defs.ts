@@ -14,6 +14,12 @@ export interface ISecurityBundleConfig {
 }
 export type UserId = number | string | ObjectId | Partial<ObjectId>;
 
+/**
+ * User records may carry strategy-specific fields beyond the known IUser shape
+ * (password/profile data, arbitrary attributes), so we allow extra keys.
+ */
+export type IUserData = Partial<IUser> & Record<string, unknown>;
+
 export interface IUser {
   _id?: UserId;
   isEnabled: boolean;
@@ -26,7 +32,7 @@ export interface IFieldMap {
   [key: string]: number;
 }
 export interface IPermissioning {
-  addPermission(userPermission: IPermission): any;
+  addPermission(userPermission: IPermission): Promise<void>;
 
   hasPermission(
     userId: UserId,
@@ -65,28 +71,28 @@ export interface IPermissioning {
 }
 
 export interface IUserPersistance<K extends IUser = IUser> {
-  insertUser(data): Promise<any>; // returns UserID
-  updateUser(userId, data): Promise<void>; // $set, returns void
-  deleteUser(userId): Promise<void>;
+  insertUser(data: IUserData): Promise<UserId>; // returns UserID
+  updateUser(userId: UserId, data: IUserData): Promise<void>; // $set, returns void
+  deleteUser(userId: UserId): Promise<void>;
 
-  findUser(filters, fields?: IFieldMap): Promise<K>;
+  findUser(filters: Record<string, unknown>, fields?: IFieldMap): Promise<K>;
   findUserById(userId: UserId, fields?: IFieldMap): Promise<K>;
 
-  findThroughAuthenticationStrategy<T = any>(
+  findThroughAuthenticationStrategy<T = unknown>(
     strategyName: string,
-    filters,
+    filters: Record<string, unknown>,
     fields?: IFieldMap
   ): Promise<null | FindAuthenticationStrategyResponse<T>>;
   removeAuthenticationStrategyData(
-    userId,
+    userId: UserId,
     authenticationStrategyName: string
   ): Promise<void>;
-  updateAuthenticationStrategyData<T = any>(
+  updateAuthenticationStrategyData<T = unknown>(
     userId: UserId,
     authenticationStrategyName: string,
     data: Partial<T>
   ): Promise<void>;
-  getAuthenticationStrategyData<T = any>(
+  getAuthenticationStrategyData<T = unknown>(
     userId: UserId,
     authenticationStrategyName: string,
     fields?: IFieldMap
@@ -107,11 +113,15 @@ export interface ISessionPersistance {
    * Returns the token newly generated
    * @param sessionData
    */
-  newSession(userId, expiresAt: Date, data?: any): Promise<string>;
+  newSession(
+    userId: UserId,
+    expiresAt: Date,
+    data?: ISessionData
+  ): Promise<string>;
   getSession(token: string): Promise<ISession>;
   deleteSession(token: string): Promise<void>;
   deleteAllSessionsForUser(userId: UserId): Promise<void>;
-  findSession(userId: UserId, data: any): Promise<ISession>;
+  findSession(userId: UserId, data: Partial<ISessionData>): Promise<ISession>;
   /**
    * Cleanup old, no longer available, expired tokens
    */
@@ -119,7 +129,7 @@ export interface ISessionPersistance {
 }
 
 export interface IPermissionPersistance {
-  insertPermission(permission: IPermission): Promise<any>;
+  insertPermission(permission: IPermission): Promise<void>;
   removePermission(filters: IPermissionSearchFilters): Promise<void>;
   countPermissions(filters: IPermissionSearchFilters): Promise<number>;
   findPermissions(search: IPermissionSearchFilters): Promise<IPermission[]>;
@@ -136,19 +146,19 @@ export interface IPermissionSearchFilter {
 }
 
 export interface IPermissionSearchFilters {
-  userId?: any[];
+  userId?: UserId[];
   permission?: string[];
   domain?: string[];
   domainIdentifier?: string[] | ObjectId[];
-  createdById?: any[];
+  createdById?: UserId[];
 }
 
 export interface IPermissionSearch {
-  userId?: any;
+  userId?: UserId;
   permission?: string;
   domain?: string;
   domainIdentifier?: string | ObjectId;
-  createdById?: any;
+  createdById?: UserId;
 }
 
 export interface IPermission {
@@ -176,30 +186,36 @@ export interface ISecurityService {
   /**
    * Returns userId
    */
-  createUser(data): Promise<any>;
-  updateUser(userId, data: object): Promise<void>;
-  deleteUser(userId): Promise<void>;
+  createUser(data?: IUserData): Promise<UserId>;
+  updateUser(userId: UserId, data: IUserData): Promise<void>;
+  deleteUser(userId: UserId): Promise<void>;
 
-  findUser(filters, fields?: IFieldMap): Promise<Partial<IUser>>;
+  findUser(
+    filters: Record<string, unknown>,
+    fields?: IFieldMap
+  ): Promise<Partial<IUser>>;
   findUserById(userId: UserId, fields?: IFieldMap): Promise<Partial<IUser>>;
 
-  login(userId, options: ICreateSessionOptions): Promise<string>;
+  login(userId: UserId, options: ICreateSessionOptions): Promise<string>;
   logout(userId: UserId): Promise<void>;
 
-  createSession(userId, options?: ICreateSessionOptions): Promise<string>;
-  getSession(token): Promise<ISession>;
+  createSession(
+    userId: UserId,
+    options?: ICreateSessionOptions
+  ): Promise<string>;
+  getSession(token: string): Promise<ISession>;
 
-  updateAuthenticationStrategyData<T = any>(
+  updateAuthenticationStrategyData<T = unknown>(
     userId: UserId,
     strategyName: string,
     data: Partial<T>
   ): Promise<void>;
-  findThroughAuthenticationStrategy<T = any>(
+  findThroughAuthenticationStrategy<T = unknown>(
     strategyName: string,
-    filters,
+    filters: Record<string, unknown>,
     fields?: IFieldMap
   ): Promise<null | FindAuthenticationStrategyResponse<T>>;
-  getAuthenticationStrategyData<T = any>(
+  getAuthenticationStrategyData<T = unknown>(
     userId: UserId,
     strategyName: string,
     fields?: IFieldMap
@@ -207,13 +223,13 @@ export interface ISecurityService {
   removeAuthenticationStrategyData(
     userId: UserId,
     strategyName: string
-  ): Promise<any>;
+  ): Promise<void>;
   isUserEnabled(userId: UserId): Promise<boolean>;
   enableUser(userId: UserId): Promise<void>;
   disableUser(userId: UserId): Promise<void>;
 }
 
-export interface FindAuthenticationStrategyResponse<T = any> {
+export interface FindAuthenticationStrategyResponse<T = unknown> {
   userId: UserId;
   strategy: T;
 }
@@ -223,7 +239,7 @@ export interface ICreateSessionOptions {
   /**
    * This is for storing additional data inside the token that we may need later
    */
-  data?: any;
+  data?: ISessionData;
   /**
    * npm package zeit/ms format
    */

@@ -10,6 +10,7 @@ type IChildrenContext = {
 };
 
 export const generateWrapperTree = (
+  // why: wrapper components accept heterogeneous React props; ComponentType is contravariant so unknown cannot hold them
   wrappers: WrapperComponentType<any>[],
   index = 0
 ): ReactElement | null => {
@@ -17,8 +18,7 @@ export const generateWrapperTree = (
 
   const wrapper = wrappers[index];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let props: any;
+  let props: unknown;
   if (typeof wrapper.props === "function") {
     props = wrapper.props();
   } else if (typeof wrapper.props === "object") {

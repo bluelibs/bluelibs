@@ -53,7 +53,7 @@ export class BaseModel<T = null> {
       return result;
     }
     if (typeof element === "function") {
-      return (element as () => any)();
+      return element();
     }
     return element;
   }

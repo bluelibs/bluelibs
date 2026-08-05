@@ -1,4 +1,4 @@
-import { QueryBodyType } from "../../defs";
+import { QueryBodyType, FieldBodyType } from "../../defs";
 import * as _ from "lodash";
 import { INode } from "./INode";
 import * as dot from "dot-object";
@@ -7,14 +7,14 @@ import { SPECIAL_PARAM_FIELD } from "../../constants";
 const PROJECTION_FIELDS = ["$filter"];
 
 export default class FieldNode implements INode {
-  public name: any;
-  public projectionOperator: any;
-  public body: number | QueryBodyType;
+  public name: string;
+  public projectionOperator: unknown;
+  public body: FieldBodyType;
   public isProjectionField: boolean;
   public subfields: FieldNode[] = [];
   public scheduledForDeletion: boolean = true;
 
-  constructor(name: string, body?: number | QueryBodyType) {
+  constructor(name: string, body?: FieldBodyType) {
     this.name = name;
     if (name.indexOf(".") > -1) {
       throw new Error(`Please specify the nested field as an object`);
@@ -27,19 +27,19 @@ export default class FieldNode implements INode {
     }
   }
 
-  public spread(body: any, scheduleForDeletion: boolean = false) {
+  public spread(body: FieldBodyType, scheduleForDeletion: boolean = false) {
     if (_.isObject(body)) {
       _.forEach(body, (fieldBody, fieldName) => {
         const subfield = this.getSubfield(fieldName);
         if (!subfield) {
-          const fieldNode = new FieldNode(fieldName, fieldBody);
+          const fieldNode = new FieldNode(fieldName, fieldBody as FieldBodyType);
           fieldNode.scheduledForDeletion = scheduleForDeletion;
           this.subfields.push(fieldNode);
         } else {
           if (subfield.scheduledForDeletion === true && scheduleForDeletion === false) {
             subfield.scheduledForDeletion = false;
           }
-          subfield.spread(fieldBody);
+          subfield.spread(fieldBody as FieldBodyType);
         }
       });
     }
@@ -88,7 +88,7 @@ export default class FieldNode implements INode {
    * Transforms ['a', 'b', 'c'] to { a: { b : { c: 1 }}}
    * @param parts
    */
-  public toQueryBody(parts: any[]): QueryBodyType {
+  public toQueryBody(parts: string[]): QueryBodyType {
     const object = {};
 
     let path = object;
@@ -104,7 +104,7 @@ export default class FieldNode implements INode {
    * We have fields like: 1, {}, { $: {...} }, { $filter: {...} }
    * @param body
    */
-  public static canBodyRepresentAField(body: any): boolean {
+  public static canBodyRepresentAField(body: FieldBodyType): boolean {
     if (body === 1 || body === true) {
       return true;
     }
@@ -128,13 +128,13 @@ export default class FieldNode implements INode {
     return false;
   }
 
-  public static isProjectionField(body: any) {
+  public static isProjectionField(body: FieldBodyType) {
     const keys = Object.keys(body);
 
     return keys.length === 1 && PROJECTION_FIELDS.includes(keys[0]);
   }
 
-  public getSubfield(name): FieldNode {
+  public getSubfield(name: string): FieldNode {
     return this.subfields.find((subfield) => subfield.name === name);
   }
 }

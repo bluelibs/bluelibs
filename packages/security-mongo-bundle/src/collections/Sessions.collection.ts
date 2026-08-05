@@ -1,6 +1,7 @@
 import { randomInt } from "crypto";
 import {
   ISession,
+  ISessionData,
   ISessionPersistance,
   UserId,
 } from "@bluelibs/security-bundle";
@@ -28,7 +29,7 @@ export class SessionsCollection
   async newSession(
     userId: UserId,
     expiresAt: Date,
-    data?: any
+    data?: ISessionData
   ): Promise<string> {
     const session = {
       token: generateToken(64),
@@ -71,16 +72,24 @@ export class SessionsCollection
     });
   }
 
-  async findSession(userId: UserId, data: any): Promise<ISession> {
+  async findSession(
+    userId: UserId,
+    data: Partial<ISessionData>
+  ): Promise<ISession> {
+    const sessionData = data as Record<string, unknown>;
+
     return this.findOne({
       userId,
       expiresAt: {
         $gte: new Date(),
       },
-      ...Object.keys(data).reduce((prev, key) => {
-        prev["data." + key] = data[key];
-        return prev;
-      }, {}),
+      ...Object.keys(sessionData).reduce(
+        (prev, key) => {
+          prev["data." + key] = sessionData[key];
+          return prev;
+        },
+        {} as Record<string, unknown>
+      ),
     });
   }
 }

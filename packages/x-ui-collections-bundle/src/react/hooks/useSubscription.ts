@@ -11,10 +11,10 @@ import { use } from "@bluelibs/x-ui-react-bundle";
  * @param observable
  */
 export function useSubscription<T>(
-  observableCreator: () => Observable<any>
+  observableCreator: () => Observable<T>
 ): [T[], boolean] {
   const [isReady, setIsReady] = useState(false);
-  const [dataSet, setDataSet] = useState<any[]>([]);
+  const [dataSet, setDataSet] = useState<T[]>([]);
 
   useEffect(() => {
     const observable = observableCreator();
@@ -39,7 +39,7 @@ export function useCollectionSubscription<T>(
 ): [T[], boolean] {
   const collection = use(collectionClass);
   const [isReady, setIsReady] = useState(false);
-  const [dataSet, setDataSet] = useState<any[]>([]);
+  const [dataSet, setDataSet] = useState<T[]>([]);
 
   useEffect(() => {
     const observable = collection.subscribe(body, options);

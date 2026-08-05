@@ -1,8 +1,9 @@
 import { QueryBodyType } from "@bluelibs/nova";
+import { IDType } from "../../defs";
 
 export class QueryInput {
   filters: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   options: QueryOptionsInput;
 }
@@ -17,8 +18,8 @@ export class QueryOptionsInput {
 }
 
 export class DocumentUpdateInput {
-  _id: any;
+  _id: IDType;
   modifier: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }

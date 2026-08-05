@@ -17,7 +17,7 @@ import { Service } from "@bluelibs/core";
 export class Loader {
   protected typeDefs: string[] = [];
   protected resolvers: IResolverMap[] = [];
-  protected schemas: any[] = [];
+  protected schemas: unknown[] = [];
   protected schemaDirectives: ISchemaDirectiveMap[] = [];
   protected contextReducers: IContextReducer[] = [];
 
@@ -53,7 +53,9 @@ export class Loader {
         commentDescriptions: true,
         reverseDirectives: true,
       }),
-      resolvers: mergeResolvers(resolvers as any) as unknown as IFunctionMapSimple,
+      resolvers: mergeResolvers(
+        resolvers as unknown as Parameters<typeof mergeResolvers>[0]
+      ) as unknown as IFunctionMapSimple,
       schemaDirectives: this.mergeSchemaDirectives(),
       contextReducers: this.contextReducers,
     };
@@ -87,7 +89,7 @@ export class Loader {
             for (const key in subscriptionResolvers) {
               const newResolver: Partial<SubscriptionResolver> = Object.assign(
                 {
-                  resolve: (payload: any) => payload,
+                  resolve: (payload: unknown) => payload,
                 },
                 subscriptionResolvers[key]
               );

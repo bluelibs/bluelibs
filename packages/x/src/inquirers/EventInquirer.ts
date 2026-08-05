@@ -12,7 +12,7 @@ export class EventInquirer extends Inquirer<EventModel> {
     await this.prompt(
       "eventName",
       Shortcuts.input("Enter the name of your event (eg: PostPublished)", {
-        validate(value: any) {
+        validate(value: string) {
           return Boolean(value);
         },
       })

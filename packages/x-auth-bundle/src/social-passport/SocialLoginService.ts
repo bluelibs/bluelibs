@@ -13,16 +13,30 @@ import {
   PROFILE_OBJECT_PATH,
 } from "./socialServiceConstants";
 import { PasswordService } from "@bluelibs/password-bundle";
-import { SecurityService } from "@bluelibs/security-bundle";
+import { SecurityService, IUser } from "@bluelibs/security-bundle";
 import {
   socialArrayPropsTypes,
   socialCustomConfigMapType,
   socialPropsTypes,
+  SocialAuthCallback,
+  SocialProfile,
+  SocialServiceConfigType,
+  SocialStrategyType,
 } from "./defs";
 import { MultipleFactorService } from "../multipleAuthFactor/MultipleFactorService";
+
+/**
+ * The shape we store on the request when the social login completes.
+ */
+type SocialAuthUser = { token?: string; redirectUrl?: string };
+
+/**
+ * User records may carry strategy-specific fields beyond the known IUser shape.
+ */
+type SocialUpdateBody = Partial<IUser> & Record<string, unknown>;
 @Service()
 export class SocialLoginService {
-  httpBundle;
+  httpBundle: HTTPBundle;
   constructor(
     protected readonly container: ContainerInstance,
     @Inject(X_AUTH_SETTINGS)
@@ -62,25 +76,18 @@ export class SocialLoginService {
 
     this.init();
   }
-  protected passport;
+  protected passport: typeof passport;
   protected socialCustomConfig: socialCustomConfigMapType =
     SOCIAL_CUSTOM_CONFIG;
   protected socialUniqueIds: socialPropsTypes = SOCIAL_UNIQUE_IDS;
   protected strategyNameMap: socialPropsTypes = STRATEGY_NAME_MAP;
-  protected importStrategyMap: socialPropsTypes = IMPORT_STRATEGY_MAP;
+  protected importStrategyMap: Record<string, string | SocialStrategyType> =
+    IMPORT_STRATEGY_MAP;
   protected fieldsValues: socialArrayPropsTypes = FIELD_FETCH_VALUES;
   protected profileObjectPath: socialArrayPropsTypes = PROFILE_OBJECT_PATH;
   protected returnRawData: boolean;
   protected url: string;
-  protected onSocialAuth: (
-    req,
-    type,
-    uniqueProperty,
-    accessToken,
-    refreshToken,
-    profile,
-    done
-  ) => any;
+  protected onSocialAuth: SocialAuthCallback;
 
   init() {
     //prepare the rest app for our passport
@@ -104,8 +111,8 @@ export class SocialLoginService {
     }
   }
 
-  setupService(service: string, setting: any) {
-    let passportSetup = {
+  setupService(service: string, setting: SocialServiceConfigType) {
+    let passportSetup: Record<string, unknown> = {
       clientID: setting.settings.clientID,
       clientSecret: setting.settings.clientSecret,
       callbackURL: this.url + setting.url.callback,
@@ -125,25 +132,18 @@ export class SocialLoginService {
       }
     }
     // if the strategy requires more variables than cleintId and secretId
-    if (
-      this.socialCustomConfig[service] &&
-      this.socialCustomConfig[service].extraCredentialsKeys
-    ) {
-      for (const varname in this.socialCustomConfig[service]
-        .extraCredentialsKeys) {
-        passportSetup[varname] =
-          this.socialCustomConfig[service].extraCredentialsKeys[varname](
-            setting
-          );
+    const extraCredentialsKeys = this.socialCustomConfig[service]
+      ?.extraCredentialsKeys as
+      Record<string, (setting: SocialServiceConfigType) => unknown> | undefined;
+    if (extraCredentialsKeys) {
+      for (const varname in extraCredentialsKeys) {
+        passportSetup[varname] = extraCredentialsKeys[varname](setting);
       }
     }
-    if (
-      this.socialCustomConfig[service] &&
-      this.socialCustomConfig[service].extraCredentialsKeys
-    ) {
+    if (extraCredentialsKeys) {
       passportSetup = {
         ...passportSetup,
-        ...this.socialCustomConfig[service].extraCredentialsKeys,
+        ...extraCredentialsKeys,
       };
     }
     // Execute the passport strategy
@@ -160,7 +160,7 @@ export class SocialLoginService {
                 )),
             [this.socialUniqueIds[service]]:
               profile[this.socialUniqueIds[service]],
-          };
+          } as SocialProfile;
           return this.onSocialAuth(
             req,
             service,
@@ -195,67 +195,73 @@ export class SocialLoginService {
       }),
       (req, res, _next) => {
         //here in our callback method we return return token of teh user
-        if (req.user.token)
-          res.redirect(setting.url?.success + "?token=" + req.user?.token);
-        else if (req.user.redirectUrl) {
-          res.redirect(req.user.redirectUrl);
+        const user = req.user as SocialAuthUser;
+        if (user.token)
+          res.redirect(setting.url?.success + "?token=" + user.token);
+        else if (user.redirectUrl) {
+          res.redirect(user.redirectUrl);
         } else res.redirect(setting.url.fail);
       }
     );
   }
 
-  preparseProfileData(service, profile) {
+  preparseProfileData(service: string, profile: SocialProfile): SocialProfile {
     const path =
       this.profileObjectPath[service] || this.profileObjectPath.default;
-    const profileData = path.reduce((prev, current) => prev[current], profile);
+    const profileData = path.reduce(
+      (prev, current) => prev[current] as SocialProfile,
+      profile
+    );
     return profileData;
   }
 
-  getStrategy(socialServie: any) {
+  getStrategy(socialServie: string): SocialStrategyType {
     if (typeof this.importStrategyMap[socialServie] == "string")
       // eslint-disable-next-line @typescript-eslint/no-var-requires -- strategies are loaded dynamically by name from config
-      return require(this.importStrategyMap[socialServie]).Strategy;
-    return this.importStrategyMap[socialServie];
+      return require(this.importStrategyMap[socialServie] as string).Strategy;
+    return this.importStrategyMap[socialServie] as SocialStrategyType;
   }
 
-  getProfileFields(profile: any) {
-    const cleanProfile: any = {};
+  getProfileFields(profile: SocialProfile): Record<string, unknown> {
+    const cleanProfile: Record<string, unknown> = {};
     const wantedFields = Object.keys(this.fieldsValues);
     for (const wantedField of wantedFields) {
-      const fieldValue: any = Object.keys(profile).find((profileKey) =>
+      const fieldValue = Object.keys(profile).find((profileKey) =>
         this.fieldsValues[wantedField].some((f: string) =>
           profileKey?.toLowerCase().includes(f?.toLowerCase())
         )
       );
+      if (fieldValue === undefined) continue;
+      const value = profile[fieldValue];
       //string
-      if (typeof profile[fieldValue] === "string")
-        cleanProfile[wantedField] = profile[fieldValue];
+      if (typeof value === "string") cleanProfile[wantedField] = value;
       //array
-      else if (Array.isArray(profile[fieldValue])) {
-        cleanProfile[wantedField] = profile[fieldValue][0];
+      else if (Array.isArray(value)) {
+        cleanProfile[wantedField] = value[0];
       }
     }
     return cleanProfile;
   }
 
   async defaultOnSocialAuth(
-    req,
-    service,
-    uniqueProperty,
-    accessToken,
-    refreshToken,
-    profile,
-    done
+    req: unknown,
+    service: string,
+    uniqueProperty: string,
+    accessToken: string,
+    refreshToken: string,
+    profile: SocialProfile,
+    done: (error: unknown, user?: unknown) => void
   ) {
-    let userId = await this.passwordService.findUserIdByUsername(profile.email);
-    let updateBody: any = {
-      socialAccounts: [{ service, id: profile[uniqueProperty] }],
+    const email = profile.email;
+    let userId = await this.passwordService.findUserIdByUsername(email);
+    let updateBody: SocialUpdateBody = {
+      socialAccounts: [{ service, id: profile[uniqueProperty] as string }],
     };
     if (!userId) {
       userId = await this.securityService.createUser();
       await this.passwordService.attach(userId, {
-        username: profile.email,
-        email: profile.email,
+        username: email,
+        email: email,
         password: profile.password,
         isEmailVerified: true,
       });

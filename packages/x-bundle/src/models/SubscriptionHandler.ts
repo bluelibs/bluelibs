@@ -18,9 +18,9 @@ export class SubscriptionHandler<
   protected _readyPromise: Promise<boolean>;
   protected _readyPromiseResolve: Callback;
 
-  public readonly addedCallbacks: OnDocumentAddedHandler[] = [];
+  public readonly addedCallbacks: OnDocumentAddedHandler<T>[] = [];
   public readonly changedCallbacks: OnDocumentChangedHandler<T>[] = [];
-  public readonly removedCallbacks: OnDocumentRemovedHandler[] = [];
+  public readonly removedCallbacks: OnDocumentRemovedHandler<T>[] = [];
   public readonly stopCallbacks: Callback[] = [];
 
   constructor(
@@ -32,11 +32,11 @@ export class SubscriptionHandler<
     });
   }
 
-  get collection(): Collection<any> {
+  get collection(): Collection<T> {
     return this.processor.collection;
   }
 
-  get documentStore(): DocumentStore<any> {
+  get documentStore(): DocumentStore<T> {
     return this.processor.documentStore;
   }
 
@@ -44,7 +44,7 @@ export class SubscriptionHandler<
     return this.documentStore.length;
   }
 
-  onAdded(handler: OnDocumentAddedHandler) {
+  onAdded(handler: OnDocumentAddedHandler<T>) {
     this.addedCallbacks.push(handler);
   }
 
@@ -52,7 +52,7 @@ export class SubscriptionHandler<
     this.changedCallbacks.push(handler);
   }
 
-  onRemoved(handler: OnDocumentRemovedHandler) {
+  onRemoved(handler: OnDocumentRemovedHandler<T>) {
     this.removedCallbacks.push(handler);
   }
 

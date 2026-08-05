@@ -15,7 +15,7 @@ export class CollectionInquirer extends Inquirer<CollectionModel> {
     await this.prompt(
       "collectionName",
       Shortcuts.input("Enter the name of your collection (ex: users)", {
-        validate(value: any) {
+        validate(value: string) {
           return Boolean(value);
         },
       })

@@ -4,6 +4,7 @@ import { Linker, LINK_STORAGE } from "@bluelibs/nova";
 import { Collection, MONGO_BUNDLE_COLLECTION } from "../../models/Collection";
 import { Collection as MongoCollection } from "mongodb";
 import { ObjectId } from "@bluelibs/ejson";
+import { IContextAware } from "../../defs";
 
 const NODE = Symbol("NODE");
 
@@ -12,23 +13,35 @@ export type DeepSyncOptionsType = {
 };
 
 /**
+ * Options accepted while flushing a deep-sync tree: an insert or an update,
+ * depending on whether the root document already exists.
+ */
+type DeepSyncFlushOptions = IContextAware &
+  (MongoDB.InsertOneOptions | MongoDB.UpdateOptions);
+
+/**
  * Graph-like solution to persist related data to the database
  */
 export class DeepSyncDocumentNode {
+  // why: collections are resolved from nova's LINK_STORAGE at runtime and may be
+  // of any document schema.
   collection: MongoCollection<any>;
   /**
    * Represents the model we are playing with.
+   * why: the object is a runtime-dynamic nested document that this node also
+   * annotates with a symbol marker (NODE).
    */
   data: any;
 
   /**
    * Here is the data that does not contain and links, it has been
    */
-  databaseObject: DeepPartial<any>;
+  databaseObject: DeepPartial<MongoDB.Document>;
 
   links: Array<{
     id: string;
     nodes: DeepSyncDocumentNode[];
+    // why: see `collection` above.
     collection: MongoCollection<any>;
     // Virtual refers to the fact that storage is stored on the other side.
     linker: Linker;
@@ -54,10 +67,10 @@ export class DeepSyncDocumentNode {
     this.storeLinkData(plain);
 
     this.databaseObject = plain;
-    this._id = (data as any)._id;
+    this._id = data._id;
   }
 
-  private storeLinkData(plain: any) {
+  private storeLinkData(plain: MongoDB.Document) {
     const linkInfos = this.collection[LINK_STORAGE];
     for (const linkName in linkInfos) {
       const linker = linkInfos[linkName] as Linker;
@@ -102,7 +115,7 @@ export class DeepSyncDocumentNode {
     }
   }
 
-  async flush(options: any = {}) {
+  async flush(options: DeepSyncFlushOptions = {}) {
     if (this.inFlush) {
       return;
     } else {
@@ -128,7 +141,7 @@ export class DeepSyncDocumentNode {
   /**
    * Process the direct links to allow propper of _id
    */
-  protected async processDirectLinks(options: any = {}) {
+  protected async processDirectLinks(options: DeepSyncFlushOptions = {}) {
     const directLinks = this.links.filter((link) => !link.linker.isVirtual());
 
     for (const directLink of directLinks) {
@@ -154,7 +167,7 @@ export class DeepSyncDocumentNode {
    * Process links in which storage is stored after
    * Should be run once I have an _id
    */
-  protected async processVirtualLinks(options: any = {}) {
+  protected async processVirtualLinks(options: DeepSyncFlushOptions = {}) {
     const virtualLinks = this.links.filter((link) => link.linker.isVirtual());
 
     for (const virtualLink of virtualLinks) {
@@ -175,7 +188,7 @@ export class DeepSyncDocumentNode {
   /**
    * Persists the document and returns the _id if it exists
    */
-  protected async persist(options: any = {}) {
+  protected async persist(options: DeepSyncFlushOptions = {}) {
     const collection = this.collection[MONGO_BUNDLE_COLLECTION] as Collection;
     const actualCollection = this.options.direct
       ? collection.collection
@@ -190,13 +203,13 @@ export class DeepSyncDocumentNode {
           {
             $set: rest,
           },
-          options
+          options as MongoDB.UpdateOptions
         );
       }
     } else {
       const result = await actualCollection.insertOne(
         this.databaseObject,
-        options
+        options as MongoDB.InsertOneOptions
       );
       this._id = result.insertedId;
     }

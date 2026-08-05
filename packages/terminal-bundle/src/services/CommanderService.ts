@@ -87,7 +87,7 @@ export class CommanderService implements ICommandService {
   }
 
   async inquire(): Promise<void> {
-    const commandId = await this.prompter.prompt(
+    const commandId = await this.prompter.prompt<string>(
       Shortcuts.autocomplete(
         "Choose a command",
         this.commands.map((c) => c.id)
@@ -245,6 +245,8 @@ export class CommanderService implements ICommandService {
       )
       .description("Execute a custom command")
       .action((commandId, data) => {
+        // why: `eval` assigns an arbitrary user-provided JS object literal to `model`
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const model: any = {};
         // Sorry
         if (data.model) {

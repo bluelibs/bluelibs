@@ -59,10 +59,17 @@ export type GuardianUserRegistrationType = {
   email: string;
   password: string;
 };
+
+export type RequestLoginLinkResult = {
+  magicCodeSent: boolean;
+  userId: string;
+  method: string | null;
+  confirmationFormat: string | null;
+};
 export class GuardianSmart<
   TUserType extends IUserMandatory = GuardianUserType,
   TUserRegistrationType = GuardianUserRegistrationType,
-> extends Smart<State<TUserType>, any> {
+> extends Smart<State<TUserType>, null> {
   protected authenticationToken: string | null = null;
 
   state: State<TUserType> = {
@@ -123,6 +130,8 @@ export class GuardianSmart<
     }
   }
 
+  // why: Apollo errors expose `.networkError.result.errors` which is not part of the base Error type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected handleUserRetrievalError(err: any) {
     console.error(
       `[Authentication] There was an error fetching the user: ${err.toString()}`
@@ -148,7 +157,7 @@ export class GuardianSmart<
   }
 
   public async reissueToken(token: string) {
-    const newToken = await (this.apolloClient as any)
+    const newToken = await this.apolloClient
       .mutate({
         mutation: gql`
           mutation ($token: String!) {
@@ -159,14 +168,14 @@ export class GuardianSmart<
           token,
         },
       })
-      .then((response: any) => response.data.reissueToken as string);
+      .then((response) => response.data.reissueToken as string);
 
     await this.storeToken(newToken);
     await this.load();
   }
 
   protected async retrieveUser(): Promise<TUserType> {
-    return (this.apolloClient as any)
+    return this.apolloClient
       .query({
         query: gql`
           query me {
@@ -183,11 +192,11 @@ export class GuardianSmart<
         `,
         fetchPolicy: "network-only",
       })
-      .then(async (response: any) => {
+      .then(async (response) => {
         const user = Object.assign({}, response.data.me);
 
         try {
-          user._id = new ObjectId(user._id as any);
+          user._id = new ObjectId(user._id);
         } catch (e) {
           console.error(
             `We could not transform user._id in an ObjectId for value: ${user._id}`,
@@ -228,7 +237,7 @@ export class GuardianSmart<
     });
     await this.storeToken(null);
 
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: this.isMultipleFactorAuth
           ? gql`
@@ -253,7 +262,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response: any) => {
+      .then(async (response) => {
         const { token, redirectUrl } = response.data.login;
         if (redirectUrl) {
           window.location.replace(redirectUrl);
@@ -275,7 +284,7 @@ export class GuardianSmart<
    * @param user
    */
   async register(user: TUserRegistrationType): Promise<string | null> {
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: gql`
           mutation register($input: RegistrationInput!) {
@@ -288,7 +297,7 @@ export class GuardianSmart<
           input: user,
         },
       })
-      .then(async (response: any) => {
+      .then(async (response) => {
         const { token } = response.data.register;
         if (token) {
           await this.storeToken(token);
@@ -299,7 +308,7 @@ export class GuardianSmart<
   }
 
   async verifyEmail(emailToken: string): Promise<string> {
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: gql`
           mutation verifyEmail($input: VerifyEmailInput!) {
@@ -314,7 +323,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response: any) => {
+      .then(async (response) => {
         const { token } = response.data.verifyEmail;
         await this.storeToken(token);
 
@@ -323,7 +332,7 @@ export class GuardianSmart<
   }
 
   async forgotPassword(email: string): Promise<void> {
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: gql`
           mutation forgotPassword($input: ForgotPasswordInput!) {
@@ -346,7 +355,7 @@ export class GuardianSmart<
     token: string,
     newPassword: string
   ): Promise<string> {
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: gql`
           mutation resetPassword($input: ResetPasswordInput!) {
@@ -363,7 +372,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response: any) => {
+      .then(async (response) => {
         const { token } = response.data.resetPassword;
         await this.storeToken(token);
 
@@ -380,7 +389,7 @@ export class GuardianSmart<
     oldPassword: string,
     newPassword: string
   ): Promise<void> {
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: gql`
           mutation changePassword($input: ChangePasswordInput!) {
@@ -403,7 +412,7 @@ export class GuardianSmart<
    * Logs the user out and cleans up the tokens
    */
   async logout(): Promise<void> {
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: gql`
           mutation logout {
@@ -437,8 +446,8 @@ export class GuardianSmart<
     username?: string;
     method?: string;
     userId: string;
-  }): Promise<any> {
-    return (this.apolloClient as any)
+  }): Promise<RequestLoginLinkResult> {
+    return this.apolloClient
       .mutate({
         mutation: gql`
           mutation requestLoginLink($input: RequestLoginLinkInput!) {
@@ -458,7 +467,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then((response: any) => {
+      .then((response) => {
         return response.data.requestLoginLink;
       });
   }
@@ -474,7 +483,7 @@ export class GuardianSmart<
     });
     await this.storeToken(null);
 
-    return (this.apolloClient as any)
+    return this.apolloClient
       .mutate({
         mutation: this.isMultipleFactorAuth
           ? gql`
@@ -499,7 +508,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response: any) => {
+      .then(async (response) => {
         const { token } = response.data.verifyMagicCode;
         await this.eventManager.emit(new UserLoggedInEvent({ token }));
 

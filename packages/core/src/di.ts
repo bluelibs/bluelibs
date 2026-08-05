@@ -9,12 +9,17 @@ import {
   Token,
 } from "typedi";
 
-export { Inject, Token } from "typedi";
+export { Inject, Token, ServiceIdentifier } from "typedi";
 
 const SERVICE_META_STORAGE = Symbol("ServiceInfo");
 
+// why: a decorator target may be any constructor, and `new (...args: unknown[])` rejects classes with required params
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Constructor = new (...args: any[]) => unknown;
+
+interface ServiceMetadataHolder<T> {
+  [SERVICE_META_STORAGE]?: ServiceMetadata<T>;
+}
 
 export function Service<T = unknown>(
   options?: ServiceOptions<T>
@@ -25,8 +30,7 @@ export function Service<T = unknown>(
     const serviceMetadata: ServiceMetadata<T> = {
       id: opts.id || targetConstructor,
       type: targetConstructor as unknown as Constructable<T>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      factory: (opts as any).factory || undefined,
+      factory: (opts as Partial<ServiceMetadata<T>>).factory || undefined,
       multiple: opts.multiple || false,
       eager: opts.eager || false,
       // @ts-expect-error typedi internal property
@@ -39,8 +43,9 @@ export function Service<T = unknown>(
       referencedBy: new Map().set(Container.id, Container),
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (targetConstructor as any)[SERVICE_META_STORAGE] = serviceMetadata;
+    (targetConstructor as unknown as ServiceMetadataHolder<T>)[
+      SERVICE_META_STORAGE
+    ] = serviceMetadata;
   };
 }
 
@@ -48,12 +53,14 @@ export class ContainerInstance extends BaseContainerInstance {
   get<T>(id: ServiceIdentifier<T>): T {
     // @ts-expect-error accessing internal method
     if (!this.has(id)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((id as any)[SERVICE_META_STORAGE]) {
+      const serviceMetadata = (id as unknown as ServiceMetadataHolder<T>)[
+        SERVICE_META_STORAGE
+      ];
+
+      if (serviceMetadata) {
         // It's clearly a constructor
         this.set({
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ...(id as any)[SERVICE_META_STORAGE],
+          ...serviceMetadata,
           id,
           type: id as unknown as Constructable<T>,
         });
@@ -76,8 +83,7 @@ export class ContainerInstance extends BaseContainerInstance {
           // );
           this.set({
             id: id as unknown as Constructable<T>,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            type: id as any,
+            type: id as unknown as Constructable<T>,
           });
           return super.get(id);
         }

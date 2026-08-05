@@ -39,7 +39,7 @@ export class XBundle extends Bundle<IXBundleConfig> {
       debug: false,
     },
     cacheConfig: {
-      store: "memory",
+      store: "memory" as const,
       storeConfig: {
         max: 100,
         ttl: 60,
@@ -71,7 +71,7 @@ export class XBundle extends Bundle<IXBundleConfig> {
     if (this.config.live.messengerClass) {
       messengerType = this.config.live.messengerClass;
     } else {
-      // We leave it here as any due to constructor incompatibility in this.container.set()
+      // Both RedisMessenger and LocalMessenger implement IMessenger
       messengerType = this.config.live.redis ? RedisMessenger : LocalMessenger;
     }
 

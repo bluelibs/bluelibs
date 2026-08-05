@@ -1,5 +1,5 @@
 import { Kernel } from "./Kernel";
-import { ContainerInstance } from "typedi";
+import { ContainerInstance, ServiceIdentifier } from "typedi";
 import { mergeDeep } from "../utils/mergeDeep";
 import {
   IBundle,
@@ -18,7 +18,7 @@ import { EventManager } from "./EventManager";
  * @template T this represents the final configuration of the bundle accessible via bundle.config
  * @template R this represents the required configuration that must be provided when instantiating the bundle
  */
-export abstract class Bundle<T = any, R = null> implements IBundle<T> {
+export abstract class Bundle<T = unknown, R = null> implements IBundle<T> {
   /**
    * Dev Note:
    * We haven't made defaultConfig static because we want by default to use Partial<T>
@@ -36,7 +36,7 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
   /**
    * @deprecated Please use `addDependency`
    */
-  public readonly dependencies: Array<IBundleConstructor<any>> = [];
+  public readonly dependencies: Array<IBundleConstructor<unknown>> = [];
 
   /**
    * The logic here is like this, if there's a Required (R) set of config then we oblige the user to enter it in the constructor
@@ -69,8 +69,11 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
 
   public async setup() {
     // Note: we do this here because defaultConfig gets the value after construction()
-    const config: any = {};
-    mergeDeep(config, this.defaultConfig, this.requiredConfig);
+    const config: T = mergeDeep(
+      {} as T,
+      this.defaultConfig,
+      this.requiredConfig
+    );
     this.config = config;
     await this.validate(this.config);
 
@@ -118,7 +121,7 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
    * Returns the service by its id
    * @param serviceId
    */
-  public get<T = any>(serviceId: any): T {
+  public get<T = unknown>(serviceId: ServiceIdentifier<T>): T {
     return this.container.get<T>(serviceId);
   }
 
@@ -150,13 +153,15 @@ export abstract class Bundle<T = any, R = null> implements IBundle<T> {
    * If the service has an initialisation function (init), it will be run
    * @param services
    */
-  protected async warmup(services: Array<any>) {
+  protected async warmup(services: Array<unknown>) {
     for (let i = 0; i < services.length; i++) {
       const serviceClass = services[i];
-      const initialisable = this.container.get<any>(serviceClass);
+      const initialisable = this.container.get(
+        serviceClass as ServiceIdentifier
+      ) as { init?: () => void | Promise<void> } | undefined;
 
       // If it contains an init function just run it as well
-      if (initialisable.init) {
+      if (initialisable?.init) {
         await initialisable.init();
       }
     }

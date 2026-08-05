@@ -60,11 +60,19 @@ export async function createEcosystem(configXAuthBundle = {}, port = PORT) {
  */
 export async function shutdownKernel(container: ContainerInstance) {
   try {
-    const client: any = container.get(DatabaseService).client;
-    const server = (client.topology?.s?.servers as Map<string, any> | undefined)
-      ?.values()
-      ?.next()?.value;
-    const pool: any = server?.pool;
+    const client = container.get(DatabaseService).client;
+    // why: the connection pool internals are private to the MongoDB driver
+    // (topology is excluded from the public types), so we reach into them with
+    // a structurally-typed cast.
+    const topology = (
+      client as unknown as {
+        topology?: { s?: { servers?: Map<string, unknown> } };
+      }
+    )?.topology;
+    const server = topology?.s?.servers?.values()?.next()?.value;
+    const pool = (
+      server as { pool?: { checkedOut?: { size: number } } } | undefined
+    )?.pool;
     const deadline = Date.now() + 2000;
     while (pool?.checkedOut?.size > 0 && Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 10));

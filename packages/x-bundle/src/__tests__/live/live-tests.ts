@@ -175,7 +175,7 @@ test("Test changes are detected for top-fields", async () => {
     {
       onChanged(documentId, set) {
         try {
-          expect(set.title).toBe("Goodbye");
+          expect((set as { title: string }).title).toBe("Goodbye");
           finisher.done();
         } catch (error) {
           finisher.done(error.message);
@@ -223,8 +223,10 @@ test("Test changes are detected for nested fields also", async () => {
     {
       onChanged(documentId, set) {
         try {
-          expect(set.profile.age).toBe(99);
-          expect(set.profile.name).toBe("123");
+          const profile = (set as { profile: { age: number; name: string } })
+            .profile;
+          expect(profile.age).toBe(99);
+          expect(profile.name).toBe("123");
           finisher.done();
         } catch (error) {
           finisher.done(error.message);
@@ -290,14 +292,18 @@ test("Test whether limit-sort respects the propper 'collection view' after inser
 
   subscription.onRemoved((document) => {
     try {
-      expect(document._id.toString()).toBe(result5.insertedId.toString());
+      expect((document as { _id: { toString(): string } })._id.toString()).toBe(
+        result5.insertedId.toString()
+      );
     } catch (error) {
       finisher.done(error.message);
     }
   });
   subscription.onAdded((document) => {
     try {
-      expect(document._id.toString()).toBe(result2.insertedId.toString());
+      expect((document as { _id: { toString(): string } })._id.toString()).toBe(
+        result2.insertedId.toString()
+      );
       finisher.done();
     } catch (error) {
       finisher.done(error.message);
@@ -394,8 +400,12 @@ test("Check update with positional property", async () => {
     {
       onChanged(document) {
         try {
-          expect(document._id.toString()).toBe(result.insertedId.toString());
-          document.bom.forEach((element) => {
+          const changed = document as {
+            _id: { toString(): string };
+            bom: { stockId: number; quantity: number }[];
+          };
+          expect(changed._id.toString()).toBe(result.insertedId.toString());
+          changed.bom.forEach((element) => {
             expect(Object.keys(element).length).toBe(2);
             if (element.stockId === 1) {
               expect(element.quantity).toBe(30);
@@ -497,7 +507,7 @@ test("Ensure multi-update multi-removed are detected properly", async () => {
     {
       onChanged(document, set) {
         try {
-          expect(set.title).toBe("Goodbye");
+          expect((set as { title: string }).title).toBe("Goodbye");
           finisher.done();
         } catch (error) {
           finisher.done(error.message);

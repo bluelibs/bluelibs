@@ -1,11 +1,16 @@
 import { SecurityService } from "@bluelibs/security-bundle";
+import { ContainerInstance } from "@bluelibs/core";
 import { createEcosystem, shutdownKernel, PORT } from "../createEcosystem";
 import * as superagent from "superagent";
 import userData from "../mocks/userData";
 import StrategyMock from "../mocks/mockStrategy";
 
 describe("SocialLoginService.test ", () => {
-  let securityService, container, userId: any;
+  let securityService: SecurityService;
+  let container: ContainerInstance;
+  // why: the skipped test stores the result of findUser (a user document) and
+  // later passes it to deleteUser which expects a UserId; the types don't line up
+  let userId: any;
 
   beforeEach(async () => {
     container = await createEcosystem({

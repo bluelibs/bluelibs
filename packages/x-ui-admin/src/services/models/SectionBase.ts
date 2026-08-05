@@ -6,7 +6,7 @@ export interface IItemBase {
   id: string;
   route: (router: XRouter) => string;
   label?: string;
-  icon?: ReactElement<any>;
+  icon?: ReactElement;
   order?: number;
 }
 

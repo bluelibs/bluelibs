@@ -45,7 +45,8 @@ export class Comments extends Collection<Comment> {
         title: 1,
         date: 1,
       },
-      reduce({ title, date }) {
+      reduce(obj) {
+        const { title, date } = obj as { title: string; date: Date };
         return `${title} - ${date.getTime()}`;
       },
     },

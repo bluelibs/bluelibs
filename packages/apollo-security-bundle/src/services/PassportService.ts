@@ -17,8 +17,8 @@ export class PassportService {
       fn(null, user);
     });
 
-    passport.deserializeUser((user: any, fn) => {
-      fn(null, user);
+    passport.deserializeUser((user: unknown, fn) => {
+      fn(null, user as Express.User | false);
     });
 
     this.apolloBundle.app.use(passport.initialize());

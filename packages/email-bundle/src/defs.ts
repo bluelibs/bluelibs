@@ -2,7 +2,7 @@ import React from "react";
 import { Transport, SentMessageInfo } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/smtp-transport";
 
-type SimpleObjectType = { [key: string]: any };
+export type SimpleObjectType = { [key: string]: unknown };
 
 export interface IGlobalEmailProps {}
 

@@ -14,7 +14,7 @@ ContainerContext.displayName = "BlueLibsContainer";
 export interface IXUIProviderProps {
   kernel: Kernel;
   loadingComponent?: JSX.Element;
-  children?: any;
+  children?: React.ReactNode;
 }
 
 type IChildrenProviderProps = {
@@ -69,8 +69,10 @@ const XUIProviderInitialised: React.FC = () => {
 
   // We do this to trigger re-rendering
   const [_, setLocale] = useState<string>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handler = useMemo(() => (e: any) => setLocale(e.data.locale), []);
+  const handler = useMemo(
+    () => (e: LocaleChangedEvent) => setLocale(e.data.locale),
+    []
+  );
 
   listen(LocaleChangedEvent, handler);
 

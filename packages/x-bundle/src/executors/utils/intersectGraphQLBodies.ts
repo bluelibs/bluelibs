@@ -6,8 +6,8 @@ import * as dot from "dot-object";
  * @param intersection
  */
 export function intersectGraphQLBodies(
-  requestBody: any,
-  flattenIntersection: any
+  requestBody: Record<string, unknown>,
+  flattenIntersection: Record<string, unknown>
 ): void {
   const flattenRequest = dot.dot(requestBody);
   for (const key in flattenRequest) {

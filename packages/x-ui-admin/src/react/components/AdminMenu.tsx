@@ -96,7 +96,7 @@ export function renderItem(
 type ItemRenderProps = {
   item: IMenuItemConfig;
   t: Translator;
-  children?: any;
+  children?: React.ReactNode;
 };
 
 function ItemRender(props: ItemRenderProps) {

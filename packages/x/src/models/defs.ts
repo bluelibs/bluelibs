@@ -94,7 +94,7 @@ export interface IGenericField extends IFieldBaseSignature {
   /**
    * The default value of this field. This should be JSON-compatible. If it relates an `enum` it should be the `enum` identifier.
    */
-  defaultValue?: any;
+  defaultValue?: unknown;
   /**
    * Whether to render in typescript/graphql
    */

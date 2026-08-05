@@ -21,7 +21,7 @@ export interface IPasswordService {
     password: string,
     options?: IPasswordValidationOptions
   ): Promise<boolean>;
-  findUserIdByUsername(username: string): Promise<any>;
+  findUserIdByUsername(username: string): Promise<UserId>;
   createTokenForPasswordReset(userId: UserId): Promise<string>;
   isResetPasswordTokenValid(userId: UserId, token: string): Promise<boolean>;
   resetPassword(
@@ -36,7 +36,7 @@ export interface IPasswordService {
    * Helper method to get data easier
    */
   getData(
-    userId,
+    userId: UserId,
     fields?: IFieldMap
   ): Promise<Partial<IPasswordAuthenticationStrategy>>;
 
@@ -44,15 +44,15 @@ export interface IPasswordService {
    * Helper method to easily update the password data
    */
   updateData(
-    userId,
+    userId: UserId,
     data: Partial<IPasswordAuthenticationStrategy>
   ): Promise<void>;
 }
 
 export interface IHasherService {
-  generateSalt(userId?: any): string;
-  getHashedPassword(plainPassword, salt?: string): string;
-  generateToken(userId?: any): string;
+  generateSalt(userId?: UserId): string;
+  getHashedPassword(plainPassword: string, salt?: string): string;
+  generateToken(userId?: UserId): string;
 }
 
 export interface IPasswordAuthenticationStrategyCreationOptions {

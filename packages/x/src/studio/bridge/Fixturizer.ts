@@ -5,7 +5,7 @@ import { FieldValueKind } from "../models/FieldValueKind";
 import { Field } from "../models/Field";
 
 export type DataSet = {
-  [collection: string]: any[];
+  [collection: string]: Record<string, unknown>[];
 };
 
 export class Fixturizer {
@@ -14,7 +14,7 @@ export class Fixturizer {
   constructor(protected readonly app: Studio.App) {}
 
   getDataSet(): {
-    [collection: string]: any[];
+    [collection: string]: Record<string, unknown>[];
   } {
     this.app.collections.forEach((collection) => {
       this.generateForCollection(collection);
@@ -81,11 +81,13 @@ export class Fixturizer {
    * @param collection
    * @returns
    */
-  generateDocumentForCollection(collection: Studio.Collection): object {
+  generateDocumentForCollection(
+    collection: Studio.Collection
+  ): Record<string, unknown> {
     this.dataSet[collection.getMongoCollectionName()] =
       this.dataSet[collection.getMongoCollectionName()] || [];
 
-    const document: any = {
+    const document: Record<string, unknown> = {
       _id: new ObjectId(),
     };
 
@@ -101,9 +103,10 @@ export class Fixturizer {
             min: field.mock.minCount,
             max: field.mock.maxCount,
           });
-          document[field.id] = [];
+          const items: unknown[] = [];
+          document[field.id] = items;
           for (let i = 0; i < count; i++) {
-            document[field.id].push(field.mock.generator());
+            items.push(field.mock.generator());
           }
         } else {
           document[field.id] = field.mock.generator();
@@ -139,8 +142,8 @@ export class Fixturizer {
    */
   protected storeRelationalData(
     _relation: Studio.Relation,
-    document: any,
-    result: any[]
+    document: Record<string, unknown>,
+    result: Record<string, unknown>[]
   ) {
     const relation = _relation.cleaned;
 

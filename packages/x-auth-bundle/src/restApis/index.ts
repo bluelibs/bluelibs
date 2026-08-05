@@ -8,7 +8,7 @@ const authPrefix = "/api/users";
 export function injectRestAuthRoutes(
   config: IXAuthBundleConfig,
   httpBundle: HTTPBundle
-): any {
+): void {
   //add routes just on demand
   const apis = REST_APIS.filter((api) => config.rest[api.name]);
   if (apis.length > 0) {
@@ -21,16 +21,16 @@ export function injectRestAuthRoutes(
             api.handler(container, req, res, next);
           } else {
             try {
-              let input;
+              let input: unknown;
               if (api.type !== "get") {
-                input = (req as any).body;
+                input = req.body;
               }
               const service = await container.get(XAuthService);
               const data = await service[api.service](input);
-              return (res as any).json(data);
+              return res.json(data);
             } catch (err) {
               console.log(err);
-              (res as any).json({
+              res.json({
                 message: `something wen wrong! with route ${api.name}`,
               });
             }

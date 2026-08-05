@@ -17,12 +17,12 @@ export class ApolloServerBeforeInitEvent extends Event<IApolloServerInitialisati
 export class ApolloServerAfterInitEvent extends Event<IApolloServerInitialisation> {}
 
 export interface IWebSocketOnDisconnectEventData {
-  webSocket: any;
-  context: any;
+  webSocket: unknown;
+  context: unknown;
 }
 
 export interface IWebSocketOnConnectEventData extends IWebSocketOnDisconnectEventData {
-  connectionParams: any;
+  connectionParams: unknown;
 }
 
 /**

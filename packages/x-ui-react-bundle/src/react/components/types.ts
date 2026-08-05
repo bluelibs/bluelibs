@@ -1,7 +1,11 @@
 import * as React from "react";
 import * as Components from "./index";
 
-export interface IComponents<Error = any, NOT_AUTHORIZED = any> {
+export interface IComponents<
+  // why: DeepPartial<ComponentType<ConcreteProps>> (used by Bundle.defaultConfig) recurses into React propTypes and cannot compile; any keeps them usable
+  Error = any,
+  NOT_AUTHORIZED = any,
+> {
   Error: React.ComponentType<Error>;
   ErrorBoundary: React.ComponentType<{ children?: React.ReactNode }>;
   Loading: React.ComponentType;

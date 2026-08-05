@@ -1,12 +1,15 @@
 import { keysOf, isInfOrNaN, hasOwn, lengthOf } from "../utilities";
 import { Base64 } from "../base64";
 import { ObjectId } from "../objectid";
+import { EJSONConverter, EJSONConverterContext } from "../types";
 
 // Build a set of builtin converters bound to a given context.
 // The context must expose: toJSONValue, fromJSONValue, _isCustomType, customTypes
-export const buildBuiltinConvertersFor = (ctx: any) => {
+export const buildBuiltinConvertersFor = (
+  ctx: EJSONConverterContext
+): EJSONConverter[] => {
   // indirection to reference the list while it is being built
-  const holder: { current: any[] | null } = { current: null };
+  const holder: { current: EJSONConverter[] | null } = { current: null };
   const converters = [
     {
       // ObjectId

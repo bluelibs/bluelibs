@@ -12,8 +12,8 @@ export type RouteHandlerType = (
   container: ContainerInstance,
   req: express.Request,
   res: express.Response,
-  next: any
-) => any;
+  next: express.NextFunction
+) => unknown;
 
 export type RouteType = {
   type: "post" | "get" | "put" | "patch" | "delete" | "all";

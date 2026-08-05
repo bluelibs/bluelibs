@@ -2,6 +2,7 @@ import { addReducers } from "@bluelibs/nova";
 import { BehaviorType, ITranslatableBehaviorOptions } from "../defs";
 import { Collection } from "../models/Collection";
 import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";
+import * as MongoDB from "mongodb";
 
 function i18nField(field: string) {
   return `${field}_i18n`;
@@ -42,7 +43,7 @@ function storeI18NByLocale(
 export default function translatable(
   i18nBehaviorOptions: ITranslatableBehaviorOptions
 ): BehaviorType {
-  return (collection: Collection<any>) => {
+  return <T extends MongoDB.Document>(collection: Collection<T>) => {
     collection.onInit(() => {
       // Add reducers for the fields for easy finding
       i18nBehaviorOptions.fields.forEach((field) => {

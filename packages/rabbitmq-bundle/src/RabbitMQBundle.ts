@@ -1,6 +1,6 @@
 import { Bundle } from "@bluelibs/core";
 import { EJSON } from "@bluelibs/ejson";
-import { Channel, connect, Connection, Options } from "amqplib";
+import { Channel, connect, Connection, ConsumeMessage, Options } from "amqplib";
 import { RabbitMQBundleConfigType } from "./defs";
 
 export class RabbitMQBundle extends Bundle<
@@ -35,7 +35,7 @@ export class RabbitMQBundle extends Bundle<
    */
   public publish(
     queue: string,
-    message: any,
+    message: unknown,
     options?: Options.Publish
   ): boolean {
     return this.channel.sendToQueue(
@@ -53,7 +53,7 @@ export class RabbitMQBundle extends Bundle<
    */
   public consume(
     queue: string,
-    handler: (message: any) => void | Promise<void>,
+    handler: (message: unknown) => void | Promise<void>,
     options?: Options.Consume
   ) {
     if (!this.config.consume) {
@@ -62,7 +62,7 @@ export class RabbitMQBundle extends Bundle<
 
     this.channel.consume(
       queue,
-      async (msg: any) => {
+      async (msg: ConsumeMessage | null) => {
         if (!msg) return;
         await handler(EJSON.parse(msg.content.toString()));
         if (!options?.noAck) {

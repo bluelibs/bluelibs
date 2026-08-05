@@ -81,6 +81,7 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
    * Based on certain specific values generate how the filters should look like
    * @returns
    */
+  // why: filter mappers receive arbitrary UI filter values and return mongo filter fragments
   getFilterMap(): { [key: string]: (value) => any } {
     return {};
   }
@@ -95,7 +96,9 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
     const menu = (
       <Menu>
         {actions.items.map((item) => {
-          const props: any = {
+          const props: React.ComponentProps<typeof Menu.Item> & {
+            key: React.Key;
+          } = {
             key: item.label,
             onClick: undefined,
           };
@@ -154,7 +157,7 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
    * This basically means that it transforms the filters specified into custom mongo filters ready to use
    * @param filters
    */
-  setFlexibleFilters(filters: any) {
+  setFlexibleFilters(filters: Record<string, unknown>) {
     const $and = this.extractFilters(filters);
 
     if ($and.length === 0) {
@@ -174,7 +177,10 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
    * @param filters
    * @returns
    */
-  protected extractFilters(filters: any, keyPrefix: string = ""): any[] {
+  protected extractFilters(
+    filters: Record<string, unknown>,
+    keyPrefix: string = ""
+  ): Record<string, unknown>[] {
     const $and = [];
     const filterMap = this.getFilterMap();
     const push = (key, value) => {
@@ -226,7 +232,10 @@ export abstract class AntTableSmart<T = any> extends ListSmart<T> {
           }
         } else {
           if (typeof filters[key] === "object") {
-            const objectFilters = this.extractFilters(filters[key], key + ".");
+            const objectFilters = this.extractFilters(
+              filters[key] as Record<string, unknown>,
+              key + "."
+            );
 
             if (objectFilters.length) {
               $and.push(...objectFilters);

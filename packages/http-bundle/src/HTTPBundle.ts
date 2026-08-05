@@ -53,8 +53,11 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
         if (Array.isArray(route.handler)) {
           for (const handler of route.handler) {
             const result = await handler(this.container, req, res, next);
-            (req as any)[RouteHandlerPreviousResultStore] = result;
+            (req as unknown as Record<symbol, unknown>)[
+              RouteHandlerPreviousResultStore
+            ] = result;
           }
+          return;
         } else {
           return route.handler(this.container, req, res, next);
         }

@@ -1,4 +1,5 @@
 type Constructor<T> = {
+  // why: any[] is required so classes with required constructor params remain assignable
   new (...args: any[]): T;
 };
 

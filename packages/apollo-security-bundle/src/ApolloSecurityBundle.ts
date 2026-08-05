@@ -4,8 +4,15 @@ import { SecurityService, SecurityBundle } from "@bluelibs/security-bundle";
 import { ApolloInvalidTokenException } from "./exceptions";
 import { PassportService } from "./services/PassportService";
 import { IResolverMap } from "@bluelibs/graphql-bundle";
+import * as express from "express";
+import { Context } from "graphql-ws";
 
 import "@bluelibs/apollo-bundle"; // To ensure the IGraphQLContext is extended
+
+// The websocket connection exposes the token under a nested `context` path.
+type WebSocketConnection = {
+  context?: { connectionParams?: Record<string, unknown> };
+};
 
 export interface IApolloSecurityBundleConfig {
   support: {
@@ -61,7 +68,7 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
       resolvers: {
         Mutation: {
           async reissueToken(
-            _: any,
+            _: unknown,
             { token }: { token: string },
             ctx: IGraphQLContext
           ) {
@@ -119,18 +126,23 @@ export class ApolloSecurityBundle extends Bundle<IApolloSecurityBundleConfig> {
    * @param req
    * @param connection
    */
-  identifyToken(req: any, connection: any): string | undefined {
+  identifyToken(
+    req: express.Request | undefined,
+    connection: Context | undefined
+  ): string | undefined {
     const { support, identifiers } = this.config;
 
     let token: string | undefined;
     if (connection) {
       if (support.websocket && identifiers.websocket) {
-        token = connection.context?.connectionParams?.[identifiers.websocket];
+        token = (connection as WebSocketConnection).context?.connectionParams?.[
+          identifiers.websocket
+        ] as string | undefined;
       }
     } else {
       if (req) {
         if (support.headers && identifiers.headers) {
-          token = req.headers[identifiers.headers];
+          token = req.headers[identifiers.headers] as string | undefined;
         }
 
         if (!token && support.cookies && req.cookies && identifiers.cookies) {

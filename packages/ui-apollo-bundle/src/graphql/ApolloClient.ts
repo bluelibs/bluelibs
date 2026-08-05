@@ -1,11 +1,12 @@
 import { ApolloClient as BaseApolloClient } from "@apollo/client/core";
+import { NormalizedCacheObject } from "@apollo/client/cache";
 import { ContainerInstance, EventManager, Service } from "@bluelibs/core";
 import { Client } from "graphql-ws";
 import { IUIApolloBundleConfig } from "../defs";
 import { createApolloLink } from "./utils/createApolloLink";
 
 @Service()
-export class ApolloClient extends BaseApolloClient<any> {
+export class ApolloClient extends BaseApolloClient<NormalizedCacheObject> {
   public subscriptionClient?: Client;
 
   constructor(container: ContainerInstance, options: IUIApolloBundleConfig) {

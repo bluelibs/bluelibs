@@ -1,4 +1,4 @@
-import { Collection } from "mongodb";
+import { Collection, Document } from "mongodb";
 import { LINK_STORAGE } from "../constants";
 import { ILinkCollectionOptions, HardwiredFiltersOptions } from "../defs";
 
@@ -7,7 +7,7 @@ export enum LinkStrategy {
   MANY,
 }
 
-export default class Linker<T = any> {
+export default class Linker<T = Document> {
   public mainCollection: Collection<T>;
   public linkConfig: ILinkCollectionOptions & {
     strategy: LinkStrategy;
@@ -174,7 +174,7 @@ export default class Linker<T = any> {
 
     const matches = this.createAggregationMatches(foreignField);
 
-    const result: any = {
+    const result: Document = {
       from: this.getLinkedCollection().collectionName,
       let: {
         localField: `$${localField}`,
@@ -199,8 +199,8 @@ export default class Linker<T = any> {
    * This function allows us to use the aggregation pipeline fully
    * @param foreignField
    */
-  private createAggregationMatches(foreignField: any) {
-    const matches = [];
+  private createAggregationMatches(foreignField: string) {
+    const matches: Document[] = [];
     if (this.isVirtual()) {
       if (this.isMany()) {
         matches.push(
@@ -251,6 +251,6 @@ export default class Linker<T = any> {
 }
 
 export interface IGetLookupOperatorOptions {
-  pipeline?: any[];
+  pipeline?: Document[];
   as?: string;
 }

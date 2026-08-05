@@ -1,6 +1,7 @@
-import { QueryBodyType, IReducerOption, IQueryContext } from "../../defs";
+import { QueryBodyType, IReducerOption, IQueryContext, AnyObject } from "../../defs";
 import { SPECIAL_PARAM_FIELD } from "../../constants";
 import { INode } from "./INode";
+import { Document } from "mongodb";
 
 interface ReducerNodeOptions extends IReducerOption {
   body: QueryBodyType;
@@ -8,12 +9,12 @@ interface ReducerNodeOptions extends IReducerOption {
 
 export default class ReducerNode implements INode {
   public name: string;
-  public props: any;
+  public props: { [key: string]: unknown };
   public isSpread: boolean = false;
 
-  public reduceFunction?: any;
-  public pipeline: any[] | ((context: IQueryContext) => any[]);
-  public projection: any;
+  public reduceFunction?: IReducerOption["reduce"];
+  public pipeline: Document[] | ((context: IQueryContext) => Document[]);
+  public projection: Document;
 
   // This refers to the graph dependency
   public dependency: QueryBodyType;
@@ -39,7 +40,7 @@ export default class ReducerNode implements INode {
       this.projection = { [name]: 1 };
     }
 
-    this.props = options.body[SPECIAL_PARAM_FIELD] || {};
+    this.props = (options.body[SPECIAL_PARAM_FIELD] || {}) as AnyObject;
   }
 
   /**
@@ -48,7 +49,7 @@ export default class ReducerNode implements INode {
    * @param {*} object
    * @param {*} args
    */
-  public async compute(object) {
+  public async compute(object: Document) {
     if (!this.reduceFunction) {
       return;
     }
@@ -65,21 +66,21 @@ export default class ReducerNode implements INode {
    * @param object
    * @param args
    */
-  public async reduce(object, ...args) {
-    return this.reduceFunction.call(this, object, ...args);
+  public async reduce(object: Document, params?: { context: IQueryContext } & AnyObject) {
+    return this.reduceFunction.call(this, object, params);
   }
 
   /**
    * Adapts the final projection
    * @param projection
    */
-  public blendInProjection(projection) {
+  public blendInProjection(projection: Record<string, number | boolean>) {
     if (this.projection) {
       Object.assign(projection, this.projection);
     }
   }
 
   get hasPipeline() {
-    return this.pipeline && this.pipeline.length > 0;
+    return Array.isArray(this.pipeline) && this.pipeline.length > 0;
   }
 }

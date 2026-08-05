@@ -1,4 +1,5 @@
 import * as MongoDB from "mongodb";
+import type { DocumentNode } from "graphql";
 import {
   Inject,
   EventManager,
@@ -52,7 +53,10 @@ export const MONGO_BUNDLE_COLLECTION = Symbol("MONGO_BUNDLE_COLLECTION");
 // @ts-expect-error - abstract class with decorator for DI
 @Service()
 export abstract class Collection<T extends MongoDB.Document = any> {
-  static model: any;
+  // why: the default `any` keeps bare `Collection` (and `Constructor<Collection>`)
+  // assignable from concrete collection classes; `MongoDB.Document` is not
+  // assignable across document types due to contravariance in the driver types.
+  static model: Constructor<unknown>;
   static links: IBundleLinkOptions = {};
   static reducers: IReducerOptions = {};
   static expanders: IExpanderOptions = {};
@@ -61,7 +65,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
   /**
    * This schema can be created by using { t } from @bluelibs/nova package t.schema({})
    */
-  static jitSchema: any;
+  static jitSchema: unknown;
 
   static collectionName: string;
 
@@ -201,7 +205,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     await this.ensureInitialised();
     const result = await this.collection.findOne(query, options);
 
-    return this.toModel(result);
+    return this.toModel(result) as T;
   }
 
   /**
@@ -226,12 +230,12 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       options,
     };
 
-    const event = new BeforeInsertEvent<any>(eventData);
+    const event = new BeforeInsertEvent<MongoDB.Document>(eventData);
     await this.emit(event);
 
     // We will insert what is left in the event
     const result = await this.collection.insertOne(
-      event.data.document as any,
+      event.data.document as MongoDB.OptionalUnlessRequiredId<T>,
       options
     );
 
@@ -271,7 +275,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
     }
 
     const result = await this.collection.insertMany(
-      events.map((e) => e.data.document),
+      events.map((e) => e.data.document as MongoDB.OptionalUnlessRequiredId<T>),
       options
     );
 
@@ -521,7 +525,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param pipeline Pipeline options from mongodb
    * @param options
    */
-  aggregate(pipeline: any[], options?: MongoDB.AggregateOptions) {
+  aggregate(pipeline: MongoDB.Document[], options?: MongoDB.AggregateOptions) {
     return this.collection.aggregate(pipeline, options);
   }
 
@@ -541,7 +545,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       session,
     }).fetch();
 
-    return this.toModel(results);
+    return this.toModel(results) as Array<Partial<T>>;
   }
 
   /**
@@ -560,14 +564,16 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       container: this.container,
     }).fetchOne();
 
-    return this.toModel(result);
+    return this.toModel(result) as Partial<T>;
   }
 
   /**
    * Retrieve the collection from the database service
    * @param collectionBaseClass The collection class
    */
-  getCollection(collectionBaseClass): Collection<any> {
+  getCollection<T extends Collection = Collection>(
+    collectionBaseClass: Constructor<T>
+  ): T {
     return this.databaseService.getCollection(collectionBaseClass);
   }
 
@@ -601,9 +607,14 @@ export abstract class Collection<T extends MongoDB.Document = any> {
 
       adaptedLinks[key] = {
         ...links[key],
+        // why: the link registry stores collection classes as `Constructor<unknown>`;
+        // at runtime the resolver always returns a Collection subclass.
         collection: () =>
-          this.getCollection(collectionBaseClassResolver(this.container))
-            .collection,
+          this.getCollection(
+            collectionBaseClassResolver(this.container) as Constructor<
+              Collection<MongoDB.Document>
+            >
+          ).collection,
       };
     }
 
@@ -619,10 +630,12 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param collectionEvent This is the class of the event
    * @param handler This is the function that is executed
    */
-  on<E extends CollectionEvent<any>>(
+  on<E extends CollectionEvent>(
     collectionEvent: Constructor<E>,
     handler: (event: E) => void | Promise<void>
   ) {
+    // why: the core EventManager types events as Event<T> (payload = T) while our
+    // events carry their payload on the subclass; the cast bridges the two models.
     this.localEventManager.addListener(
       collectionEvent as IEventConstructor<any>,
       handler as EventHandlerType<any>
@@ -633,15 +646,15 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * Transforms a plain object to the model
    * @param plain Object which you want to transform
    */
-  toModel(plain: any | any[]): any | any[] {
+  toModel<D = T>(plain: D): D {
     const model = this.getStaticVariable("model");
 
     if (model) {
       if (Array.isArray(plain)) {
-        return plain.map((element) => toModel<any>(model, element));
+        return plain.map((element) => toModel(model, element)) as D;
       }
 
-      return toModel(model, plain);
+      return toModel(model, plain) as D;
     }
 
     return plain;
@@ -660,7 +673,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param config
    */
   async queryGraphQL<T = null>(
-    ast: any,
+    ast: DocumentNode,
     config?: IAstToQueryOptions<T>,
     session?: MongoDB.ClientSession,
     context?: Partial<IQueryContext>
@@ -673,7 +686,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       })
       .fetch();
 
-    return this.toModel(result);
+    return this.toModel(result) as Array<Partial<T>>;
   }
 
   /**
@@ -682,7 +695,7 @@ export abstract class Collection<T extends MongoDB.Document = any> {
    * @param config
    */
   async queryOneGraphQL<T = null>(
-    ast,
+    ast: DocumentNode,
     config?: IAstToQueryOptions<T>,
     session?: MongoDB.ClientSession,
     context?: Partial<IQueryContext>
@@ -695,14 +708,14 @@ export abstract class Collection<T extends MongoDB.Document = any> {
       })
       .fetchOne();
 
-    return this.toModel(result);
+    return this.toModel(result) as Partial<T>;
   }
 
   /**
    * Emit events
    * @param event
    */
-  async emit(event: CollectionEvent<any>) {
+  async emit<E extends CollectionEvent>(event: E) {
     event.prepare(this);
     await this.localEventManager.emit(event);
     await this.globalEventManager.emit(event);

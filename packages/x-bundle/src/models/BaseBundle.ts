@@ -14,13 +14,13 @@ import {
   IValidationMethod,
 } from "@bluelibs/validator-bundle";
 
-export abstract class BaseBundle<T = any> extends CoreBundle<T> {
+export abstract class BaseBundle<T = unknown> extends CoreBundle<T> {
   async setupBundle(config: {
-    collections?: Record<string, any | Constructor<Collection>>;
-    listeners?: Record<string, any | Constructor<Listener>>;
-    validators?: Record<string, any | Constructor<IValidationMethod<any>>>;
-    fixtures?: Record<string, any>;
-    graphqlModule?: any | ILoadOptions | ILoadOptions[];
+    collections?: Record<string, Collection | Constructor<Collection>>;
+    listeners?: Record<string, Listener | Constructor<Listener>>;
+    validators?: Record<string, Constructor<IValidationMethod>>;
+    fixtures?: Record<string, unknown>;
+    graphqlModule?: ILoadOptions | ILoadOptions[];
   }) {
     const { collections, listeners, validators, graphqlModule, fixtures } =
       config;

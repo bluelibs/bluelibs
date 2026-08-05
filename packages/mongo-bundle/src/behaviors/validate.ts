@@ -1,5 +1,5 @@
 import { Collection } from "../models/Collection";
-import { IValidateBehaviorOptions, IContextAware } from "../defs";
+import { BehaviorType, IValidateBehaviorOptions, IContextAware } from "../defs";
 import { ValidatorService } from "@bluelibs/validator-bundle";
 import {
   BeforeInsertEvent,
@@ -12,11 +12,16 @@ import { DatabaseService } from "../services/DatabaseService";
 // Some things here can be re-used between updateOne, updateMany and findOneAndUpdate
 // However we find that this is the clearest way of coding
 
-export default function validate(behaviorOptions: IValidateBehaviorOptions) {
+export default function validate(
+  behaviorOptions: IValidateBehaviorOptions
+): BehaviorType {
   behaviorOptions.options = behaviorOptions.options || {};
   behaviorOptions.castOptions = behaviorOptions.castOptions || {};
 
-  return (collection: Collection) => {
+  // why: the closure rewrites methods against a generic document collection; the
+  // returned function is widened to the generic BehaviorType so it can be applied
+  // to any concrete collection subclass.
+  return ((collection: Collection<MongoDB.Document>) => {
     const validatorService =
       collection.container.get<ValidatorService>(ValidatorService);
     const dbService =
@@ -56,11 +61,11 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
     // and decide which use-case is best for them.
 
     collection.updateOne = async (
-      filter: MongoDB.Filter<any>,
-      update: MongoDB.UpdateFilter<any>,
+      filter: MongoDB.Filter<MongoDB.Document>,
+      update: MongoDB.UpdateFilter<MongoDB.Document>,
       options: IContextAware & MongoDB.UpdateOptions = {}
     ) => {
-      let result = null;
+      let result: MongoDB.UpdateResult | null = null;
       const fields = dbService.getFields(update);
 
       // first we find it so we can retrieve it later
@@ -128,12 +133,12 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
         })
       );
 
-      return result as any;
+      return result;
     };
 
     collection.updateMany = async (
-      filter: MongoDB.Filter<any>,
-      update: MongoDB.UpdateFilter<any>,
+      filter: MongoDB.Filter<MongoDB.Document>,
+      update: MongoDB.UpdateFilter<MongoDB.Document>,
       options: IContextAware & MongoDB.UpdateOptions = {}
     ) => {
       const fields = dbService.getFields(update);
@@ -208,12 +213,12 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
         })
       );
 
-      return result as any;
+      return result;
     };
 
     collection.findOneAndUpdate = async (
-      filter: MongoDB.Filter<any> = {},
-      update: MongoDB.UpdateFilter<any>,
+      filter: MongoDB.Filter<MongoDB.Document> = {},
+      update: MongoDB.UpdateFilter<MongoDB.Document>,
       options: IContextAware & MongoDB.FindOneAndUpdateOptions = {}
     ) => {
       const fields = dbService.getFields(update);
@@ -250,7 +255,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
         (element as { _id?: unknown } | null)?._id;
 
       if (documentId) {
-        const document = await collection.findOne({ _id: documentId as any });
+        const document = await collection.findOne({ _id: documentId });
 
         if (document) {
           try {
@@ -282,7 +287,7 @@ export default function validate(behaviorOptions: IValidateBehaviorOptions) {
         })
       );
 
-      return result as any;
+      return result;
     };
-  };
+  }) as BehaviorType;
 }
