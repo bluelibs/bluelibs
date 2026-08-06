@@ -1,5 +1,9 @@
 <h1 align="center">BlueLibs CORE</h1>
 
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fcore.svg)](https://badge.fury.io/js/%40bluelibs%2Fcore)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A powerful and lightweight module composition strategy responsible for orchestrating your logic, enabling you to easily respect SOLID principles within your infinitely-scalable app.
 
 ## Install

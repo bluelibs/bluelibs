@@ -1,7 +1,13 @@
+<h1 align="center">BlueLibs X-UI-SESSION-BUNDLE</h1>
+
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fx-ui-session-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fx-ui-session-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Installation
 
 ```bash
-npm i -S @bluelibs/ui-session-bundle
+npm i -S @bluelibs/x-ui-session-bundle
 ```
 
 ## [Documentation](./DOCUMENTATION.md)

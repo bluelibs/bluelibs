@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs NOVA</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/nova">
-    <img src="https://api.travis-ci.org/bluelibs/nova.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/nova?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/nova/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fnova.svg)](https://badge.fury.io/js/%40bluelibs%2Fnova)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Nova is the fetching layer on top of MongoDB Node Driver, which allows SQL-comparable speeds for retrieving relational data.
 

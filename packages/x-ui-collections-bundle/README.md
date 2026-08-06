@@ -1,5 +1,9 @@
 <h1 align="center">BlueLibs X-UI-COLLECTIONS-BUNDLE</h1>
 
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fx-ui-collections-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fx-ui-collections-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <!-- // TODO: update docs -->
 
 This is the X-Framework of handling password authentication blended with GraphQL.
