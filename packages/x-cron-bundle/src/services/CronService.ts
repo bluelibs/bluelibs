@@ -162,9 +162,16 @@ export class CronService {
           self.logger.info(
             "Exception running scheduled job " + (e && e.stack ? e.stack : e)
           );
+        } finally {
+          // Re-arm inside a finally so a throw in the handler above (e.g. the
+          // logger itself failing) can never strand this cron without a timer.
+          if (!done) {
+            clearableTimeout = self.setLaterTimeout(
+              scheduleTimeout,
+              cronSchedule
+            );
+          }
         }
-
-        clearableTimeout = self.setLaterTimeout(scheduleTimeout, cronSchedule);
       }
     }
 
