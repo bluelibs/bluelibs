@@ -7,17 +7,19 @@ import * as MongoDB from "mongodb";
 
 /**
  * A behavior receives a collection instance of any document type and wires itself onto it.
- * It is generic over the document type because behaviors apply to arbitrary collections.
+ * Behaviors are deliberately non-generic: a behavior written for a concrete document type
+ * (e.g. `(collection: Collection<MyDoc>) => void`) must remain assignable regardless of the
+ * collection it is attached to. A generic signature would require `Collection<T>` to be
+ * assignable to `Collection<MyDoc>` for every `T`, which the invariant driver types forbid.
  */
-export type BehaviorType = <T extends MongoDB.Document = MongoDB.Document>(
-  collectionEventManager: Collection<T>
-) => void;
+export type BehaviorType = (collectionEventManager: Collection<any>) => void;
 
 /**
- * The identifier of the user performing an operation. Mongo supports ObjectIds, strings and
- * numbers as identifiers; this mirrors what security-bundle's UserId accepts.
+ * The identifier of the user performing an operation. This must stay mutually assignable
+ * with security-bundle's `UserId` (`number | string | ObjectId | Partial<ObjectId>`), since
+ * consumers pass security-bundle user ids into mongo-bundle operations.
  */
-export type UserId = string | number | ObjectId | MongoDB.ObjectId;
+export type UserId = number | string | ObjectId | Partial<ObjectId>;
 
 declare module "@bluelibs/nova" {
   export interface IQueryContext {

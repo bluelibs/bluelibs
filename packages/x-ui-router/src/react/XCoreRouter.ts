@@ -6,8 +6,6 @@ export type AddRoutingArguments<T> = {
   [routeName: string]: T;
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - abstract class with decorator for DI
 @Service()
 export abstract class XCoreRouter<
   RT extends IRoute,

@@ -50,7 +50,7 @@ import { DocumentWithID, LinkOperatorModel, Unpacked } from "./LinkOperator";
  * This symbol allows us to access this collection from the MongoCollection
  */
 export const MONGO_BUNDLE_COLLECTION = Symbol("MONGO_BUNDLE_COLLECTION");
-// @ts-expect-error - abstract class with decorator for DI
+// the core @Service() decorator now accepts abstract class constructors
 @Service()
 export abstract class Collection<T extends MongoDB.Document = any> {
   // why: the default `any` keeps bare `Collection` (and `Constructor<Collection>`)

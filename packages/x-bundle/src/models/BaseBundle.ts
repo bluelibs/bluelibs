@@ -16,7 +16,11 @@ import {
 
 export abstract class BaseBundle<T = unknown> extends CoreBundle<T> {
   async setupBundle(config: {
-    collections?: Record<string, Collection | Constructor<Collection>>;
+    // why: bundles register a module namespace of collection classes, model
+    // classes, enums and constants. The published pre-cleanup type was
+    // `Record<string, any | Constructor<Collection>>`; keeping the strict
+    // `Collection` type here rejects valid registration modules.
+    collections?: Record<string, any | Constructor<Collection>>;
     listeners?: Record<string, Listener | Constructor<Listener>>;
     validators?: Record<string, Constructor<IValidationMethod>>;
     fixtures?: Record<string, unknown>;

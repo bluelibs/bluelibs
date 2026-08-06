@@ -13,9 +13,12 @@ export { Inject, Token, ServiceIdentifier } from "typedi";
 
 const SERVICE_META_STORAGE = Symbol("ServiceInfo");
 
-// why: a decorator target may be any constructor, and `new (...args: unknown[])` rejects classes with required params
+// why: a decorator target may be any constructor — concrete or abstract.
+// `new (...args: unknown[])` rejects classes with required params AND abstract
+// classes (TS1238 when decorated), so `abstract new` is the wider, compatible
+// shape. Consumers legitimately apply @Service() to abstract base classes.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Constructor = new (...args: any[]) => unknown;
+type Constructor = abstract new (...args: any[]) => unknown;
 
 interface ServiceMetadataHolder<T> {
   [SERVICE_META_STORAGE]?: ServiceMetadata<T>;
@@ -28,7 +31,9 @@ export function Service<T = unknown>(
     const opts = options || {};
 
     const serviceMetadata: ServiceMetadata<T> = {
-      id: opts.id || targetConstructor,
+      // why: decorators only ever apply to concrete (instantiable) classes at
+      // runtime, so the abstract-constructor target is safely narrowed here.
+      id: opts.id || (targetConstructor as unknown as Constructable<T>),
       type: targetConstructor as unknown as Constructable<T>,
       factory: (opts as Partial<ServiceMetadata<T>>).factory || undefined,
       multiple: opts.multiple || false,

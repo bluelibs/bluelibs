@@ -10,7 +10,6 @@ export interface IItemBase {
   order?: number;
 }
 
-// @ts-expect-error - abstract class with decorator for DI
 @Service()
 export abstract class SectionBase<T extends IItemBase> {
   items: T[];

@@ -6,7 +6,10 @@ import {
   UserId,
 } from "@bluelibs/security-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
-export class SessionsCollection
+// The type parameter is retained for consumer compatibility: callers use
+// `SessionsCollection<ISession>` and the published signature declares it.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export class SessionsCollection<T extends ISession>
   extends Collection<ISession>
   implements ISessionPersistance
 {

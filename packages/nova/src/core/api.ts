@@ -112,7 +112,12 @@ export function hasLinker<T = Document>(collection: Collection<T>, name: string)
  * This is useful for complex searching and filtering
  */
 export function lookup(
-  collection: Collection,
+  // why: the mongodb driver `Collection<T>` is invariant, so a bare
+  // `Collection` (defaults to Document) rejects `Collection<TeamMembership>`.
+  // `any` restores the published signature and keeps lookup usable with any
+  // concrete collection type.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  collection: Collection<any>,
   linkName: string,
   options?: IGetLookupOperatorOptions
 ) {

@@ -2,7 +2,14 @@ import React from "react";
 import { Transport, SentMessageInfo } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/smtp-transport";
 
-export type SimpleObjectType = { [key: string]: unknown };
+// why: the loose `any` index signature is part of the published public API.
+// Consumers assign React FunctionComponents and props objects of arbitrary
+// shape to IReactEmailTemplate / IEmailSendingTemplateConfig (often via the
+// default type parameter). A strict `unknown` index signature rejects those
+// assignments (unknown is not assignable to concrete prop types) and makes
+// EmailBundle's `defaultConfig` unassignable to older @bluelibs/core Bundle
+// constraints, so this must stay `any` to remain consumer-compatible.
+export type SimpleObjectType = { [key: string]: any };
 
 export interface IGlobalEmailProps {}
 

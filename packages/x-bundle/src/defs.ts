@@ -32,12 +32,17 @@ export interface IXBundleConfig {
   cacheConfig?: ICacheManagerConfig;
 }
 
-export type MessageHandleType = (data: ISubscriptionEvent) => Promise<void>;
+// why: the old published signature was `(data: any) => Promise<void>`. Handlers
+// are contravariant and consumers type them for their own raw-message shape
+// (e.g. `(message: string) => Promise<void>`), so the parameter must stay `any`.
+export type MessageHandleType = (data: any) => Promise<void>;
 
 export interface IMessenger {
   subscribe(channel: string, handler: MessageHandleType);
   unsubscribe(channel: string, handler: MessageHandleType);
-  publish(channels: string[], data: ISubscriptionEvent);
+  // why: the messenger carries arbitrary payloads (e.g. `{ event, payload }`),
+  // matching the published `data: any` signature.
+  publish(channels: string[], data: any);
 }
 
 export interface ISubscriptionEvent<T extends IDocumentBase = IDocumentBase> {

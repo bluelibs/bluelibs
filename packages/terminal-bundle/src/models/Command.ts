@@ -3,8 +3,6 @@ import { PrompterService } from "../services/PrompterService";
 import { CommanderService } from "../services/CommanderService";
 import { IExecutor } from "../defs";
 
-// TODO:
-// @ts-expect-error - abstract class with decorator for DI
 @Service()
 export abstract class Command<T = unknown> implements IExecutor<T> {
   @Inject(() => PrompterService)

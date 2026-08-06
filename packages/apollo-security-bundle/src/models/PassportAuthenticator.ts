@@ -1,5 +1,5 @@
-import { Service } from "@bluelibs/core";
 import { IUser, SecurityService, UserId } from "@bluelibs/security-bundle";
+import { Authenticator } from "../decorators/Authenticator";
 import passport from "passport";
 import * as express from "express";
 import { ApolloBundle } from "@bluelibs/apollo-bundle";
@@ -17,8 +17,7 @@ export type EasyRouteCallback = (
   next: express.NextFunction
 ) => void | Promise<void>;
 
-// @ts-expect-error - abstract class with decorator for DI
-@Service()
+@Authenticator()
 export abstract class PassportAuthenticator {
   public strategy: passport.Strategy;
 
@@ -39,10 +38,10 @@ export abstract class PassportAuthenticator {
   abstract createStrategy(): passport.Strategy;
 
   get name(): string {
-    if (!this.strategy?.name) {
-      throw new Error("Strategy name is not available");
-    }
-    return this.strategy.name;
+    // why: real passport strategies always set `name` in their constructor;
+    // `@types/passport` types it as optional, but a nameless strategy cannot be
+    // registered via `passport.use`.
+    return this.strategy.name!;
   }
 
   /**
