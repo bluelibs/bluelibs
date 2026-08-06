@@ -1,5 +1,5 @@
 import { IUser, SecurityService, UserId } from "@bluelibs/security-bundle";
-import { Authenticator } from "../decorators/Authenticator";
+import { Service } from "@bluelibs/core";
 import passport from "passport";
 import * as express from "express";
 import { ApolloBundle } from "@bluelibs/apollo-bundle";
@@ -17,7 +17,7 @@ export type EasyRouteCallback = (
   next: express.NextFunction
 ) => void | Promise<void>;
 
-@Authenticator()
+@Service()
 export abstract class PassportAuthenticator {
   public strategy: passport.Strategy;
 
