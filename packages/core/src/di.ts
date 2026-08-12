@@ -13,10 +13,10 @@ export { Inject, Token, ServiceIdentifier } from "typedi";
 
 const SERVICE_META_STORAGE = Symbol("ServiceInfo");
 
-// why: a decorator target may be any constructor — concrete or abstract.
-// `new (...args: unknown[])` rejects classes with required params AND abstract
-// classes (TS1238 when decorated), so `abstract new` is the wider, compatible
-// shape. Consumers legitimately apply @Service() to abstract base classes.
+// why: a decorator target may be a concrete or abstract constructor. A plain
+// `new` signature rejects abstract classes with TS1238 when decorated, so
+// `abstract new` matches how consumers apply @Service() to abstract base
+// classes (e.g. Collection, Command, PassportAuthenticator).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Constructor = abstract new (...args: any[]) => unknown;
 
@@ -31,8 +31,10 @@ export function Service<T = unknown>(
     const opts = options || {};
 
     const serviceMetadata: ServiceMetadata<T> = {
-      // why: decorators only ever apply to concrete (instantiable) classes at
-      // runtime, so the abstract-constructor target is safely narrowed here.
+      // why: the decorator target is typed `abstract new` but typedi's
+      // `Constructable` requires a concrete constructor. The cast is purely
+      // compile-time — typedi stores the constructor reference as-is and never
+      // instantiates it (consumers resolve concrete subclasses).
       id: opts.id || (targetConstructor as unknown as Constructable<T>),
       type: targetConstructor as unknown as Constructable<T>,
       factory: (opts as Partial<ServiceMetadata<T>>).factory || undefined,

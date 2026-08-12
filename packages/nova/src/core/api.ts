@@ -46,7 +46,11 @@ query.graphql = function graphql<T = Document>(
   return astToQuery(collection, ast, options, context);
 };
 
-export function clear(collection: Collection) {
+export function clear(
+  // why: the mongodb driver `Collection<T>` is invariant; `any` accepts any
+  // concrete collection type (see `lookup`).
+  collection: Collection<any>
+) {
   collection[LINK_STORAGE] = {};
   collection[REDUCER_STORAGE] = {};
   collection[EXPANDER_STORAGE] = {};
@@ -116,7 +120,6 @@ export function lookup(
   // `Collection` (defaults to Document) rejects `Collection<TeamMembership>`.
   // `any` restores the published signature and keeps lookup usable with any
   // concrete collection type.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   collection: Collection<any>,
   linkName: string,
   options?: IGetLookupOperatorOptions
@@ -124,14 +127,20 @@ export function lookup(
   return getLinker(collection, linkName).getLookupAggregationPipeline(options);
 }
 
-export function getReducerConfig(collection: Collection, name: string): IReducerOption | undefined {
+export function getReducerConfig(
+  collection: Collection<any>,
+  name: string
+): IReducerOption | undefined {
   if (collection[REDUCER_STORAGE]) {
     return collection[REDUCER_STORAGE][name];
   }
   return undefined;
 }
 
-export function getExpanderConfig(collection: Collection, name: string): QueryBodyType | undefined {
+export function getExpanderConfig(
+  collection: Collection<any>,
+  name: string
+): QueryBodyType | undefined {
   if (collection[EXPANDER_STORAGE]) {
     return collection[EXPANDER_STORAGE][name];
   }

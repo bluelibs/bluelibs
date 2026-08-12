@@ -38,9 +38,10 @@ export abstract class PassportAuthenticator {
   abstract createStrategy(): passport.Strategy;
 
   get name(): string {
-    // why: real passport strategies always set `name` in their constructor;
-    // `@types/passport` types it as optional, but a nameless strategy cannot be
-    // registered via `passport.use`.
+    // why: real passport strategies set `name` in their constructor, but
+    // `@types/passport` types it as optional. This bundle registers strategies
+    // via the one-arg `passport.use(strategy)` form, which rejects nameless
+    // strategies before `name` is ever read.
     return this.strategy.name!;
   }
 

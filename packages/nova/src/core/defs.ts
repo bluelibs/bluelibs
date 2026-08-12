@@ -76,11 +76,12 @@ export interface ILinkCollectionOptions {
   filters?: FilterQuery<Document> | ((options: HardwiredFiltersOptions) => FilterQuery<Document>);
 }
 
-// why: the reduce object's shape is derived from the `dependency` field at
-// runtime and cannot be statically inferred, so the `ParentType` (and `ReturnType`)
-// defaults are `any` (not `unknown`) to restore the published pre-cleanup
-// signature and keep consumer reducers like `reduce(user) { user.password }`
-// compiling. The same reasoning applies to `AnyObject`: params are runtime-shaped.
+// why: the parent document passed to `reduce` is runtime-shaped (the
+// `dependency` only requests a projection of it) and cannot be statically
+// inferred by the library, so the `ParentType` (and `ReturnType`) defaults are
+// `any` (not `unknown`) to restore the published pre-cleanup signature and keep
+// consumer reducers like `reduce(user) { user.password }` compiling. The same
+// reasoning applies to `AnyObject`: params are runtime-shaped.
 export type AnyObject = { [key: string]: any };
 export interface IReducerOption<ReturnType = any, ParamsType = AnyObject, ParentType = any> {
   dependency: DeepOmit<QueryBodyType, "$">;

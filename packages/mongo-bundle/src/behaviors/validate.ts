@@ -19,8 +19,8 @@ export default function validate(
   behaviorOptions.castOptions = behaviorOptions.castOptions || {};
 
   // why: the closure rewrites methods against a generic document collection; the
-  // returned function is widened to the generic BehaviorType so it can be applied
-  // to any concrete collection subclass.
+  // returned function matches BehaviorType so it can be applied to any concrete
+  // collection subclass.
   return ((collection: Collection<MongoDB.Document>) => {
     const validatorService =
       collection.container.get<ValidatorService>(ValidatorService);
