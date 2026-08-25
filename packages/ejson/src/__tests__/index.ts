@@ -76,6 +76,17 @@ test("ejson - some equality tests", () => {
   assert.isFalse(EJSON.equals({ a: { b: 2 } }, { a: {} }));
 });
 
+test("ejson - ObjectId equality", () => {
+  const id = new ObjectId();
+  const copy = new ObjectId(id.toString());
+  const other = new ObjectId();
+
+  assert.isTrue(id.equals(copy));
+  assert.isTrue(EJSON.equals(id, copy));
+  assert.isFalse(EJSON.equals(id, other));
+  assert.isTrue(EJSON.equals({ a: id }, { a: copy }));
+});
+
 test("ejson - equality and falsiness", () => {
   assert.isTrue(EJSON.equals(null, null));
   assert.isTrue(EJSON.equals(undefined, undefined));
