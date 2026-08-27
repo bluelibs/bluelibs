@@ -464,6 +464,12 @@ export class EJSONModule {
     if (!a || !b) {
       return false;
     }
+    if (isFunction(a.equals)) {
+      return a.equals(b, options);
+    }
+    if (isFunction(b.equals)) {
+      return b.equals(a, options);
+    }
     if (!(isObject(a) && isObject(b))) {
       return false;
     }
@@ -480,12 +486,6 @@ export class EJSONModule {
         }
       }
       return true;
-    }
-    if (isFunction(a.equals)) {
-      return a.equals(b, options);
-    }
-    if (isFunction(b.equals)) {
-      return b.equals(a, options);
     }
     if (a instanceof Array) {
       if (!(b instanceof Array)) {
