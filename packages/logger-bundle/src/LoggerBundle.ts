@@ -13,8 +13,8 @@ export class LoggerBundle extends Bundle<ILoggerBundleConfig> {
     this.get<LoggerService>(LoggerService);
     if (this.config.console) {
       const consoleListener = this.get<ConsoleListener>(ConsoleListener);
-      consoleListener.minLogLevel = this.config.level;
-      this.warmup([consoleListener]);
+      consoleListener.minLogLevel = this.config.level ?? LogLevel.DEBUG;
+      await this.warmup([ConsoleListener]);
     }
   }
 

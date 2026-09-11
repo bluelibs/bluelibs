@@ -2,5 +2,9 @@
 !src/**/*
 !dist/**/*
 dist/**/*.test.*
+src/__tests__/**
+dist/__tests__/**
 !package.json
 !README.md
+!DOCUMENTATION.md
+!CHANGELOG.md

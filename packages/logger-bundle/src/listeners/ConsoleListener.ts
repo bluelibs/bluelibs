@@ -6,17 +6,20 @@ import { LogLevel, LogLevelOrder } from "../defs";
 @Service()
 export class ConsoleListener extends Listener {
   lastLogDate: Date;
-  minLogLevel: LogLevel;
+  minLogLevel: LogLevel = LogLevel.DEBUG;
 
   init() {
     this.on(LogEvent, (e: LogEvent) => {
       const log = e.data.log;
 
-      if (LogLevelOrder.indexOf(log.level) > LogLevelOrder.indexOf(this.minLogLevel)) {
+      if (
+        LogLevelOrder.indexOf(log.level) >
+        LogLevelOrder.indexOf(this.minLogLevel)
+      ) {
         return;
       }
 
-      let color: any;
+      let color = chalk.gray;
       // what are some good colors?
       if (log.level == LogLevel.INFO) {
         color = chalk.blueBright;

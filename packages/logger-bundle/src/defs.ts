@@ -5,7 +5,8 @@ export interface ILoggerBundleConfig {
   console?: boolean;
 
   /**
-   * Minimum log level to be displayed
+   * Minimum severity printed to the console. Defaults to DEBUG (all levels).
+   * Custom LogEvent listeners still receive every log.
    */
   level?: LogLevel;
 }
@@ -31,7 +32,8 @@ export enum LogLevel {
   DEBUG = "debug",
 }
 
-export const LogLevelOrder = [
+/** Log levels ordered from highest to lowest severity. */
+export const LogLevelOrder: readonly LogLevel[] = [
   LogLevel.CRITICAL,
   LogLevel.ERROR,
   LogLevel.WARNING,
