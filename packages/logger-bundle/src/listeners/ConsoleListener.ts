@@ -1,17 +1,25 @@
 import { Listener, Service } from "@bluelibs/core";
 import { LogEvent } from "../events";
 import chalk from "chalk";
-import { LogLevel } from "../defs";
+import { LogLevel, LogLevelOrder } from "../defs";
 
 @Service()
 export class ConsoleListener extends Listener {
   lastLogDate: Date;
+  minLogLevel: LogLevel = LogLevel.DEBUG;
 
   init() {
     this.on(LogEvent, (e: LogEvent) => {
       const log = e.data.log;
 
-      let color: any;
+      if (
+        LogLevelOrder.indexOf(log.level) >
+        LogLevelOrder.indexOf(this.minLogLevel)
+      ) {
+        return;
+      }
+
+      let color = chalk.gray;
       // what are some good colors?
       if (log.level == LogLevel.INFO) {
         color = chalk.blueBright;

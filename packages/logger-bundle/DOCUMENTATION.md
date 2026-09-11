@@ -89,6 +89,33 @@ logger.send(new UserLog("message", LogLevel.INFO, { userId: "XXX" }));
 
 You can identify in your log listeners where this is a `UserLog` via `instanceof`.
 
+## Configuration
+
+You can configure the `LoggerBundle` by passing an options object to the constructor. The available options are:
+
+- `console`: Whether to print logs to the console (default: `true`).
+- `level`: The minimum severity printed to the console (default: `LogLevel.DEBUG`, allowing all levels).
+
+Severity increases from `DEBUG` to `INFO`, `WARNING`, `ERROR`, and `CRITICAL`.
+The threshold is inclusive and only affects console output. Custom `LogEvent`
+listeners still receive every log, including when `console` is `false`.
+
+Example:
+
+```typescript
+import { Kernel } from "@bluelibs/core";
+import { LoggerBundle, LogLevel } from "@bluelibs/logger-bundle";
+
+const kernel = new Kernel({
+  bundles: [
+    new LoggerBundle({
+      console: true,
+      level: LogLevel.ERROR, // Print only ERROR and CRITICAL messages.
+    }),
+  ],
+});
+```
+
 ## Meta
 
 ### Summary
