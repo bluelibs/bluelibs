@@ -40,6 +40,8 @@
     "typescript": "^5.3.3"
   },
   "optionalDependencies": {
+    "@img/sharp-libvips-linux-x64": "1.3.3",
+    "@img/sharp-linux-x64": "0.35.4",
     "@nx/nx-linux-x64-gnu": "22.7.12"
   },
   "engines": {
