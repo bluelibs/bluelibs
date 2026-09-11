@@ -50,7 +50,6 @@
     "@bluelibs/x-ui-router": "^1.1.0",
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",
-    "@types/graphql": "^0.11.3",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.6",
     "@types/node-polyglot": "^2.4.2",

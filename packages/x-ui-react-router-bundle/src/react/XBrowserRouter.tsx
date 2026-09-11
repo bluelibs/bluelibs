@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Route, Router, Switch } from "react-router-dom";
-import * as queryString from "query-string";
+import * as qs from "qs";
 import { XRouter } from "./XRouter";
 import { useUIComponents } from "@bluelibs/x-ui-react-bundle";
 import type { ProtectProps } from "@bluelibs/x-ui-guardian-bundle";
@@ -33,7 +33,10 @@ export const XBrowserRouter: React.FC<IProps> = (props) => {
                 const elementProps = {
                   ...match.params,
                   queryVariables: location.search
-                    ? queryString.parse(location.search)
+                    ? qs.parse(location.search, {
+                        ignoreQueryPrefix: true,
+                        strictNullHandling: true,
+                      })
                     : {},
                 };
 

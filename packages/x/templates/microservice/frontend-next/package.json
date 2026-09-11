@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
@@ -31,17 +31,20 @@
     "apollo-upload-client": "^16.0.0",
     "babel-plugin-inline-react-svg": "^2.0.1",
     "json-to-graphql-query": "^2.1.0",
-    "next": "^13.0.9",
-    "query-string": "^7.0.1",
+    "next": "^16.3.4",
+    "query-string": "^9.5.1",
     "react": "^18.0.2",
     "react-dom": "^18.0.2",
     "graphql-ws": "^5.11.3"
   },
   "devDependencies": {
-    "@types/node": "16.11.6",
+    "@types/node": "^20.19.0",
     "@types/react": "^18.0.0",
-    "eslint": "7.32.0",
-    "eslint-config-next": "12.0.1",
-    "typescript": "^4.4.4"
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.3.4",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   }
 }

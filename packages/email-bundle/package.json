@@ -25,7 +25,7 @@
     "lint:fix": "eslint src --ext .ts --fix"
   },
   "dependencies": {
-    "nodemailer": "^9.0.4"
+    "nodemailer": "^9.1.1"
   },
   "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
@@ -38,7 +38,6 @@
     "@bluelibs/logger-bundle": "^1.6.0",
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",
-    "@types/graphql": "^0.11.3",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.6",
     "@types/nodemailer": "^6.4.0",

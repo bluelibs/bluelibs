@@ -60,7 +60,7 @@ If you want to run mikro-orm cli commands follow the guide here: https://mikro-o
 The only difference is how the config file looks like. You will basically have to isolate your file kernel like this:
 
 ```ts
-import { ORM, MikroORMBundle } from "@bluelibs/mikroorm-bundle";
+import { ORM, MikroORMBundle } from "@bluelibs/mikro-orm-bundle";
 
 // A good idea at this stage would be to create a bundles/mikro-orm.ts which you import in your main kernel and the config file
 const kernel = new Kernel({

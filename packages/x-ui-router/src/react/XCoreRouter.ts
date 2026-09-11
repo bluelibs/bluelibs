@@ -1,6 +1,6 @@
 import { IRoute, IRouteGenerationProps, IRouteParams } from "../defs";
 import { Service } from "@bluelibs/core";
-import * as queryString from "query-string";
+import * as qs from "qs";
 
 export type AddRoutingArguments<T> = {
   [routeName: string]: T;
@@ -69,7 +69,11 @@ export abstract class XCoreRouter<
     }
 
     if (options?.query && Object.keys(options.query).length) {
-      queryPath = `?${queryString.stringify(options.query)}`;
+      queryPath = `?${qs.stringify(options.query, {
+        arrayFormat: "repeat",
+        strictNullHandling: true,
+        sort: (left, right) => left.localeCompare(right),
+      })}`;
     }
 
     return finalPath + queryPath;

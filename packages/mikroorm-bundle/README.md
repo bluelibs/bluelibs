@@ -9,7 +9,7 @@ This is the X-Framework of handling password authentication blended with GraphQL
 ## Install
 
 ```bash
-npm install --save @bluelibs/mikroorm-bundle
+npm install --save @bluelibs/mikro-orm-bundle
 ```
 
 ## [Documentation](./DOCUMENTATION.md)

@@ -40,7 +40,6 @@
     "@bluelibs/security-bundle": "^1.2.0",
     "@types/chai": "^4.3.11",
     "@types/chai-as-promised": "^7.1.8",
-    "@types/graphql": "^0.11.3",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.10.6",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
