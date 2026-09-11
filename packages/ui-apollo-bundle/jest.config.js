@@ -1,14 +1,7 @@
+const baseConfig = require("../../jest.config.base.js");
+
 module.exports = {
-  preset: "ts-jest",
-  testEnvironment: "node",
-  transform: {
-    "^.+\\.mjs$": "babel-jest"
-  },
-  moduleFileExtensions: [
-    "js",
-    "ts",
-    "tsx",
-    "jsx",
-    "mjs"
-  ],
+  ...baseConfig,
+  roots: ["<rootDir>/src"],
+  testMatch: ["**/__tests__/**/*.test.ts"],
 };

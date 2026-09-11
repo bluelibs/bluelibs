@@ -5,7 +5,7 @@ export abstract class BlueprintWriter implements IBlueprintWriter {
   @Inject()
   protected readonly container: ContainerInstance;
 
-  abstract write(model: any, session: IBlueprintWriterSession);
+  abstract write(model: unknown, session: IBlueprintWriterSession);
 
   /**
    * @param writerClass

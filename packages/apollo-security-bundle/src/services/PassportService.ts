@@ -1,6 +1,6 @@
 import { ApolloBundle } from "@bluelibs/apollo-bundle";
 import { Constructor, Service, ContainerInstance } from "@bluelibs/core";
-import * as passport from "passport";
+import passport from "passport";
 import { PassportAuthenticator } from "../models/PassportAuthenticator";
 
 @Service()
@@ -17,8 +17,8 @@ export class PassportService {
       fn(null, user);
     });
 
-    passport.deserializeUser((user: any, fn) => {
-      fn(null, user);
+    passport.deserializeUser((user: unknown, fn) => {
+      fn(null, user as Express.User | false);
     });
 
     this.apolloBundle.app.use(passport.initialize());
@@ -26,8 +26,7 @@ export class PassportService {
 
   register(
     passportStrategiesClasses:
-      | Constructor<PassportAuthenticator>
-      | Constructor<PassportAuthenticator>[]
+      Constructor<PassportAuthenticator> | Constructor<PassportAuthenticator>[]
   ) {
     if (!Array.isArray(passportStrategiesClasses)) {
       passportStrategiesClasses = [passportStrategiesClasses];

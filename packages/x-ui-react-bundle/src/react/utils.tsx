@@ -1,23 +1,24 @@
 import * as React from "react";
 
-import { createContext, createElement, useContext } from "react";
+import { createContext, createElement, useContext, ReactElement } from "react";
 
 import { WrapperComponentType } from "../defs";
 
 type IChildrenContext = {
-  children: JSX.Element;
-  setChildren: (children: JSX.Element) => void;
+  children: React.ReactNode;
+  setChildren: (children: React.ReactNode) => void;
 };
 
 export const generateWrapperTree = (
+  // why: wrapper components accept heterogeneous React props; ComponentType is contravariant so unknown cannot hold them
   wrappers: WrapperComponentType<any>[],
   index = 0
-) => {
+): ReactElement | null => {
   if (index === wrappers.length) return <ChildrenWrapper />;
 
   const wrapper = wrappers[index];
 
-  let props;
+  let props: unknown;
   if (typeof wrapper.props === "function") {
     props = wrapper.props();
   } else if (typeof wrapper.props === "object") {
@@ -31,10 +32,14 @@ export const generateWrapperTree = (
   );
 };
 
-export const ChildrenWrapper = () => {
+export const ChildrenWrapper = (): React.ReactElement | null => {
   const childrenContext = useContext(ChildrenContext);
 
-  return childrenContext.children;
+  return <>{childrenContext.children}</>;
 };
 
-export const ChildrenContext = createContext<IChildrenContext>(null);
+export const ChildrenContext = createContext<IChildrenContext>({
+  children: null,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  setChildren: (_children: React.ReactNode) => {},
+});

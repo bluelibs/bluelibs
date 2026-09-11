@@ -1,6 +1,7 @@
 # @bluelibs/ejson
 
 [![npm version](https://badge.fury.io/js/%40bluelibs%2Fejson.svg)](https://badge.fury.io/js/%40bluelibs%2Fejson)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **A powerful, TypeScript-first implementation of Extended JSON (EJSON), inspired by Meteor's original. `@bluelibs/ejson` allows you to effortlessly serialize and deserialize complex JavaScript types that standard `JSON` just can't handle.**

@@ -29,7 +29,7 @@ export class XUIReactBundle extends Bundle<IXUIReactBundleConfigType> {
     initialisingComponent: Components.Loading,
   };
 
-  private static providerWrappers = new OrderedList<WrapperType<any>>();
+  private static providerWrappers = new OrderedList<WrapperType<any>>(); // why: wrapper components have heterogeneous React props; ComponentType is contravariant so unknown cannot hold them
 
   get wrappers(): WrapperComponentType<any>[] {
     return XUIReactBundle.providerWrappers.elements();

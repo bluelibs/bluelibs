@@ -7,10 +7,7 @@ export type ConsumerIdableType = {
 class AlreadyConsumedError extends Error {}
 class ElementNotFoundError extends Error {}
 
-export class Consumer<
-  T extends ConsumerIdableType = ConsumerIdableType,
-  Keys = any[]
-> {
+export class Consumer<T extends ConsumerIdableType = ConsumerIdableType> {
   static Errors = {
     AlreadyConsumed: AlreadyConsumedError,
     ElementNotFound: ElementNotFoundError,

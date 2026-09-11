@@ -1,13 +1,8 @@
 <h1 align="center">BlueLibs rabbitmq-bundle</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/rabbitmq-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/rabbitmq-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/rabbitmq-bundle?branch=main">
-    <img src="https://coveralls.io/repos/github/bluelibs/rabbitmq-bundle/badge.svg?branch=main" />
-  </a>
-</p>
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Frabbitmq-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Frabbitmq-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is the X-Framework of handling password authentication blended with GraphQL.
 

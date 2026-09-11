@@ -2,22 +2,20 @@ import { UserRolesType, useUIComponents } from "@bluelibs/x-ui-react-bundle";
 import * as React from "react";
 import { useGuardian } from "../hooks";
 
-export type ProtectProps = {
+// `P` defaults to `any` because the wrapped component's props are consumer-defined
+// and unknown to Protect; callers may specialise `ProtectProps<MyComponentProps>`.
+export type ProtectProps<P = any> = {
   /**
    * If you don't specify any roles it will ensure that the user is logged in.
    */
   roles?: UserRolesType;
-  component?: React.ComponentType<any>;
-  componentProps?: AnyProps;
-  children?: any;
-};
-
-type AnyProps = {
-  [key: string]: any;
+  component?: React.ComponentType<P>;
+  componentProps?: P;
+  children?: React.ReactNode;
 };
 
 export function Protect(props: ProtectProps) {
-  const { roles, ...restProps } = props;
+  const { roles, component, componentProps, children } = props;
   const guardian = useGuardian();
   const UIComponents = useUIComponents();
 
@@ -31,11 +29,11 @@ export function Protect(props: ProtectProps) {
   }
 
   if (shouldRender) {
-    if (props.children) {
-      return props.children;
+    if (children) {
+      return children;
     }
-    return React.createElement(props.component, props.componentProps);
+    return React.createElement(component!, componentProps);
   } else {
-    return <UIComponents.NotAuthorized roles={props.roles} />;
+    return <UIComponents.NotAuthorized roles={roles} />;
   }
 }

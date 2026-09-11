@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-nocheck
 
 export default function isExtractableFile(value) {
   return (

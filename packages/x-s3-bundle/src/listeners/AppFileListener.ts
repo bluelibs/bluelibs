@@ -1,13 +1,12 @@
 import { Inject, Listener, On } from "@bluelibs/core";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import { BeforeDeleteEvent } from "@bluelibs/mongo-bundle";
+import { BeforeDeleteEvent, ObjectID } from "@bluelibs/mongo-bundle";
 import { AppFileGroupsCollection } from "../collections/appFileGroups/AppFileGroups.collection";
 import { AppFilesCollection } from "../collections/appFiles/AppFiles.collection";
 import {
   APP_FILES_COLLECTION_TOKEN,
   APP_FILE_GROUPS_COLLECTION_TOKEN,
 } from "../constants";
-import { S3UploadService } from "../services/S3UploadService";
 import { FileManagementService } from "../services/FileManagementService";
 
 export class AppFileListener extends Listener {
@@ -37,7 +36,9 @@ export class AppFileListener extends Listener {
       return;
     }
 
-    const _id = filters._id;
+    // A delete filter may hold a query condition; S3 cleanup only handles a
+    // single id, which the guard below enforces at runtime.
+    const _id = filters._id as ObjectID | undefined;
     if (!_id) {
       this.logger.info(
         "Could not reliably delete app file from S3. Please use a deletion by id for this to work."

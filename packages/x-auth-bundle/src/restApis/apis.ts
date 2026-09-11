@@ -10,16 +10,21 @@ import {
   RequestLoginLinkInput,
   VerifyMagicLinkInput,
 } from "../inputs/RequestMagicLinkInput";
-import * as X from "@bluelibs/x-bundle";
-import { SecurityService } from "@bluelibs/security-bundle";
+import { ContainerInstance, Constructor } from "@bluelibs/core";
+import { Request, Response, NextFunction } from "express";
 
 export const REST_APIS: {
   name: string;
   type: "post" | "get" | "put" | "patch" | "delete" | "all";
   path: string;
   service?: string;
-  inputType?: any;
-  handler?: (container, req, res, next) => any;
+  inputType?: Constructor<object>;
+  handler?: (
+    container: ContainerInstance,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => void;
 }[] = [
   {
     name: "register",
@@ -87,7 +92,7 @@ export const REST_APIS: {
     name: "me",
     type: "get",
     path: "/me",
-    handler: async (container, req, res, next) => {
+    handler: async (container, req, res, _next) => {
       try {
       } catch (err) {
         console.log(err);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Constructor } from "@bluelibs/core";
+import { ObjectId } from "@bluelibs/ejson";
 import { Collection } from "../../graphql/Collection";
 import {
   IQueryInput,
@@ -26,8 +27,8 @@ export function useLiveData<T>(
 ): UseLiveDataStateType<T[]> {
   const collection = use(collectionClass);
   const [isReady, setIsReady] = useState(false);
-  const [dataSet, setDataSet] = useState<any[]>([]);
-  const [error, setError] = useState<any>(null);
+  const [dataSet, setDataSet] = useState<T[]>([]);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const newBody = Object.assign({}, body);
@@ -38,7 +39,8 @@ export function useLiveData<T>(
     const observable = collection.subscribe(newBody, subscriptionOptions);
     const subscription = new XSubscription(observable, setDataSet, {
       onReady: () => setIsReady(true),
-      onError: (err) => setError(err),
+      onError: (err) =>
+        setError(err instanceof Error ? err : new Error(String(err))),
       ...subscriptionOptions,
     });
     return () => {
@@ -58,14 +60,13 @@ export function useLiveData<T>(
  */
 export function useLiveDataOne<T>(
   collectionClass: Constructor<Collection<T>>,
-  _id: any,
+  _id: ObjectId | string,
   body: QueryBodyType<T>,
   options: ISubscriptionOptions = {}
 ): UseLiveDataStateType<T> {
   const { data, isLoading, error } = useLiveData(
     collectionClass,
     {
-      // @ts-ignore
       filters: {
         _id,
       },

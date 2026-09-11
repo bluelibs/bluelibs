@@ -10,7 +10,7 @@ export class FixtureModel {
   collectionElement: IXElementResult;
   fixtureName: string;
   dataMapMode: boolean = false;
-  dataMap: { [mongoDBCollectionName: string]: any[] };
+  dataMap: { [mongoDBCollectionName: string]: unknown[] };
 
   // Representing the path of the fixture
   targetPath: string;

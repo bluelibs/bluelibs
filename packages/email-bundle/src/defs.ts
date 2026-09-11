@@ -2,12 +2,17 @@ import React from "react";
 import { Transport, SentMessageInfo } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/smtp-transport";
 
-type SimpleObjectType = { [key: string]: any };
+// why: part of the published public API — must stay `any` to remain
+// consumer-compatible. A strict `unknown` index makes EmailBundle's
+// `defaultConfig` unassignable to core's `Bundle` constraint (TS2416) and
+// turns template prop reads into `unknown`.
+export type SimpleObjectType = { [key: string]: any };
 
 export interface IGlobalEmailProps {}
 
-export interface IReactEmailTemplate<IProps = SimpleObjectType>
-  extends React.FC<IProps & IGlobalEmailProps> {
+export interface IReactEmailTemplate<
+  IProps = SimpleObjectType,
+> extends React.FC<IProps & IGlobalEmailProps> {
   subject?: (props: IProps & IGlobalEmailProps) => string;
 }
 

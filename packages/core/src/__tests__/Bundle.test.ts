@@ -6,7 +6,10 @@ import { BundlePhase } from "../defs";
 
 describe("Bundle", () => {
   it("Should work with a config and a default config", () => {
-    class A extends Bundle {
+    class A extends Bundle<{
+      number?: number;
+      somethingElse?: number | boolean;
+    }> {
       public defaultConfig = {
         number: 20,
       };
@@ -36,7 +39,7 @@ describe("Bundle", () => {
     assert.equal(a.getConfig().somethingElse, false);
   });
 
-  it("Should validate when set kernel", done => {
+  it("Should validate when set kernel", (done) => {
     const kernel = new Kernel();
 
     class A extends Bundle {
@@ -83,9 +86,8 @@ describe("Bundle", () => {
     }
   });
 
-  it("Ensure a bundle can get other bundle", done => {
+  it("Ensure a bundle can get other bundle", (done) => {
     const kernel = new Kernel();
-    let aBundle;
     class ABundle extends Bundle {}
     class BBundle extends Bundle {
       async init() {
@@ -97,7 +99,7 @@ describe("Bundle", () => {
       }
     }
 
-    aBundle = new ABundle();
+    const aBundle = new ABundle();
     const bBundle = new BBundle();
 
     kernel.addBundle(aBundle);

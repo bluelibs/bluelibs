@@ -2,7 +2,6 @@
 //
 import { getEcosystem } from "../helpers";
 import { Collection } from "../../models/Collection";
-import timestampable from "../../behaviors/timestampable";
 import translatable from "../../behaviors/translatable";
 
 describe("Translatable", () => {
@@ -23,7 +22,7 @@ describe("Translatable", () => {
 
     const postsCollection = container.get(Posts);
     await postsCollection.deleteMany({});
-    let resultInsert = await postsCollection.insertOne(
+    const resultInsert = await postsCollection.insertOne(
       {
         title: "Bonjour",
       },
@@ -34,7 +33,7 @@ describe("Translatable", () => {
       }
     );
 
-    let post = await postsCollection.findOne(resultInsert.insertedId);
+    const post = await postsCollection.findOne(resultInsert.insertedId);
 
     expect(post.title).toBeUndefined();
     expect(post.title_i18n).toHaveLength(1);
@@ -60,7 +59,7 @@ describe("Translatable", () => {
     const postsCollection = container.get(Posts);
     await postsCollection.deleteMany({});
 
-    let resultInsert = await postsCollection.insertOne(
+    const resultInsert = await postsCollection.insertOne(
       {
         title: "Bonjour",
       },

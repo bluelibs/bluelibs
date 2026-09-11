@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs SECURITY-BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/security-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/security-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/security-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/security-bundle/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fsecurity-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fsecurity-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This bundle aims to solve Authentication and Authorization (with included Permission Management & Permissioning Tree Hierarchy) while being fully decoupled from a persistence layer (Database), meaning you can implement your own persistence layers to work with any type of database/API.
 

@@ -10,16 +10,20 @@ import {
 } from "../../events";
 import createUploadLink from "../uploads/createUploadLink";
 
-const createContextLink = (eventManager: EventManager) => {
-  return setContext(async (operation: GraphQLRequest, prevContext: any) => {
-    const newContext = Object.assign({}, prevContext);
+const createContextLink = (eventManager: EventManager): ApolloLink => {
+  // `apollo-link-context` returns the legacy `apollo-link` ApolloLink class,
+  // which is structurally incompatible with `@apollo/client`'s ApolloLink.
+  return setContext(
+    async (operation: GraphQLRequest, prevContext: Record<string, unknown>) => {
+      const newContext = Object.assign({}, prevContext);
 
-    await eventManager.emit(
-      new ApolloBeforeOperationEvent({ context: newContext, operation })
-    );
+      await eventManager.emit(
+        new ApolloBeforeOperationEvent({ context: newContext, operation })
+      );
 
-    return newContext;
-  });
+      return newContext;
+    }
+  ) as unknown as ApolloLink;
 };
 
 type CreateLinkOptions = {
@@ -42,7 +46,7 @@ export function createApolloLink(
     uri,
   });
   const enhancedHttpLink = ApolloLink.from([
-    createContextLink(eventManager) as any,
+    createContextLink(eventManager),
     uploadLink,
   ]);
 
@@ -54,7 +58,7 @@ export function createApolloLink(
     subscriptionClient = createClient({
       url: uri.replace("http://", "ws://").replace("https://", "wss://"),
       connectionParams: async () => {
-        const params: Record<string, any> = {};
+        const params: Record<string, unknown> = {};
 
         await eventManager.emit(
           new ApolloSubscriptionOnConnectionParamsSetEvent({

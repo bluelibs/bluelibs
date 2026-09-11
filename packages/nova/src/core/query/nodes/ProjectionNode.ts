@@ -1,6 +1,8 @@
 import * as _ from "lodash";
 import FieldNode from "./FieldNode";
 import { SPECIAL_FIELDS } from "../../constants";
+import { FieldBodyType } from "../../defs";
+import { Document } from "mongodb";
 
 /**
  * This class was used to do field projection on the result set
@@ -9,11 +11,11 @@ import { SPECIAL_FIELDS } from "../../constants";
  */
 export default class ProjectionNode {
   public name: string;
-  public body: any;
+  public body: FieldBodyType;
   public nodes: ProjectionNode[] = [];
   public isLeaf: boolean = false;
 
-  constructor(name, body) {
+  constructor(name: string, body: FieldBodyType) {
     this.name = name;
     this.body = body;
 
@@ -22,7 +24,7 @@ export default class ProjectionNode {
         _.forEach(body, (value, fieldName) => {
           // We do not perform projection for fields such as $ or $alias
           if (!SPECIAL_FIELDS.includes(fieldName)) {
-            this.nodes.push(new ProjectionNode(fieldName, value));
+            this.nodes.push(new ProjectionNode(fieldName, value as FieldBodyType));
           }
         });
       }
@@ -31,7 +33,7 @@ export default class ProjectionNode {
     this.isLeaf = this.nodes.length === 0;
   }
 
-  public project(object) {
+  public project(object: Document) {
     if (!object) {
       return null;
     }
@@ -42,9 +44,7 @@ export default class ProjectionNode {
 
     const newObject = {};
     this.nodes.forEach((node) => {
-      newObject[node.name] = node.isLeaf
-        ? object[node.name]
-        : node.project(object[node.name]);
+      newObject[node.name] = node.isLeaf ? object[node.name] : node.project(object[node.name]);
     });
 
     return newObject;

@@ -1,4 +1,4 @@
-import { EventManager, Inject, Service } from "@bluelibs/core";
+import { EventManager, Service } from "@bluelibs/core";
 import { ILogger, LogLevel } from "../defs";
 import { Log } from "../models";
 import { LogEvent } from "../events";
@@ -19,7 +19,7 @@ export class LoggerService implements ILogger {
   /**
    * Log a critical message. Critical logs are used for security breaches or things that have high business impact
    */
-  async critical(message: string, context?: any): Promise<void> {
+  async critical(message: string, context?: unknown): Promise<void> {
     const log = new Log(message, LogLevel.CRITICAL, context);
 
     await this.send(log);
@@ -28,7 +28,7 @@ export class LoggerService implements ILogger {
   /**
    * Log an info type log. Info logs described actions that have been done or are about to happen
    */
-  async info(message: string, context?: any): Promise<void> {
+  async info(message: string, context?: unknown): Promise<void> {
     const log = new Log(message, LogLevel.INFO, context);
 
     await this.send(log);
@@ -37,13 +37,13 @@ export class LoggerService implements ILogger {
   /**
    * Warnings happen
    */
-  async warning(message: string, context?: any): Promise<void> {
+  async warning(message: string, context?: unknown): Promise<void> {
     const log = new Log(message, LogLevel.WARNING, context);
 
     await this.send(log);
   }
 
-  async error(message: string, context?: any): Promise<void> {
+  async error(message: string, context?: unknown): Promise<void> {
     const log = new Log(message, LogLevel.ERROR, context);
 
     await this.send(log);

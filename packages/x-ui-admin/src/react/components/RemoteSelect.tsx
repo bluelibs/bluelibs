@@ -5,7 +5,8 @@ import { Alert, Select, SelectProps, Spin } from "antd";
 import { ObjectId } from "@bluelibs/ejson";
 import * as _ from "lodash";
 
-export type RemoteSelectProps = SelectProps<any> & {
+export type RemoteSelectProps = SelectProps & {
+  // why: the collection's document type is unknown; `any` keeps every `Collection<T>` assignable
   collectionClass: Constructor<Collection<any>>;
   field: string;
   idAsString?: boolean;

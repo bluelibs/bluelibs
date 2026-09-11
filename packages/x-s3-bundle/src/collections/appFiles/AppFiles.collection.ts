@@ -2,7 +2,6 @@ import { Collection, Behaviors } from "@bluelibs/mongo-bundle";
 import * as reducers from "./AppFiles.reducers";
 import * as links from "./AppFiles.links";
 import { AppFile } from "./AppFile.model";
-import { IExpanderOptions } from "@bluelibs/nova";
 
 export class AppFilesCollection extends Collection<AppFile> {
   static collectionName = "appFiles";

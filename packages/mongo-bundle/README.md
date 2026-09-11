@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs MONGO BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/mongo-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/mongo-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/mongo-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/mongo-bundle/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fmongo-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fmongo-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 The MongoBundle offers integration with MongoDB database by allowing you to hook into events, giving ability to work with model classes and add behaviors. As well it is integrated with `@bluelibs/nova` package which allows extremely rapid queries for relational data.
 

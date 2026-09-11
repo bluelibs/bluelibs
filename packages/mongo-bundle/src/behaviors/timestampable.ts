@@ -1,6 +1,7 @@
 import { ITimestampableBehaviorOptions, BehaviorType } from "../defs";
 import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";
 import { Collection } from "../models/Collection";
+import * as MongoDB from "mongodb";
 
 export default function timestampable(
   options: ITimestampableBehaviorOptions = {}
@@ -11,9 +12,10 @@ export default function timestampable(
   };
   const keepInitialUpdateAsNull = options.keepInitialUpdateAsNull || false;
 
-  return (collection: Collection<any>) => {
+  return <T extends MongoDB.Document>(collection: Collection<T>) => {
     collection.localEventManager.addListener(
       BeforeInsertEvent,
+      // @ts-expect-error - handler uses CollectionEvent subclass
       (e: BeforeInsertEvent) => {
         const document = e.data.document;
         const now = new Date();
@@ -29,6 +31,7 @@ export default function timestampable(
 
     collection.localEventManager.addListener(
       BeforeUpdateEvent,
+      // @ts-expect-error - handler uses CollectionEvent subclass
       (e: BeforeUpdateEvent) => {
         const update = e.data.update;
 

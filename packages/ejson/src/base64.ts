@@ -2,12 +2,11 @@ export const Base64 = {
   characters:
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
 
-  encode: function (string) {
-    const characters = Base64.characters;
+  encode: function (string: string) {
     let result = "";
 
     if (typeof string !== "string") {
-      string = string.toString();
+      string = (string as { toString(): string }).toString();
     }
 
     let i = 0;
@@ -41,8 +40,7 @@ export const Base64 = {
     return result;
   },
 
-  decode: function (string) {
-    const characters = Base64.characters;
+  decode: function (string: string) {
     let result = "";
 
     let i = 0;
@@ -78,7 +76,7 @@ export const Base64 = {
     const CHUNK = 0x8000;
     for (let i = 0; i < u8.length; i += CHUNK) {
       const slice = u8.subarray(i, i + CHUNK);
-      out += String.fromCharCode.apply(null, Array.from(slice) as any);
+      out += String.fromCharCode.apply(null, Array.from(slice));
     }
     return Base64.encode(out);
   },

@@ -16,7 +16,7 @@ test("should work", async () => {
       mq.consume(
         QUEUE_NAME,
         async (result) => {
-          expect(result.result).toBe(1);
+          expect((result as { result: number }).result).toBe(1);
           finished();
           setTimeout(() => {
             kernel.shutdown();

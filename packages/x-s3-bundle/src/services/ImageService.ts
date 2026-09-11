@@ -1,10 +1,7 @@
-import * as os from "os";
-import * as sharp from "sharp";
+import sharp from "sharp";
 import { X_S3_CONFIG_TOKEN } from "../constants";
 import { Inject } from "@bluelibs/core";
 import { XS3BundleConfigType } from "../defs";
-
-const uploadDir = os.tmpdir();
 
 export class ImageService {
   constructor(
@@ -35,7 +32,7 @@ export class ImageService {
     return response;
   }
 
-  public isMimeTypeImage(mimeType): boolean {
+  public isMimeTypeImage(mimeType: string): boolean {
     return mimeType.indexOf("image") !== -1;
   }
 }

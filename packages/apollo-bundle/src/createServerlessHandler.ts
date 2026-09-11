@@ -1,9 +1,9 @@
 import { Kernel } from "@bluelibs/core";
-import { Callback, Context, Handler } from "aws-lambda";
+import { Handler } from "aws-lambda";
 import { ApolloBundle } from "./ApolloBundle";
 
 export function createServerlessHandler(kernel: Kernel): Handler {
-  return async (event: any, context: Context, callback: Callback) => {
+  return async (event, context, callback) => {
     if (!kernel.isInitialised()) {
       await kernel.init();
     }

@@ -1,8 +1,9 @@
 import * as React from "react";
 import { Route, Router, Switch } from "react-router-dom";
-import * as queryString from "query-string";
+import * as qs from "qs";
 import { XRouter } from "./XRouter";
 import { useUIComponents } from "@bluelibs/x-ui-react-bundle";
+import type { ProtectProps } from "@bluelibs/x-ui-guardian-bundle";
 
 interface IProps {
   router: XRouter;
@@ -32,21 +33,29 @@ export const XBrowserRouter: React.FC<IProps> = (props) => {
                 const elementProps = {
                   ...match.params,
                   queryVariables: location.search
-                    ? queryString.parse(location.search)
+                    ? qs.parse(location.search, {
+                        ignoreQueryPrefix: true,
+                        strictNullHandling: true,
+                      })
                     : {},
                 };
 
                 if (route.roles) {
+                  const protectProps: ProtectProps = {
+                    roles: route.roles,
+                    component,
+                    componentProps: elementProps,
+                  };
+
                   return (
                     <Components.ErrorBoundary>
-                      {/* // TODO: fix type definition, modified by x-ui-guardian-bundle */}
-                      {React.createElement((Components as any).Protect, {
-                        roles: route.roles,
-                        component,
-                        componentProps: elementProps,
-                      })}
+                      {React.createElement(Components.Protect, protectProps)}
                     </Components.ErrorBoundary>
                   );
+                }
+
+                if (!component) {
+                  return null;
                 }
 
                 return React.createElement(component, elementProps);

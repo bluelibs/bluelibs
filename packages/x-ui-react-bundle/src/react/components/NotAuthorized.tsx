@@ -5,7 +5,7 @@ export type NotAuthorizedProps = {
   roles?: UserRolesType;
 };
 
-export function NotAuthorized(props: NotAuthorizedProps) {
+export function NotAuthorized(_props: NotAuthorizedProps) {
   return (
     <div>
       <h1>You are not currently authorised to view this page</h1>

@@ -1,15 +1,9 @@
 import {
   IBlueprintWriterSession,
-  IBlueprintTemplate,
   IBlueprintWriterOperation,
   IBlueprintSessionCommitOptions,
 } from "../defs";
-import {
-  Service,
-  Constructor,
-  ContainerInstance,
-  Inject,
-} from "@bluelibs/core";
+import { Service, ContainerInstance, Inject } from "@bluelibs/core";
 import * as path from "path";
 import * as fs from "fs";
 import * as mkdirp from "mkdirp";
@@ -24,12 +18,14 @@ export class BlueprintWriterSession implements IBlueprintWriterSession {
   /**
    * This contains a list of handlers that are mandatory to run.
    */
-  protected afterCommitHandlers: ((...args: any[]) => any)[] = [];
+  protected afterCommitHandlers: (() => void | Promise<void>)[] = [];
   /**
    * This is used specifically to leave information
    * When doing large-scale generations we want to avoid this
+   * Instructions can be a plain text message or a handler to run.
    */
-  protected afterCommitInstructions: ((...args: any[]) => any)[] = [];
+  protected afterCommitInstructions: ((() => void | Promise<void>) | string)[] =
+    [];
 
   @Inject()
   protected readonly container: ContainerInstance;
@@ -43,7 +39,7 @@ export class BlueprintWriterSession implements IBlueprintWriterSession {
     return this;
   }
 
-  copyDir(dirPath, toPath, options = {}) {
+  copyDir(dirPath: string, toPath: string, options: object = {}) {
     this.operations.push({
       type: "copyDir",
       paths: [toPath],
@@ -191,7 +187,11 @@ export class BlueprintWriterSession implements IBlueprintWriterSession {
     this.afterCommitHandlers = [];
     if (!options?.skipInstructions) {
       for (const afterCommitHandler of this.afterCommitInstructions) {
-        await afterCommitHandler();
+        if (typeof afterCommitHandler === "function") {
+          await afterCommitHandler();
+        } else {
+          console.log(afterCommitHandler);
+        }
       }
     }
     this.afterCommitInstructions = [];
@@ -201,17 +201,17 @@ export class BlueprintWriterSession implements IBlueprintWriterSession {
    * Register a function to execute after commit has been made
    * @param handler
    */
-  afterCommit(handler) {
+  afterCommit(handler: () => void | Promise<void>) {
     this.afterCommitHandlers.push(handler);
 
     return this;
   }
 
   /**
-   * Register a function to execute after commit has been made
+   * Register an instruction to be shown (or a handler to run) after commit has been made
    * @param handler
    */
-  afterCommitInstruction(handler) {
+  afterCommitInstruction(handler: (() => void | Promise<void>) | string) {
     this.afterCommitInstructions.push(handler);
 
     return this;

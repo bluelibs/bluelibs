@@ -1,5 +1,4 @@
 import { Constructor } from "@bluelibs/core";
-import { Collection, ObjectID } from "@bluelibs/mongo-bundle";
 import { ReadStream } from "fs";
 import { AppFilesCollection } from "./collections/appFiles/AppFiles.collection";
 import { AppFileGroupsCollection } from "./collections/appFileGroups/AppFileGroups.collection";

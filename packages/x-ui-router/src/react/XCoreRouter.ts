@@ -1,6 +1,6 @@
 import { IRoute, IRouteGenerationProps, IRouteParams } from "../defs";
 import { Service } from "@bluelibs/core";
-import * as queryString from "query-string";
+import * as qs from "qs";
 
 export type AddRoutingArguments<T> = {
   [routeName: string]: T;
@@ -9,7 +9,7 @@ export type AddRoutingArguments<T> = {
 @Service()
 export abstract class XCoreRouter<
   RT extends IRoute,
-  RP extends IRouteParams = IRouteParams
+  RP extends IRouteParams = IRouteParams,
 > {
   store: RT[] = [];
 
@@ -37,7 +37,7 @@ export abstract class XCoreRouter<
       return found;
     }
 
-    return this.store.find((r) => r.name === routeNameOrPath);
+    return this.store.find((r) => r.name === routeNameOrPath) ?? null;
   }
 
   /**
@@ -69,7 +69,11 @@ export abstract class XCoreRouter<
     }
 
     if (options?.query && Object.keys(options.query).length) {
-      queryPath = `?${queryString.stringify(options.query)}`;
+      queryPath = `?${qs.stringify(options.query, {
+        arrayFormat: "repeat",
+        strictNullHandling: true,
+        sort: (left, right) => left.localeCompare(right),
+      })}`;
     }
 
     return finalPath + queryPath;
@@ -83,16 +87,17 @@ export abstract class XCoreRouter<
   /**
    * This method is used to ensure that you do not have duplicated routes
    */
-  protected checkRouteConsistency(route: RT) {
+  protected checkRouteConsistency(route: RT): void {
     // Ensure that there isn't another route with the same path or name
     const found = this.store.find((r) => {
       if (r.path === route.path) {
-        return r;
+        return true;
       }
       // Name can often be null
       if (route.name && r.name === route.name) {
-        return r;
+        return true;
       }
+      return false;
     });
 
     if (!found) {

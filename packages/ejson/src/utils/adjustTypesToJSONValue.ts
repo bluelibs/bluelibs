@@ -1,8 +1,12 @@
 import { ObjectId } from "../objectid/ObjectId";
 import { isObject, keysOf, isInfOrNaN } from "../utilities";
 import { toJSONValueHelper } from "./toJSONValueHelper";
+import { EJSONConverter } from "../types";
 // for both arrays and objects, in-place modification.
-export const adjustTypesToJSONValue = (obj, converters?) => {
+export const adjustTypesToJSONValue = (
+  obj: unknown,
+  converters: EJSONConverter[]
+): unknown => {
   // Is it an atom that we need to adjust?
   if (obj === null) {
     return null;
@@ -19,8 +23,8 @@ export const adjustTypesToJSONValue = (obj, converters?) => {
   }
 
   // Iterate over array or object structure.
-  keysOf(obj).forEach((key) => {
-    const value = obj[key];
+  keysOf(obj as object).forEach((key) => {
+    const value = (obj as Record<string, unknown>)[key];
     if (
       !isObject(value) &&
       value !== undefined &&
@@ -33,7 +37,7 @@ export const adjustTypesToJSONValue = (obj, converters?) => {
     const changed = toJSONValueHelper(value, converters);
 
     if (changed) {
-      obj[key] = changed;
+      (obj as Record<string, unknown>)[key] = changed;
       return; // on to the next key
     }
     // if we get here, value is an object but not adjustable

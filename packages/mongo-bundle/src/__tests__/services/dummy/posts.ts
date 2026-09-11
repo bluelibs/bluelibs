@@ -14,7 +14,7 @@ export class Post {
 
   comments: Comment[] = [];
 
-  authorId: ObjectId | any;
+  authorId: ObjectId;
   author: User;
 
   number?: string | number;

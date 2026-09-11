@@ -3,6 +3,7 @@ import { mergeDeep } from "../../utils/mergeDeep";
 
 describe("mergeDeep", () => {
   it("should merge object properly", () => {
+    // why: the target is assembled dynamically by deep-merging arbitrary objects
     const target: any = {};
     const obj1 = {
       a: {
@@ -31,6 +32,7 @@ describe("mergeDeep", () => {
 
   it("should work when extending a string", () => {
     // when the target type is a string or primitive, and the other is an object, the object should override it.
+    // why: the target is assembled dynamically by deep-merging arbitrary objects
     const target: any = {};
     const obj1 = {
       a: "abc",
@@ -51,6 +53,7 @@ describe("mergeDeep", () => {
       constructor(public readonly id: string) {}
     }
 
+    // why: the target is assembled dynamically by deep-merging arbitrary objects
     const target: any = {
       a: {
         cache: new Cache("target"),

@@ -4,7 +4,7 @@
 // When processor doesn't have a handle anymore, it should die.
 
 import { Collection } from "@bluelibs/mongo-bundle";
-import { IChangeSet, IDocumentBase, ISubscriptionEvent } from "../defs";
+import { IDocumentBase, ISubscriptionEvent } from "../defs";
 import { DocumentStore } from "./DocumentStore";
 import { IMessenger } from "../defs";
 import { SubscriptionHandler } from "./SubscriptionHandler";
@@ -12,7 +12,13 @@ import { extractIdsFromSelectors } from "../utils/extractIdsFromSelectors";
 import { Strategy, DocumentMutationType } from "../constants";
 import { hasSortFields } from "../utils/hasSortFields";
 import { SubscriptionStore } from "../services/SubscriptionStore";
-import { ICollectionQueryConfig, QueryBodyType } from "@bluelibs/nova";
+import { Filter, FindOptions } from "mongodb";
+import {
+  AnyifyFieldsWithIDs as Clean,
+  ICollectionQueryConfig,
+  IQueryOptions,
+  QueryBodyType,
+} from "@bluelibs/nova";
 import { getFieldsFromQueryBody, getAllowedFields } from "./utils/fields";
 import { getChangedSet } from "./utils/getChangedSet";
 
@@ -22,9 +28,9 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
   protected _ready = false;
   protected filtersAreEmpty = false;
   protected allowedFields: null | string[] = null;
-  public readonly filters: any;
-  public readonly options: any;
-  public channels = [];
+  public readonly filters: Filter<Clean<T>>;
+  public readonly options: IQueryOptions<T>;
+  public channels: string[] = [];
   public handlers: SubscriptionHandler<T>[] = [];
   public readonly documentStore: DocumentStore<T> = new DocumentStore<T>();
 
@@ -36,12 +42,12 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
   constructor(
     protected readonly messenger: IMessenger,
     protected readonly isDebug: boolean,
-    public readonly collection: Collection<any>,
-    protected readonly body: QueryBodyType,
+    public readonly collection: Collection<T>,
+    protected readonly body: QueryBodyType<T>,
     protected readonly subscriptionOptions: SubscriptionProcessorOptionsType = {}
   ) {
     this.collectionName = collection.collectionName;
-    const { filters, options } = body.$ as ICollectionQueryConfig;
+    const { filters, options } = body.$ as ICollectionQueryConfig<T>;
     this.filters = filters;
     this.options = options;
     this.allowedFields = getFieldsFromQueryBody(body);
@@ -64,8 +70,8 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
     const documents = await this.collection.query(this.body);
 
     documents.forEach((document) => {
-      // TODO: fix
-      this.documentStore.add(document as any);
+      // The query returns partial documents, but the store holds full documents
+      this.documentStore.add(document as T);
     });
 
     this.channels.forEach((channel) => {
@@ -95,7 +101,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
     }
   };
 
-  async add(document) {
+  async add(document: Partial<T>) {
     if (!document) {
       return;
     }
@@ -105,20 +111,20 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
         document
       );
 
-    this.documentStore.add(document);
+    this.documentStore.add(document as T);
     for (const handler of this.handlers) {
       for (const callback of handler.addedCallbacks) {
-        callback(document);
+        callback(document as T);
       }
     }
   }
 
-  async update(documentId, set) {
+  async update(documentId: T["_id"], set: Partial<T>) {
     if (set === null) {
       return;
     }
     const oldDocument = Object.assign({}, this.documentStore.get(documentId));
-    const optimalChangeSet = getChangedSet(oldDocument, set) as IChangeSet<T>;
+    const optimalChangeSet = getChangedSet<T>(oldDocument, set);
 
     if (Object.keys(optimalChangeSet).length === 0) {
       // No change detected.
@@ -141,7 +147,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
     }
   }
 
-  async remove(documentId) {
+  async remove(documentId: T["_id"]) {
     this.isDebug &&
       console.log(`[${this.collectionName}] Removing document ${documentId}`);
 
@@ -159,7 +165,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
    * and then it adds the handle to it. When doing this the first time we also have to add the documents that we already have in the store.
    * @param handler
    */
-  public attachHandler(handler: SubscriptionHandler<any>) {
+  public attachHandler(handler: SubscriptionHandler<T>) {
     this.handlers.push(handler);
 
     handler.addedCallbacks.forEach((callback) => {
@@ -171,7 +177,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
     handler.markAsReady();
   }
 
-  public detachHandler(handler) {
+  public detachHandler(handler: SubscriptionHandler<T>) {
     this.handlers = this.handlers.filter((_handler) => _handler !== handler);
   }
 
@@ -183,7 +189,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
    * Checks whether the document is eligible to be in this session
    * @param documentId
    */
-  protected async isDocumentEligible(documentId): Promise<boolean> {
+  protected async isDocumentEligible(documentId: T["_id"]): Promise<boolean> {
     if (this.filtersAreEmpty) {
       return true;
     }
@@ -211,8 +217,8 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
     event: ISubscriptionEvent<T>,
     withSpecificFields: string[] = []
   ): Promise<null | Partial<T>> {
-    const options: any = {};
-    const filters = { _id: event.documentId };
+    const options: { projection?: Record<string, 1> } = {};
+    const filters = { _id: event.documentId } as Filter<Clean<T>>;
 
     return this.collection.queryOne(this.getFilteredBody(filters));
 
@@ -246,13 +252,17 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
    * This is useful when wanting to fetch a single document by id
    * @param filters
    */
-  protected getFilteredBody(filters: any) {
+  protected getFilteredBody(
+    filters: Filter<Clean<T>> | { _id: T["_id"] | { $in: T["_id"][] } }
+  ) {
     const body = Object.assign({}, this.body);
     body.$ = Object.assign({}, this.body.$);
-    (body.$ as ICollectionQueryConfig).filters = {
+    // Merging the enforced filters with the caller's selector; both are
+    // already `Filter<Clean<T>>`-shaped, the `_id` form included.
+    (body.$ as ICollectionQueryConfig<T>).filters = {
       ...this.filters,
       ...filters,
-    };
+    } as ICollectionQueryConfig<T>["filters"];
 
     return body;
   }
@@ -363,7 +373,10 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
   protected async requery(event: ISubscriptionEvent<T>) {
     const freshIds = (
       await this.collection
-        .find(this.filters, { ...this.options, projection: { _id: 1 } })
+        .find(this.filters, {
+          ...this.options,
+          projection: { _id: 1 },
+        } as FindOptions<T>)
         .toArray()
     ).map((document) => document._id);
 
@@ -409,7 +422,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
 
   async reload() {
     const documents = await this.collection
-      .find(this.filters, this.options)
+      .find(this.filters, this.options as FindOptions<T>)
       .toArray();
 
     for (const document of this.documentStore.all()) {
@@ -426,7 +439,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
    * @param options
    * @returns {*}
    */
-  protected getStrategy(filters, options) {
+  protected getStrategy(filters: Filter<Clean<T>>, options: IQueryOptions<T>) {
     if (options.limit && !options.sort) {
       options.sort = { _id: 1 };
       // throw new Meteor.Error(`Sorry, but you are not allowed to use "limit" without "sort" option.`);
@@ -446,7 +459,7 @@ export class SubscriptionProcessor<T extends IDocumentBase> {
   /**
    * Identifies to which channel should we subscribe
    */
-  protected getSubscriptionChannels(filters): string[] {
+  protected getSubscriptionChannels(filters: Filter<Clean<T>>): string[] {
     if (filters._id) {
       const _ids = extractIdsFromSelectors(filters);
       return _ids.map((_id) => {

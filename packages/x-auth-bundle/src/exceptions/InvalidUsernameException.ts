@@ -6,6 +6,6 @@ export class InvalidUsernameException extends Exception<{ username: string }> {
   }
 
   getCode() {
-    return "INVALID_USERNAME"
+    return "INVALID_USERNAME";
   }
 }

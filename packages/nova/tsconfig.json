@@ -1,22 +1,20 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2019",
-    "allowJs": false,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "lib": ["esnext"],
-    "noImplicitAny": false,
-    "rootDir": "./src",
     "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
-    "pretty": true,
-    "removeComments": true,
-    "declaration": true,
-    "skipLibCheck": true,
-    "typeRoots": ["node_modules/@types"]
+    "rootDir": "./src",
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false
   },
-
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "benchmarks"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
 }

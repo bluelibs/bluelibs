@@ -1,11 +1,10 @@
 import { FacebookAuthenticator } from "./passport.facebook";
 import { createKernel } from "./ecosystem";
-import { Bundle } from "@bluelibs/core";
+import { Bundle, Kernel } from "@bluelibs/core";
 import { PassportService } from "../services/PassportService";
 import fetch from "node-fetch";
-import { ApolloBundle } from "@bluelibs/apollo-bundle";
 
-let kernel;
+let kernel: Kernel;
 describe("passport", () => {
   afterEach(async () => {
     if (kernel) {

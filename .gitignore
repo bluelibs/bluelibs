@@ -4,7 +4,6 @@ coverage
 dist
 node_modules
 npm-debug.log
-package-lock.json
 typings
 yarn-error.log
 yarn.lock
@@ -15,4 +14,7 @@ packages/graphql-final
 packages/x-cell-bundle
 packages/apollo-lambda-bundle
 .env
+.env.*
 .aider*
+# jest-junit reporter output
+junit.xml

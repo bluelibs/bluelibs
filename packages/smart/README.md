@@ -1,14 +1,8 @@
 <h1 align="center">BlueLibs SMART</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/smart">
-    <img src="https://api.travis-ci.org/bluelibs/smart.svg?branch=master" />
-  </a>
-  
-  <a href="https://coveralls.io/github/bluelibs/smart?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/smart/badge.svg?branch=master" />
-  </a>
-</p>
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fsmart.svg)](https://badge.fury.io/js/%40bluelibs%2Fsmart)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Smart is a simple tool which allows you to decouple state and logic from your components.
 

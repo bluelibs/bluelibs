@@ -7,13 +7,14 @@ import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
 import { XPasswordService } from "../services/XPasswordService";
 import { ChangePasswordInput } from "../inputs/ChangePasswordInput";
 import { IXPasswordBundleConfig } from "../defs";
+import { IFunctionMap } from "@bluelibs/graphql-bundle";
 
 export default (config: IXPasswordBundleConfig) => {
   const {
     graphql: { mutations },
   } = config;
 
-  const resolvers: any = {};
+  const resolvers: IFunctionMap = {};
 
   if (mutations.register) {
     resolvers.register = [
@@ -43,7 +44,7 @@ export default (config: IXPasswordBundleConfig) => {
   if (mutations.logout) {
     resolvers.logout = [
       X.CheckLoggedIn(),
-      X.ToService(XPasswordService, "logout", (args, ctx, any) => {
+      X.ToService(XPasswordService, "logout", (args, ctx) => {
         return [ctx.authenticationToken];
       }),
     ];

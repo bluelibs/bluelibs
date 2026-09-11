@@ -2,12 +2,12 @@ import * as _ from "lodash";
 import { QueryBodyType, IQueryContext } from "../defs";
 import CollectionNode from "./nodes/CollectionNode";
 import hypernova from "./hypernova/hypernova";
-import { Collection } from "mongodb";
+import { Collection, Document } from "mongodb";
 
-export default class Query<T = any> {
+export default class Query<T = Document> {
   public collection: Collection<T>;
   private graph: CollectionNode;
-  public readonly body: any;
+  public readonly body: QueryBodyType;
   public queryName: string;
 
   /**
@@ -16,11 +16,7 @@ export default class Query<T = any> {
    * @param collection
    * @param body
    */
-  constructor(
-    collection: Collection<T>,
-    body: QueryBodyType,
-    context?: IQueryContext
-  ) {
+  constructor(collection: Collection<T>, body: QueryBodyType, context?: IQueryContext) {
     this.collection = collection;
     this.queryName = collection.collectionName;
     this.body = body;
@@ -40,7 +36,7 @@ export default class Query<T = any> {
    * @param context
    * @returns {*}
    */
-  public async fetch(): Promise<any[]> {
+  public async fetch(): Promise<Document[]> {
     this.graph.forceSingleResult = false;
     return this.toArray();
   }
@@ -49,7 +45,7 @@ export default class Query<T = any> {
     return hypernova(this.graph);
   }
 
-  public async fetchOne(): Promise<any> {
+  public async fetchOne(): Promise<Document> {
     this.graph.forceSingleResult = true;
     const results = await this.toArray();
 

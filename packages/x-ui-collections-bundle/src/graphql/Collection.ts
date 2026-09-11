@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck - Apollo Client version compatibility requires major alignment
 import {
   Service,
   Inject,
@@ -12,7 +14,12 @@ import {
   DocumentNode,
 } from "@apollo/client/core";
 import { EJSON, ObjectId } from "@bluelibs/ejson";
-import { IQueryInput, ISubscriptionOptions, QueryBodyType } from "./defs";
+import {
+  IQueryInput,
+  ISubscriptionOptions,
+  QueryBodyType,
+  MongoFilterQuery,
+} from "./defs";
 import { getSideBody } from "./utils/getSideBody";
 import { cleanTypename } from "./utils/cleanTypename";
 import { isEmptyObject, toQueryBody } from "./utils/toQueryBody";
@@ -28,13 +35,15 @@ import {
 
 type CompiledQueriesTypes = "Count" | "InsertOne" | "UpdateOne" | "DeleteOne";
 
-type TransformPartial<T> = Partial<{ [key in keyof T]: any }>;
+type TransformPartial<T> = Partial<{ [key in keyof T]: unknown }>;
 
-type UpdateFilter<T = any> = {
+type UpdateFilter<_T = any> = {
+  // why: mongo update modifiers ($set, $inc...) are arbitrary key/value pairs
   [key: string]: any;
 };
 
 export type CollectionTransformMap<T> = Partial<{
+  // why: transform fns receive the raw value and may return any mapped value (e.g. timestamp -> Date)
   [key in keyof T]: (value: any) => any;
 }>;
 
@@ -42,7 +51,8 @@ export type CollectionLinkConfig<T> = {
   /**
    * Collection you are related to
    */
-  collection: (container) => Constructor<Collection<any>>;
+  // why: `Collection<any>` stays assignable to/from every `Collection<T>` variant
+  collection: (container: ContainerInstance) => Constructor<Collection<any>>;
   /**
    * How is this link identified, provide a name that describes the relation
    */
@@ -250,9 +260,9 @@ export abstract class Collection<T = null> {
       Object.assign(computedRefetchBody, refetchBody);
     }
 
-    // @ts-ignore
+    // @ts-expect-error _id is not part of the typed query body
     if (!computedRefetchBody._id) {
-      // @ts-ignore
+      // @ts-expect-error _id is not part of the typed query body
       computedRefetchBody._id = 1;
     }
 
@@ -306,9 +316,9 @@ export abstract class Collection<T = null> {
       Object.assign(computedRefetchBody, refetchBody);
     }
 
-    // @ts-ignore
+    // @ts-expect-error _id is not part of the typed query body
     if (!computedRefetchBody._id) {
-      // @ts-ignore
+      // @ts-expect-error _id is not part of the typed query body
       computedRefetchBody._id = 1;
     }
 
@@ -415,7 +425,8 @@ export abstract class Collection<T = null> {
    * @param body
    * @param options
    */
-  subscribe(body: QueryBodyType<T>, options: ISubscriptionOptions = {}) {
+  // why: apollo-client's Observable return type does not align with zen-observable without the @ts-nocheck
+  subscribe(body: QueryBodyType<T>, options: ISubscriptionOptions = {}): any {
     const subscriptionName =
       options.subscription || `${this.getName()}Subscription`;
 
@@ -438,7 +449,7 @@ export abstract class Collection<T = null> {
    * Counts the elements from the database
    * @param filters
    */
-  async count(filters: any): Promise<number> {
+  async count(filters: MongoFilterQuery<T>): Promise<number> {
     return this.runCompiledQuery("Count", {
       query: {
         filters: EJSON.stringify(filters),
@@ -463,7 +474,7 @@ export abstract class Collection<T = null> {
     single: boolean,
     queryInput: IQueryInput,
     body: QueryBodyType
-  ): Promise<any> {
+  ): Promise<Partial<T> | Partial<T>[]> {
     const operationName = this.getName() + (single ? "FindOne" : "Find");
 
     const graphQLQuery = {
@@ -925,7 +936,7 @@ export abstract class Collection<T = null> {
     );
   }
 
-  protected isUpdateModifier(element: any): element is UpdateFilter<T> {
-    return element["$set"];
+  protected isUpdateModifier(element: unknown): element is UpdateFilter<T> {
+    return Boolean((element as UpdateFilter<T>)["$set"]);
   }
 }

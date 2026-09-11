@@ -1,15 +1,20 @@
 import { assert } from "chai";
-import astToQuery, { deny, getMaxDepth, astToBody, astQueryToInfo } from "../../core/graphql/astToQuery";
+import astToQuery, {
+  deny,
+  getMaxDepth,
+  astToBody,
+  astQueryToInfo,
+} from "../../core/graphql/astToQuery";
 import gql from "graphql-tag";
-import { log, getRandomCollection } from "../integration/helpers";
-import { query, clear } from "../../core/api";
+import { getRandomCollection } from "../integration/helpers";
+import { clear } from "../../core/api";
 import { Collection } from "mongodb";
-import { client } from "../connection";
 import { SPECIAL_PARAM_FIELD } from "../../core/constants";
 import { enforceMaxLimit } from "../../core/graphql/astToQuery";
 import Query from "../../core/query/Query";
+import { QueryBodyType, IQueryOptions } from "../../core/defs";
 
-describe("GraphQL", function() {
+describe("GraphQL", function () {
   let A: Collection;
   let B: Collection;
   let C: Collection;
@@ -84,7 +89,7 @@ describe("GraphQL", function() {
           a: 1,
         },
       },
-      embody(body, getArguments) {
+      embody(_body, getArguments) {
         const profileArguments = getArguments("profile");
         assert.equal(profileArguments.withPrefix, true);
       },
@@ -96,11 +101,12 @@ describe("GraphQL", function() {
     assert.instanceOf(query, Query);
 
     // console.log(query.body);
-    assert.isUndefined(query.body.b);
-    assert.isUndefined(query.body.profile.b);
+    const deniedBody = query.body as { b?: unknown; profile?: { b?: unknown } };
+    assert.isUndefined(deniedBody.b);
+    assert.isUndefined(deniedBody.profile.b);
   });
 
-  it("#deny()", function() {
+  it("#deny()", function () {
     const body = {
       test: 1,
       testDeny: 1,
@@ -127,7 +133,13 @@ describe("GraphQL", function() {
       },
     };
 
-    deny(body, ["testDeny", "nested.testDeny", "nestedEmpty.disallow", "nestedDeny", "heavy.nest.ting.wup.denyThis"]);
+    deny(body, [
+      "testDeny",
+      "nested.testDeny",
+      "nestedEmpty.disallow",
+      "nestedDeny",
+      "heavy.nest.ting.wup.denyThis",
+    ]);
 
     assert.isDefined(body.test);
     assert.isUndefined(body.testDeny);
@@ -137,8 +149,8 @@ describe("GraphQL", function() {
     assert.isUndefined(body.heavy);
   });
 
-  it("#getMaxDepth()", function() {
-    let body: any = {
+  it("#getMaxDepth()", function () {
+    let body: QueryBodyType = {
       a: 1,
       b: 2,
     };
@@ -197,8 +209,8 @@ describe("GraphQL", function() {
     assert.equal(getMaxDepth(body), 6);
   });
 
-  it("#enforceMaxLimit()", function() {
-    let props: any = {
+  it("#enforceMaxLimit()", function () {
+    let props: { options?: IQueryOptions } = {
       options: {
         limit: 5,
       },

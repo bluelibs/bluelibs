@@ -132,10 +132,10 @@ test("ejson - clone", () => {
   cloneTest({ x: 42, y: "asdf" });
 
   function testCloneArgs(...args) {
-    const clonedArgs = EJSON.clone(args);
+    const clonedArgs = EJSON.clone(args) as unknown[];
     const shouldBe = [1, 2, "foo", [4]];
     assert.isTrue(clonedArgs.length === shouldBe.length);
-    clonedArgs.forEach((arg, idx) => {
+    clonedArgs.forEach((_arg, idx) => {
       assert.deepEqual(clonedArgs[idx], shouldBe[idx]);
     });
   }
@@ -215,7 +215,7 @@ test("ejson - stringify", () => {
 });
 
 test("ejson - parse", () => {
-  const parsed = EJSON.parse("[1,2,3]");
+  const parsed = EJSON.parse("[1,2,3]") as unknown[];
   assert.isTrue(parsed.length === 3);
   assert.isTrue(parsed[0] === 1);
   assert.isTrue(parsed[1] === 2);
@@ -228,11 +228,10 @@ test("ejson - parse", () => {
 
 test("ejson - regexp", () => {
   assert.deepEqual(EJSON.stringify(/foo/gi), '{"$regexp":"foo","$flags":"gi"}');
-  var d = new RegExp("foo", "gi");
-  var obj = { $regexp: "foo", $flags: "gi" };
+  const obj = { $regexp: "foo", $flags: "gi" };
 
-  var eObj = EJSON.toJSONValue(obj);
-  var roundTrip = EJSON.fromJSONValue(eObj);
+  const eObj = EJSON.toJSONValue(obj);
+  const roundTrip = EJSON.fromJSONValue(eObj);
   assert.deepEqual(obj, roundTrip);
 });
 
@@ -272,9 +271,9 @@ test("ejson - custom types", () => {
   assert.notEqual(a, nakedA as EJSONTest.Address);
   const holder = new EJSONTest.Holder(nakedA);
   assert.deepEqual(holder.toJSONValue(), a.toJSONValue()); // sanity check
-  // @ts-ignore
+  // @ts-expect-error - comparing objects of different types
   assert.notEqual(holder, a);
-  // @ts-ignore
+  // @ts-expect-error - comparing objects of different types
   assert.notEqual(a, holder as EJSONTest.Holder);
 
   const d = new Date();
@@ -299,21 +298,19 @@ test('ejson - handle objects with properties named "length"', () => {
   }
   const widget = new Widget();
 
-  const toJsonWidget = EJSON.toJSONValue(widget);
+  const toJsonWidget = EJSON.toJSONValue(widget) as { length: number };
   assert.equal(widget.length, toJsonWidget.length);
 
-  const fromJsonWidget = EJSON.fromJSONValue(widget);
+  const fromJsonWidget = EJSON.fromJSONValue(widget) as { length: number };
   assert.equal(widget.length, fromJsonWidget.length);
 
   const stringifiedWidget = EJSON.stringify(widget);
   assert.deepEqual(stringifiedWidget, '{"length":10}');
 
-  const parsedWidget = EJSON.parse('{"length":10}');
+  const parsedWidget = EJSON.parse('{"length":10}') as { length: number };
   assert.equal(10, parsedWidget.length);
 
   assert.isFalse(EJSON.isBinary(widget));
-
-  const widget2 = new Widget();
 
   const clonedWidget = EJSON.clone(widget);
 
@@ -341,10 +338,10 @@ test("should work with parsing object ids and everything", () => {
 
 // ----- EJSON Batch (interfaces + API presence) -----
 test("ejson batch - API presence", () => {
-  expect(typeof (EJSON as any).toBatchJSONValue).toBe("function");
-  expect(typeof (EJSON as any).fromBatchJSONValue).toBe("function");
-  expect(typeof (EJSON as any).stringifyBatch).toBe("function");
-  expect(typeof (EJSON as any).parseBatch).toBe("function");
+  expect(typeof EJSON.toBatchJSONValue).toBe("function");
+  expect(typeof EJSON.fromBatchJSONValue).toBe("function");
+  expect(typeof EJSON.stringifyBatch).toBe("function");
+  expect(typeof EJSON.parseBatch).toBe("function");
 });
 
 test("ejson batch - schema and payload interface shape compiles", () => {
@@ -391,6 +388,15 @@ test("ejson batch - options type compiles", () => {
   expect(typeof opts).toBe("object");
 });
 
+interface BatchRow {
+  _id: ObjectId;
+  createdAt: Date;
+  active: boolean;
+  name: string;
+  score: number;
+  re: RegExp;
+}
+
 test("ejson batch - stringifyBatch/parseBatch roundtrip for flat uniform objects", () => {
   const rows = Array.from({ length: 5 }).map((_, i) => ({
     _id: new ObjectId(),
@@ -402,7 +408,7 @@ test("ejson batch - stringifyBatch/parseBatch roundtrip for flat uniform objects
   }));
 
   const s = EJSON.stringifyBatch(rows);
-  const back = EJSON.parseBatch(s);
+  const back = EJSON.parseBatch<BatchRow>(s);
   expect(Array.isArray(back)).toBe(true);
   expect(back.length).toBe(rows.length);
   for (let i = 0; i < rows.length; i++) {
@@ -420,21 +426,21 @@ test("ejson batch - stringifyBatch/parseBatch roundtrip for flat uniform objects
 
 test("ejson batch - chooses packed objectId encoding when option set", () => {
   const rows = Array.from({ length: 3 }).map(() => ({ _id: new ObjectId() }));
-  const s = (EJSON as any).stringifyBatch(rows, { preferPackedObjectId: true });
+  const s = EJSON.stringifyBatch(rows, { preferPackedObjectId: true });
   const parsed = JSON.parse(s);
   expect(!!parsed.$batch).toBe(true);
   expect(parsed.$batch.schema.columns._id.encoding).toBe("packed");
-  const back = (EJSON as any).parseBatch(s);
+  const back = EJSON.parseBatch<{ _id: ObjectId }>(s);
   expect(back[0]._id.toString()).toBe(rows[0]._id.toString());
 });
 
 test("ejson batch - rejects non-uniform arrays and falls back", () => {
-  const rows: any[] = [{ a: 1, b: 2 }, { a: 2 }];
-  const s = (EJSON as any).stringifyBatch(rows);
+  const rows: Array<Record<string, unknown>> = [{ a: 1, b: 2 }, { a: 2 }];
+  const s = EJSON.stringifyBatch(rows);
   // Expect fallback to regular stringify (no $batch marker)
   const parsed = JSON.parse(s);
   expect(parsed.$batch).toBeUndefined();
-  const back = (EJSON as any).parseBatch(s);
+  const back = EJSON.parseBatch<Record<string, unknown>>(s);
   expect(Array.isArray(back)).toBe(true);
   expect(back.length).toBe(2);
   expect(back[0].a).toBe(1);

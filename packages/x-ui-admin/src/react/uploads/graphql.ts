@@ -13,8 +13,16 @@ export const UPLOAD_FILE = gql`
 `;
 
 export const UPLOAD_FILE_TO_GROUP = gql`
-  mutation UploadFileToGroup($groupId: ObjectId!, $upload: Upload!, $context: String) {
-    AppFileUploadToGroup(groupId: $groupId, upload: $upload, context: $context) {
+  mutation UploadFileToGroup(
+    $groupId: ObjectId!
+    $upload: Upload!
+    $context: String
+  ) {
+    AppFileUploadToGroup(
+      groupId: $groupId
+      upload: $upload
+      context: $context
+    ) {
       _id
       name
       mimeType

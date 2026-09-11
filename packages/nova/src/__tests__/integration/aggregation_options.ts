@@ -1,11 +1,11 @@
 import { expect } from "chai";
-import { Collection } from "mongodb";
+import { Collection, AggregateOptions, Document } from "mongodb";
 import { query } from "../../core/api";
 import { getRandomCollection } from "./helpers";
 
 describe("Aggregation options", function () {
   let collection: Collection;
-  let lastAggregateOptions: any;
+  let lastAggregateOptions: AggregateOptions | null;
 
   beforeAll(async () => {
     collection = await getRandomCollection("AggregationOptions");
@@ -20,7 +20,8 @@ describe("Aggregation options", function () {
     await collection.insertOne({ number: 1 });
 
     const originalAggregate = collection.aggregate.bind(collection);
-    collection.aggregate = ((pipeline: any, options: any) => {
+    // why: overriding the driver's generic aggregate method with a spy requires a cast.
+    collection.aggregate = ((pipeline: Document[], options: AggregateOptions) => {
       lastAggregateOptions = options;
       return originalAggregate(pipeline, options);
     }) as any;
@@ -47,4 +48,3 @@ describe("Aggregation options", function () {
     expect(lastAggregateOptions.readPreference).to.equal("secondaryPreferred");
   });
 });
-

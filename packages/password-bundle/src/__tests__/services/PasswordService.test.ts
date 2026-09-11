@@ -2,7 +2,6 @@ import { SecurityService } from "@bluelibs/security-bundle";
 import { PasswordService } from "../../services/PasswordService";
 import { createEcosystem } from "../ecosystem";
 import { assert } from "chai";
-import { ContainerInstance } from "@bluelibs/core";
 import { UsernameAlreadyExistsException } from "../../exceptions";
 
 describe("PasswordService", () => {
@@ -94,8 +93,7 @@ describe("PasswordService", () => {
     // So, if I do one request now, the next one I can do after cooldown.
 
     // Should be ok
-    const passwordRequestToken =
-      await passwordService.createTokenForPasswordReset(userId);
+    await passwordService.createTokenForPasswordReset(userId);
 
     // Now this next one, the cooldown is 1m so we should expect an error, we already requested it few ms ago
     await expect(
@@ -115,7 +113,7 @@ describe("PasswordService", () => {
     await passwordService.resetPassword(userId, lastToken, "somepw");
 
     // Now that everything should be cleaned let's try again
-    const newToken = await passwordService.createTokenForPasswordReset(userId);
+    await passwordService.createTokenForPasswordReset(userId);
 
     // Now we need to emulate the time passing, so what we do. You got it, we set time in the past and we try to reset our pw
     passwordService.updateData(userId, {
@@ -226,9 +224,8 @@ describe("PasswordService", () => {
 
     await passwordService.setUsername(userId, "johnny@johnny.com");
 
-    const userIdFound = await passwordService.findUserIdByUsername(
-      "johnny@johnny.com"
-    );
+    const userIdFound =
+      await passwordService.findUserIdByUsername("johnny@johnny.com");
     expect(userIdFound).toEqual(userId);
     await passwordService.attach(userId2, {
       password: "123456",

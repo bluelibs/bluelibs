@@ -35,7 +35,7 @@ export class Field extends BaseModel<Field> {
   /**
    * Variable name
    */
-  id: string;
+  declare id: string;
 
   /**
    * This represents whether a field value is mandatory to exit.
@@ -94,7 +94,7 @@ export class Field extends BaseModel<Field> {
   /**
    * What does this field do, what is its purpose?
    */
-  description: string;
+  declare description: string;
 
   /**
    * Mock info how to generate the field in a custom fashion. Keep in mind this won't work with when `isRelationStorageField` is true
@@ -133,7 +133,7 @@ export class Field extends BaseModel<Field> {
   /**
    * Store a default value for this field. If you want to eval the thing use `eval: new Date()`. If you are using it from an enum just pick it up.
    */
-  defaultValue: any;
+  defaultValue: unknown;
 
   clean() {
     this.storeUIDefaults();
@@ -298,12 +298,12 @@ export class Field extends BaseModel<Field> {
     key: string;
     label: string;
     description?: string;
-    enums?: any;
+    enums?: Record<string, string>;
   } {
     const parents: Field[] = [];
     let current: Field = this;
     //in case of enums
-    let enums: any;
+    let enums: Record<string, string> | undefined;
 
     if (forceParent) {
       current.parent = forceParent;
@@ -319,7 +319,7 @@ export class Field extends BaseModel<Field> {
     }
     if (current.type === FieldValueKind.ENUM && current.enumValues.length > 0) {
       enums = {};
-      for (let enum_value of current.enumValues) {
+      for (const enum_value of current.enumValues) {
         const enum_key =
           typeof enum_value === "string" ? enum_value : enum_value?.label;
         enums[enum_key.toLowerCase()] = enum_key;

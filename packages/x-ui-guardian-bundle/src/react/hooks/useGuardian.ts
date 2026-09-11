@@ -1,4 +1,4 @@
-import { use, useContainer, useSmart } from "@bluelibs/x-ui-react-bundle";
+import { use, useSmart } from "@bluelibs/x-ui-react-bundle";
 import { GUARDIAN_SMART_TOKEN } from "../../constants";
 
 import { GuardianSmart } from "../smarts/GuardianSmart";

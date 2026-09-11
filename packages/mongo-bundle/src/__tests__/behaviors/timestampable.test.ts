@@ -1,5 +1,4 @@
 import { describe, it, expect } from "@jest/globals";
-import { Schema } from "@bluelibs/validator-bundle";
 import timestampable from "../../behaviors/timestampable";
 import { Collection } from "../../models/Collection";
 import { BehaviorType } from "../../defs";
@@ -9,11 +8,6 @@ import { ObjectId } from "mongodb";
 describe("timestampable behavior", () => {
   it("should set createdAt and updatedAt on insert if not provided", async () => {
     const { container } = await getEcosystem();
-
-    @Schema()
-    class User {
-      name: string;
-    }
 
     class UserCollection extends Collection<any> {
       static collectionName = "users_timestampable_test_1";
@@ -29,11 +23,6 @@ describe("timestampable behavior", () => {
 
   it("should update the updatedAt field on update but preserve createdAt", async () => {
     const { container } = await getEcosystem();
-
-    @Schema()
-    class User {
-      name: string;
-    }
 
     class UserCollection extends Collection<any> {
       static collectionName = "users_timestampable_test_2";
@@ -59,11 +48,6 @@ describe("timestampable behavior", () => {
   it("should keep updatedAt as null initially if keepInitialUpdateAsNull is true", async () => {
     const { container } = await getEcosystem();
 
-    @Schema()
-    class User {
-      name: string;
-    }
-
     class UserCollection extends Collection<any> {
       static collectionName = "users_timestampable_test_3";
       static behaviors: BehaviorType[] = [
@@ -82,11 +66,6 @@ describe("timestampable behavior", () => {
   it("should set createdAt when using upsert if originally not provided", async () => {
     const { container } = await getEcosystem();
 
-    @Schema()
-    class User {
-      name?: string;
-    }
-
     class UserCollection extends Collection<any> {
       static collectionName = "users_timestampable_test_4";
       static behaviors: BehaviorType[] = [timestampable()];
@@ -103,11 +82,6 @@ describe("timestampable behavior", () => {
 
   it("should handle upsert with $set and $setOnInsert properly", async () => {
     const { container } = await getEcosystem();
-
-    @Schema()
-    class User {
-      valid?: boolean;
-    }
 
     class UserCollection extends Collection<any> {
       static collectionName = "users_timestampable_test_5";

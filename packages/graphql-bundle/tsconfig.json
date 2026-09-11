@@ -1,22 +1,16 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2019",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "lib": ["es6", "dom", "esnext"],
-    "noImplicitAny": false,
-    "rootDir": "./src",
     "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
-    "pretty": true,
-    "removeComments": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "declaration": true,
-    "typeRoots": ["node_modules/@types"]
+    "rootDir": "./src"
   },
-
-  "include": ["src/**/*.ts", "src/**/*.graphql"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
 }

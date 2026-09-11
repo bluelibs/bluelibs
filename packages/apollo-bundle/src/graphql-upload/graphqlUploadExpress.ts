@@ -1,11 +1,14 @@
-// @ts-check
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 
 import defaultProcessRequest from "./processRequest";
+
+import { Request, Response, NextFunction } from "express";
 
 export default function graphqlUploadExpress({
   processRequest = defaultProcessRequest,
   ...processRequestOptions
-} = {}) {
+}: any = {}) {
   /**
    * [Express](https://expressjs.com) middleware that processes incoming
    * [GraphQL multipart requests](https://github.com/jaydenseric/graphql-multipart-request-spec)
@@ -16,7 +19,11 @@ export default function graphqlUploadExpress({
    * @param {import("express").Response} response
    * @param {import("express").NextFunction} next
    */
-  function graphqlUploadExpressMiddleware(request, response, next) {
+  function graphqlUploadExpressMiddleware(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
     if (!request.is("multipart/form-data")) return next();
 
     const requestEnd = new Promise((resolve) => request.on("end", resolve));
@@ -26,7 +33,7 @@ export default function graphqlUploadExpress({
     // before the request has ended.
     response.send =
       /** @param {Array<unknown>} args */
-      (...args) => {
+      (...args: any[]) => {
         requestEnd.then(() => {
           response.send = send;
           response.send(...args);
@@ -34,11 +41,11 @@ export default function graphqlUploadExpress({
       };
 
     processRequest(request, response, processRequestOptions)
-      .then((body) => {
+      .then((body: any) => {
         request.body = body;
         next();
       })
-      .catch((error) => {
+      .catch((error: any) => {
         if (error.status && error.expose) response.status(error.status);
         next(error);
       });

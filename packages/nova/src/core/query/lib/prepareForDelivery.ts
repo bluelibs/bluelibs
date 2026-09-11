@@ -1,6 +1,7 @@
 import * as _ from "lodash";
 import applyReducers from "./computeReducers";
 import CollectionNode from "../nodes/CollectionNode";
+import { Document } from "mongodb";
 
 export default async (node: CollectionNode) => {
   storeOneResults(node, node.results);
@@ -9,7 +10,7 @@ export default async (node: CollectionNode) => {
   node.project();
 };
 
-export function storeOneResults(node: CollectionNode, sameLevelResults: any[]) {
+export function storeOneResults(node: CollectionNode, sameLevelResults: Document[]) {
   if (!sameLevelResults) {
     return;
   }
@@ -21,20 +22,14 @@ export function storeOneResults(node: CollectionNode, sameLevelResults: any[]) {
       if (result !== undefined) {
         if (Array.isArray(result[childCollectionNode.name])) {
           // If it isn't an array it means it was already processed by the same result of assembly elsewhere
-          storeOneResults(
-            childCollectionNode,
-            result[childCollectionNode.name]
-          );
+          storeOneResults(childCollectionNode, result[childCollectionNode.name]);
         }
       }
     });
 
     if (childCollectionNode.isOneResult) {
       sameLevelResults.forEach((result) => {
-        if (
-          result[childCollectionNode.name] &&
-          Array.isArray(result[childCollectionNode.name])
-        ) {
+        if (result[childCollectionNode.name] && Array.isArray(result[childCollectionNode.name])) {
           result[childCollectionNode.name] =
             result[childCollectionNode.name].length > 0
               ? _.first(result[childCollectionNode.name])

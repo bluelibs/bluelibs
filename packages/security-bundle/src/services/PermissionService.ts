@@ -155,23 +155,26 @@ export class PermissionService implements IPermissionService {
    * Prepares your easy search and transforms it so it reaches persistance layers properly
    * @param object
    */
-  protected transformToFilters(object: any): IPermissionSearchFilters {
-    const newObject = {};
-    [
+  protected transformToFilters(
+    object: IPermissionSearchFilter
+  ): IPermissionSearchFilters {
+    const newObject: Record<string, unknown> = {};
+    const keys: (keyof IPermissionSearchFilter)[] = [
       "userId",
       "permission",
       "domain",
       "domainIdentifier",
       "createdById",
-    ].forEach((key) => {
-      if (object[key]) {
-        newObject[key] = Array.isArray(object[key])
-          ? object[key]
-          : [object[key]];
+    ];
+
+    keys.forEach((key) => {
+      const value = object[key];
+      if (value) {
+        newObject[key] = Array.isArray(value) ? value : [value];
       }
     });
 
-    return newObject;
+    return newObject as unknown as IPermissionSearchFilters;
   }
 
   /**

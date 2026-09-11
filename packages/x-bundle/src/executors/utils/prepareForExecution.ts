@@ -1,15 +1,15 @@
 import { IAstToQueryOptions } from "@bluelibs/nova";
-import { Constructor, ContainerInstance } from "@bluelibs/core";
+import { Constructor } from "@bluelibs/core";
 import { detectPipelineInSideBody } from "./detectPipelineInSideBody";
 import { performRelationalSorting } from "./performRelationalSorting";
 import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
-import * as merge from "lodash.merge";
+import merge from "lodash.merge";
 import { NOVA_AST_TO_QUERY_OPTIONS, NOVA_INTERSECTION } from "../security";
 
 export const prepareForExecution = (
   ctx: IGraphQLContext,
-  collectionClass: Constructor<Collection<any>>,
+  collectionClass: Constructor<Collection>,
   astToQueryOptions: IAstToQueryOptions
 ): IAstToQueryOptions => {
   if (ctx[NOVA_INTERSECTION] && !astToQueryOptions.intersect) {
@@ -27,7 +27,11 @@ export const prepareForExecution = (
 
   const container = ctx.container;
 
-  let { sideBody, ...cleanedOptions } = astToQueryOptions.options || {};
+  // `sideBody` lives on the options object itself (not on `options.options`),
+  // matching what nova's astToQuery reads back from `config.sideBody`.
+  const initialSideBody = astToQueryOptions.sideBody;
+  const cleanedOptions = astToQueryOptions.options;
+  let sideBody = initialSideBody;
   if (!sideBody) {
     sideBody = {};
     astToQueryOptions.sideBody = sideBody;
@@ -43,7 +47,9 @@ export const prepareForExecution = (
   // The sort from options takes owning
   const sort = cleanedOptions?.sort || sideBody.$.options?.sort;
 
-  if (sort && Object.keys(sort).length > 0) {
+  // Array-form sorts (`[[field, direction], ...]`) are handled by the driver
+  // and are not relational; only object-form sorts can reference links.
+  if (sort && !Array.isArray(sort) && Object.keys(sort).length > 0) {
     const pipeline = performRelationalSorting(container, collectionClass, sort);
     if (pipeline.length) {
       if (sideBody.$.pipeline) {

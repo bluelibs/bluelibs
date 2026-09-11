@@ -8,12 +8,12 @@ export const ResultSymbol = Symbol("GraphQLResolverResult");
 /**
  * Get the value stored in an object
  */
-export function getResult(object: any) {
-  return object[ResultSymbol];
+export function getResult(object: unknown) {
+  return (object as Record<symbol, unknown>)[ResultSymbol];
 }
 
 export function execute(map: IFunctionMap): IFunctionMap {
-  const newMap = {};
+  const newMap: IFunctionMap = {};
 
   for (const key in map) {
     newMap[key] = craftFunction(map[key]);
@@ -27,12 +27,12 @@ export function group(
   map: IFunctionMap = {},
   after: GraphQLResolverType[] = []
 ): IResolverMap {
-  const newMap = {};
+  const newMap: IFunctionMap = {};
   for (const key in map) {
     newMap[key] = craftFunction(map[key], before, after);
   }
 
-  return newMap;
+  return newMap as unknown as IResolverMap;
 }
 
 export function craftFunction(
@@ -51,12 +51,14 @@ export function craftFunction(
     definition = [definition];
   }
 
-  definition = [...before, ...definition, ...after];
+  const defs = [...before, ...definition, ...after];
 
-  return async (...resolverArguments) => {
-    let result;
-    for (const i in definition) {
-      result = await definition[i].call(null, ...resolverArguments);
+  // why: GraphQL resolver arguments (source, args, context, info) are dynamic and passed through the whole pipeline
+  return async (...resolverArguments: any[]) => {
+    let result: unknown;
+    for (const i in defs) {
+      const index = Number(i);
+      result = await (defs[index] as (...args: unknown[]) => unknown)(...resolverArguments);
       // Adapt the context and store the result inside ResultSymbol
       if (result) {
         resolverArguments[2] && (resolverArguments[2][ResultSymbol] = result);

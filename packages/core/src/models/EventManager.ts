@@ -10,7 +10,7 @@ import {
 export const HandlerOptionsDefaults = { order: 0 };
 
 export class Event<T = null> {
-  public data: T;
+  public data!: T;
 
   constructor(...args: T extends null ? [] : [T]) {
     if (args[0] !== undefined) {
@@ -27,17 +27,20 @@ export class Event<T = null> {
 
 @Service()
 export class EventManager {
-  protected listeners = new Map<Constructor<Event<any>>, IListenerStorage[]>();
+  protected listeners = new Map<
+    Constructor<Event<unknown>>,
+    IListenerStorage[]
+  >();
   protected globalListeners: IListenerStorage[] = [];
 
   /**
    * Emit to all listeners of this event
    * @param data
    */
-  public async emit(event: Event<any>): Promise<void> {
+  public async emit(event: Event<unknown>): Promise<void> {
     await event.validate();
 
-    let listeners = this.getListeners(
+    const listeners = this.getListeners(
       event.constructor as IEventConstructor
     ).slice(0);
 
@@ -73,10 +76,13 @@ export class EventManager {
   ): EventManager {
     const listeners = this.getListeners(eventClass);
 
+    // why: storage is heterogeneous (handlers for any event type); the cast is safe because
+    // this manager only invokes them with events matching the class they were registered for
     listeners.push({
-      handler,
+      handler: handler as EventHandlerType<unknown>,
       order: options.order || 0,
-      filter: options.filter,
+      filter: options.filter as
+        ((event: Event<unknown>) => boolean) | undefined,
     });
 
     this.sortListeners(listeners);
@@ -128,8 +134,8 @@ export class EventManager {
    * @param handler
    */
   public removeGlobalListener(handler: EventHandlerType) {
-    this.globalListeners = this.globalListeners.filter(listener => {
-      listener.handler !== handler;
+    this.globalListeners = this.globalListeners.filter((listener) => {
+      return listener.handler !== handler;
     });
 
     return this;
@@ -138,9 +144,9 @@ export class EventManager {
   /**
    * Removes the handler from this event.
    */
-  public removeListener(
-    eventClass: IEventConstructor,
-    handler: EventHandlerType
+  public removeListener<T>(
+    eventClass: IEventConstructor<T>,
+    handler: EventHandlerType<T>
   ): EventManager {
     let listeners = this.listeners.get(eventClass);
 
@@ -148,7 +154,7 @@ export class EventManager {
       return this;
     }
 
-    listeners = listeners.filter(listener => listener.handler !== handler);
+    listeners = listeners.filter((listener) => listener.handler !== handler);
 
     this.listeners.set(eventClass, listeners);
 

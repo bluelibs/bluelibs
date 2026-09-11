@@ -1,6 +1,6 @@
 import { Token } from "@bluelibs/core";
 import { IMessenger, IXBundleConfig } from "./defs";
-import * as chalk from "chalk";
+import chalk from "chalk";
 import { Router } from "./services/Router";
 import type { ClientOpts } from "redis";
 import { ICacheManagerConfig } from "./cache/defs";

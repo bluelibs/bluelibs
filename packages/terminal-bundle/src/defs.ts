@@ -1,6 +1,5 @@
 import { Constructor, ContainerInstance } from "@bluelibs/core";
 import { DistinctQuestion } from "inquirer";
-import { BlueprintWriterSession } from "./models";
 
 export interface ITerminalBundleConfig {
   commands?: ICommand[];
@@ -22,7 +21,7 @@ export interface ICommandRunOptions {
   /**
    * Some pre-existing data to feed the model (if applicable)
    */
-  model?: any;
+  model?: unknown;
 }
 
 export interface ICommand {
@@ -30,16 +29,18 @@ export interface ICommand {
   description?: string;
   inquirer?: Constructor<IInquirer>;
   writer?: Constructor<IBlueprintWriter>;
-  execute?: Function; // TODO:
+  // why: command execute handlers receive dynamic args (e.g. parsed CLI options)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  execute?: (...args: any[]) => any; // TODO:
   executor?: Constructor<IExecutor>;
   sessionFactory?: (container: ContainerInstance) => IBlueprintWriterSession;
 }
 
-export interface IExecutor<M = any> {
+export interface IExecutor<M = unknown> {
   execute(model: M);
 }
 
-export interface IInquirer<M = any> {
+export interface IInquirer<M = unknown> {
   /**
    * @param existingDataSet This refers to the fact that you can already have some default values
    */
@@ -53,8 +54,8 @@ export interface IInquirer<M = any> {
 }
 
 export interface IPrompter {
-  prompt<V = any>(prompt: IPrompt): Promise<V>;
-  promptMany<V = any>(
+  prompt<V = unknown>(prompt: IPrompt): Promise<V>;
+  promptMany<V = unknown>(
     prompt: IPrompt,
     continuationMessage: string
   ): Promise<V[]>;
@@ -66,12 +67,12 @@ export interface IPrompt {
    */
   question?: DistinctQuestion;
   inquirer?: Constructor<IInquirer>;
-  default?: any;
+  default?: unknown;
 }
 
 export interface IBlueprintWriter<
-  T = any,
-  SessionType = IBlueprintWriterSession
+  T = unknown,
+  SessionType = IBlueprintWriterSession,
 > {
   write(model: T, session: SessionType);
 }
@@ -86,16 +87,18 @@ export interface IBlueprintWriterOperation {
     | "custom"
     | "deep-extend-json";
   paths: string[];
+  // why: operation values are heterogeneous (string, object, function)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any;
 }
 
-export type IBlueprintTemplate<M = any> = (model: M, helper?) => string;
+export type IBlueprintTemplate<M = unknown> = (model: M, helper?) => string;
 
 export interface IBlueprintWriterSession {
-  afterCommit(handler: any): IBlueprintWriterSession;
+  afterCommit(handler: () => void | Promise<void>): IBlueprintWriterSession;
   getAllAffectedPaths(showRelative: boolean): string[];
   addOperation(operation: IBlueprintWriterOperation): IBlueprintWriterSession;
-  copyDir(from: string, to: string, options?: any): IBlueprintWriterSession;
+  copyDir(from: string, to: string, options?: object): IBlueprintWriterSession;
   mkdir(path: string): IBlueprintWriterSession;
   write(path: string, content: string): IBlueprintWriterSession;
   append(path: string, content: string): IBlueprintWriterSession;

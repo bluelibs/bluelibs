@@ -1,4 +1,4 @@
-import { DeepPartial, Service } from "@bluelibs/core";
+import { DeepPartial } from "@bluelibs/core";
 import { ObjectId } from "@bluelibs/ejson";
 import { Collection, MONGO_BUNDLE_COLLECTION } from "./Collection";
 import { Linker, LINK_STORAGE } from "@bluelibs/nova";
@@ -11,13 +11,10 @@ export type ID = ObjectId | MongoDB.ObjectId;
 
 export type DocumentWithID = { _id?: ID };
 
-type GenericObject = {
-  [key: string]: any;
-};
+type GenericObject = MongoDB.Document;
 
 type Linkable<T extends DocumentWithID = null> =
-  | ID
-  | (T extends null ? GenericObject : DeepPartial<T>);
+  ID | ((T extends null ? GenericObject : DeepPartial<T>) & DocumentWithID);
 
 type CleanOptionsType = {
   /**
@@ -50,10 +47,14 @@ export type Unpacked<T> = T extends (infer U)[] ? U : T;
  * This class allows you to properly play with relationships
  */
 export class LinkOperatorModel<T extends DocumentWithID = null> {
+  // why: the related collection is resolved from the linker's runtime metadata
+  // (LINK_STORAGE) and operates on documents of an arbitrary schema.
   protected relatedCollection: Collection<any>;
   protected linker: Linker;
 
   constructor(
+    // why: link operators read/write dynamic link-storage fields on collections
+    // of arbitrary document types.
     protected readonly collection: Collection<any>,
     protected readonly linkName: string
   ) {
@@ -135,7 +136,6 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
     ids: ID[],
     options: UnlinkOptionsType
   ) {
-    let orphanedIds = null;
     if (options.delete) {
       await this.relatedCollection.deleteMany({
         _id: { $in: ids as MongoDB.ObjectId[] },
@@ -148,7 +148,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
           _id: rootId,
         },
         {
-          // @ts-ignore
+          // @ts-expect-error - dynamic $pull key from link storage field
           $pull: {
             [this.linker.linkStorageField]: ids,
           },
@@ -184,7 +184,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
           _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
-          // @ts-ignore
+          // @ts-expect-error - dynamic $pull key from link storage field
           $pull: {
             [this.linker.linkStorageField]: rootId,
           },
@@ -248,7 +248,6 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
           _id: { $in: ids as MongoDB.ObjectId[] },
         },
         {
-          // @ts-ignore
           $addToSet: {
             [this.linker.linkStorageField]: rootId,
           },
@@ -308,9 +307,8 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
         if (linkable._id) {
           result.push(linkable._id as ID);
         } else {
-          const linkableInsertResult = await this.relatedCollection.insertOne(
-            linkable
-          );
+          const linkableInsertResult =
+            await this.relatedCollection.insertOne(linkable);
           linkable._id = linkableInsertResult.insertedId;
           result.push(linkableInsertResult.insertedId);
         }
@@ -398,7 +396,7 @@ export class LinkOperatorModel<T extends DocumentWithID = null> {
             },
           },
           {
-            // @ts-ignore
+            // @ts-expect-error - dynamic $pull key from link storage field
             $pull: {
               [linkStorage]: { $in: [rootId] },
             },

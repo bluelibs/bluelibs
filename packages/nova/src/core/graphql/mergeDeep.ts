@@ -3,7 +3,7 @@
  * @param item
  * @returns {boolean}
  */
-export function isObject(item) {
+export function isObject(item: unknown): item is object {
   return item && typeof item === "object" && !Array.isArray(item);
 }
 
@@ -12,7 +12,7 @@ export function isObject(item) {
  * @param target
  * @param ...sources
  */
-export function mergeDeep(target, ...sources) {
+export function mergeDeep<T>(target: T, ...sources: unknown[]): T {
   if (!sources.length) return target;
   const source = sources.shift();
 

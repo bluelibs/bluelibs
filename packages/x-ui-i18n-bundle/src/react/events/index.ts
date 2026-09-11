@@ -1,1 +1,1 @@
-export * from "./LocaleChangedEvent"
+export * from "./LocaleChangedEvent";

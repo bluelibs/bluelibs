@@ -4,7 +4,6 @@ import {
   QueryBodyType,
   IReducerOption,
   IReducerOptions,
-  IAstToQueryOptions,
   IQueryContext,
 } from "./defs";
 
@@ -20,20 +19,16 @@ import Query from "./query/Query";
 import astToQuery, { secureBody } from "./graphql/astToQuery";
 import { IGetLookupOperatorOptions } from "./query/Linker";
 import { Collection } from "mongodb";
-import CollectionNode from "./query/nodes/CollectionNode";
+import type { DocumentNode } from "graphql";
 import { ISecureOptions } from "./defs";
 
 export { secureBody, Linker };
 
-export function query<T>(
-  collection: Collection<T>,
-  body: QueryBodyType,
-  context?: IQueryContext
-) {
+export function query<T>(collection: Collection<T>, body: QueryBodyType, context?: IQueryContext) {
   return new Query(collection, body, context);
 }
 
-query.securely = function securely<T = any>(
+query.securely = function securely<T = Document>(
   config: ISecureOptions,
   collection: Collection<T>,
   body: QueryBodyType,
@@ -42,25 +37,26 @@ query.securely = function securely<T = any>(
   return query(collection, secureBody(body, config), context);
 };
 
-query.graphql = function graphql<T = any>(
+query.graphql = function graphql<T = Document>(
   collection: Collection<T>,
-  ast: any,
+  ast: DocumentNode,
   options: ISecureOptions,
   context?: IQueryContext
 ) {
   return astToQuery(collection, ast, options, context);
 };
 
-export function clear(collection: Collection<any>) {
+export function clear(
+  // why: the mongodb driver `Collection<T>` is invariant; `any` accepts any
+  // concrete collection type (see `lookup`).
+  collection: Collection<any>
+) {
   collection[LINK_STORAGE] = {};
   collection[REDUCER_STORAGE] = {};
   collection[EXPANDER_STORAGE] = {};
 }
 
-export function addLinks<T = any>(
-  collection: Collection<T>,
-  data: ILinkOptions
-) {
+export function addLinks<T = Document>(collection: Collection<T>, data: ILinkOptions) {
   if (!collection[LINK_STORAGE]) {
     collection[LINK_STORAGE] = {};
   }
@@ -68,7 +64,7 @@ export function addLinks<T = any>(
   _.forEach(data, (linkConfig, linkName) => {
     if (collection[LINK_STORAGE][linkName]) {
       throw new Error(
-        `You cannot add the link with name: ${linkName} because it was already added to ${this.collectionName} collection`
+        `You cannot add the link with name: ${linkName} because it was already added to ${(collection as { collectionName?: string }).collectionName || "unknown"} collection`
       );
     }
 
@@ -83,10 +79,7 @@ export function addLinks<T = any>(
   });
 }
 
-export function addExpanders<T = any>(
-  collection: Collection<T>,
-  data: IExpanderOptions
-) {
+export function addExpanders<T = Document>(collection: Collection<T>, data: IExpanderOptions) {
   if (!collection[EXPANDER_STORAGE]) {
     collection[EXPANDER_STORAGE] = {};
   }
@@ -102,23 +95,15 @@ export function addExpanders<T = any>(
   });
 }
 
-export function getLinker<T = any>(
-  collection: Collection<T>,
-  name: string
-): Linker {
+export function getLinker<T = Document>(collection: Collection<T>, name: string): Linker {
   if (collection[LINK_STORAGE] && collection[LINK_STORAGE][name]) {
     return collection[LINK_STORAGE][name];
   } else {
-    throw new Error(
-      `Link "${name}" is not found in collection: "${collection.collectionName}"`
-    );
+    throw new Error(`Link "${name}" is not found in collection: "${collection.collectionName}"`);
   }
 }
 
-export function hasLinker<T = any>(
-  collection: Collection<T>,
-  name: string
-): boolean {
+export function hasLinker<T = Document>(collection: Collection<T>, name: string): boolean {
   if (collection[LINK_STORAGE]) {
     return Boolean(collection[LINK_STORAGE][name]);
   } else {
@@ -131,6 +116,10 @@ export function hasLinker<T = any>(
  * This is useful for complex searching and filtering
  */
 export function lookup(
+  // why: the mongodb driver `Collection<T>` is invariant, so a bare
+  // `Collection` (defaults to Document) rejects `Collection<TeamMembership>`.
+  // `any` restores the published signature and keeps lookup usable with any
+  // concrete collection type.
   collection: Collection<any>,
   linkName: string,
   options?: IGetLookupOperatorOptions
@@ -141,25 +130,24 @@ export function lookup(
 export function getReducerConfig(
   collection: Collection<any>,
   name: string
-): IReducerOption {
+): IReducerOption | undefined {
   if (collection[REDUCER_STORAGE]) {
     return collection[REDUCER_STORAGE][name];
   }
+  return undefined;
 }
 
 export function getExpanderConfig(
   collection: Collection<any>,
   name: string
-): QueryBodyType {
+): QueryBodyType | undefined {
   if (collection[EXPANDER_STORAGE]) {
     return collection[EXPANDER_STORAGE][name];
   }
+  return undefined;
 }
 
-export function addReducers<T = any>(
-  collection: Collection<T>,
-  data: IReducerOptions
-) {
+export function addReducers<T = Document>(collection: Collection<T>, data: IReducerOptions) {
   if (!collection[REDUCER_STORAGE]) {
     collection[REDUCER_STORAGE] = {};
   }
@@ -202,11 +190,7 @@ export type CollectionDecorations<T> = {
    * @param context
    * @returns
    */
-  queryFromAST: (
-    ast: any,
-    options: ISecureOptions,
-    context?: IQueryContext
-  ) => Query<T>;
+  queryFromAST: (ast: DocumentNode, options: ISecureOptions, context?: IQueryContext) => Query<T>;
 };
 
 /**
@@ -228,11 +212,8 @@ export function decorate<TEnhanced, TCModel>(
       body: QueryBodyType<TEnhanced>,
       context?: IQueryContext
     ) => query(collection, secureBody(body, config), context),
-    queryFromAST: (
-      ast: any,
-      options: ISecureOptions,
-      context?: IQueryContext
-    ) => astToQuery(collection, ast, options, context),
+    queryFromAST: (ast: DocumentNode, options: ISecureOptions, context?: IQueryContext) =>
+      astToQuery(collection, ast, options, context),
   });
 
   return collection as Collection<TCModel> & CollectionDecorations<TEnhanced>;

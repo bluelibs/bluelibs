@@ -1,6 +1,6 @@
 import { Service } from "@bluelibs/core";
 import { IMenuItemConfig } from "../defs";
-import * as startCase from "lodash.startcase";
+import startCase from "lodash.startcase";
 
 @Service()
 export class MenuService {

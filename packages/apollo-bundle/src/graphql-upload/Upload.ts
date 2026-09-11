@@ -9,8 +9,8 @@
  */
 export default class Upload {
   promise: Promise<any>;
-  resolve: (file: any) => void;
-  reject: (error: Error) => void;
+  resolve!: (file: any) => void;
+  reject!: (error: Error) => void;
   file: any | undefined;
 
   constructor() {

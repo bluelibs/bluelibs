@@ -1,10 +1,4 @@
-import {
-  Schema,
-  Is,
-  a,
-  an,
-  ValidatorService,
-} from "@bluelibs/validator-bundle";
+import { Schema, Is, a, ValidatorService } from "@bluelibs/validator-bundle";
 import { ObjectId } from "@bluelibs/ejson";
 import { createKernel } from "./createEcosystem";
 import { Collection } from "@bluelibs/mongo-bundle";
@@ -69,7 +63,7 @@ describe("validation", () => {
 
     const validator = container.get(ValidatorService);
 
-    const result = await validator.validate(dummy); // should be ok
+    await validator.validate(dummy); // should be ok
 
     await kernel.shutdown();
   });

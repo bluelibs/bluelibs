@@ -1,7 +1,5 @@
 import { getEcosystem } from "../helpers";
-import { Comments } from "./dummy/comments";
 import { Posts } from "./dummy/posts";
-import { Users, User } from "./dummy/users";
 
 import { DatabaseService } from "../../services/DatabaseService";
 import { MigrationService } from "../../services/MigrationService";
@@ -10,9 +8,7 @@ describe("Migrations", () => {
   test("Should work with basic migration and ensure all run", async () => {
     const { container } = await getEcosystem();
 
-    const comments = container.get<Comments>(Comments);
     const posts = container.get<Posts>(Posts);
-    const users = container.get<Users>(Users);
 
     const migrationService = container.get(MigrationService);
     migrationService.add({
@@ -95,9 +91,7 @@ describe("Migrations", () => {
   test("Ensure offset works", async () => {
     const { container } = await getEcosystem();
 
-    const comments = container.get<Comments>(Comments);
     const posts = container.get<Posts>(Posts);
-    const users = container.get<Users>(Users);
 
     const migrationService = container.get(MigrationService);
 
@@ -138,7 +132,7 @@ describe("Migrations", () => {
     await posts.deleteMany({});
 
     await dbService.db.collection("migrations").updateOne(
-      // @ts-ignore
+      // @ts-expect-error - _id filter typed as ObjectId but we pass a string
       { _id: "status" },
       { $set: { version: 3, locked: false } },
       { upsert: true }

@@ -1,4 +1,3 @@
-import * as React from "react";
 import { kernel } from "./ecosystem";
 
 import * as TestRenderer from "react-test-renderer";
@@ -8,7 +7,7 @@ import { XUIProvider } from "@bluelibs/x-ui-react-bundle";
 describe("XUIBundle", () => {
   test("Container Injection", async () => {
     const TestComponent = () => {
-      const router = useRouter();
+      useRouter();
 
       return <h5>Works</h5>;
     };

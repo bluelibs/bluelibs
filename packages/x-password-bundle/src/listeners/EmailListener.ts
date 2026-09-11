@@ -50,9 +50,7 @@ export class EmailListener extends Listener {
     );
   }
 
-  protected async getUserData(
-    userId
-  ): Promise<{
+  protected async getUserData(userId): Promise<{
     name: string;
     email: string;
   }> {

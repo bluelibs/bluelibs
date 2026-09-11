@@ -1,17 +1,17 @@
 import { Bundle } from "@bluelibs/core";
 import { EJSON } from "@bluelibs/ejson";
-import { Channel, connect, Connection, Options } from "amqplib";
+import { Channel, connect, Connection, ConsumeMessage, Options } from "amqplib";
 import { RabbitMQBundleConfigType } from "./defs";
 
 export class RabbitMQBundle extends Bundle<
   RabbitMQBundleConfigType,
   RabbitMQBundleConfigType
 > {
-  public connection: Connection;
-  public channel: Channel;
+  public connection!: Connection;
+  public channel!: Channel;
 
   protected defaultConfig = {
-    url: "amqp://localhost:5672/",
+    url: "amqp://localhost:5672/?frameMax=8192",
     consume: true,
   };
 
@@ -35,7 +35,7 @@ export class RabbitMQBundle extends Bundle<
    */
   public publish(
     queue: string,
-    message: any,
+    message: unknown,
     options?: Options.Publish
   ): boolean {
     return this.channel.sendToQueue(
@@ -51,16 +51,21 @@ export class RabbitMQBundle extends Bundle<
    * @param handler
    * @param options
    */
-  public consume(queue: string, handler, options?: Options.Consume) {
+  public consume(
+    queue: string,
+    handler: (message: unknown) => void | Promise<void>,
+    options?: Options.Consume
+  ) {
     if (!this.config.consume) {
       return;
     }
 
     this.channel.consume(
       queue,
-      async (msg) => {
+      async (msg: ConsumeMessage | null) => {
+        if (!msg) return;
         await handler(EJSON.parse(msg.content.toString()));
-        if (!options.noAck) {
+        if (!options?.noAck) {
           this.channel.ack(msg);
         }
       },

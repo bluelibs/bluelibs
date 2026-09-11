@@ -1,9 +1,14 @@
 import { EventManager, Inject, Service } from "@bluelibs/core";
 
-import * as Polyglot from "node-polyglot";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Polyglot = require("node-polyglot");
 import { IXUII18NBundleConfig } from "../../defs";
 import { I18N_CONFIG_TOKEN } from "../../constants";
 import { LocaleChangedEvent } from "../events";
+
+type PolyglotInstance = InstanceType<typeof import("node-polyglot")> & {
+  currentLocale?: string;
+};
 
 export type I18NConfig = Record<string, I18NMessages>;
 
@@ -14,7 +19,7 @@ export type I18NMessages = {
 @Service()
 export class I18NService {
   // locale, polyglot
-  public polyglots = new Map<string, Polyglot>();
+  public polyglots = new Map<string, PolyglotInstance>();
 
   constructor(
     @Inject(I18N_CONFIG_TOKEN)
@@ -30,7 +35,7 @@ export class I18NService {
     this.setLocale(config.defaultLocale);
   }
 
-  protected activePolyglot: Polyglot = null;
+  protected activePolyglot: PolyglotInstance | null = null;
 
   /**
    * Add or update messages for the specific locale
@@ -39,7 +44,7 @@ export class I18NService {
    * @param messages
    * @param prefix
    */
-  extend(locale: string, messages: any, prefix?: string) {
+  extend(locale: string, messages: I18NMessages, prefix?: string): void {
     this.getPolyglot(locale).extend(messages, prefix);
   }
 
@@ -50,7 +55,7 @@ export class I18NService {
    * @param configs
    * @returns
    */
-  store(configs: I18NConfig | I18NConfig[]) {
+  store(configs: I18NConfig | I18NConfig[]): void {
     if (!Array.isArray(configs)) {
       return this.store([configs]);
     }
@@ -66,7 +71,7 @@ export class I18NService {
    * Sets the current locale
    * @param locale
    */
-  setLocale(locale: string) {
+  setLocale(locale: string): void {
     this.activePolyglot = this.getPolyglot(locale);
     this.eventManager.emit(new LocaleChangedEvent({ locale }));
   }
@@ -77,8 +82,11 @@ export class I18NService {
    * @param options
    * @returns
    */
-  t = (string: string, options?: Polyglot.InterpolationOptions) => {
-    return this.activePolyglot.t(string, options);
+  t = (
+    string: string,
+    options?: number | import("node-polyglot").InterpolationOptions
+  ) => {
+    return this.activePolyglot!.t(string, options);
   };
 
   /**
@@ -86,11 +94,11 @@ export class I18NService {
    * @param locale
    * @returns
    */
-  getPolyglot(locale: string): Polyglot {
+  getPolyglot(locale: string): PolyglotInstance {
     let polyglot = this.polyglots.get(locale);
 
     if (!polyglot) {
-      polyglot = new Polyglot({ locale });
+      polyglot = new Polyglot({ locale }) as PolyglotInstance;
       this.polyglots.set(locale, polyglot);
     }
 
@@ -98,6 +106,6 @@ export class I18NService {
   }
 
   getCurrentPolyglot(): string {
-    return this.activePolyglot["currentLocale"] || this.config?.defaultLocale;
+    return this.activePolyglot!.currentLocale || this.config?.defaultLocale;
   }
 }

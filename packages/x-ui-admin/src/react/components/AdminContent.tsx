@@ -4,7 +4,7 @@ import { Content } from "antd/lib/layout/layout";
 import { useUIComponents } from "@bluelibs/x-ui";
 
 export type AdminContentProps = {
-  children?: any;
+  children?: React.ReactNode;
 };
 
 const contentStyles = {

@@ -1,33 +1,34 @@
 import * as _ from "lodash";
-import { ClientSession } from "mongodb";
+import {
+  ClientSession,
+  Collection,
+  Document,
+  Filter as FilterQuery,
+  AggregateOptions,
+} from "mongodb";
 import * as dot from "dot-object";
 
-import {
-  SPECIAL_PARAM_FIELD,
-  ALIAS_FIELD,
-  CONTEXT_FIELD,
-} from "../../constants";
+import { SPECIAL_PARAM_FIELD, ALIAS_FIELD, CONTEXT_FIELD } from "../../constants";
 import {
   QueryBodyType,
+  FieldBodyType,
   IReducerOption,
   QuerySubBodyType,
   IQueryContext,
+  ICollectionQueryConfig,
+  IQueryOptions,
+  ValueOrValueResolver,
 } from "../../defs";
 
-import {
-  getLinker,
-  getReducerConfig,
-  getExpanderConfig,
-  hasLinker,
-} from "../../api";
+import { getLinker, getReducerConfig, getExpanderConfig, hasLinker } from "../../api";
 import Linker from "../Linker";
 import { INode } from "./INode";
 import FieldNode from "./FieldNode";
 import ReducerNode from "./ReducerNode";
-import { Collection, ObjectId } from "mongodb";
 import { ALL_FIELDS } from "../../constants";
 
 export interface CollectionNodeOptions {
+  // why: the node can wrap any typed collection; Collection<T> is not assignable to Collection<Document>.
   collection: Collection<any>;
   body: QueryBodyType;
   explain?: boolean;
@@ -46,13 +47,14 @@ export enum NodeLinkType {
 export default class CollectionNode implements INode {
   public body: QuerySubBodyType;
   public name: string;
+  // why: the node can wrap any typed collection; Collection<T> is not assignable to Collection<Document>.
   public collection: Collection<any>;
   public parent: CollectionNode;
   public alias: string;
   public scheduledForDeletion: boolean = false;
 
   public nodes: INode[] = [];
-  public props: any; // TODO: refator to: ValueOrValueResolver<ICollectionQueryConfig>
+  public props: ValueOrValueResolver<ICollectionQueryConfig>;
 
   public isVirtual?: boolean;
   public isOneResult?: boolean;
@@ -84,7 +86,7 @@ export default class CollectionNode implements INode {
   public linkStorageField: string;
   public linkForeignStorageField: string;
   public readonly context: IQueryContext;
-  public results: any = [];
+  public results: Document[] = [];
 
   /**
    * This is used for self-referencing expanders
@@ -164,9 +166,7 @@ export default class CollectionNode implements INode {
   }
 
   get collectionNodes(): CollectionNode[] {
-    return this.nodes.filter(
-      (n) => n instanceof CollectionNode
-    ) as CollectionNode[];
+    return this.nodes.filter((n) => n instanceof CollectionNode) as CollectionNode[];
   }
 
   get fieldNodes(): FieldNode[] {
@@ -205,17 +205,15 @@ export default class CollectionNode implements INode {
    * Returns the filters and options needed to fetch this node
    * The argument parentObject is given when we perform recursive fetches
    */
-  public getPropsForQuerying(parentObject?: any): {
-    filters: any;
-    options: any;
-    pipeline: any[];
+  public getPropsForQuerying(parentObject?: Document): {
+    filters: FilterQuery<Document>;
+    options: IQueryOptions;
+    pipeline: Document[];
   } {
-    let props =
-      typeof this.props === "function"
-        ? this.props(parentObject)
-        : _.cloneDeep(this.props);
+    const props =
+      typeof this.props === "function" ? this.props(parentObject) : _.cloneDeep(this.props);
 
-    let { filters = {}, options = {}, pipeline = [], decoder } = props;
+    const { filters = {}, options = {}, pipeline = [] } = props;
 
     if (!this.queryAllFields) {
       options.projection = this.blendInProjection(options.projection);
@@ -241,7 +239,7 @@ export default class CollectionNode implements INode {
    * Creates the projection object based on all the fields and reducers
    * @param projection
    */
-  public blendInProjection(projection) {
+  public blendInProjection(projection: Record<string, number | boolean>) {
     if (!projection) {
       projection = {};
     }
@@ -316,17 +314,14 @@ export default class CollectionNode implements INode {
   /**
    * Fetches the data accordingly
    */
-  public async toArray(additionalFilters = {}, parentObject?: any) {
+  public async toArray(additionalFilters: FilterQuery<Document> = {}, parentObject?: Document) {
     const { pipeline, aggregateOptions } = this.getAggregationPipeline(
       additionalFilters,
       parentObject
     );
 
     if (this.explain) {
-      console.log(
-        `[${this.name}] Pipeline:\n`,
-        JSON.stringify(pipeline, null, 2)
-      );
+      console.log(`[${this.name}] Pipeline:\n`, JSON.stringify(pipeline, null, 2));
     }
 
     const pipelineOptions = {
@@ -358,7 +353,10 @@ export default class CollectionNode implements INode {
     return NodeLinkType.FIELD;
   }
 
-  public getFiltersAndOptions(additionalFilters = {}, parentObject?: any) {
+  public getFiltersAndOptions(
+    additionalFilters: FilterQuery<Document> = {},
+    parentObject?: Document
+  ) {
     const { filters, options } = this.getPropsForQuerying(parentObject);
 
     Object.assign(filters, additionalFilters);
@@ -373,16 +371,16 @@ export default class CollectionNode implements INode {
    * Based on the current configuration fetches the pipeline
    */
   public getAggregationPipeline(
-    additionalFilters = {},
-    parentObject?: any
-  ): { pipeline: any[]; aggregateOptions: any } {
+    additionalFilters: FilterQuery<Document> = {},
+    parentObject?: Document
+  ): { pipeline: Document[]; aggregateOptions: AggregateOptions } {
     const {
       filters,
       options,
       pipeline: pipelineFromProps,
     } = this.getPropsForQuerying(parentObject);
 
-    const pipeline = [];
+    const pipeline: Document[] = [];
     Object.assign(filters, additionalFilters);
     const { limit, skip, sort, projection, ...aggregateOptions } = options;
 
@@ -399,7 +397,10 @@ export default class CollectionNode implements INode {
     }
 
     this.reducerNodes.forEach((reducerNode) => {
-      pipeline.push(...reducerNode.pipeline);
+      const nodePipeline = reducerNode.pipeline;
+      if (Array.isArray(nodePipeline)) {
+        pipeline.push(...nodePipeline);
+      }
     });
 
     let effectiveLimit = limit;
@@ -457,9 +458,7 @@ export default class CollectionNode implements INode {
 
       let linkType = this.getLinkingType(alias);
 
-      scheduleForDeletion = fromReducerNode
-        ? true
-        : Boolean(scheduleForDeletion);
+      scheduleForDeletion = fromReducerNode ? true : Boolean(scheduleForDeletion);
 
       /**
        * This allows us to have reducer with the same name as the field
@@ -524,9 +523,7 @@ export default class CollectionNode implements INode {
             // When we spread the body of that other reducer we also need to add it to its deps
             if (fromReducerNode) {
               const reducerNode = this.getReducerNode(fieldName);
-              if (
-                !fromReducerNode.dependencies.find((n) => n === reducerNode)
-              ) {
+              if (!fromReducerNode.dependencies.find((n) => n === reducerNode)) {
                 fromReducerNode.dependencies.push(reducerNode);
               }
             }
@@ -554,7 +551,7 @@ export default class CollectionNode implements INode {
           this.spread(expanderConfig);
           break;
         case NodeLinkType.FIELD:
-          this.addField(fieldName, fieldBody, scheduleForDeletion);
+          this.addField(fieldName, fieldBody as FieldBodyType, scheduleForDeletion);
           break;
         default:
           throw new Error(`We could not process the type: ${linkType}`);
@@ -576,7 +573,7 @@ export default class CollectionNode implements INode {
    * @param body
    * @param scheduleForDeletion
    */
-  protected addField(fieldName: string, body, scheduleForDeletion = false) {
+  protected addField(fieldName: string, body: FieldBodyType, scheduleForDeletion = false) {
     if (this.queryAllFields) {
       return;
     }
@@ -597,10 +594,7 @@ export default class CollectionNode implements INode {
       // In case it contains some sub fields
       const fieldNode = this.getFirstLevelField(fieldName);
 
-      if (
-        scheduleForDeletion === false &&
-        fieldNode.scheduledForDeletion === true
-      ) {
+      if (scheduleForDeletion === false && fieldNode.scheduledForDeletion === true) {
         fieldNode.scheduledForDeletion = false;
       }
 
@@ -661,6 +655,8 @@ export default class CollectionNode implements INode {
   }
 
   protected hasPipeline() {
-    return this.props.pipeline && this.props.pipeline.length > 0;
+    return (
+      typeof this.props !== "function" && this.props.pipeline && this.props.pipeline.length > 0
+    );
   }
 }

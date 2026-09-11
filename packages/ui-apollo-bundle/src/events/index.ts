@@ -3,11 +3,11 @@ import { Event } from "@bluelibs/core";
 
 export class ApolloBeforeOperationEvent extends Event<{
   context: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   operation: GraphQLRequest;
 }> {}
 
 export class ApolloSubscriptionOnConnectionParamsSetEvent extends Event<{
-  params: Record<string, any>;
+  params: Record<string, unknown>;
 }> {}

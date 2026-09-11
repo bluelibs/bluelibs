@@ -12,7 +12,7 @@ export interface ObjectIdLike {
 export class ObjectId implements ObjectIdLike {
   id: Uint8Array;
   __id?: string;
-  public _bsontype: "ObjectId" = "ObjectId";
+  public _bsontype = "ObjectId" as const;
 
   /**
    * Create a new LightObjectId
@@ -92,14 +92,17 @@ export class ObjectId implements ObjectIdLike {
   /**
    * Check if the provided value is a valid ObjectIdLike
    */
-  static isValid(value: any): boolean {
+  static isValid(value: unknown): boolean {
     if (!value) return false;
     if (value instanceof ObjectId) return true;
     if (typeof value === "string")
       return value.length === 24 && /^[0-9a-fA-F]{24}$/.test(value);
     if (value instanceof Uint8Array) return value.length === 12;
-    if (typeof value === "object" && typeof value.toHexString === "function") {
-      const hex = value.toHexString();
+    if (
+      typeof value === "object" &&
+      typeof (value as ObjectIdLike).toHexString === "function"
+    ) {
+      const hex = (value as ObjectIdLike).toHexString();
       return (
         typeof hex === "string" &&
         hex.length === 24 &&

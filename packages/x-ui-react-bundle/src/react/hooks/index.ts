@@ -21,7 +21,7 @@ export const useEventManager = () => {
   return use(EventManager);
 };
 
-export const listen = <T = any>(
+export const listen = <T = unknown>(
   eventClass: IEventConstructor<T>,
   listener: EventHandlerType<T>
 ) => {

@@ -1,13 +1,8 @@
-<h1 align="center">BlueLibs SECURITY-MONGO-BUNDLE</h1>
+<h1 align="center">BlueLibs X-AUTH-BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/x-auth-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/x-auth-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/x-auth-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/x-auth-bundle/badge.svg?branch=master" />
-  </a>
-</p>
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fx-auth-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fx-auth-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is the X-Framework of handling password authentication blended with GraphQL.
 

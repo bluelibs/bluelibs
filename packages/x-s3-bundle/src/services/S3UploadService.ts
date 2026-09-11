@@ -1,12 +1,7 @@
-import * as shortid from "shortid";
+import { nanoid } from "nanoid";
 import { FileUpload } from "graphql-upload/processRequest.mjs";
-import {
-  PutObjectCommandInput,
-  PutObjectOutput,
-  PutObjectRequest,
-  S3,
-} from "@aws-sdk/client-s3";
-import * as moment from "moment";
+import { PutObjectCommandInput, PutObjectOutput, S3 } from "@aws-sdk/client-s3";
+import moment from "moment";
 import { XS3BundleConfigType } from "../defs";
 import { AppFile, AppFileThumb } from "../collections/appFiles/AppFile.model";
 import { Inject, EventManager } from "@bluelibs/core";
@@ -149,7 +144,7 @@ export class S3UploadService {
     mimetype: string,
     buffer: Buffer
   ) {
-    const id = shortid.generate();
+    const id = nanoid();
     const fileName = `${id}-${filename}`;
     const fileKey = this.generateKey(fileName);
 
@@ -238,7 +233,7 @@ export class S3UploadService {
       .locale("en")
       .format("MM")}/${moment().locale("en").format("DD")}`;
 
-    let key = `${dateFolder}/${shortid.generate()}`;
+    let key = `${dateFolder}/${nanoid()}`;
 
     if (context !== "") {
       key += `-${context}`;

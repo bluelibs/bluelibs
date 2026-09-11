@@ -1,8 +1,8 @@
 import "reflect-metadata";
 import * as chai from "chai";
-import * as AsPromised from "chai-as-promised";
+import chaiAsPromised from "chai-as-promised";
 
-chai.use(AsPromised);
+chai.use(chaiAsPromised);
 
 import "./utils/mergeDeep.test";
 import "./DI.test";

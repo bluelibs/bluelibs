@@ -1,8 +1,16 @@
 import { CacheOptions } from "../cache/defs";
 import { CACHE_SERVICE_TOKEN } from "../constants";
+import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 
-export function Cache<T>(
-  actions: ((_: any, args: any, ctx: any, ast: any) => Promise<any>)[],
+type CacheLookup = { found: boolean; data: unknown };
+
+export function Cache<_T>(
+  actions: ((
+    _: unknown,
+    args: unknown,
+    ctx: IGraphQLContext,
+    ast: unknown
+  ) => Promise<unknown>)[],
   options?: CacheOptions
 ) {
   return async function (_, args, ctx, ast) {
@@ -15,9 +23,10 @@ export function Cache<T>(
     //generate cache key
     const cacheKey = cacheService.generateCacheKey(options, ctx, ast);
 
-    let result = await cacheService.get(cacheKey);
+    let result: unknown = await cacheService.get(cacheKey);
+    const lookup = result as CacheLookup;
 
-    if (result && result.found) return result.data;
+    if (lookup && lookup.found) return lookup.data;
 
     for (const action of actions) {
       result = await action(_, args, ctx, ast);

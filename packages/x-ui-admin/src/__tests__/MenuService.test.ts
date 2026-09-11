@@ -1,4 +1,3 @@
-import { IMenuItemConfig } from "../defs";
 import { MenuService } from "../services/MenuService";
 
 test("[MenuService] should work", () => {
@@ -15,8 +14,6 @@ test("[MenuService] should work", () => {
 
 test("[MenuService] injection", () => {
   const menu = new MenuService();
-  let item;
-
   menu.add({
     key: "Users",
     path: "/users",
@@ -33,7 +30,7 @@ test("[MenuService] injection", () => {
   });
 
   expect(menu.items).toHaveLength(2);
-  item = menu.getItem("Dashboard");
+  const item = menu.getItem("Dashboard");
   expect(item.subitems).toHaveLength(1);
   expect(item.subitems[0].key).toBe("DashboardStatistics");
 
@@ -51,8 +48,6 @@ test("[MenuService] injection", () => {
 
 test("[MenuService] isSelected", () => {
   const menu = new MenuService();
-  let item: IMenuItemConfig;
-
   menu.add({
     key: "Users",
     path: "/users",
@@ -62,7 +57,7 @@ test("[MenuService] isSelected", () => {
     path: "/dashboard",
   });
 
-  item = menu.getItem("Users");
+  const item = menu.getItem("Users");
   expect(item.isSelected("/users")).toBe(true);
   expect(item.isSelected("/users/test")).toBe(true);
   expect(item.isSelected("/userx")).toBe(false);

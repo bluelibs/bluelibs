@@ -1,7 +1,7 @@
 import { Collection } from "./Collection";
 
 export interface IMigrationStatus {
-  _id: string | any;
+  _id: string;
   version: number;
   locked: boolean;
   lockedAt?: Date;

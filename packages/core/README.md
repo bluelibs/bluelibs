@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs CORE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/core">
-    <img src="https://api.travis-ci.org/bluelibs/core.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/core?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/core/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fcore.svg)](https://badge.fury.io/js/%40bluelibs%2Fcore)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A powerful and lightweight module composition strategy responsible for orchestrating your logic, enabling you to easily respect SOLID principles within your infinitely-scalable app.
 

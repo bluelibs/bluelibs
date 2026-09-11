@@ -1,4 +1,5 @@
 import { InMemoryCache } from "@apollo/client/core";
+import { NormalizedCacheObject } from "@apollo/client/cache";
 import { Bundle } from "@bluelibs/core";
 import { ApolloClient } from ".";
 import { IUIApolloBundleConfig } from "./defs";
@@ -24,7 +25,10 @@ export class UIApolloBundle extends Bundle<IUIApolloBundleConfig> {
     if (!this.config.client.cache) {
       this.config.client.cache = new InMemoryCache({
         dataIdFromObject: (object) => (object?._id as string) || null,
-      }).restore((window as any).__APOLLO_STATE__ || {});
+      }).restore(
+        (window as { __APOLLO_STATE__?: NormalizedCacheObject })
+          .__APOLLO_STATE__ || {}
+      );
     }
 
     this.container.set(

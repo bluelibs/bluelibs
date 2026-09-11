@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FC, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useContext, useEffect, useMemo, useState } from "react";
 
 type SmartSubscriber<StateModel> = (
   oldState: StateModel | undefined,
@@ -10,12 +10,14 @@ export type SetStateOptions = {
   silent?: boolean;
 };
 
-export abstract class Smart<StateModel = any, Config = null> {
+export abstract class Smart<StateModel = unknown, Config = null> {
   public state!: StateModel;
   public config!: Config;
+  // why: React.Context is invariant and this static holds the context of every Smart subclass
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static _context: React.Context<any> | null = null;
 
-  protected subscribers: SmartSubscriber<any>[] = [];
+  protected subscribers: SmartSubscriber<StateModel>[] = [];
   protected previousState?: StateModel;
 
   setConfig(config: Config) {
@@ -56,9 +58,11 @@ export abstract class Smart<StateModel = any, Config = null> {
   }
 
   // Automatically create context when needed
+  // why: React.Context is invariant and the static-side of subclasses overrides getContext(); `any` is required
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static getContext<T extends Smart<any>>(): React.Context<any> {
     if (!this._context) {
-      this._context = React.createContext(null as any);
+      this._context = React.createContext(null);
     }
     return this._context as React.Context<T>;
   }
@@ -70,8 +74,12 @@ export abstract class Smart<StateModel = any, Config = null> {
 }
 
 // Custom Hook to use Smart model
-export function useSmart<T extends Smart<S, C>, S, C>(modelClass: {
+// why: the constraint needs `any` because Smart is contravariant in its state through setState()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useSmart<T extends Smart<any, any>>(modelClass: {
   new (): T;
+  // why: the concrete smart's static getContext() returns Context<any>; typing it precisely breaks inference
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getContext(): React.Context<any>;
 }): T {
   const Context = modelClass.getContext();
@@ -86,8 +94,8 @@ export function useSmart<T extends Smart<S, C>, S, C>(modelClass: {
   const [, forceUpdate] = useState(0);
 
   useEffect(() => {
-    const subscriber: SmartSubscriber<any> = () => {
-      forceUpdate((n) => n + 1);
+    const subscriber: SmartSubscriber<unknown> = () => {
+      forceUpdate((n: number) => n + 1);
     };
     model.subscribe(subscriber);
     return () => {
@@ -100,27 +108,30 @@ export function useSmart<T extends Smart<S, C>, S, C>(modelClass: {
 
 /**
  * @deprecated use useNewSmart() instead.
- * @param args
+ * @param _args
  */
-export function newSmart(...args: never[]) {}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function newSmart(..._args: never[]) {}
 
 // Custom Hook to create Smart model and Provider
+// why: the constraint needs `any` because Smart is contravariant in its state through setState()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useNewSmart<T extends Smart<any, any>>(
   modelClass: {
     new (): T;
     getContext(): React.Context<T>;
   },
-  ...args: T extends Smart<infer S, infer C> ? (C extends null ? [] : [C]) : []
-): [T, FC<{ children: any }>] {
+  ...args: T extends Smart<infer _S, infer C> ? (C extends null ? [] : [C]) : []
+): [T, FC<{ children: React.ReactNode }>] {
   const model = useMemo(() => {
     const instance = new modelClass();
-    instance.setConfig(args[0] as any);
+    instance.setConfig(args[0]!);
     instance.init();
 
     return instance;
   }, [modelClass, args[0]]);
 
-  const Provider: FC<{ children: any }> = ({ children }) => {
+  const Provider: FC<{ children: React.ReactNode }> = ({ children }) => {
     const Context = modelClass.getContext();
     return <Context.Provider value={model}>{children}</Context.Provider>;
   };
@@ -135,16 +146,19 @@ export function useNewSmart<T extends Smart<any, any>>(
 }
 
 // Higher-Order Component to wrap components with Smart Provider
-export function withSmart<T extends Smart<S, C>, S, C>(
+// why: the constraint needs `any` because Smart is contravariant in its state through setState()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function withSmart<T extends Smart<any, any>>(
   modelClass: {
     new (): T;
     getContext(): React.Context<T>;
   },
-  ...args: T extends Smart<infer S, infer C> ? (C extends null ? [] : [C]) : []
+  ...args: T extends Smart<infer _S, infer C> ? (C extends null ? [] : [C]) : []
 ) {
   return function <P extends object>(Component: React.ComponentType<P>): FC<P> {
     return function SmartComponent(props: P) {
-      const [model, Provider] = useNewSmart(modelClass, ...args);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [_model, Provider] = useNewSmart(modelClass, ...args);
       return (
         <Provider>
           <Component {...props} />

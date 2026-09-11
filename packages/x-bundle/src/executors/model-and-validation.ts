@@ -1,4 +1,5 @@
 import { toModel, ToModelOptions } from "@bluelibs/ejson";
+import { Constructor } from "@bluelibs/core";
 import { ValidatorService, IValidateOptions } from "@bluelibs/validator-bundle";
 
 export interface IToModelExecutorOptions {
@@ -9,16 +10,19 @@ export interface IToModelExecutorOptions {
   partial?: boolean;
 }
 
-export function ToModel(model: any, options: IToModelExecutorOptions = {}) {
+export function ToModel<T>(
+  model: Constructor<T>,
+  options: IToModelExecutorOptions = {}
+) {
   if (!options.field) {
     options.field = "input";
   }
-  let toModelOptions: Partial<ToModelOptions> = {};
+  const toModelOptions: Partial<ToModelOptions> = {};
   if (options.partial) {
     toModelOptions.partial = true;
   }
 
-  return async function ToModel(_, args, ctx, ast) {
+  return async function ToModel(_, args) {
     args[options.field] = toModel(
       model,
       args[options.field],
@@ -41,7 +45,7 @@ export function Validate(options: IValidateExecutorOptions = {}) {
     options.field = "input";
   }
 
-  return async function Validate(_, args, ctx, ast) {
+  return async function Validate(_, args, ctx) {
     const validator: ValidatorService = ctx.container.get(ValidatorService);
 
     await validator.validate(args[options.field], {

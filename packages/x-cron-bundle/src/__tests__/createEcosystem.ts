@@ -2,11 +2,10 @@ import { MongoBundle, DatabaseService } from "@bluelibs/mongo-bundle";
 import { ContainerInstance, Kernel, Bundle } from "@bluelibs/core";
 import { CronsCollection } from "../collections/Crons.collection";
 import { XCronBundle } from "../XCronBundle";
+import { CronService } from "../services/CronService";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
 
-export async function createEcosystem(
-  init?: any
-): Promise<{
+export async function createEcosystem(init?: () => unknown): Promise<{
   container: ContainerInstance;
   teardown: () => void;
   cleanup: () => Promise<void>;
@@ -41,6 +40,7 @@ export async function createEcosystem(
       await kernel.container.get(CronsCollection).deleteMany({});
     },
     teardown: () => {
+      kernel.container.get(CronService).pause();
       dbService.client.close();
     },
   };

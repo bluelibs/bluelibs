@@ -1,5 +1,4 @@
 import * as _ from "lodash";
-import * as dot from "dot-object";
 import CollectionNode from "../nodes/CollectionNode";
 import { LinkStrategy } from "../Linker";
 
@@ -23,8 +22,7 @@ export default function processDirectNode(childCollectionNode: CollectionNode) {
   }
 
   const resultsByKeyId = _.groupBy(childCollectionNode.results, (r) => {
-    const linkForeignStorageFieldDot =
-      linkForeignStorageField.indexOf(".") >= 0;
+    const linkForeignStorageFieldDot = linkForeignStorageField.indexOf(".") >= 0;
 
     const value = linkForeignStorageFieldDot
       ? _.get(r, linkForeignStorageField)

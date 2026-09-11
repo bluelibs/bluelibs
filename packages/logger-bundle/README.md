@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs LOGGER</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/logger-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/logger-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/logger-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/logger-bundle/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Flogger-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Flogger-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This bundle allows you to log information that happens in your system. The logger can optionally output to `console.log` but later on, as your system grows, all of your instances should output to a centralised log management place. This is why we strongly recommend, as you're building your app, to use `LoggerService` instead of `console.log`
 

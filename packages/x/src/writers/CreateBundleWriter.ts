@@ -18,7 +18,7 @@ export class CreateBundleWriter extends BlueprintWriter {
 export function writeNewBundle(
   session: XSession,
   model: CreateBundleModel,
-  microserviceDir: any
+  microserviceDir: string
 ) {
   const fsOperator = new FSOperator(session, model);
 

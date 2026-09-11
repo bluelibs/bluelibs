@@ -6,6 +6,6 @@ export class UsernameAlreadyExistsException extends Exception {
   }
 
   getCode() {
-    return "USERNAME_ALREADY_EXISTS"
+    return "USERNAME_ALREADY_EXISTS";
   }
 }

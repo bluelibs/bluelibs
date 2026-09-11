@@ -1,14 +1,8 @@
 import * as X from "@bluelibs/x-bundle";
-import { RegistrationInput } from "../inputs/RegistrationInput";
-import { LoginInput } from "../inputs/LoginInput";
-import { ResetPasswordInput } from "../inputs/ResetPasswordInput";
-import { ForgotPasswordInput } from "../inputs/ForgotPasswordInput";
-import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
-import { XPasswordService } from "../services/XPasswordService";
-import { ChangePasswordInput } from "../inputs/ChangePasswordInput";
 import { IXPasswordBundleConfig } from "../defs";
-import { IFunctionMap } from "@bluelibs/graphql-bundle";
+import { IFunctionMap, IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { ContainerInstance } from "@bluelibs/core";
+import { UserId } from "@bluelibs/security-bundle";
 import {
   UsersCollection,
   USERS_COLLECTION_TOKEN,
@@ -24,15 +18,23 @@ export default (config: IXPasswordBundleConfig) => {
   if (queries.me) {
     resolvers.me = [
       X.CheckLoggedIn(),
-      (_, args, context, ast) => {
-        const userId = (context as any).userId;
-        const container = context.container as ContainerInstance;
+      (
+        _,
+        args,
+        context: IGraphQLContext & {
+          container: ContainerInstance;
+          userId: UserId;
+        },
+        ast
+      ) => {
+        const { userId, container } = context;
 
+        // why: the user model is extended with app-specific fields (fullName, profile, ...) beyond IUser
         const usersCollection = container.get<UsersCollection<any>>(
           USERS_COLLECTION_TOKEN
         );
 
-        return usersCollection.queryOneGraphQL(ast, {
+        return usersCollection.queryOneGraphQL<any>(ast, {
           filters: {
             _id: userId,
           },

@@ -1,4 +1,3 @@
-import { ObjectID } from "@bluelibs/mongo-bundle";
 import { UserId } from "@bluelibs/security-bundle";
 
 export class AuthenticationCodes {

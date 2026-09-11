@@ -1,26 +1,28 @@
-import { assert, expect } from "chai";
-import * as _ from "lodash";
-import { getRandomCollection, log } from "./helpers";
-import {
-  addLinks,
-  query,
-  clear,
-  addExpanders,
-  addReducers,
-} from "../../core/api";
+/* eslint-disable @typescript-eslint/no-unused-vars -- fixture data is created via insertOne side effects; the returned bindings are intentionally unused */
+import { assert } from "chai";
+import { getRandomCollection } from "./helpers";
+import { addLinks, query, clear, addExpanders, addReducers } from "../../core/api";
 import { client } from "../connection";
 import { Collection } from "mongodb";
-import {
-  manyToMany,
-  manyToOne,
-  oneToOne,
-  oneToMany,
-} from "../../core/quickLinkers";
+import { manyToMany, manyToOne, oneToOne, oneToMany } from "../../core/quickLinkers";
 
 // Read: https://mongodb.github.io/node-mongodb-native/3.3/api/
 declare module "../../core/defs" {
   export interface IQueryContext {
     test?: any;
+  }
+}
+
+// The driver excludes `MongoClient.topology` from its public types, but the
+// afterAll hook reads it to drain the connection pool before close() (see the
+// MongoClientClosedError comment there). Re-expose only the slice we read.
+declare module "mongodb" {
+  interface MongoClient {
+    topology?: {
+      s: {
+        servers: Map<string, { pool: { checkedOutConnections: Set<unknown> } }>;
+      };
+    };
   }
 }
 
@@ -30,6 +32,21 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // The MongoDB driver returns connections to the pool asynchronously after the
+  // last operation. Closing the client while a connection is still checked out
+  // makes close() error that connection with a MongoClientClosedError, which can
+  // crash the Jest worker. Wait for the pool to drain before closing the client.
+  try {
+    const server = client.topology?.s.servers.values().next().value;
+    const pool = server?.pool;
+    const deadline = Date.now() + 2000;
+    while (pool && pool.checkedOutConnections.size > 0 && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+  } catch {
+    // Fall back to a short settle delay if the pool can't be inspected.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
   await client.close();
 });
 
@@ -74,7 +91,7 @@ describe("Main tests", function () {
       bsIds: [b1, b2, b3].map((b) => b.insertedId),
     });
 
-    let result = await query(A, {
+    const result = await query(A, {
       bs: {
         number: 1,
       },
@@ -139,12 +156,12 @@ describe("Main tests", function () {
       name: "John",
     });
 
-    const a = await A.insertOne({
+    await A.insertOne({
       bId: b.insertedId,
       number: 200,
     });
 
-    let result: any = await query(A, {
+    const result: any = await query(A, {
       b: {
         name: 1,
       },
@@ -168,7 +185,7 @@ describe("Main tests", function () {
       name: "John",
     });
 
-    const a = await A.insertOne({
+    await A.insertOne({
       bId: b.insertedId,
       number: 200,
     });
@@ -195,7 +212,7 @@ describe("Main tests", function () {
       name: "John",
     });
 
-    const a = await A.insertOne({
+    await A.insertOne({
       bsIds: [b.insertedId],
       number: 200,
     });
@@ -222,7 +239,7 @@ describe("Main tests", function () {
       name: "John",
     });
 
-    const a = await A.insertOne({
+    await A.insertOne({
       bId: b.insertedId,
       number: 200,
     });
@@ -249,12 +266,12 @@ describe("Main tests", function () {
       name: "John",
     });
 
-    const a = await A.insertOne({
+    await A.insertOne({
       bId: b.insertedId,
       number: 200,
     });
 
-    let result: any = await query(A, {
+    const result: any = await query(A, {
       b: {
         name: {},
       },
@@ -392,7 +409,7 @@ describe("Main tests", function () {
     assert.isUndefined(bResult.profile.lastName);
     assert.isString(bResult.profile.number);
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       bId: b1.insertedId,
     });
 
@@ -420,7 +437,7 @@ describe("Main tests", function () {
 
     const a1 = await A.insertOne({ n: 1 });
     const a2 = await A.insertOne({ n: 2 });
-    const a3 = await A.insertOne({ n: 3 });
+    await A.insertOne({ n: 3 });
 
     const b1 = await B.insertOne({ n: 1 });
     const b2 = await B.insertOne({ n: 2 });
@@ -473,7 +490,7 @@ describe("Main tests", function () {
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: 1,
         lastName: 1,
@@ -503,7 +520,7 @@ describe("Main tests", function () {
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: 1,
         lastName: 1,
@@ -550,7 +567,7 @@ describe("Main tests", function () {
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: 1,
         lastName: 1,
@@ -583,7 +600,7 @@ describe("Main tests", function () {
       },
     });
 
-    const b1 = await A.insertOne({
+    await A.insertOne({
       firstName: "John",
       lastName: "Smith",
     });
@@ -606,7 +623,7 @@ describe("Main tests", function () {
       },
     });
 
-    const b1 = await A.insertOne({
+    await A.insertOne({
       thumbs: [{ id: "123", type: "123" }, { id: "100" }],
     });
 
@@ -631,13 +648,18 @@ describe("Main tests", function () {
             lastName: 1,
           },
         },
-        async reduce(obj, params) {
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+        async reduce(obj) {
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: 1,
         lastName: 1,
@@ -660,13 +682,13 @@ describe("Main tests", function () {
         dependency: {
           name: 1,
         },
-        async reduce(obj, params) {
-          return `${obj.name} world!`;
+        async reduce(obj) {
+          return `${(obj as { name: string }).name} world!`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       name: "Hello",
     });
 
@@ -688,14 +710,18 @@ describe("Main tests", function () {
           },
         },
         async reduce(obj, { context }) {
-          // @ts-ignore
           assert.equal(context.test, 1);
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: 1,
         lastName: 1,
@@ -728,14 +754,18 @@ describe("Main tests", function () {
           },
         },
         async reduce(obj, { context }) {
-          // @ts-ignore
           assert.equal(context.test, 1);
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: 1,
         lastName: 1,
@@ -771,8 +801,13 @@ describe("Main tests", function () {
             },
           },
         },
-        async reduce(obj, params) {
-          return `${obj.b.profile.firstName} ${obj.b.profile.lastName}`;
+        async reduce(obj) {
+          const { firstName, lastName } = (
+            obj as {
+              b: { profile: { firstName: string; lastName: string } };
+            }
+          ).b.profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -784,7 +819,7 @@ describe("Main tests", function () {
         number: 500,
       },
     });
-    const a1 = await A.insertOne({
+    await A.insertOne({
       bId: b1.insertedId,
     });
 
@@ -813,8 +848,13 @@ describe("Main tests", function () {
             },
           },
         },
-        reduce(obj, params) {
-          return `${obj.b.profile.firstName} ${obj.b.profile.lastName}`;
+        reduce(obj) {
+          const { firstName, lastName } = (
+            obj as {
+              b: { profile: { firstName: string; lastName: string } };
+            }
+          ).b.profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
@@ -826,7 +866,7 @@ describe("Main tests", function () {
         number: 500,
       },
     });
-    const a1 = await A.insertOne({
+    await A.insertOne({
       bId: b1.insertedId,
     });
 
@@ -856,13 +896,18 @@ describe("Main tests", function () {
             lastName: 1,
           },
         },
-        reduce(obj, params) {
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+        reduce(obj) {
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: "a",
         lastName: "b",
@@ -894,7 +939,7 @@ describe("Main tests", function () {
           notes: true,
         },
         async reduce(deal) {
-          return deal.notes?.length;
+          return (deal as { notes?: string[] }).notes?.length;
         },
       },
       hasNotes: {
@@ -902,7 +947,7 @@ describe("Main tests", function () {
           notesLength: true,
         },
         async reduce(deal) {
-          return deal.notesLength > 0;
+          return (deal as { notesLength: number }).notesLength > 0;
         },
       },
       sureItHasNotes: {
@@ -910,12 +955,12 @@ describe("Main tests", function () {
           hasNotes: true,
         },
         async reduce(deal) {
-          return deal.hasNotes === true; // Edited
+          return (deal as { hasNotes: boolean }).hasNotes === true; // Edited
         },
       },
     });
 
-    const deal1 = await Deals.insertOne({
+    await Deals.insertOne({
       name: "Deal 1",
       notes: ["note 1", "note 2"],
     });
@@ -937,8 +982,8 @@ describe("Main tests", function () {
         dependency: {
           inversedName: 1,
         },
-        reduce(obj, params) {
-          return `prefix ${obj.inversedName}`;
+        reduce(obj) {
+          return `prefix ${(obj as { inversedName: string }).inversedName}`;
         },
       },
       inversedName: {
@@ -948,12 +993,12 @@ describe("Main tests", function () {
           },
         },
         reduce(obj) {
-          return `inversed ${obj.profile.firstName}`;
+          return `inversed ${(obj as { profile: { firstName: string } }).profile.firstName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: "Aloha",
         lastName: "b",
@@ -976,8 +1021,8 @@ describe("Main tests", function () {
         dependency: {
           inversedName: 1,
         },
-        reduce(obj, params) {
-          return `prefix ${obj.inversedName}`;
+        reduce(obj) {
+          return `prefix ${(obj as { inversedName: string }).inversedName}`;
         },
       },
       inversedName: {
@@ -987,12 +1032,12 @@ describe("Main tests", function () {
           },
         },
         reduce(obj) {
-          return `inversed ${obj.profile.firstName}`;
+          return `inversed ${(obj as { profile: { firstName: string } }).profile.firstName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: "Aloha",
         lastName: "b",
@@ -1019,12 +1064,12 @@ describe("Main tests", function () {
           },
         },
         reduce(obj, params) {
-          return `${obj.profile.firstName} ${params.lastName}`;
+          return `${(obj as { profile: { firstName: string } }).profile.firstName} ${params.lastName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: "John",
         lastName: "b",
@@ -1053,13 +1098,18 @@ describe("Main tests", function () {
             lastName: 1,
           },
         },
-        reduce(obj, params) {
-          return `${obj.profile.firstName} ${obj.profile.lastName}`;
+        reduce(obj) {
+          const { firstName, lastName } = (
+            obj as {
+              profile: { firstName: string; lastName: string };
+            }
+          ).profile;
+          return `${firstName} ${lastName}`;
         },
       },
     });
 
-    const a1 = await A.insertOne({
+    await A.insertOne({
       profile: {
         firstName: "John",
         lastName: "Smith",
@@ -1194,7 +1244,7 @@ describe("Main tests", function () {
       linkName: "b",
     });
 
-    const b1 = await B.insertOne({
+    await B.insertOne({
       foreign: "someId",
       test: "123",
     });
@@ -1231,11 +1281,11 @@ describe("Main tests", function () {
       linkName: "bs",
     });
 
-    const b1 = await B.insertOne({
+    await B.insertOne({
       foreign: "someId1",
       test: "123",
     });
-    const b2 = await B.insertOne({
+    await B.insertOne({
       foreign: "someId2",
       test: "123",
     });
@@ -1274,13 +1324,13 @@ describe("Main tests", function () {
       linkName: "b",
     });
 
-    const b1 = await B.insertOne({
+    await B.insertOne({
       foreign: {
         key: "someId",
       },
       test: "123",
     });
-    const b2 = await B.insertOne({
+    await B.insertOne({
       foreign: {
         key: "someId2",
       },
@@ -1319,19 +1369,19 @@ describe("Main tests", function () {
       linkName: "bs",
     });
 
-    const b1 = await B.insertOne({
+    await B.insertOne({
       foreign: {
         key: "someId1",
       },
       test: "123",
     });
-    const b2 = await B.insertOne({
+    await B.insertOne({
       foreign: {
         key: "someId2",
       },
       test: "123",
     });
-    const b3 = await B.insertOne({
+    await B.insertOne({
       foreign: {
         key: "someId3",
       },
@@ -1605,7 +1655,7 @@ describe("Main tests", function () {
     });
 
     // Sleep to ensure that index has been actually created
-    await new Promise<void>((resolve, reject) => {
+    await new Promise<void>((resolve) => {
       setTimeout(() => {
         resolve();
       }, 200);
@@ -1702,7 +1752,7 @@ describe("Main tests", function () {
       age: 20,
     });
 
-    const a = await A.insertOne({
+    await A.insertOne({
       bId: b.insertedId,
       number: 200,
       divsion: 3,

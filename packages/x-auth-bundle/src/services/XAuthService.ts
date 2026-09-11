@@ -1,10 +1,9 @@
+import { randomInt } from "crypto";
+import { SecurityService, UserId } from "@bluelibs/security-bundle";
 import {
-  SecurityService,
-  UserId,
-  ICreateSessionOptions,
-  ISession,
-} from "@bluelibs/security-bundle";
-import { PasswordService } from "@bluelibs/password-bundle";
+  IPasswordAuthenticationStrategy,
+  PasswordService,
+} from "@bluelibs/password-bundle";
 import { EmailService } from "@bluelibs/email-bundle";
 import { Service, Inject, ContainerInstance } from "@bluelibs/core";
 import { InvalidPasswordException } from "../exceptions/InvalidPasswordException";
@@ -37,7 +36,7 @@ import { ObjectId } from "mongodb";
 import { MultipleFactorRedirect } from "../multipleAuthFactor/defs";
 import { MultipleFactorService } from "../multipleAuthFactor/MultipleFactorService";
 import { AuthenticationCodesCollection } from "../collections/AuthenticationCodes.collection";
-import * as ms from "ms";
+import ms from "ms";
 import { AuthenticationCodes } from "../collections/AuthenticationCodes.model";
 import { CodeSubmissionExceededException } from "../exceptions/CodeSubmissionExceededException";
 
@@ -70,7 +69,7 @@ export class XAuthService implements IXAuthService {
    */
   async register(
     input: RegistrationInput
-  ): Promise<{ token: string; userId: UserId }> {
+  ): Promise<{ token: string | null; userId: UserId }> {
     const existingUserId = await this.passwordService.findUserIdByUsername(
       input.email
     );
@@ -168,7 +167,7 @@ export class XAuthService implements IXAuthService {
     }
   }
 
-  async logout(token) {
+  async logout(token: string) {
     await this.securityService.logout(token);
   }
 
@@ -200,9 +199,8 @@ export class XAuthService implements IXAuthService {
       return;
     }
 
-    const token = await this.passwordService.createTokenForPasswordReset(
-      userId
-    );
+    const token =
+      await this.passwordService.createTokenForPasswordReset(userId);
 
     this.sendResetPasswordEmail(input.email, input.email, token);
   }
@@ -254,12 +252,13 @@ export class XAuthService implements IXAuthService {
       }
     }
 
-    const result = await this.securityService.findThroughAuthenticationStrategy(
-      PASSWORD_STRATEGY,
-      {
-        emailVerificationToken: input.token,
-      }
-    );
+    const result =
+      await this.securityService.findThroughAuthenticationStrategy<IPasswordAuthenticationStrategy>(
+        PASSWORD_STRATEGY,
+        {
+          emailVerificationToken: input.token,
+        }
+      );
 
     if (!result) {
       throw new InvalidTokenException({
@@ -368,19 +367,20 @@ export class XAuthService implements IXAuthService {
    * Generates the token for email validation and maybe others
    * @param length
    */
-  generateToken(length, chars?: string[]) {
+  generateToken(length: number, chars: string[] = ALLOWED_CHARS): string {
     const b = [];
-    if (!chars) {
-      chars = ALLOWED_CHARS;
-    }
     for (let i = 0; i < length; i++) {
-      const j = (Math.random() * (chars.length - 1)).toFixed(0);
-      b[i] = chars[j];
+      b[i] = chars[randomInt(0, chars.length)];
     }
     return b.join("");
   }
 
-  async requestLoginLink(input: RequestLoginLinkInput): Promise<any> {
+  async requestLoginLink(input: RequestLoginLinkInput): Promise<{
+    magicCodeSent: boolean;
+    userId: UserId;
+    method?: "email" | "sms" | "phonecall";
+    confirmationFormat?: "token" | "code" | "qrCode";
+  }> {
     const userId = input.userId
       ? new ObjectId(input.userId)
       : await this.passwordService.findUserIdByUsername(input.username);
@@ -447,8 +447,10 @@ export class XAuthService implements IXAuthService {
       emails: { regardsName, paths, templates },
     } = this.config;
 
-    // This will run in the background
-    this.emailService.send(
+    // Ensure the email is fully sent before the request is considered complete.
+    // Fire-and-forget sending left a dangling promise that could race with
+    // kernel shutdown (MongoClientClosedError during tests) and swallow errors.
+    await this.emailService.send(
       {
         component: templates.requestMagicLink,
         props: {

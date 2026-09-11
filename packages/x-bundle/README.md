@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs X BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/x-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/x-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/x-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/x-bundle/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fx-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fx-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 The X-Framework is a set of tools that beautifully bridges the gap between your API Layer (GraphQL), your database (MongoDB), and your service layer. It is thought with fast-prototyping in mind but code scalability as well.
 

@@ -3,7 +3,6 @@ import { IS_LIVE_DEBUG, REDIS_OPTIONS } from "../constants";
 import { ClientOpts, createClient, RedisClient } from "redis";
 import { EJSON } from "@bluelibs/ejson";
 import { IMessenger, ISubscriptionEvent, MessageHandleType } from "../defs";
-import { SubscriptionStore } from "./SubscriptionStore";
 import Queue from "queue";
 import { RedisConnectionResumedEvent } from "../events/RedisConnectionResumedEvent";
 import { LoggerService } from "@bluelibs/logger-bundle";
@@ -119,7 +118,8 @@ export class RedisMessenger implements IMessenger {
   initListener() {
     this.listener.on("message", (channel, _message) => {
       if (this.channelMap[channel]) {
-        const message = EJSON.parse(_message);
+        // Channels only ever carry serialized subscription events.
+        const message = EJSON.parse(_message) as ISubscriptionEvent;
         this.channelMap[channel].forEach((channelHandler) => {
           channelHandler(message);
         });

@@ -12,7 +12,9 @@ export async function createEcosystem(
     async init() {}
   }
 
-  kernel.addBundle(new SecurityBundle());
+  // session.cleanup registers a never-cleared 24h setInterval that keeps the
+  // jest worker's event loop alive, hanging the test run.
+  kernel.addBundle(new SecurityBundle({ session: { cleanup: false } }));
   kernel.addBundle(new PasswordBundle(passwordBundleConfig));
   kernel.addBundle(new AppBundle());
 

@@ -8,7 +8,8 @@ import {
   IPasswordAuthenticationStrategy,
   IHasherService,
 } from "../defs";
-import * as ms from "ms";
+// ms import compatibility
+import ms from "ms";
 import { Inject, Service, EventManager } from "@bluelibs/core";
 import { BUNDLE_CONFIG_TOKEN, HASHER_SERVICE_TOKEN } from "../constants";
 import {
@@ -77,7 +78,7 @@ export class PasswordService implements IPasswordService {
       salt
     );
 
-    const data: any = {
+    const data: Partial<IPasswordAuthenticationStrategy> = {
       salt,
       passwordHash,
       username: options.username,
@@ -312,7 +313,7 @@ export class PasswordService implements IPasswordService {
    * @param fields
    */
   async getData(
-    userId,
+    userId: UserId,
     fields?: IFieldMap
   ): Promise<Partial<IPasswordAuthenticationStrategy>> {
     return this.securityService.getAuthenticationStrategyData<IPasswordAuthenticationStrategy>(
@@ -369,7 +370,7 @@ export class PasswordService implements IPasswordService {
    * @param data
    */
   async updateData(
-    userId,
+    userId: UserId,
     data: Partial<IPasswordAuthenticationStrategy>
   ): Promise<void> {
     if (data.username) {

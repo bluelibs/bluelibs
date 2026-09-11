@@ -1,13 +1,8 @@
 <h1 align="center">BlueLibs HTTP-BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/http-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/http-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/http-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/http-bundle/badge.svg?branch=master" />
-  </a>
-</p>
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fhttp-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fhttp-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This is the X-Framework of handling password authentication blended with GraphQL.
 

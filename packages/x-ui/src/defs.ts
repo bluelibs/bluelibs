@@ -10,12 +10,13 @@ import {
   IUIApolloBundleConfig,
 } from "@bluelibs/ui-apollo-bundle";
 import { Constructor } from "@bluelibs/core";
+import type { NormalizedCacheObject } from "@apollo/client/cache";
 
 export type XUIBundleConfigType = Partial<{
   /**
    * @deprecated Please use `apollo.client`
    */
-  graphql: Partial<ApolloClientOptions<any>>;
+  graphql: Partial<ApolloClientOptions<NormalizedCacheObject>>;
 
   /**
    * @deprecated Please use `guardian.guardianClass`

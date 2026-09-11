@@ -5,8 +5,10 @@ import { Alert, Select, SelectProps, Spin } from "antd";
 import { ObjectId } from "@bluelibs/ejson";
 import * as debounce from "lodash.debounce";
 
-export interface DebounceSelectProps<ValueType = any>
-  extends Omit<SelectProps<ValueType>, "options" | "children"> {
+export interface DebounceSelectProps<ValueType = any> extends Omit<
+  SelectProps<ValueType>,
+  "options" | "children"
+> {
   fetchOptions: (search: string) => Promise<ValueType[]>;
   debounceTimeout?: number;
 }
@@ -16,7 +18,7 @@ function DebounceSelect<
     key?: string;
     label: React.ReactNode;
     value: string | number;
-  } = any
+  } = any,
 >({ fetchOptions, debounceTimeout = 250, ...props }: DebounceSelectProps) {
   const [fetching, setFetching] = React.useState(false);
   const [options, setOptions] = React.useState<ValueType[]>([]);
@@ -71,7 +73,8 @@ function DebounceSelect<
 
 type RemoteSelectFilterResolver = (searchValue) => any;
 
-export type RemoteSelectLazyProps = SelectProps<any> & {
+export type RemoteSelectLazyProps = SelectProps & {
+  // why: the collection's document type is unknown; `any` keeps every `Collection<T>` assignable
   collectionClass: Constructor<Collection<any>>;
   /**
    * This is recommended to be a reducer or a GraphQL resolver.
@@ -106,7 +109,7 @@ export function RemoteSelectLazy(props: RemoteSelectLazyProps) {
     }
   }
 
-  const collection: Collection<any> = use(collectionClass);
+  const collection = use(collectionClass);
 
   return (
     <DebounceSelect
@@ -174,7 +177,7 @@ function getDefaultLazyFilters(field, value: string) {
 function getLazyFilters(
   lazy: string | string[] | boolean | RemoteSelectFilterResolver,
   field: string,
-  value: any
+  value: string
 ) {
   if (lazy === undefined || value === "" || value === undefined) {
     return {};

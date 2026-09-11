@@ -1,26 +1,38 @@
 import { Inject, Service } from "@bluelibs/core";
 import { CACHE_CONFIG } from "../constants";
-import { CacheOptions } from "./defs";
+import { CacheOptions, ICacheManagerConfig } from "./defs";
 import * as CacheManager from "cache-manager";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import * as Hash from "node-object-hash";
+import { IGraphQLContext } from "@bluelibs/graphql-bundle";
+import Hash from "node-object-hash";
 const Hasher = Hash({ sort: true, coerce: true });
+
+interface CacheWithKeys extends CacheManager.Cache {
+  keys?(): Promise<string[]>;
+}
+
+interface CachedEntry {
+  data: unknown;
+  syncedAt: number;
+  ttl?: number;
+  refresh?: boolean;
+}
 
 @Service()
 export class CacheService {
-  private cacheManager;
+  private cacheManager: CacheWithKeys;
 
   constructor(
-    @Inject(CACHE_CONFIG) private config,
+    @Inject(CACHE_CONFIG) private config: ICacheManagerConfig,
     protected readonly logger: LoggerService
   ) {
     this.cacheManager = CacheManager.caching({
       store: this.config.store,
       ...this.config.storeConfig,
-    });
+    } as CacheManager.StoreConfig & CacheManager.CacheOptions);
   }
 
-  async set(key: string, data: any, options: CacheOptions) {
+  async set(key: string, data: unknown, options: CacheOptions) {
     await this.cacheManager.set(
       key,
       {
@@ -34,7 +46,7 @@ export class CacheService {
   }
 
   async get(key: string) {
-    const cachedData = await this.cacheManager.get(key);
+    const cachedData = await this.cacheManager.get<CachedEntry>(key);
     if (!cachedData) return { found: false, data: undefined };
 
     if (cachedData && cachedData.refresh) {
@@ -57,8 +69,8 @@ export class CacheService {
     return await this.cacheManager.keys();
   }
 
-  generateCacheKey(ctx, ast, options?: CacheOptions): string {
-    let keyBody: any = (({
+  generateCacheKey(ctx: unknown, ast: unknown, options?: unknown): string {
+    let keyBody: Record<string, unknown> = (({
       fieldName,
       fieldNodes,
       returnType,
@@ -70,18 +82,26 @@ export class CacheService {
       returnType,
       parentType,
       variableValues,
-    }))(ast);
-    if (options && options.contextBoundness)
+    }))(
+      ast as {
+        fieldName: unknown;
+        fieldNodes: unknown;
+        returnType: unknown;
+        parentType: unknown;
+        variableValues: unknown;
+      }
+    );
+    if (options && (options as CacheOptions).contextBoundness)
       keyBody = this.addUserBoundnessFieldsToKeyObject(
-        options.userBoundnessFields,
+        (options as CacheOptions).userBoundnessFields,
         keyBody,
-        ctx
+        ctx as IGraphQLContext
       );
 
     return Hasher.hash(keyBody);
   }
 
-  configureOptions(ctx, options?): CacheOptions {
+  configureOptions(ctx: IGraphQLContext, options?: CacheOptions): CacheOptions {
     options = {
       ...this.config.resolverDefaultConfig,
       ...options,
@@ -91,7 +111,10 @@ export class CacheService {
     return options;
   }
 
-  calculateTtlWithExpirationBoundness(options: CacheOptions, ctx): number {
+  calculateTtlWithExpirationBoundness(
+    options: CacheOptions,
+    ctx: IGraphQLContext
+  ): number {
     let expirationTtl;
     if (typeof ctx[options.expirationBoundnessField] === "number")
       expirationTtl = ctx[options.expirationBoundnessField];
@@ -107,8 +130,8 @@ export class CacheService {
 
   addUserBoundnessFieldsToKeyObject(
     userBoundnessFields: string[],
-    objectBody,
-    ctx
+    objectBody: Record<string, unknown>,
+    ctx: IGraphQLContext
   ) {
     userBoundnessFields.map((key) => (objectBody[key] = ctx[key]));
     return objectBody;

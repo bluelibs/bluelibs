@@ -1,6 +1,7 @@
 import { ApolloClientOptions } from "@apollo/client/core";
 
 export interface IUIApolloBundleConfig {
+  // The cache shape is user-defined and passed through to ApolloClient unchanged.
   client: ApolloClientOptions<any>;
   enableSubscriptions?: boolean;
 }
@@ -19,8 +20,12 @@ export interface ISubscriptionEventMessage {
 
 export interface IEventsMap {
   onReady?: () => void;
-  onError?: (err: any) => void;
-  onChanged?: (document: any, changeSet: any, previousDocument: any) => void;
-  onRemoved?: (document: any) => void;
-  onAdded?: (document: any) => void;
+  onError?: (err: unknown) => void;
+  onChanged?: (
+    document: unknown,
+    changeSet: unknown,
+    previousDocument: unknown
+  ) => void;
+  onRemoved?: (document: unknown) => void;
+  onAdded?: (document: unknown) => void;
 }

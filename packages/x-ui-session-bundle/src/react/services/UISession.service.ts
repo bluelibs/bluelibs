@@ -1,10 +1,4 @@
-import {
-  EventManager,
-  Service,
-  Event,
-  Inject,
-  ExecutionContext,
-} from "@bluelibs/core";
+import { EventManager, Service, Event, Inject } from "@bluelibs/core";
 import { useEffect, useState } from "react";
 import { UI_SESSION_BUNDLE_CONFIG_TOKEN } from "../../constants";
 import { IXUISessionBundleConfigType, IXUISessionStore } from "../../defs";
@@ -25,7 +19,8 @@ export type UISessionEventChangeHandler = (
 
 @Service()
 export class UISessionService {
-  protected _state: IXUISessionStore;
+  // Populated later in init(); the store interface may be augmented with required fields
+  protected _state: IXUISessionStore = {} as IXUISessionStore;
 
   constructor(
     protected readonly eventManager: EventManager,
@@ -115,13 +110,14 @@ export class UISessionService {
   onSet<T extends keyof IXUISessionStore>(
     fieldName: T,
     handler: UISessionEventChangeHandler
-  ) {
+  ): void {
     this.eventManager.addListener(UISessionStateChangeEvent, handler, {
-      filter: (e) => e.data.fieldName === fieldName,
+      filter: (e: Event<UISessionStateChangeEventProps>) =>
+        e.data.fieldName === fieldName,
     });
   }
 
-  onSetRemove(handler: UISessionEventChangeHandler) {
+  onSetRemove(handler: UISessionEventChangeHandler): void {
     this.eventManager.removeListener(UISessionStateChangeEvent, handler);
   }
 }

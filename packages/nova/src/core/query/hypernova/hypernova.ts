@@ -1,7 +1,6 @@
 import prepareForDelivery from "../lib/prepareForDelivery";
 import storeHypernovaResults from "./storeHypernovaResults";
 import CollectionNode from "../nodes/CollectionNode";
-import { performance } from "perf_hooks";
 
 async function hypernovaRecursive(collectionNode: CollectionNode) {
   if (collectionNode.collectionNodes.length === 0) {
@@ -14,7 +13,7 @@ async function hypernovaRecursive(collectionNode: CollectionNode) {
    * The logic here is that the child collections need the parent, but child collection queries can all run in parallel
    * And then when a child collection resolves it also drills down and runs its children (if any) in parallel.
    */
-  const promises = [];
+  const promises: Promise<void>[] = [];
 
   for (const childCollectionNode of collectionNodes) {
     promises.push(

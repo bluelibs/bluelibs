@@ -4,7 +4,7 @@ import { Service } from "@bluelibs/core";
 
 @Service()
 export class PermissionGraph {
-  public readonly graph: DepGraph<any>;
+  public readonly graph: DepGraph<string>;
 
   constructor(public readonly tree: IPermissionTree) {
     this.tree = tree;
@@ -27,8 +27,8 @@ export class PermissionGraph {
    * @param tree
    * @param parent
    */
-  protected processGraph(tree, parent?: string) {
-    for (let key in tree) {
+  protected processGraph(tree: IPermissionTree, parent?: string) {
+    for (const key in tree) {
       const value = tree[key];
       if (!this.graph.hasNode(key)) {
         this.graph.addNode(key);
@@ -39,12 +39,12 @@ export class PermissionGraph {
           this.graph.addDependency(parent, key);
         }
       } else {
-        this.processGraph(value, key);
+        this.processGraph(value as IPermissionTree, key);
       }
     }
   }
 
-  protected isLeaf(value): boolean {
+  protected isLeaf(value: IPermissionTree | number): boolean {
     return value === 1;
   }
 
@@ -62,7 +62,7 @@ export class PermissionGraph {
     }
 
     if (Array.isArray(role)) {
-      const roles = [];
+      const roles: string[] = [];
       role.forEach((r) => {
         roles.push(...this.getParentRolesOf(r));
       });

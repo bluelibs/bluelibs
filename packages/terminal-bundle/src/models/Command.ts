@@ -3,9 +3,8 @@ import { PrompterService } from "../services/PrompterService";
 import { CommanderService } from "../services/CommanderService";
 import { IExecutor } from "../defs";
 
-// TODO:
 @Service()
-export abstract class Command<T = any> implements IExecutor<T> {
+export abstract class Command<T = unknown> implements IExecutor<T> {
   @Inject(() => PrompterService)
   prompter: PrompterService;
   @Inject(() => CommanderService)

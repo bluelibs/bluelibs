@@ -1,0 +1,458 @@
+version: 2
+updates:
+  # Root package.json
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "theodor-diaconu"
+    assignees:
+      - "theodor-diaconu"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+    groups:
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  # --- Packages ---
+
+  - package-ecosystem: "npm"
+    directory: "/packages/core"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/ejson"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/nova"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/smart"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/mongo-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/mikroorm-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/apollo-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/apollo-security-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/graphql-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/http-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/email-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/logger-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/password-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/security-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/security-mongo-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/validator-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/terminal-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/rabbitmq-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/ui-apollo-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-auth-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-cron-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-password-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-s3-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-admin"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-collections-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-guardian-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-i18n-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-next"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-react-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-react-router-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-router"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x-ui-session-bundle"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  # --- Nested package manifests ---
+
+  - package-ecosystem: "npm"
+    directory: "/packages/http-bundle/react"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/nova/benchmarks/sql"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x/templates/project"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x/templates/microservice/backend"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x/templates/microservice/frontend-next"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/packages/x/templates/microservice/frontend-react"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  - package-ecosystem: "npm"
+    directory: "/templates/package-template"
+    schedule: { interval: "weekly", day: "monday" }
+    open-pull-requests-limit: 3
+    reviewers: ["theodor-diaconu"]
+    commit-message: { prefix: "deps", include: "scope" }
+    labels: ["dependencies"]
+    groups:
+      all: { patterns: ["*"] }
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "ci/cd"
+      - "dependencies"

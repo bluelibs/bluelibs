@@ -75,8 +75,7 @@ export class MicroserviceWriter extends BlueprintWriter {
       ].includes(model.type)
     ) {
       const frontendModel = model as
-        | FrontendReactMicroserviceModel
-        | FrontendNextMicroserviceModel;
+        FrontendReactMicroserviceModel | FrontendNextMicroserviceModel;
 
       if (frontendModel.hasCustomGuardian) {
       }

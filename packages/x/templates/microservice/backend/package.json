@@ -25,7 +25,7 @@
     "generate:docs": "typedoc ./src/startup/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
   },
   "dependencies": {
-    "@babel/runtime": "7.12.5",
+    "@babel/runtime": "^7.29.7",
     "@bluelibs/apollo-bundle": "^2.0.0",
     "@bluelibs/apollo-security-bundle": "^2.0.0",
     "@bluelibs/core": "^1.0.0",

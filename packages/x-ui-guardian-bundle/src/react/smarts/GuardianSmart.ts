@@ -28,7 +28,7 @@ export type State<UserType = GuardianUserType> = {
    * When the user has an expired token or one that couldn't retrieve the user
    */
   hasInvalidToken: boolean;
-  user: UserType;
+  user: UserType | null;
   /**
    * This is done the first time when the token is read and user is fetched. After that it will stay initialised.
    */
@@ -59,11 +59,18 @@ export type GuardianUserRegistrationType = {
   email: string;
   password: string;
 };
+
+export type RequestLoginLinkResult = {
+  magicCodeSent: boolean;
+  userId: string;
+  method: string | null;
+  confirmationFormat: string | null;
+};
 export class GuardianSmart<
   TUserType extends IUserMandatory = GuardianUserType,
-  TUserRegistrationType = GuardianUserRegistrationType
-> extends Smart<State<TUserType>, any> {
-  protected authenticationToken: string;
+  TUserRegistrationType = GuardianUserRegistrationType,
+> extends Smart<State<TUserType>, null> {
+  protected authenticationToken: string | null = null;
 
   state: State<TUserType> = {
     fetchingUserData: false,
@@ -74,10 +81,10 @@ export class GuardianSmart<
   };
 
   @Inject()
-  apolloClient: ApolloClient;
+  apolloClient!: ApolloClient;
 
   @Inject()
-  eventManager: EventManager;
+  eventManager!: EventManager;
 
   @Inject(GUARDIAN_IS_MULTIPLEFACTOR_AUTH)
   isMultipleFactorAuth?: boolean;
@@ -123,6 +130,8 @@ export class GuardianSmart<
     }
   }
 
+  // why: Apollo errors expose `.networkError.result.errors` which is not part of the base Error type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected handleUserRetrievalError(err: any) {
     console.error(
       `[Authentication] There was an error fetching the user: ${err.toString()}`
@@ -184,10 +193,10 @@ export class GuardianSmart<
         fetchPolicy: "network-only",
       })
       .then(async (response) => {
-        let user = Object.assign({}, response.data.me);
+        const user = Object.assign({}, response.data.me);
 
         try {
-          user._id = new ObjectId(user._id as any);
+          user._id = new ObjectId(user._id);
         } catch (e) {
           console.error(
             `We could not transform user._id in an ObjectId for value: ${user._id}`,
@@ -202,8 +211,7 @@ export class GuardianSmart<
   }
 
   protected async retrieveToken() {
-    this.authenticationToken =
-      localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) || null;
+    this.authenticationToken = localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY);
     await this.eventManager.emit(
       new AuthenticationTokenUpdateEvent({ token: this.authenticationToken })
     );
@@ -413,10 +421,10 @@ export class GuardianSmart<
         `,
       })
       .then(async () => {
-        const { _id } = this.state.user;
+        const userId = this.state.user?._id ?? "unknown";
         await this.eventManager.emit(
           new UserLoggedOutEvent({
-            userId: _id,
+            userId: userId,
           })
         );
         await this.storeToken(null);
@@ -438,7 +446,7 @@ export class GuardianSmart<
     username?: string;
     method?: string;
     userId: string;
-  }): Promise<any> {
+  }): Promise<RequestLoginLinkResult> {
     return this.apolloClient
       .mutate({
         mutation: gql`
@@ -459,7 +467,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then((response: any) => {
+      .then((response) => {
         return response.data.requestLoginLink;
       });
   }
@@ -500,7 +508,7 @@ export class GuardianSmart<
           },
         },
       })
-      .then(async (response: any) => {
+      .then(async (response) => {
         const { token } = response.data.verifyMagicCode;
         await this.eventManager.emit(new UserLoggedInEvent({ token }));
 

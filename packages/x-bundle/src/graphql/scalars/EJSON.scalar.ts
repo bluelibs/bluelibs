@@ -2,8 +2,8 @@
 // https://github.com/taion/graphql-type-json
 // Commit: 228b58f8e34a3e941198cadb7785b92dc64e01d6
 
-import { GraphQLScalarType, ValueNode } from "graphql";
-import { Kind, print } from "graphql/language";
+import { GraphQLScalarType } from "graphql";
+import { Kind } from "graphql/language";
 import { EJSON } from "@bluelibs/ejson";
 
 // function parseObject(typeName, ast, variables) {
@@ -50,7 +50,11 @@ export const GraphQLEJSON = new GraphQLScalarType({
       return EJSON.fromJSONValue(value);
     }
 
-    return EJSON.parse(value);
+    if (typeof value === "string") {
+      return EJSON.parse(value);
+    }
+
+    return value;
   },
   parseLiteral(valueNode) {
     if (valueNode.kind === Kind.STRING) {

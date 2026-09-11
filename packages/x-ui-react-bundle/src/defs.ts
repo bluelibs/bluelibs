@@ -11,6 +11,7 @@ export type WrapperType<T> = WrapperComponentType<T> & {
 };
 
 export type IXUIReactBundleConfigType = {
+  // why: wrapper components accept heterogeneous React props; ComponentType is contravariant so unknown cannot hold them
   wrappers: WrapperType<any>[];
   components?: Partial<IComponents>;
   initialisingComponent?: React.ComponentType;

@@ -7,9 +7,7 @@ describe("cleanTypename()", () => {
     const data = EJSON.clone(richResponse);
 
     cleanTypename(data, richResponseBody);
-    let filtered: any[] = data.map((d) =>
-      d.attachments.files?.map((f) => f.thumbs)
-    );
+    let filtered = data.map((d) => d.attachments.files?.map((f) => f.thumbs));
     filtered = filtered.flat(5).map((f) => f.path);
 
     expect(filtered[0] == filtered[1]).toBe(false);

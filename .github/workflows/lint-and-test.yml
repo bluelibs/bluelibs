@@ -1,0 +1,265 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+    types: [checks_requested]
+  workflow_dispatch:
+
+# Cancel in-progress runs for the same branch/PR
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      lint: ${{ steps.matrix.outputs.lint }}
+      lint_count: ${{ steps.matrix.outputs.lint_count }}
+      test_unit: ${{ steps.matrix.outputs.test_unit }}
+      test_unit_count: ${{ steps.matrix.outputs.test_unit_count }}
+      test_mongo: ${{ steps.matrix.outputs.test_mongo }}
+      test_mongo_count: ${{ steps.matrix.outputs.test_mongo_count }}
+      test_rabbitmq: ${{ steps.matrix.outputs.test_rabbitmq }}
+      test_rabbitmq_count: ${{ steps.matrix.outputs.test_rabbitmq_count }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: matrix
+        name: Generate package matrices
+        run: node scripts/generate-ci-matrix.js
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-node-20-${{ hashFiles('package.json', 'lerna.json', 'packages/*/package.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-node-20-
+
+      - name: Install dependencies
+        run: npm ci --no-audit --prefer-offline
+
+      - name: Compile all packages
+        run: npx lerna run compile
+
+      - name: Cache workspace
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/dist
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+  format:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: restore-workspace
+        name: Restore workspace
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/dist
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
+
+      - name: Check formatting
+        run: npx prettier --check "packages/*/src/**/*.{ts,tsx,json,md}"
+
+  lint:
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.lint_count != '0' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.lint) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: restore-workspace
+        name: Restore workspace
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/dist
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
+
+      - name: Lint ${{ matrix.package }}
+        run: cd packages/${{ matrix.package }} && npm run lint
+
+  test-unit:
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.test_unit_count != '0' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.test_unit) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: restore-workspace
+        name: Restore workspace
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/dist
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
+
+      - name: Test ${{ matrix.package }}
+        run: cd packages/${{ matrix.package }} && npm run test:ci
+
+  test-mongo:
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.test_mongo_count != '0' }}
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      # x-bundle's live tests exercise Redis-backed sessions/cache.
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.test_mongo) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: restore-workspace
+        name: Restore workspace
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/dist
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
+
+      - name: Wait for MongoDB
+        # mongosh is not installed on ubuntu-latest runners; ping via the
+        # mongodb driver that npm workspaces hoists to the root.
+        run: |
+          for i in $(seq 1 10); do
+            if node -e "const { MongoClient } = require('mongodb'); (async () => { const c = await MongoClient.connect('mongodb://localhost:27017', { serverSelectionTimeoutMS: 2000 }); await c.db('admin').command({ ping: 1 }); })().then(() => process.exit(0)).catch(() => process.exit(1))"; then
+              echo "MongoDB is ready"
+              break
+            fi
+            echo "Waiting for MongoDB... ($i/10)"
+            sleep 2
+          done
+
+      - name: Test ${{ matrix.package }}
+        run: cd packages/${{ matrix.package }} && npm run test:ci
+
+  test-rabbitmq:
+    needs: [discover, build]
+    if: ${{ needs.discover.outputs.test_rabbitmq_count != '0' }}
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+          - 15672:15672
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.discover.outputs.test_rabbitmq) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - id: restore-workspace
+        name: Restore workspace
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/dist
+          key: workspace-${{ runner.os }}-node-20-${{ github.sha }}
+
+      - name: Rebuild workspace if cache is missing
+        if: ${{ steps.restore-workspace.outputs.cache-hit != 'true' }}
+        run: npm ci --no-audit --prefer-offline && npx lerna run compile
+
+      - name: Wait for RabbitMQ
+        run: |
+          for i in $(seq 1 15); do
+            if curl -s http://localhost:15672 > /dev/null 2>&1; then
+              echo "RabbitMQ is ready"
+              break
+            fi
+            echo "Waiting for RabbitMQ... ($i/15)"
+            sleep 2
+          done
+
+      - name: Test ${{ matrix.package }}
+        run: cd packages/${{ matrix.package }} && npm run test:ci

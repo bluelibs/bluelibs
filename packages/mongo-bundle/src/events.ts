@@ -8,8 +8,11 @@ type CollectionEventData = {
 };
 
 export abstract class CollectionEvent<
-  T extends CollectionEventData = CollectionEventData
+  T extends CollectionEventData = CollectionEventData,
 > extends Event<T> {
+  // why: an event can be emitted by any concrete Collection subclass; consumers
+  // narrow with `event.collection instanceof ConcreteCollection`, and a generic
+  // collection type would not be assignable across document types.
   protected _collection: Collection<any>;
 
   get collection(): Collection<any> {
@@ -24,20 +27,22 @@ export abstract class CollectionEvent<
   }
 }
 
-export class BeforeInsertEvent<T = Object> extends CollectionEvent<{
+export class BeforeInsertEvent<T = MongoDB.Document> extends CollectionEvent<{
   document: T;
   context: IExecutionContext;
   options: MongoDB.InsertOneOptions;
 }> {}
 
-export class AfterInsertEvent<T = Object> extends CollectionEvent<{
+export class AfterInsertEvent<T = MongoDB.Document> extends CollectionEvent<{
   document: T;
-  _id: any;
+  // why: the id type is derived from the collection schema at runtime; for a
+  // bare event (T = Document) it is not statically known.
+  _id: unknown;
   context: IExecutionContext;
   options: MongoDB.InsertOneOptions;
 }> {}
 
-export class BeforeUpdateEvent<T = any> extends CollectionEvent<{
+export class BeforeUpdateEvent<T = MongoDB.Document> extends CollectionEvent<{
   filter: MongoDB.Filter<T>;
   update: MongoDB.UpdateFilter<T>;
   fields: IGetFieldsResponse;
@@ -46,7 +51,7 @@ export class BeforeUpdateEvent<T = any> extends CollectionEvent<{
   options: MongoDB.UpdateOptions;
 }> {}
 
-export class AfterUpdateEvent<T = any> extends CollectionEvent<{
+export class AfterUpdateEvent<T = MongoDB.Document> extends CollectionEvent<{
   filter: MongoDB.Filter<T>;
   update: MongoDB.UpdateFilter<T>;
   fields: IGetFieldsResponse;
@@ -56,16 +61,18 @@ export class AfterUpdateEvent<T = any> extends CollectionEvent<{
   options: MongoDB.UpdateOptions;
 }> {}
 
-export class BeforeDeleteEvent<T = any> extends CollectionEvent<{
+export class BeforeDeleteEvent<T = MongoDB.Document> extends CollectionEvent<{
   filter: MongoDB.Filter<T>;
   isMany: boolean;
   context: IExecutionContext;
   options: MongoDB.DeleteOptions | MongoDB.FindOneAndDeleteOptions;
 }> {}
 
-export class AfterDeleteEvent<T = any> extends CollectionEvent<{
+export class AfterDeleteEvent<T = MongoDB.Document> extends CollectionEvent<{
   filter: MongoDB.Filter<T>;
   isMany: boolean;
+  // why: mutation contexts are extended by consumers with arbitrary fields
+  // (e.g. x-bundle stores live-sync metadata under a symbol key).
   context: any;
   result: MongoDB.DeleteResult | MongoDB.ModifyResult<T>;
   options: MongoDB.DeleteOptions | MongoDB.FindOneAndDeleteOptions;
@@ -74,7 +81,9 @@ export class AfterDeleteEvent<T = any> extends CollectionEvent<{
 /**
  * Before a find operation is executed we await changes to the filters. Translation is a good use-case for this.
  */
-export class BeforeQueryLocalEvent<T = any> extends CollectionEvent<{
+export class BeforeQueryLocalEvent<
+  T = MongoDB.Document,
+> extends CollectionEvent<{
   filter: MongoDB.Filter<T>;
   context: IExecutionContext;
   method: "findOne" | "find" | "count";
@@ -82,7 +91,9 @@ export class BeforeQueryLocalEvent<T = any> extends CollectionEvent<{
 /**
  * Before a nova operation is executed we await changes to the filters. Translation is a good use-case for this.
  */
-export class BeforeNovaQueryLocalEvent<T = any> extends CollectionEvent<{
+export class BeforeNovaQueryLocalEvent<
+  T = MongoDB.Document,
+> extends CollectionEvent<{
   filter: MongoDB.Filter<T>;
   context: IExecutionContext;
   method: "findOne" | "find" | "count";
@@ -91,7 +102,9 @@ export class BeforeNovaQueryLocalEvent<T = any> extends CollectionEvent<{
 /**
  * This event is done before we transform the data to the default model.
  */
-export class BeforeToModelLocalEvent<T = any> extends CollectionEvent<{
+export class BeforeToModelLocalEvent<
+  T = MongoDB.Document,
+> extends CollectionEvent<{
   filter: MongoDB.Filter<T>;
   context: IExecutionContext;
 }> {}

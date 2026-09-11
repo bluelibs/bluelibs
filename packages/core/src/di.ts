@@ -3,55 +3,73 @@ import {
   ServiceIdentifier,
   ServiceNotFoundError,
   Container,
-  Service as BaseService,
   ServiceOptions,
   Constructable,
   ServiceMetadata,
   Token,
 } from "typedi";
 
-export { Inject, Token } from "typedi";
+export { Inject, Token, ServiceIdentifier } from "typedi";
 
 const SERVICE_META_STORAGE = Symbol("ServiceInfo");
 
+// why: a decorator target may be a concrete or abstract constructor. A plain
+// `new` signature rejects abstract classes with TS1238 when decorated, so
+// `abstract new` matches how consumers apply @Service() to abstract base
+// classes (e.g. Collection, Command, PassportAuthenticator).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Constructor = abstract new (...args: any[]) => unknown;
+
+interface ServiceMetadataHolder<T> {
+  [SERVICE_META_STORAGE]?: ServiceMetadata<T>;
+}
+
 export function Service<T = unknown>(
   options?: ServiceOptions<T>
-): ClassDecorator {
-  return targetConstructor => {
-    options = options || {};
+): (target: Constructor) => void {
+  return (targetConstructor): void => {
+    const opts = options || {};
 
     const serviceMetadata: ServiceMetadata<T> = {
-      id: options.id || targetConstructor,
-      type: (targetConstructor as unknown) as Constructable<T>,
-      factory: (options as any).factory || undefined,
-      multiple: options.multiple || false,
-      eager: options.eager || false,
-      // @ts-ignore
+      // why: the decorator target is typed `abstract new` but typedi's
+      // `Constructable` requires a concrete constructor. The cast is purely
+      // compile-time — typedi stores the constructor reference as-is and never
+      // instantiates it (consumers resolve concrete subclasses).
+      id: opts.id || (targetConstructor as unknown as Constructable<T>),
+      type: targetConstructor as unknown as Constructable<T>,
+      factory: (opts as Partial<ServiceMetadata<T>>).factory || undefined,
+      multiple: opts.multiple || false,
+      eager: opts.eager || false,
+      // @ts-expect-error typedi internal property
       scope:
-        // @ts-ignore
-        options.scope ||
-        (options.transient ? "transient" : null) ||
-        "container",
-      transient: options.transient || false,
+        // @ts-expect-error typedi internal property
+        opts.scope || (opts.transient ? "transient" : null) || "container",
+      transient: opts.transient || false,
 
-      // @ts-ignore
+      // @ts-expect-error typedi internal property
       referencedBy: new Map().set(Container.id, Container),
     };
 
-    targetConstructor[SERVICE_META_STORAGE] = serviceMetadata;
+    (targetConstructor as unknown as ServiceMetadataHolder<T>)[
+      SERVICE_META_STORAGE
+    ] = serviceMetadata;
   };
 }
 
 export class ContainerInstance extends BaseContainerInstance {
   get<T>(id: ServiceIdentifier<T>): T {
-    // @ts-ignore
+    // @ts-expect-error accessing internal method
     if (!this.has(id)) {
-      if (id[SERVICE_META_STORAGE]) {
+      const serviceMetadata = (id as unknown as ServiceMetadataHolder<T>)[
+        SERVICE_META_STORAGE
+      ];
+
+      if (serviceMetadata) {
         // It's clearly a constructor
         this.set({
-          ...id[SERVICE_META_STORAGE],
+          ...serviceMetadata,
           id,
-          type: id,
+          type: id as unknown as Constructable<T>,
         });
 
         return super.get(id);
@@ -60,19 +78,19 @@ export class ContainerInstance extends BaseContainerInstance {
 
     try {
       return super.get(id);
-    } catch (e) {
+    } catch (e: unknown) {
       // The reason we do this is to allow services that don't specify @Service()
       if (
         e instanceof ServiceNotFoundError ||
-        e.toString() === "ServiceNotFoundError"
+        (e as Error).toString() === "ServiceNotFoundError"
       ) {
         if (typeof id === "function") {
           // console.warn(
           //   `You have tried to get from the container a class (${id?.name}) which doesn't have @Service() specified. Please add it to remove this warning.`
           // );
           this.set({
-            id: id as Function,
-            type: id as any,
+            id: id as unknown as Constructable<T>,
+            type: id as unknown as Constructable<T>,
           });
           return super.get(id);
         }

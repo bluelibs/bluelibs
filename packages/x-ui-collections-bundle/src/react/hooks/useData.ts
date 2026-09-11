@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { Constructor } from "@bluelibs/core";
+import { ObjectId } from "@bluelibs/ejson";
 import { Collection } from "../../graphql/Collection";
 import { IQueryInput, QueryBodyType } from "../../graphql/defs";
 
 import { use } from "@bluelibs/x-ui-react-bundle";
-import { QueryHookOptions } from "@apollo/client";
 
 type RefetchType = () => Promise<void>;
 
@@ -67,7 +67,7 @@ export function useData<T>(
  */
 export function useDataOne<T>(
   collectionClass: Constructor<Collection<T>>,
-  _id: any,
+  _id: ObjectId | string,
   body: QueryBodyType<T>
   // options: QueryOp = {},
 ): UseDataStateType<Partial<T>> {

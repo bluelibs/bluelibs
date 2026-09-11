@@ -1,10 +1,11 @@
 import { EJSON } from "../ejson";
+import type { JsonValue } from "../types";
 
 export class Address {
-  city: any;
-  state: any;
+  city: string;
+  state: string;
 
-  constructor(city, state) {
+  constructor(city: string, state: string) {
     this.city = city;
     this.state = state;
   }
@@ -21,14 +22,22 @@ export class Address {
   }
 }
 
-EJSON.addType("Address", (value) => new Address(value.city, value.state));
+interface AddressJSON {
+  city: string;
+  state: string;
+}
+
+EJSON.addType("Address", (value: unknown) => {
+  const json = value as AddressJSON;
+  return new Address(json.city, json.state);
+});
 
 export class Person {
-  name: any;
-  dob: any;
-  address: any;
+  name: string;
+  dob: unknown;
+  address: unknown;
 
-  constructor(name, dob, address) {
+  constructor(name: string, dob: unknown, address: unknown) {
     this.name = name;
     this.dob = dob;
     this.address = address;
@@ -47,20 +56,25 @@ export class Person {
   }
 }
 
-EJSON.addType(
-  "Person",
-  (value) =>
-    new Person(
-      value.name,
-      EJSON.fromJSONValue(value.dob),
-      EJSON.fromJSONValue(value.address)
-    )
-);
+interface PersonJSON {
+  name: string;
+  dob: JsonValue;
+  address: JsonValue;
+}
+
+EJSON.addType("Person", (value: unknown) => {
+  const json = value as PersonJSON;
+  return new Person(
+    json.name,
+    EJSON.fromJSONValue(json.dob),
+    EJSON.fromJSONValue(json.address)
+  );
+});
 
 export class Holder {
-  content: any;
+  content: unknown;
 
-  constructor(content) {
+  constructor(content: unknown) {
     this.content = content;
   }
 
@@ -73,4 +87,4 @@ export class Holder {
   }
 }
 
-EJSON.addType("Holder", (value) => new Holder(value));
+EJSON.addType("Holder", (value: unknown) => new Holder(value));

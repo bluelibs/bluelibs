@@ -1,9 +1,8 @@
 import { Permissions, PermissionTree } from "./mocks/permissionTree.mock";
-import { PermissionService, PermissionGraph, IPermissionService } from "../..";
+import { PermissionService, PermissionGraph } from "../..";
 import { PermissionsPersistanceService } from "./mocks/PermissionsPersistanceService.mock";
 import { EventManager } from "@bluelibs/core";
 import { SecurityService } from "../../services/SecurityService";
-import { ObjectId } from "@bluelibs/ejson";
 
 const permission = new PermissionGraph(PermissionTree);
 const PERMISSION_DEFAULT_DOMAIN = "app";
@@ -185,7 +184,7 @@ export const permissionServiceTestDefinitions = [
         domainIdentifier: "BLOCK6",
       });
 
-      let permissions, domains;
+      let permissions;
 
       permissions = await service.findPermissions({
         userId: "U1",
@@ -204,7 +203,7 @@ export const permissionServiceTestDefinitions = [
       });
       expect(permissions).toHaveLength(2);
 
-      domains = await service.findDomains("U1");
+      const domains = await service.findDomains("U1");
       expect(domains).toHaveLength(2);
       expect(domains.includes("Legal")).toBe(true);
       expect(domains.includes("Health")).toBe(true);
@@ -235,7 +234,7 @@ export const permissionServiceTestDefinitions = [
         domain: PERMISSION_DEFAULT_DOMAIN,
       });
 
-      const hasRole = await service.has({
+      await service.has({
         userId: "U1",
         permission: Permissions.ADMIN,
         domain: PERMISSION_DEFAULT_DOMAIN,

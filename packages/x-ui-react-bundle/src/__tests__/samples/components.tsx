@@ -9,10 +9,12 @@ export const CustomInitialisingComponent = () => {
   return <h5>Loading...</h5>;
 };
 
-export const WrappersTestComponent: React.FC<{
-  name: number;
-  test: { works: boolean; count: number };
-}> = (props) => {
+export const WrappersTestComponent: React.FC<
+  React.PropsWithChildren<{
+    name: number;
+    test: { works: boolean; count: number };
+  }>
+> = (props) => {
   props.test.works = true;
 
   wrappersTest.count += 1;
@@ -22,7 +24,11 @@ export const WrappersTestComponent: React.FC<{
   return <div>{props.children}</div>;
 };
 
-export const wrappersTest = {
+export const wrappersTest: {
+  works: boolean;
+  count: number;
+  orderOfRender: number[];
+} = {
   works: false,
   count: 0,
   orderOfRender: [],

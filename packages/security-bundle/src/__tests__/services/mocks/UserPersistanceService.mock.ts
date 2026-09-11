@@ -1,20 +1,21 @@
 import { UserNotFoundException } from "../../../exceptions";
 import {
   IUserPersistance,
-  IUser,
   IFieldMap,
+  IUserData,
   FindAuthenticationStrategyResponse,
   UserId,
 } from "../../../defs";
 
 export class UserPersistanceService implements IUserPersistance {
+  // why: in-memory mock store; records carry heterogeneous strategy-specific shapes
   db: any[] = [];
 
   async deleteUser(userId: UserId): Promise<void> {
     this.db = this.db.filter((u) => u._id === userId);
   }
 
-  async insertUser(data: any) {
+  async insertUser(data: IUserData) {
     const _id = this.db.length + 1;
     this.db.push({
       _id,
@@ -26,7 +27,7 @@ export class UserPersistanceService implements IUserPersistance {
 
     return _id;
   }
-  async updateUser(userId: UserId, data: any) {
+  async updateUser(userId: UserId, data: IUserData) {
     const user = this.db.find((u) => u._id === userId);
     if (!userId) {
       throw new UserNotFoundException();
@@ -35,9 +36,12 @@ export class UserPersistanceService implements IUserPersistance {
     Object.assign(user, data);
   }
 
-  async findUser<IUser>(filters, fields?: any): Promise<IUser> {
-    return this.db.find((u) => {
-      const user = this.db.find((u) => {
+  async findUser<IUser>(
+    filters: Record<string, unknown>,
+    _fields?: IFieldMap
+  ): Promise<IUser> {
+    return this.db.find((_u) => {
+      this.db.find((u) => {
         let allOk = true;
         for (const key in filters) {
           if (u[key] !== filters[key]) {
@@ -50,14 +54,17 @@ export class UserPersistanceService implements IUserPersistance {
     });
   }
 
-  async findUserById<IUser>(userId, fields?: any): Promise<IUser> {
+  async findUserById<IUser>(
+    userId: UserId,
+    _fields?: IFieldMap
+  ): Promise<IUser> {
     return this.db.find((u) => u._id === userId);
   }
 
-  async findThroughAuthenticationStrategy<T = any>(
+  async findThroughAuthenticationStrategy<T = unknown>(
     methodName: string,
-    filters: any,
-    fields?: IFieldMap
+    filters: Record<string, unknown>,
+    _fields?: IFieldMap
   ): Promise<null | FindAuthenticationStrategyResponse<T>> {
     const user = this.db.find((u) => {
       if (!u.services[methodName]) {
@@ -87,7 +94,7 @@ export class UserPersistanceService implements IUserPersistance {
   async updateAuthenticationStrategyData(
     userId: UserId,
     authenticationStrategyName: string,
-    data: any
+    data: unknown
   ): Promise<void> {
     const user = this.db.find((u) => u._id === userId);
 

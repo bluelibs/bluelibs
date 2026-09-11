@@ -30,11 +30,8 @@ export class ExceptionInquirer extends Inquirer<ExceptionModel> {
       )
     );
 
-    const {
-      hasInterfaceDefined,
-      interfaceDefinition,
-      exceptionClass,
-    } = this.model;
+    const { hasInterfaceDefined, interfaceDefinition, exceptionClass } =
+      this.model;
 
     if (hasInterfaceDefined) {
       interfaceDefinition.name = `I${exceptionClass}Data`;

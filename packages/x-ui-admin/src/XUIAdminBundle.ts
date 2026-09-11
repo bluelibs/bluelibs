@@ -1,10 +1,8 @@
-import * as React from "react";
 import { Bundle, EventManager } from "@bluelibs/core";
 import { XRouter, RoutingPreparationEvent, XUIBundle } from "@bluelibs/x-ui";
 import { IXUIAdminBundleConfig } from "./defs";
 import { MenuService } from "./services/MenuService";
 import { DefaultComponentsMap } from "./react/components/types";
-import { XForm, XViewer, XList } from "./react";
 export class XUIAdminBundle extends Bundle<IXUIAdminBundleConfig> {
   defaultConfig = {
     components: DefaultComponentsMap,
@@ -13,7 +11,7 @@ export class XUIAdminBundle extends Bundle<IXUIAdminBundleConfig> {
   async hook() {
     const eventManager = this.container.get(EventManager);
     const menuService = this.container.get(MenuService);
-    const router = this.get<XRouter>(XRouter);
+    this.get<XRouter>(XRouter);
 
     eventManager.addListener(RoutingPreparationEvent, (e) => {
       e.data.routes.forEach((route) => {

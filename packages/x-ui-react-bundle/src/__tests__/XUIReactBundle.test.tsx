@@ -110,6 +110,9 @@ describe("XUIProvider", () => {
 
     const Component = () => {
       const container = useContainer();
+      if (!container) {
+        throw new Error("Container is not available");
+      }
 
       container.set("test", 1);
 

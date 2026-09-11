@@ -36,7 +36,7 @@ The log object created looks like this:
 ```typescript
 export interface ILog {
   message: string;
-  level: LogLevel; // INFO, ERROR, WARNING, CRITICAL
+  level: LogLevel; // DEBUG, INFO, WARNING, ERROR, CRITICAL
   context: any;
 }
 ```
@@ -128,5 +128,5 @@ It's just logging, simple and scalable.
 
 ### Challenges
 
-- Use the 4 types of log levels and send out some messages (1p)
+- Use the 5 types of log levels and send out some messages (1p)
 - Listen to events that are of custom type, like `UserLog` and perform an operation on it (2p)

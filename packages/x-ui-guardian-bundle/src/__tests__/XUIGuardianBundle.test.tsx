@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import { GuardianSmart } from "..";
 import { container, kernel } from "./ecosystem";
 import { XUIGuardianProvider } from "../react/provider";

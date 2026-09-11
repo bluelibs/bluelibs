@@ -1,11 +1,7 @@
 import { Inquirer, Shortcuts } from "@bluelibs/terminal-bundle";
-import { CreateBundleModel, GenericModel } from "../models";
-import { FSUtils } from "../utils/FSUtils";
-import { CollectionModel } from "../models/CollectionModel";
-import { GenericModelInquirer } from "./GenericModelInquirer";
-import * as _ from "lodash";
 import { InquiryUtils } from "../utils/InquiryUtils";
 import { EventModel } from "../models/EventModel";
+import { GenericModelInquirer } from "./GenericModelInquirer";
 
 export class EventInquirer extends Inquirer<EventModel> {
   model = new EventModel();
@@ -16,7 +12,7 @@ export class EventInquirer extends Inquirer<EventModel> {
     await this.prompt(
       "eventName",
       Shortcuts.input("Enter the name of your event (eg: PostPublished)", {
-        validate(value) {
+        validate(value: string) {
           return Boolean(value);
         },
       })

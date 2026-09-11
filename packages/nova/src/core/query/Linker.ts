@@ -1,5 +1,4 @@
-import * as _ from "lodash";
-import { Collection } from "mongodb";
+import { Collection, Document } from "mongodb";
 import { LINK_STORAGE } from "../constants";
 import { ILinkCollectionOptions, HardwiredFiltersOptions } from "../defs";
 
@@ -8,7 +7,7 @@ export enum LinkStrategy {
   MANY,
 }
 
-export default class Linker<T = any> {
+export default class Linker<T = Document> {
   public mainCollection: Collection<T>;
   public linkConfig: ILinkCollectionOptions & {
     strategy: LinkStrategy;
@@ -22,11 +21,7 @@ export default class Linker<T = any> {
    * @param linkName
    * @param linkConfig
    */
-  constructor(
-    mainCollection: Collection<T>,
-    linkName: string,
-    linkConfig: ILinkCollectionOptions
-  ) {
+  constructor(mainCollection: Collection<T>, linkName: string, linkConfig: ILinkCollectionOptions) {
     this.mainCollection = mainCollection;
 
     this.linkConfig = {
@@ -174,16 +169,12 @@ export default class Linker<T = any> {
    * Returns the aggregation pipeline
    */
   public getLookupAggregationPipeline(options: IGetLookupOperatorOptions = {}) {
-    const localField = this.isVirtual()
-      ? this.linkForeignStorageField
-      : this.linkStorageField;
-    const foreignField = this.isVirtual()
-      ? this.linkStorageField
-      : this.linkForeignStorageField;
+    const localField = this.isVirtual() ? this.linkForeignStorageField : this.linkStorageField;
+    const foreignField = this.isVirtual() ? this.linkStorageField : this.linkForeignStorageField;
 
-    let matches = this.createAggregationMatches(foreignField);
+    const matches = this.createAggregationMatches(foreignField);
 
-    const result: any = {
+    const result: Document = {
       from: this.getLinkedCollection().collectionName,
       let: {
         localField: `$${localField}`,
@@ -208,8 +199,8 @@ export default class Linker<T = any> {
    * This function allows us to use the aggregation pipeline fully
    * @param foreignField
    */
-  private createAggregationMatches(foreignField: any) {
-    let matches = [];
+  private createAggregationMatches(foreignField: string) {
+    const matches: Document[] = [];
     if (this.isVirtual()) {
       if (this.isMany()) {
         matches.push(
@@ -248,9 +239,7 @@ export default class Linker<T = any> {
    */
   private _validateAndClean() {
     if (!this.linkConfig.collection) {
-      throw new Error(
-        `For the link ${this.linkName} you did not provide a collection.`
-      );
+      throw new Error(`For the link ${this.linkName} you did not provide a collection.`);
     }
 
     if (this.linkConfig.field == this.linkName) {
@@ -262,6 +251,6 @@ export default class Linker<T = any> {
 }
 
 export interface IGetLookupOperatorOptions {
-  pipeline?: any[];
+  pipeline?: Document[];
   as?: string;
 }

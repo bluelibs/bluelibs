@@ -1,6 +1,6 @@
-import { IPrompter, IPrompt, IInquirer } from "../defs";
+import { IPrompter, IPrompt } from "../defs";
 import * as inquirer from "inquirer";
-import { QuestionCollection, Inquirer, DistinctQuestion } from "inquirer";
+import { Inquirer, DistinctQuestion } from "inquirer";
 import { ContainerInstance } from "@bluelibs/core";
 import { ExitInquiryException } from "../exceptions/ExitInquiryException";
 
@@ -17,7 +17,7 @@ export class PrompterService implements IPrompter {
    * You can ask a question or delegate the question to another inquiry model
    * @param prompt
    */
-  async prompt<V = any>(prompt: IPrompt): Promise<V> {
+  async prompt<V = unknown>(prompt: IPrompt): Promise<V> {
     if (prompt.question) {
       const question: DistinctQuestion = {
         name: DUMMY_FIELD,
@@ -42,7 +42,7 @@ export class PrompterService implements IPrompter {
   /**
    * Continously ask for the same input.
    */
-  async promptMany<V = any>(
+  async promptMany<V = unknown>(
     prompt: IPrompt,
     continuationMessage?: string,
     /**
@@ -50,7 +50,7 @@ export class PrompterService implements IPrompter {
      */
     autocontinue?: boolean
   ): Promise<V[]> {
-    const values = [];
+    const values: V[] = [];
 
     while (true) {
       let promptDefault = prompt.default;
@@ -60,7 +60,7 @@ export class PrompterService implements IPrompter {
           : promptDefault;
 
       try {
-        const value = await this.prompt({
+        const value = await this.prompt<V>({
           ...prompt,
           default: promptDefault,
         });

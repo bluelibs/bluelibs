@@ -25,7 +25,7 @@ export function getSideBody(body: QueryBodyType): QueryBodyType {
 
 export function isSideBodyNecessary(body: QueryBodyType): boolean {
   for (const key in body) {
-    if (body[key] === "$") {
+    if (String(body[key]) === "$") {
       return true;
     } else {
       if (typeof body[key] === "object") {

@@ -1,4 +1,4 @@
-import { Bundle, EventManager, KernelAfterInitEvent } from "@bluelibs/core";
+import { Bundle, KernelAfterInitEvent } from "@bluelibs/core";
 import { XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { XRouter } from ".";
 import { IXUIReactRouterBundleType } from "./defs";

@@ -14,11 +14,12 @@ import {
   socialCustomConfigMapType as SocialCustomConfigMapType,
   socialPropsTypes as SocialPropsTypes,
   SocialServiceConfigType,
+  SocialAuthCallback,
+  SocialStrategyType,
   SOCIAL_LOGIN_TYPE,
 } from "./social-passport/defs";
 import { SocialLoginService } from "./social-passport/SocialLoginService";
 import { UserId } from "@bluelibs/security-bundle";
-import { MultipleFactorService } from "./multipleAuthFactor/MultipleFactorService";
 import { IMultipleFactorService } from "./multipleAuthFactor/IMultipleFactorService";
 
 declare module "@bluelibs/security-bundle" {
@@ -28,7 +29,9 @@ declare module "@bluelibs/security-bundle" {
     socialAccounts?: { service: string; id: string }[];
   }
   export interface ISessionData {
-    factors: { strategy: string; redirectUrl: string }[];
+    type?: string;
+    // The multi-factor flow records per-strategy completion flags on the session.
+    factors?: { [strategy: string]: boolean };
   }
   export interface IUserProfile {
     firstName: string;
@@ -94,21 +97,13 @@ export interface IXAuthBundleConfig {
     services?: {
       [key: SOCIAL_LOGIN_TYPE]: SocialServiceConfigType;
     };
-    onSocialAuth?: (
-      req,
-      type,
-      uniqueProperty,
-      accessToken,
-      refreshToken,
-      profile,
-      done
-    ) => any;
+    onSocialAuth?: SocialAuthCallback;
     url: string;
     socialUniqueIds?: SocialPropsTypes;
     strategyNameMap?: SocialPropsTypes;
     socialCustomConfig?: SocialCustomConfigMapType;
     importStrategyMap?: {
-      [key: string]: any;
+      [key: string]: string | SocialStrategyType;
     };
     fieldsValues?: SocialArrayPropsTypes;
     profileObjectPath?: SocialArrayPropsTypes;

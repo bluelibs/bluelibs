@@ -1,4 +1,3 @@
-import { ContainerInstance } from "@bluelibs/core";
 import { IResolverMap } from "@bluelibs/graphql-bundle";
 import {
   AppFile,

@@ -30,7 +30,7 @@ export type XFormElementBaseType = {
   /**
    * The initial value for the form
    */
-  initialValue?: any;
+  initialValue?: unknown;
   /**
    * This represents an Ant component especially useful when you want a custom renderer.
    */
@@ -38,7 +38,7 @@ export type XFormElementBaseType = {
   /**
    * Pass properties to the component input. Warning: this doesn't work with a custom render() function.
    */
-  componentProps?: any;
+  componentProps?: Record<string, unknown>;
   /**
    * Pass additional items when using "component"-based rendering. This works with custom render functions.
    */
@@ -47,6 +47,7 @@ export type XFormElementBaseType = {
 };
 
 export type XFormRenderFormItemOptions = {
+  // why: also receives antd FormListFieldData, spread into FormItemProps
   props: any;
   isFromList: boolean;
 };
@@ -83,6 +84,7 @@ export type ListChildrenFunction = (
   }
 ) => React.ReactNode;
 
+// @ts-ignore - abstract class with decorator for DI
 @Service({ transient: true })
 export abstract class XForm<T = null> extends Consumer<XFormElementType> {
   @Inject(XUI_COMPONENTS_TOKEN)

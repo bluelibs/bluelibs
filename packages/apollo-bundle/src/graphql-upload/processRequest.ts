@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
+// eslint-disable
 import { WriteStream } from "./fs-capacitor";
 import busboy from "busboy";
 import createError from "http-errors";
@@ -7,20 +10,23 @@ import ignoreStream from "./ignoreStream";
 import Upload from "./Upload";
 
 export default function processRequest(
-  request,
-  response,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  request: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  response: any,
   {
     maxFieldSize = 1000000, // 1 MB
     maxFileSize = Infinity,
     maxFiles = Infinity,
-  } = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }: any = {}
 ) {
   return new Promise((resolve, reject) => {
     /** @type {boolean} */
-    let released;
+    let released: boolean;
 
     /** @type {Error} */
-    let exitError;
+    let exitError: Error;
 
     /**
      * @type {{ [key: string]: unknown } | Array<

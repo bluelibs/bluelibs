@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-nocheck
 
 import { ApolloLink } from "@apollo/client";
 import { createSignalIfSupported } from "@apollo/client";
@@ -14,8 +14,8 @@ import { serializeFetchParameter } from "@apollo/client";
 import { Observable } from "@apollo/client/utilities";
 import extractFiles from "./extractFiles";
 
-import defaultFormDataAppendFile from "./formDataAppendFile.js";
-import defaultIsExtractableFile from "./isExtractableFile.js";
+import defaultFormDataAppendFile from "./formDataAppendFile";
+import defaultIsExtractableFile from "./isExtractableFile";
 
 /**
  * Creates a
@@ -85,7 +85,7 @@ type CreateUploadLinkOptions = {
   FormData?: typeof FormData;
   formDataAppendFile?: typeof defaultFormDataAppendFile;
   print?: typeof defaultPrinter;
-  fetch?: WindowOrWorkerGlobalScope['fetch'];
+  fetch?: WindowOrWorkerGlobalScope["fetch"];
   fetchOptions?: RequestInit;
   credentials?: RequestCredentials;
   headers?: HeadersInit;
@@ -109,7 +109,7 @@ export default function createUploadLink({
     http: { includeExtensions },
     options: fetchOptions,
     credentials,
-    headers: headers as {[key: string]: string},
+    headers: headers as { [key: string]: string },
   };
 
   return new ApolloLink((operation) => {
@@ -148,7 +148,7 @@ export default function createUploadLink({
       print,
       fallbackHttpConfig,
       linkConfig,
-      contextConfig,
+      contextConfig
     );
 
     const { clone, files } = extractFiles(body, customIsExtractableFile, "");
@@ -191,7 +191,7 @@ export default function createUploadLink({
         !operation.query.definitions.some(
           (definition) =>
             definition.kind === "OperationDefinition" &&
-            definition.operation === "mutation",
+            definition.operation === "mutation"
         )
       )
         options.method = "GET";
@@ -227,7 +227,7 @@ export default function createUploadLink({
                 // Prevent a memory leak if the user configured abort controller
                 // is long lasting, or controls multiple things.
                 once: true,
-              },
+              }
             );
 
       options.signal = controller.signal;

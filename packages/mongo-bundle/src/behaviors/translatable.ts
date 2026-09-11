@@ -1,16 +1,8 @@
-import { EventManager } from "@bluelibs/core";
-import { addExpanders, addLinks, addReducers } from "@bluelibs/nova";
-import {
-  ITimestampableBehaviorOptions,
-  BehaviorType,
-  ITranslatableBehaviorOptions,
-} from "../defs";
+import { addReducers } from "@bluelibs/nova";
+import { BehaviorType, ITranslatableBehaviorOptions } from "../defs";
 import { Collection } from "../models/Collection";
-import {
-  BeforeInsertEvent,
-  BeforeUpdateEvent,
-  AfterUpdateEvent,
-} from "../events";
+import { BeforeInsertEvent, BeforeUpdateEvent } from "../events";
+import * as MongoDB from "mongodb";
 
 function i18nField(field: string) {
   return `${field}_i18n`;
@@ -48,27 +40,10 @@ function storeI18NByLocale(
   }
 }
 
-function cleanI18N(result: any | any[], fields: string[], locale: string) {
-  if (Array.isArray(result)) {
-    result.forEach((item) => {
-      cleanI18N(item, fields, locale);
-    });
-  } else {
-    fields.forEach((field) => {
-      if (result[i18nField(field)]) {
-        result[field] = i18nFindByLocale(result[i18nField(field)], locale);
-        delete result[i18nField(field)];
-      }
-    });
-  }
-}
-
-const STORAGE = Symbol("i18n");
-
 export default function translatable(
   i18nBehaviorOptions: ITranslatableBehaviorOptions
 ): BehaviorType {
-  return (collection: Collection<any>) => {
+  return <T extends MongoDB.Document>(collection: Collection<T>) => {
     collection.onInit(() => {
       // Add reducers for the fields for easy finding
       i18nBehaviorOptions.fields.forEach((field) => {
@@ -82,7 +57,7 @@ export default function translatable(
               const locale =
                 params.context?.locale || i18nBehaviorOptions.defaultLocale;
 
-              let value = i18nFindByLocale(object[i18nField(field)], locale);
+              const value = i18nFindByLocale(object[i18nField(field)], locale);
               return value || object[field];
             },
           },
@@ -92,6 +67,7 @@ export default function translatable(
       // Manipulate before insert and before update to store the i18n fields accordingly:
       collection.localEventManager.addListener(
         BeforeInsertEvent,
+        // @ts-expect-error - handler uses CollectionEvent subclass
         (e: BeforeInsertEvent) => {
           const document = e.data.document;
           i18nBehaviorOptions.fields.forEach((field) => {
@@ -111,6 +87,7 @@ export default function translatable(
 
       collection.localEventManager.addListener(
         BeforeUpdateEvent,
+        // @ts-expect-error - handler uses CollectionEvent subclass
         async (e: BeforeUpdateEvent) => {
           // only works with $set
           if (!e.data.update.$set) {
@@ -152,16 +129,13 @@ export default function translatable(
             storeI18NByLocale(
               i18nData[i18nField(field)],
               e.data.context.locale || i18nBehaviorOptions.defaultLocale,
-              // @ts-ignore
               e.data.update.$set[field]
             );
 
             if (e.data.update.$set) {
-              // @ts-ignore
               e.data.update.$set[i18nField(field)] =
                 i18nData[i18nField(field)] || [];
 
-              // @ts-ignore
               delete e.data.update.$set[field];
             }
           });

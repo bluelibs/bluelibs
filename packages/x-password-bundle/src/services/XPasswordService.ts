@@ -1,5 +1,8 @@
 import { SecurityService, UserId } from "@bluelibs/security-bundle";
-import { PasswordService } from "@bluelibs/password-bundle";
+import {
+  IPasswordAuthenticationStrategy,
+  PasswordService,
+} from "@bluelibs/password-bundle";
 import { EmailService } from "@bluelibs/email-bundle";
 import { Service, Inject, ContainerInstance } from "@bluelibs/core";
 import { InvalidPasswordException } from "../exceptions/InvalidPasswordException";
@@ -17,9 +20,8 @@ import { X_PASSWORD_SETTINGS } from "../constants";
 import { InvalidUsernameException } from "../exceptions/InvalidUsernameException";
 import { UsernameAlreadyExistsException } from "../exceptions";
 
-const ALLOWED_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split(
-  ""
-);
+const ALLOWED_CHARS =
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -142,7 +144,7 @@ export class XPasswordService implements IXPasswordService {
     }
   }
 
-  async logout(token) {
+  async logout(token: string) {
     await this.securityService.logout(token);
   }
 
@@ -174,9 +176,8 @@ export class XPasswordService implements IXPasswordService {
       return;
     }
 
-    const token = await this.passwordService.createTokenForPasswordReset(
-      userId
-    );
+    const token =
+      await this.passwordService.createTokenForPasswordReset(userId);
 
     this.sendResetPasswordEmail(input.email, input.email, token);
   }
@@ -228,12 +229,13 @@ export class XPasswordService implements IXPasswordService {
       }
     }
 
-    const result = await this.securityService.findThroughAuthenticationStrategy(
-      this.passwordService.method,
-      {
-        emailVerificationToken: input.token,
-      }
-    );
+    const result =
+      await this.securityService.findThroughAuthenticationStrategy<IPasswordAuthenticationStrategy>(
+        this.passwordService.method,
+        {
+          emailVerificationToken: input.token,
+        }
+      );
 
     if (!result) {
       throw new InvalidTokenException({
@@ -342,7 +344,7 @@ export class XPasswordService implements IXPasswordService {
    * Generates the token for email validation and maybe others
    * @param length
    */
-  generateToken(length) {
+  generateToken(length: number) {
     const b = [];
     for (let i = 0; i < length; i++) {
       const j = (Math.random() * (ALLOWED_CHARS.length - 1)).toFixed(0);

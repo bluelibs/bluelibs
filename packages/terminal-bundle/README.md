@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs TERMINAL-BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/terminal-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/terminal-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/terminal-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/terminal-bundle/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fterminal-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fterminal-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An utility bundle helping you to create and run commands from your terminal within the context of your kernel.
 

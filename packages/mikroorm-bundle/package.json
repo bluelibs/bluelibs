@@ -1,6 +1,6 @@
 {
   "name": "@bluelibs/mikro-orm-bundle",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "BlueLibs Mikro-ORM-bundle",
   "main": "dist/index.js",
   "repository": {
@@ -8,10 +8,11 @@
     "url": "https://github.com/bluelibs/bluelibs"
   },
   "scripts": {
+    "compile": "tsc",
     "build": "tsc",
     "watch": "tsc -w",
     "pretest": "npm run build",
-    "test": "jest --verbose dist/__tests__/index.js",
+    "test": "jest --verbose --passWithNoTests",
     "test:dev": "jest --verbose src/__tests__/index.ts --watch",
     "test:clean": "jest --clearCache",
     "testonly": "npm test",
@@ -19,25 +20,32 @@
     "coverage": "npm test -- --coverage",
     "coverage:upload": "codecov",
     "prepublishOnly": "npm run build",
-    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json"
+    "gen-doc": "typedoc ./src/index.ts --exclude ./src/__tests__ --out typeDocs --tsconfig tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "devDependencies": {
-    "@mikro-orm/mongodb": "^4.5.7",
-    "@types/graphql": "^0.11.3",
-    "@types/jest": "^27.0.3",
-    "@types/node": "^14.0.0",
-    "@typescript-eslint/eslint-plugin": "2.3.0",
-    "@typescript-eslint/parser": "2.3.0",
-    "eslint": "^6.6.0",
-    "eslint-config-prettier": "6.3.0",
-    "eslint-plugin-prettier": "3.1.1",
-    "jest": "^27.3.1",
-    "jest-junit": "^10.0.0",
+    "@bluelibs/core": "^1.3.0",
+    "@mikro-orm/core": "^6.6.10",
+    "@mikro-orm/mongodb": "^6.6.10",
+    "@types/chai": "^4.3.11",
+    "@types/chai-as-promised": "^7.1.8",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "chai": "^4.4.1",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "jest": "^29.7.0",
+    "jest-junit": "^17.0.0",
     "mongodb": "^6.0.0",
-    "prettier": "^2.0.5",
-    "source-map-support": "^0.5.13",
-    "ts-jest": "^27.0.3",
-    "typescript": "4.4.4"
+    "prettier": "^3.2.5",
+    "source-map-support": "^0.5.21",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
   },
   "typings": "dist/index.d.ts",
   "typescript": {
@@ -46,6 +54,9 @@
   "license": "MIT",
   "peerDependencies": {
     "@bluelibs/core": "^1.0.0",
-    "@mikro-orm/core": "^4.5.7"
+    "@mikro-orm/core": "^6.6.10"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

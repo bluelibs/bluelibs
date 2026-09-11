@@ -10,7 +10,7 @@ import {
   GraphQLSubscriptionEvent,
   IS_LIVE_DEBUG,
 } from "../constants";
-import { IMessenger, ISubscriptionEventOptions } from "../defs";
+import { IDocumentBase, IMessenger, ISubscriptionEventOptions } from "../defs";
 import { SubscriptionHandler } from "../models/SubscriptionHandler";
 import {
   SubscriptionProcessor,
@@ -20,6 +20,8 @@ import { LIVE_BEHAVIOR_MARKER } from "../behaviors/live.behavior";
 
 @Service()
 export class SubscriptionStore {
+  // why: the store holds processors/handlers for heterogeneous document types,
+  // a single generic cannot represent all of them
   public processors: SubscriptionProcessor<any>[] = [];
 
   protected pubSubEventEmitter: EventEmitter;
@@ -45,14 +47,14 @@ export class SubscriptionStore {
    * @param collection
    * @param body
    */
-  async createAsyncIterator<T>(
+  async createAsyncIterator<T extends IDocumentBase>(
     collection: Collection<T>,
     body: QueryBodyType<T>,
     subscriptionOptions: SubscriptionProcessorOptionsType = {}
-  ): Promise<AsyncIterator<any>> {
+  ): Promise<AsyncIterator<unknown>> {
     const channel = uuid();
 
-    const publish = (event, document?) => {
+    const publish = (event: GraphQLSubscriptionEvent, document?: unknown) => {
       this.isDebug &&
         console.log(
           `[publish] channel: "${channel}", event: "${event}"`,
@@ -61,7 +63,7 @@ export class SubscriptionStore {
       this.pubSub.publish(channel, { document, event });
     };
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       resolve(this.pubSub.asyncIterator([channel]));
 
       // We have to wait on the resolve to execute
@@ -71,16 +73,16 @@ export class SubscriptionStore {
           collection,
           body,
           {
-            onAdded: (document) => {
+            onAdded: (document: T) => {
               publish(GraphQLSubscriptionEvent.ADDED, document);
             },
-            onChanged: (document, changeSet) => {
+            onChanged: (document: T, changeSet: Partial<T>) => {
               publish(GraphQLSubscriptionEvent.CHANGED, {
                 _id: document._id,
                 ...changeSet,
               });
             },
-            onRemoved: (document) => {
+            onRemoved: (document: T) => {
               publish(GraphQLSubscriptionEvent.REMOVED, {
                 _id: document._id,
               });
@@ -105,18 +107,18 @@ export class SubscriptionStore {
    * @param collection
    * @param filters
    */
-  async createAsyncIteratorForCounting<T>(
+  async createAsyncIteratorForCounting<T extends IDocumentBase>(
     collection: Collection<T>,
     filters: Filter<T> = {},
     subscriptionOptions: SubscriptionProcessorOptionsType = {}
-  ): Promise<AsyncIterator<any>> {
+  ): Promise<AsyncIterator<unknown>> {
     const channel = uuid();
 
-    const publish = (count) => {
+    const publish = (count: number) => {
       this.pubSub.publish(channel, { count });
     };
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       resolve(this.pubSub.asyncIterator([channel]));
 
       let ready = false;
@@ -125,12 +127,12 @@ export class SubscriptionStore {
         {
           $: { filters },
           _id: 1,
-        },
+        } as unknown as QueryBodyType<T>,
         {
-          onAdded: (document) => {
+          onAdded: () => {
             ready && publish(handler.documentStore.length);
           },
-          onRemoved: (document) => {
+          onRemoved: () => {
             ready && publish(handler.documentStore.length);
           },
         },
@@ -144,19 +146,19 @@ export class SubscriptionStore {
     });
   }
 
-  async createSubscription<T>(
+  async createSubscription<T extends IDocumentBase>(
     collection: Collection<T>,
-    body: QueryBodyType,
+    body: QueryBodyType<T>,
     eventOptions: ISubscriptionEventOptions = {},
     subscriptionOptions: SubscriptionProcessorOptionsType = {}
-  ): Promise<SubscriptionHandler<any>> {
+  ): Promise<SubscriptionHandler<T>> {
     if (!collection[LIVE_BEHAVIOR_MARKER]) {
       console.warn(
         `This collection: "${collection.collectionName}" does not have the live behavior attached. Reactivity may not work as expected.`
       );
     }
     if (!body) {
-      body = {};
+      body = {} as QueryBodyType<T>;
     }
     this.cleanupBody(body);
 
@@ -199,7 +201,7 @@ export class SubscriptionStore {
    * And make sure we include _id otherwise, we can't know what to update
    * @param body
    */
-  private cleanupBody(body: QueryBodyType) {
+  private cleanupBody<T extends IDocumentBase>(body: QueryBodyType<T>) {
     if (!body.$) {
       body.$ = {};
     }
@@ -219,11 +221,11 @@ export class SubscriptionStore {
    * This creates the handle of removing
    * @param channel
    */
-  protected handleAsyncIteratorStopping(
-    channel,
-    handler: SubscriptionHandler<any>
+  protected handleAsyncIteratorStopping<T extends IDocumentBase>(
+    channel: string,
+    handler: SubscriptionHandler<T>
   ) {
-    const stopObserver = (_channel) => {
+    const stopObserver = (_channel: string) => {
       if (_channel === channel) {
         if (this.pubSubChannelStore[channel]) {
           this.pubSubChannelStore[channel].stop();
@@ -243,9 +245,9 @@ export class SubscriptionStore {
    * @param subscriptionEvents
    * @param subscriptionHandler
    */
-  protected attachEventsToHandlerFromOptions<T>(
+  protected attachEventsToHandlerFromOptions<T extends IDocumentBase>(
     subscriptionEvents: ISubscriptionEventOptions = {},
-    subscriptionHandler: SubscriptionHandler<any>
+    subscriptionHandler: SubscriptionHandler<T>
   ) {
     ["onAdded", "onChanged", "onRemoved"].forEach((event) => {
       if (subscriptionEvents[event]) {
@@ -264,7 +266,7 @@ export class SubscriptionStore {
    *
    * @param handle
    */
-  stopHandle(handle: SubscriptionHandler<any>) {
+  stopHandle<T extends IDocumentBase>(handle: SubscriptionHandler<T>) {
     this.isDebug && console.log(`[handles] Stopping a handle from a processor`);
     handle.processor.detachHandler(handle);
     if (!handle.processor.hasHandlers()) {
@@ -272,11 +274,11 @@ export class SubscriptionStore {
     }
   }
 
-  createProcessor<T>(
+  createProcessor<T extends IDocumentBase>(
     collection: Collection<T>,
-    body: QueryBodyType,
+    body: QueryBodyType<T>,
     subscriptionOptions: SubscriptionProcessorOptionsType = {}
-  ): SubscriptionProcessor<any> {
+  ): SubscriptionProcessor<T> {
     const processor = new SubscriptionProcessor(
       this.messenger,
       this.isDebug,
@@ -290,7 +292,7 @@ export class SubscriptionStore {
     return processor;
   }
 
-  stopProcessor(processor: SubscriptionProcessor<any>) {
+  stopProcessor<T extends IDocumentBase>(processor: SubscriptionProcessor<T>) {
     this.isDebug &&
       console.log(
         `[processors] Destroying subscription with id: ${processor.id}`
@@ -301,9 +303,9 @@ export class SubscriptionStore {
     );
   }
 
-  static getSubscriptionId(
+  static getSubscriptionId<T>(
     collection: Collection,
-    body: QueryBodyType,
+    body: QueryBodyType<T>,
     subscriptionOptions: SubscriptionProcessorOptionsType = {}
   ) {
     // We need to ensure that first level cannot be a function

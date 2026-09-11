@@ -14,13 +14,17 @@ import {
   IValidationMethod,
 } from "@bluelibs/validator-bundle";
 
-export abstract class BaseBundle<T = any> extends CoreBundle<T> {
+export abstract class BaseBundle<T = unknown> extends CoreBundle<T> {
   async setupBundle(config: {
+    // why: bundles register a module namespace of collection classes, model
+    // classes, enums and constants. The published pre-cleanup type was
+    // `Record<string, any | Constructor<Collection>>`; keeping the strict
+    // `Collection` type here rejects valid registration modules.
     collections?: Record<string, any | Constructor<Collection>>;
-    listeners?: Record<string, any | Constructor<Listener>>;
-    validators?: Record<string, any | Constructor<IValidationMethod<any>>>;
-    fixtures?: Record<string, any>;
-    graphqlModule?: any | ILoadOptions | ILoadOptions[];
+    listeners?: Record<string, Listener | Constructor<Listener>>;
+    validators?: Record<string, Constructor<IValidationMethod>>;
+    fixtures?: Record<string, unknown>;
+    graphqlModule?: ILoadOptions | ILoadOptions[];
   }) {
     const { collections, listeners, validators, graphqlModule, fixtures } =
       config;

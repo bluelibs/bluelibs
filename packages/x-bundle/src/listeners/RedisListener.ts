@@ -8,7 +8,7 @@ export class RedisListener extends Listener {
   protected subscriptionStore: SubscriptionStore;
 
   @On(RedisConnectionResumedEvent)
-  onRedisConnectionResumed(e: RedisConnectionResumedEvent) {
+  onRedisConnectionResumed(_e: RedisConnectionResumedEvent) {
     this.subscriptionStore.processors.forEach((processor) => {
       processor.reload();
     });

@@ -45,7 +45,7 @@ export class ServiceWriter extends BlueprintWriter {
     );
   }
 
-  protected createUnitTestModel(model: ServiceModel, microserviceDir: any) {
+  protected createUnitTestModel(model: ServiceModel, microserviceDir: string) {
     const unitTestModel = new UnitTestModel();
     unitTestModel.bundleName = model.bundleName;
     unitTestModel.element = XElements.createXElementResult(

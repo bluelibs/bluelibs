@@ -1,14 +1,25 @@
 import { Collection } from "./models/Collection";
-import {
-  IAstToQueryOptions,
-  ILinkCollectionOptions,
-  QueryBodyType,
-} from "@bluelibs/nova";
+import { ILinkCollectionOptions } from "@bluelibs/nova";
 import { IValidateOptions } from "@bluelibs/validator-bundle";
 import { ContainerInstance, Constructor } from "@bluelibs/core";
-import { ClientSession } from "mongodb";
+import { ObjectId } from "@bluelibs/ejson";
+import * as MongoDB from "mongodb";
 
+/**
+ * A behavior receives a collection instance of any document type and wires itself onto it.
+ * Behaviors are deliberately non-generic: a behavior written for a concrete document type
+ * (e.g. `(collection: Collection<MyDoc>) => void`) must remain assignable regardless of the
+ * collection it is attached to. A generic signature would require `Collection<T>` to be
+ * assignable to `Collection<MyDoc>` for every `T`, which the invariant driver types forbid.
+ */
 export type BehaviorType = (collectionEventManager: Collection<any>) => void;
+
+/**
+ * The identifier of the user performing an operation. This must stay mutually assignable
+ * with security-bundle's `UserId` (`number | string | ObjectId | Partial<ObjectId>`), since
+ * consumers pass security-bundle user ids into mongo-bundle operations.
+ */
+export type UserId = number | string | ObjectId | Partial<ObjectId>;
 
 declare module "@bluelibs/nova" {
   export interface IQueryContext {
@@ -25,11 +36,11 @@ export interface IExecutionContext {
   /**
    * This userId is needed for blamable behaviors. You can omit it if it's done by the system
    */
-  userId?: any;
+  userId?: UserId;
   /**
    * Used for transactions
    */
-  session?: ClientSession;
+  session?: MongoDB.ClientSession;
   /**
    * Used for i18n
    */
@@ -66,10 +77,10 @@ export interface ITimestampableBehaviorOptions {
 }
 
 export interface IValidateBehaviorOptions {
-  model: any;
+  model: Constructor<unknown>;
   options?: Omit<IValidateOptions, "model">;
   cast?: boolean;
-  castOptions?: any;
+  castOptions?: Partial<IValidateOptions>;
 }
 
 export interface IBlameableBehaviorOptions {
@@ -96,8 +107,10 @@ export interface ISoftdeletableBehaviorOptions {
   };
 }
 
-export interface IBundleLinkCollectionOption<T = any>
-  extends Omit<ILinkCollectionOptions, "collection"> {
+export interface IBundleLinkCollectionOption<T = unknown> extends Omit<
+  ILinkCollectionOptions,
+  "collection"
+> {
   collection: (container: ContainerInstance) => Constructor<T>;
   /**
    * If you want to delete this relationship when this gets deleted, cleaning can only be used for reversed relationships.

@@ -7,7 +7,8 @@ export type EJSONBatchVersion = 1;
 export type EJSONScalarType = "string" | "number" | "boolean" | "null";
 
 /** Extended EJSON types supported in batch columns. */
-export type EJSONExtendedType = "date" | "objectId" | "binary" | "regexp" | "custom";
+export type EJSONExtendedType =
+  "date" | "objectId" | "binary" | "regexp" | "custom";
 
 /** Column type for a batch schema. */
 export type EJSONBatchColumnType = EJSONScalarType | EJSONExtendedType;
@@ -34,7 +35,7 @@ export interface EJSONBatchSchema {
 }
 
 /** Generic "values" payload for a column. Length should equal batch count. */
-export interface EJSONBatchColumnValues<T = any> {
+export interface EJSONBatchColumnValues<T = unknown> {
   v: T[];
   /** Indexes where value is null (optional helper). */
   nulls?: number[];
@@ -55,7 +56,8 @@ export interface EJSONBatchColumnPacked {
 }
 
 /** Union of possible per-column data encodings. */
-export type EJSONBatchColumnData = EJSONBatchColumnValues | EJSONBatchColumnPacked;
+export type EJSONBatchColumnData =
+  EJSONBatchColumnValues | EJSONBatchColumnPacked;
 
 /** The payload for a batch-encoded value. */
 export interface EJSONBatchPayload {

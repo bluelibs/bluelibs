@@ -5,14 +5,16 @@ import { parse } from "date-fns";
 type IDateTransformerConfig = string;
 
 @Service()
-export class DateTransformer
-  implements IValidationTransformer<IDateTransformerConfig, Date> {
+export class DateTransformer implements IValidationTransformer<
+  IDateTransformerConfig,
+  Date
+> {
   parent = yup.date;
   name = "format";
 
   // Note that this is not async
   // Transformers do not support async out of the box in yup
-  transform(value, originalValue, format, schema) {
+  transform(value, originalValue, format) {
     if (value instanceof Date) {
       return value;
     }

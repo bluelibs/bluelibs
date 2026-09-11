@@ -6,6 +6,6 @@ export class InvalidTokenException extends Exception<{ context: string }> {
   }
 
   getCode() {
-    return "INVALID_TOKEN"
+    return "INVALID_TOKEN";
   }
 }

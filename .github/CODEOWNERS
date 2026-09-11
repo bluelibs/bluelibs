@@ -1,0 +1,19 @@
+# Default owner for everything
+
+- @theodor-diaconu
+
+# Core packages
+
+/packages/core/ @theodor-diaconu
+/packages/nova/ @theodor-diaconu
+/packages/mongo-bundle/ @theodor-diaconu
+/packages/security-bundle/ @theodor-diaconu
+/packages/security-mongo-bundle/ @theodor-diaconu
+
+# CI/CD and infrastructure
+
+/.github/ @theodor-diaconu
+/scripts/ @theodor-diaconu
+/lerna.json @theodor-diaconu
+/package.json @theodor-diaconu
+/tsconfig.base.json @theodor-diaconu

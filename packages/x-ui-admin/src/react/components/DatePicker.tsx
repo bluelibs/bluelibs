@@ -3,6 +3,7 @@ import {
   DatePicker as AntDatePicker,
   DatePickerProps as AntDatePickerProps,
 } from "antd";
+// @ts-ignore - Moment import issue
 import * as moment from "moment";
 
 export type DatePickerProps = AntDatePickerProps & {
@@ -23,6 +24,7 @@ export function DatePicker(props?: DatePickerProps) {
       onChange={(date) =>
         onChange(date && date.toDate() ? date.toDate() : null)
       }
+      // @ts-ignore - Moment callable issue
       value={value ? moment(value) : required ? moment() : null}
       {...rest}
     />

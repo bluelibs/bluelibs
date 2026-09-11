@@ -10,10 +10,12 @@ describe("Extraction", () => {
 
     const schema = loader.getSchema();
 
-    assert.equal(schema.resolvers.A['test1'], 1);
-    assert.equal(schema.resolvers.A['test2'], 1);
-    assert.equal(schema.resolvers.A['test3'], 1);
-    assert.equal(schema.resolvers.A['test4'], 1);
+    const resolversA = schema.resolvers!.A as unknown as Record<string, unknown>;
+
+    assert.equal(resolversA["test1"], 1);
+    assert.equal(resolversA["test2"], 1);
+    assert.equal(resolversA["test3"], 1);
+    assert.equal(resolversA["test4"], 1);
 
     assert.include(schema.typeDefs, "somethingReallyGood");
     assert.include(schema.typeDefs, "somethingGood");

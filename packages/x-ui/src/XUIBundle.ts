@@ -1,5 +1,4 @@
 import { Bundle, KernelPhase } from "@bluelibs/core";
-import { setDefaults } from "@bluelibs/smart";
 import {
   ApolloClient,
   ApolloProvider,
@@ -15,13 +14,9 @@ import {
   GuardianSmart,
   XUIGuardianBundle,
 } from "@bluelibs/x-ui-guardian-bundle";
-import { Components, XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
+import { XUIReactBundle } from "@bluelibs/x-ui-react-bundle";
 import { IComponents } from "./overrides";
-import {
-  XBrowserRouter,
-  XRouter,
-  XUIReactRouterBundle,
-} from "@bluelibs/x-ui-react-router-bundle";
+import { XUIReactRouterBundle } from "@bluelibs/x-ui-react-router-bundle";
 import { XUICollectionsBundle } from "@bluelibs/x-ui-collections-bundle";
 import { XUIBundleConfigType } from "./defs";
 
@@ -79,7 +74,7 @@ export class XUIBundle extends Bundle<XUIBundleConfigType> {
   setGuardianClass(guardianClass: { new (): GuardianSmart }) {
     const phase = this.kernel.getPhase();
     if ([KernelPhase.PREPARING, KernelPhase.INITIALISING].includes(phase)) {
-      this.config.guardian.guardianClass = guardianClass;
+      this.config.guardian!.guardianClass = guardianClass;
     } else {
       throw new Error(
         `You cannot set the guardian at this stage, do it before the bundle is initialised.`

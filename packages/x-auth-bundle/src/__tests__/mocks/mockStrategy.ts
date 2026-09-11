@@ -37,9 +37,9 @@ export default class StrategyMock extends Strategy {
     done(null, user);
   }
 
-  public authenticate(req, options) {
-    var _accessToken = this._accessToken || "abcd";
-    var _refreshToken = this._refreshToken || "efgh";
+  public authenticate(req, _options) {
+    const _accessToken = this._accessToken || "abcd";
+    const _refreshToken = this._refreshToken || "efgh";
 
     if (
       this._redirectToCallback &&
@@ -48,7 +48,7 @@ export default class StrategyMock extends Strategy {
     ) {
       this.redirect(this._callbackURL + "?__mock_strategies=true");
     } else {
-      var _user = userData;
+      const _user = userData;
       const verified = (err, user, info) => {
         if (err) return this.error(err);
         if (!user) return this.fail(info);
@@ -56,7 +56,7 @@ export default class StrategyMock extends Strategy {
       };
 
       if (this._passAuthentication) {
-        this._verifyUser(_user, (err, user, info) => {
+        this._verifyUser(_user, (_err, _user, _info) => {
           if (this._passReqToCallback) {
             this.verify(req, _accessToken, _refreshToken, userData, verified);
           } else {

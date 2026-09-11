@@ -78,6 +78,6 @@ export class SessionBeforeCreateEvent extends Event<{
 
 export class SessionAfterCreateEvent extends Event<{
   userId: UserId;
-  token: any;
+  token: string;
   options: ICreateSessionOptions;
 }> {}

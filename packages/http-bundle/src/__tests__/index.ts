@@ -1,7 +1,6 @@
 import { Bundle } from "@bluelibs/core";
 import { HTTPBundle } from "../HTTPBundle";
 import { createKernel } from "./ecosystem";
-import * as express from "express";
 import fetch from "node-fetch";
 
 test("Initialises and works", async () => {
@@ -21,7 +20,7 @@ test("Initialises and works", async () => {
         {
           type: "get",
           path: "/users/:userId",
-          async handler(container, req, res, next) {
+          async handler(container, req, res) {
             res.json({
               value: container.get("value"),
               userId: req.params.userId,
@@ -38,7 +37,7 @@ test("Initialises and works", async () => {
   const result = await fetch("http://localhost:6000/users/123");
   const json = await result.json();
 
-  expect(json.userId).toBe("123"), expect(json.value).toBe("OKEY");
+  (expect(json.userId).toBe("123"), expect(json.value).toBe("OKEY"));
 
   await kernel.shutdown();
 });

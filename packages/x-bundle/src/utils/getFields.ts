@@ -2,9 +2,7 @@
  * Taken from: https://github.com/matb33/meteor-collection-hooks/blob/master/collection-hooks.js#L198 and modified.
  * @param mutator
  */
-export function getFields(
-  mutator
-): {
+export function getFields(mutator): {
   fields: string[];
   topLevelFields: string[];
 } {

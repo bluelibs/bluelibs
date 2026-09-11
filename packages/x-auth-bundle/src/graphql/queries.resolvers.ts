@@ -1,11 +1,4 @@
 import * as X from "@bluelibs/x-bundle";
-import { RegistrationInput } from "../inputs/RegistrationInput";
-import { LoginInput } from "../inputs/LoginInput";
-import { ResetPasswordInput } from "../inputs/ResetPasswordInput";
-import { ForgotPasswordInput } from "../inputs/ForgotPasswordInput";
-import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
-import { XAuthService } from "../services/XAuthService";
-import { ChangePasswordInput } from "../inputs/ChangePasswordInput";
 import { IXAuthBundleConfig } from "../defs";
 import { IFunctionMap } from "@bluelibs/graphql-bundle";
 import { ContainerInstance } from "@bluelibs/core";
@@ -25,14 +18,16 @@ export default (config: IXAuthBundleConfig) => {
     resolvers.me = [
       X.CheckLoggedIn(),
       (_, args, context, ast) => {
-        const userId = (context as any).userId;
+        const userId = (context as { userId?: string }).userId;
         const container = context.container as ContainerInstance;
 
+        // why: the query is GraphQL-driven and targets augmented/dynamic user
+        // fields (email, fullName) that are not part of the typed IUser shape
         const usersCollection = container.get<UsersCollection<any>>(
           USERS_COLLECTION_TOKEN
         );
 
-        return usersCollection.queryOneGraphQL(ast, {
+        return usersCollection.queryOneGraphQL<null>(ast, {
           filters: {
             _id: userId,
           },

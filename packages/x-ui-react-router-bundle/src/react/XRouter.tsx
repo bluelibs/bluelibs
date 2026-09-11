@@ -1,13 +1,10 @@
 import { Service } from "@bluelibs/core";
 import {
-  AddRoutingArguments,
-  IRoute as IBaseRoute,
   IRouteGenerationProps,
   IRouteParams,
   XCoreRouter,
 } from "@bluelibs/x-ui-router";
 
-import { RouteProps } from "react-router-dom";
 import * as H from "history";
 import { createBrowserHistory } from "history";
 import { IRoute } from "../defs";

@@ -1,12 +1,11 @@
-import { Constructor } from "@bluelibs/core";
-import { LoggerService, LogLevel } from "@bluelibs/logger-bundle";
+import { LoggerService } from "@bluelibs/logger-bundle";
 import { getResult } from "@bluelibs/graphql-bundle";
 
 /**
  * Logs information about the request: arguments, userId
  */
 export function LogRequest() {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const logger: LoggerService = ctx.container.get(LoggerService);
 
     logger.info("Received GraphQL Request", {
@@ -21,7 +20,7 @@ export function LogRequest() {
  * because sometimes console.log trims if the results are too deep
  */
 export function LogRequestJSON() {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const logger: LoggerService = ctx.container.get(LoggerService);
 
     logger.info(
@@ -38,7 +37,7 @@ export function LogRequestJSON() {
  * Logs the response with the result as log's context
  */
 export function LogResponse() {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const logger: LoggerService = ctx.container.get(LoggerService);
 
     const result = getResult(args);
@@ -52,7 +51,7 @@ export function LogResponse() {
  * Logs the current result in a JSON.stringified manner
  */
 export function LogResponseJSON() {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const logger: LoggerService = ctx.container.get(LoggerService);
 
     const result = getResult(args);

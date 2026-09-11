@@ -1,6 +1,6 @@
 import { QueryBodyType } from "@bluelibs/nova";
 
-export function getFieldsFromQueryBody(body: QueryBodyType) {
+export function getFieldsFromQueryBody<T>(body: QueryBodyType<T>) {
   return Object.keys(body).filter((key) => {
     return !["$", "$alias"].includes(key);
   });

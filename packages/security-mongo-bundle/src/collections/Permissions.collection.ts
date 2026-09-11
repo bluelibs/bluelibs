@@ -6,6 +6,7 @@ import {
   IUser,
 } from "@bluelibs/security-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
+import * as MongoDB from "mongodb";
 
 import * as links from "./Permissions.links";
 
@@ -23,7 +24,7 @@ export class PermissionsCollection<T extends IPermission>
 
   static links = links;
 
-  async insertPermission(permission: T): Promise<any> {
+  async insertPermission(permission: T): Promise<void> {
     permission = this.getCleanedPermission(permission) as T;
 
     await this.insertOne(permission);
@@ -78,8 +79,10 @@ export class PermissionsCollection<T extends IPermission>
    * @param userId
    * @param search
    */
-  protected createMongoFilters(filters: IPermissionSearchFilters) {
-    let mongoFilters: any = {};
+  protected createMongoFilters(
+    filters: IPermissionSearchFilters
+  ): MongoDB.Filter<IPermission> {
+    const mongoFilters: MongoDB.Filter<IPermission> = {};
     const { userId, domain, domainIdentifier, permission, createdById } =
       filters;
 

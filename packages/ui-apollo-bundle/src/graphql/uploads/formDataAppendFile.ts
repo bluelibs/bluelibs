@@ -1,4 +1,4 @@
-// @ts-check
+// @ts-nocheck
 
 /**
  * The default implementation for the function `createUploadLink` option

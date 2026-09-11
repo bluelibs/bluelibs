@@ -1,16 +1,8 @@
 <h1 align="center">BlueLibs X-CRON-BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/x-cron-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/x-cron-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/x-cron-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/x-cron-bundle/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fx-cron-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fx-cron-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This tool allows you to run recurrent jobs in your X Framework ecosystem. The cronjobs which are running will have their result stored in "crons" collection.
 

@@ -1,11 +1,14 @@
 export * from "./behaviors/defs";
 
 import { Constructor, ContainerInstance } from "@bluelibs/core";
-import { IAstToQueryOptions } from "@bluelibs/nova";
 import { ClientOpts } from "redis";
+import { ObjectID } from "@bluelibs/mongo-bundle";
+import { UserId } from "@bluelibs/security-bundle";
 import { ICacheManagerConfig } from "./cache/defs";
 import { DocumentMutationType } from "./constants";
-import { SubscriptionHandler } from "./models/SubscriptionHandler";
+
+export type IDType = ObjectID | string;
+
 export interface IXBundleConfig {
   /**
    * Application URL is useful as XBundle can be used to route to different part of your web/front-end application
@@ -29,32 +32,39 @@ export interface IXBundleConfig {
   cacheConfig?: ICacheManagerConfig;
 }
 
+// why: the old published signature was `(data: any) => Promise<void>`. Handlers
+// are contravariant and consumers type them for their own raw-message shape
+// (e.g. `(message: string) => Promise<void>`), so the parameter must stay `any`.
 export type MessageHandleType = (data: any) => Promise<void>;
 
 export interface IMessenger {
   subscribe(channel: string, handler: MessageHandleType);
   unsubscribe(channel: string, handler: MessageHandleType);
-  publish(channels: string[], data);
+  // why: the messenger carries arbitrary payloads (e.g. `{ event, payload }`),
+  // matching the published `data: any` signature.
+  publish(channels: string[], data: any);
 }
 
-export interface ISubscriptionEvent<T = any> {
+export interface ISubscriptionEvent<T extends IDocumentBase = IDocumentBase> {
   mutationType: DocumentMutationType;
-  documentId: any;
+  documentId: T["_id"];
   modifiedFields?: string[];
 }
 
+export type Callback = (...args: unknown[]) => void | Promise<void>;
+
 export interface ISubscriptionEventOptions {
-  onAdded?: Function | Function[];
-  onChanged?: Function | Function[];
-  onRemoved?: Function | Function[];
+  onAdded?: Callback | Callback[];
+  onChanged?: Callback | Callback[];
+  onRemoved?: Callback | Callback[];
 }
 
 export interface IDocumentStore {
-  docs: any;
+  docs: unknown;
 }
 
 export interface IDocumentBase {
-  _id: any;
+  _id: IDType;
 }
 
 export interface IChangeSet<T> {
@@ -62,26 +72,32 @@ export interface IChangeSet<T> {
   now: Partial<T>;
 }
 
-export type OnDocumentAddedHandler = (document: any) => void | Promise<void>;
+export type OnDocumentAddedHandler<T> = (document: T) => void | Promise<void>;
 
 export type OnDocumentChangedHandler<T> = (
-  document: any,
-  changeSet: IChangeSet<T>,
-  oldDocument: any
+  document: T,
+  changeSet: Partial<T>,
+  oldDocument: T
 ) => void | Promise<void>;
 
-export type OnDocumentRemovedHandler = (document) => void | Promise<void>;
+export type OnDocumentRemovedHandler<T> = (document: T) => void | Promise<void>;
 
 export interface ISubscriptionHandler<T> {
-  onAdded(handler: OnDocumentAddedHandler);
+  onAdded(handler: OnDocumentAddedHandler<T>);
   onChanged(handler: OnDocumentChangedHandler<T>);
-  onRemoved(handler: OnDocumentRemovedHandler);
-  onStop(handler: Function);
+  onRemoved(handler: OnDocumentRemovedHandler<T>);
+  onStop(handler: Callback);
   stop(): Promise<void>;
 }
 
 declare module "@bluelibs/graphql-bundle" {
   export interface IGraphQLContext {
     container: ContainerInstance;
+    userId?: UserId;
+    /**
+     * The auth token for the current request, when the app is behind a
+     * token-based auth layer (e.g. apollo-security-bundle).
+     */
+    authenticationToken?: string;
   }
 }

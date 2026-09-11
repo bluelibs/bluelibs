@@ -1,10 +1,4 @@
-import {
-  EventManager,
-  Service,
-  Event,
-  Inject,
-  ExecutionContext,
-} from "@bluelibs/core";
+import { Service, Inject, ExecutionContext } from "@bluelibs/core";
 import { EJSON } from "@bluelibs/ejson";
 
 /**
@@ -30,12 +24,16 @@ export class UISessionStorage {
     }
   }
 
-  setItem(key: string, value: any) {
+  setItem(key: string, value: unknown) {
     this.storage.setItem(key, EJSON.stringify(value));
   }
 
   getItem(key: string) {
     const value = this.storage.getItem(key);
+
+    if (value === null) {
+      return null;
+    }
 
     try {
       return EJSON.parse(value);
@@ -58,9 +56,9 @@ export class UISessionStorage {
 }
 
 class DummyLocalStorage implements Storage {
-  length: number;
+  length = 0;
   store: {
-    [key: string]: any;
+    [key: string]: string;
   } = {};
 
   clear(): void {

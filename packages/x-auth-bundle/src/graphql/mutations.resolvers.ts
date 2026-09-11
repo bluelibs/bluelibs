@@ -7,6 +7,7 @@ import { VerifyEmailInput } from "../inputs/VerifyEmailInput";
 import { XAuthService } from "../services/XAuthService";
 import { ChangePasswordInput } from "../inputs/ChangePasswordInput";
 import { IXAuthBundleConfig } from "../defs";
+import { IFunctionMap } from "@bluelibs/graphql-bundle";
 import {
   RequestLoginLinkInput,
   VerifyMagicLinkInput,
@@ -17,7 +18,7 @@ export default (config: IXAuthBundleConfig) => {
     graphql: { mutations },
   } = config;
 
-  const resolvers: any = {};
+  const resolvers: IFunctionMap = {};
 
   if (mutations.register) {
     resolvers.register = [
@@ -47,7 +48,7 @@ export default (config: IXAuthBundleConfig) => {
   if (mutations.logout) {
     resolvers.logout = [
       X.CheckLoggedIn(),
-      X.ToService(XAuthService, "logout", (args, ctx, any) => {
+      X.ToService(XAuthService, "logout", (args, ctx) => {
         return [ctx.authenticationToken];
       }),
     ];

@@ -1,12 +1,17 @@
 import { Constructor, Token } from "@bluelibs/core";
+import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 
 export function ToService<T>(
-  serviceClass: Constructor<T> | any,
+  serviceClass: Constructor<T> | Token<T>,
   methodName: string,
-  argumentMapper?: (args, ctx, ast) => any[]
+  argumentMapper?: (
+    args: Record<string, unknown>,
+    ctx: IGraphQLContext,
+    ast: unknown
+  ) => unknown[]
 ) {
   if (!argumentMapper) {
-    argumentMapper = (args, ctx, ast) => [args.input, ctx.userId];
+    argumentMapper = (args, ctx) => [args.input, ctx.userId];
   }
 
   return async function (_, args, ctx, ast) {

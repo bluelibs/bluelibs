@@ -1,6 +1,6 @@
 import * as _ from "lodash";
-import { LinkStrategy } from "../Linker";
 import CollectionNode from "../nodes/CollectionNode";
+import { Document, Filter as FilterQuery } from "mongodb";
 
 /**
  * Returns the filters that this collection needs to get all results
@@ -16,44 +16,28 @@ export function createFilters(childCollectionNode: CollectionNode) {
 
   if (isVirtual) {
     if (isMany) {
-      return createManyVirtual(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createManyVirtual(parentResults, linkStorageField, linkForeignStorageField);
     } else {
-      return createOneVirtual(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createOneVirtual(parentResults, linkStorageField, linkForeignStorageField);
     }
   } else {
     if (isMany) {
-      return createManyDirect(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createManyDirect(parentResults, linkStorageField, linkForeignStorageField);
     } else {
-      return createOneDirect(
-        parentResults,
-        linkStorageField,
-        linkForeignStorageField
-      );
+      return createOneDirect(parentResults, linkStorageField, linkForeignStorageField);
     }
   }
 }
 
-function uniqIdsComparator(id) {
-  return id ? id.toString() : null;
+function uniqIdsComparator(id: unknown) {
+  return id ? (id as { toString(): string }).toString() : null;
 }
 
 function createOneDirect(
-  parentResults: any[],
+  parentResults: Document[],
   linkStorageField: string,
   linkForeignStorageField: string
-) {
+): FilterQuery<Document> {
   return {
     [linkForeignStorageField]: {
       $in: _.uniqBy(
@@ -67,28 +51,25 @@ function createOneDirect(
 }
 
 function createOneVirtual(
-  parentResults: any[],
+  parentResults: Document[],
   linkStorageField: string,
   linkForeignStorageField: string
-) {
+): FilterQuery<Document> {
   return {
     [linkStorageField]: {
-      $in: _.uniqBy(
-        _.map(parentResults, linkForeignStorageField),
-        uniqIdsComparator
-      ),
+      $in: _.uniqBy(_.map(parentResults, linkForeignStorageField), uniqIdsComparator),
     },
   };
 }
 
 function createManyDirect(
-  parentResults: any[],
+  parentResults: Document[],
   linkStorageField: string,
   linkForeignStorageField: string
-) {
-  const arrayOfIds: any[] = _.flatten(
-    _.map(parentResults, (e) => _.get(e, linkStorageField))
-  ).filter((e) => e !== undefined);
+): FilterQuery<Document> {
+  const arrayOfIds = _.flatten(_.map(parentResults, (e) => _.get(e, linkStorageField))).filter(
+    (e) => e !== undefined
+  );
 
   return {
     [linkForeignStorageField]: {
@@ -98,10 +79,10 @@ function createManyDirect(
 }
 
 function createManyVirtual(
-  parentResults: any[],
+  parentResults: Document[],
   linkStorageField: string,
   linkForeignStorageField: string
-) {
+): FilterQuery<Document> {
   const arrayOfIds = _.flatten(_.map(parentResults, linkForeignStorageField));
   return {
     [linkStorageField]: {

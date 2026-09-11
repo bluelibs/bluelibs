@@ -1,17 +1,23 @@
 import { Kernel, Bundle, ContainerInstance } from "@bluelibs/core";
 import { ApolloBundle } from "../ApolloBundle";
-import { Loader } from "@bluelibs/graphql-bundle";
+import { Loader, ILoadOptions } from "@bluelibs/graphql-bundle";
 import createApolloClient from "./apolloClientCreator";
 import { gql } from "@apollo/client";
 import { assert } from "chai";
 import { PubSub } from "graphql-subscriptions";
 import { LoggerBundle } from "@bluelibs/logger-bundle";
+import { NextFunction, Request, Response } from "express";
+import fetch from "isomorphic-fetch";
+import { ApolloBundleConfigType } from "../defs";
 Object.assign(global, { WebSocket: require("ws") });
-let currentKernel;
+let currentKernel: Kernel;
 
 async function createEcosystemWithInit(
-  loadable: any,
-  otherOptions: any = {}
+  loadable: ILoadOptions,
+  // `ApolloServerOptions` is a deep discriminated union; spreading it into the
+  // bundle constructor exceeds the type-instantiation depth limit, and no
+  // test in this file passes `apollo` options anyway.
+  otherOptions: Omit<ApolloBundleConfigType, "apollo"> = {}
 ): Promise<Kernel> {
   class MyBundle extends Bundle {
     async init() {
@@ -53,7 +59,7 @@ describe("ApolloBundle", () => {
   });
 
   it("Should be able to initialise the server", async () => {
-    const kernel = await createEcosystemWithInit({
+    await createEcosystemWithInit({
       typeDefs: `
           type Query {
             sayHello: String
@@ -85,7 +91,7 @@ describe("ApolloBundle", () => {
       const pubsub = new PubSub();
       const CHANNEL = "tick";
 
-      const kernel = await createEcosystemWithInit({
+      await createEcosystemWithInit({
         typeDefs: `
         type Query {
           framework: String
@@ -106,7 +112,7 @@ describe("ApolloBundle", () => {
 
                 return iterator;
               },
-              resolve: (payload) => {
+              resolve: (payload: unknown) => {
                 return payload;
               },
             },
@@ -155,7 +161,7 @@ describe("ApolloBundle", () => {
   it("Should work with middleware from express", async () => {
     let inMiddleware = false;
 
-    const kernel = await createEcosystemWithInit(
+    await createEcosystemWithInit(
       {
         typeDefs: `
           type Query { something: String }
@@ -169,7 +175,7 @@ describe("ApolloBundle", () => {
       {
         enableSubscriptions: false,
         middlewares: [
-          (req, res, next) => {
+          (_req: Request, _res: Response, next: NextFunction) => {
             inMiddleware = true;
             next();
           },
@@ -179,7 +185,7 @@ describe("ApolloBundle", () => {
 
     const client = createApolloClient(6000);
 
-    const result = await client.query({
+    await client.query({
       query: gql`
         query {
           something
@@ -198,7 +204,11 @@ describe("ApolloBundle", () => {
           `,
         resolvers: {
           Query: {
-            something: (_, args, ctx) => {
+            something: (
+              _: unknown,
+              _args: unknown,
+              ctx: { container: ContainerInstance }
+            ) => {
               try {
                 assert.instanceOf(ctx.container, ContainerInstance);
               } catch (e) {
@@ -208,29 +218,41 @@ describe("ApolloBundle", () => {
             },
           },
         },
-      }).then((kernel) => {
+      }).then(() => {
         const client = createApolloClient(6000);
 
-        client.query({
-          query: gql`
-            query {
-              something
-            }
-          `,
-        });
+        // The first connection right after the previous test's server is
+        // torn down on the same port can be reset (ECONNRESET), so retry.
+        const run = (attemptsLeft = 3) => {
+          client
+            .query({
+              query: gql`
+                query {
+                  something
+                }
+              `,
+            })
+            .catch((error) => {
+              if (attemptsLeft > 0)
+                setTimeout(() => run(attemptsLeft - 1), 100);
+              else reject(error);
+            });
+        };
+
+        run();
       });
     });
   });
 
   it("Should print the exception nicely", async () => {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       createEcosystemWithInit({
         typeDefs: `
             type Query { something: String }
           `,
         resolvers: {
           Query: {
-            something: (_, args, ctx) => {
+            something: () => {
               // emulate some function calls so we have some stack traces.
               const a = () => {
                 const b = () => {
@@ -248,7 +270,7 @@ describe("ApolloBundle", () => {
             },
           },
         },
-      }).then((kernel) => {
+      }).then(() => {
         const client = createApolloClient(6000);
 
         client
@@ -259,10 +281,118 @@ describe("ApolloBundle", () => {
               }
             `,
           })
-          .catch((e) => {
+          .catch(() => {
             resolve();
           });
       });
     });
+  });
+
+  it("enforces uploads.maxFileSize/maxFiles configured on the bundle", async () => {
+    // The bundle wires its uploads config into graphqlUploadExpress, so a
+    // multipart request that exceeds either limit must be rejected before the
+    // payload is delivered to a resolver.
+    await createEcosystemWithInit(
+      {
+        typeDefs: `
+          type Query { ok: Boolean }
+          type Mutation { readFile(file: Upload): Int }
+        `,
+        resolvers: {
+          Mutation: {
+            readFile: async (
+              _root: unknown,
+              args: {
+                file: Promise<{ createReadStream(): NodeJS.ReadableStream }>;
+              }
+            ) => {
+              const file = await args.file;
+              const stream = file.createReadStream();
+              let size = 0;
+              for await (const chunk of stream) {
+                size += (chunk as Buffer).length;
+              }
+              return size;
+            },
+          },
+        },
+      },
+      {
+        enableSubscriptions: false,
+        uploads: { maxFileSize: 10, maxFiles: 1 },
+      }
+    );
+
+    const endpoint = "http://localhost:6000/graphql";
+    const operation = JSON.stringify({
+      query: "mutation($f: Upload!) { readFile(file: $f) }",
+      variables: { f: null },
+    });
+    const boundary = "TESTBOUNDARY123";
+
+    const sendMultipart = async (
+      map: Record<string, string[]>,
+      files: { name: string; content: string }[]
+    ): Promise<{ status: number; body: string }> => {
+      let body = `--${boundary}\r\n`;
+      body += `Content-Disposition: form-data; name="operations"\r\n\r\n`;
+      body += `${operation}\r\n`;
+      body += `--${boundary}\r\n`;
+      body += `Content-Disposition: form-data; name="map"\r\n\r\n`;
+      body += `${JSON.stringify(map)}\r\n`;
+      for (const file of files) {
+        body += `--${boundary}\r\n`;
+        body += `Content-Disposition: form-data; name="${file.name}"; filename="${file.name}.txt"\r\n`;
+        body += `Content-Type: text/plain\r\n\r\n`;
+        body += `${file.content}\r\n`;
+      }
+      body += `--${boundary}--\r\n`;
+
+      // The first connection right after the previous test's server is torn
+      // down on the same port can be reset (ECONNRESET), so retry.
+      // `apollo-require-preflight` is needed for the request to get past
+      // Apollo's CSRF protection once it reaches the GraphQL middleware.
+      const run = (
+        attemptsLeft = 3
+      ): Promise<{ status: number; body: string }> =>
+        fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "content-type": `multipart/form-data; boundary=${boundary}`,
+            "apollo-require-preflight": "true",
+          },
+          body,
+        })
+          .then(async (res) => ({
+            status: res.status,
+            body: await res.text(),
+          }))
+          .catch((error) => {
+            if (attemptsLeft > 0)
+              return new Promise((resolve) =>
+                setTimeout(() => resolve(run(attemptsLeft - 1)), 100)
+              );
+            throw error;
+          });
+
+      return run();
+    };
+
+    // maxFiles: 1 — declaring two files in the map must be rejected.
+    const tooMany = await sendMultipart(
+      { "0": ["variables.f"], "1": ["variables.g"] },
+      [
+        { name: "0", content: "one" },
+        { name: "1", content: "two" },
+      ]
+    );
+    expect(tooMany.status).toBe(413);
+    expect(tooMany.body).toContain("max file uploads exceeded");
+
+    // maxFileSize: 10 — reading a larger file must fail with the size-limit error.
+    const oversized = await sendMultipart({ "0": ["variables.f"] }, [
+      { name: "0", content: "x".repeat(1000) },
+    ]);
+    expect(oversized.body).toContain("exceeds the 10 byte size limit");
   });
 });

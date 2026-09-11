@@ -1,8 +1,92 @@
 {
   "name": "root",
   "private": true,
-  "devDependencies": {
-    "lerna": "^3.19.0"
+  "version": "0.0.2",
+  "description": "BlueLibs - Collection of open-source products for building scalable web applications",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "bootstrap": "npm install",
+    "build": "lerna run compile",
+    "build:watch": "lerna run --parallel watch",
+    "test": "lerna run test",
+    "test:dev": "lerna run --parallel test:dev",
+    "lint": "lerna run lint",
+    "lint:fix": "lerna run lint:fix",
+    "clean": "lerna clean && rm -rf node_modules packages/*/node_modules",
+    "audit": "npm audit && lerna exec -- npm audit",
+    "audit:fix": "npm audit fix && lerna exec -- npm audit fix",
+    "outdated": "npm outdated && lerna exec -- npm outdated",
+    "publish": "lerna publish",
+    "version": "lerna version"
   },
-  "version": "0.0.2"
+  "devDependencies": {
+    "@apollo/server": "^5.5.1",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-security": "^3.0.0",
+    "husky": "^9.0.11",
+    "inquirer": "^7.3.3",
+    "lerna": "9.0.7",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "optionalDependencies": {
+    "@img/sharp-libvips-linux-x64": "1.3.3",
+    "@img/sharp-linux-x64": "0.35.4",
+    "@nx/nx-linux-x64-gnu": "22.7.12"
+  },
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
+  },
+  "overrides": {
+    "mongodb": "^6.21.0",
+    "@types/express": "^4.17.25",
+    "tar": "^7.5.22",
+    "nx": {
+      ".": "22.7.12",
+      "brace-expansion": "^5.0.9"
+    },
+    "lerna": {
+      "js-yaml": "^4.3.2"
+    },
+    "serverless": {
+      "undici": "^6.28.0"
+    },
+    "tmp": "^0.2.7",
+    "nanoid": "^3.3.19",
+    "qs": "^6.16.0",
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "^3.15.2"
+    },
+    "smol-toml": "^1.8.0",
+    "pacote": "^21.5.1",
+    "diff": "^4.0.4",
+    "@apollo/server": {
+      "uuid": "^11.1.1"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  }
 }

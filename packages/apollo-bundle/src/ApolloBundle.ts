@@ -1,5 +1,5 @@
-import { ApolloServer, ApolloServerOptions } from "@apollo/server";
-import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServer, ApolloServerOptions, BaseContext } from "@apollo/server";
+import { expressMiddleware } from "@as-integrations/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import {
   handlers,
@@ -11,19 +11,26 @@ import {
   Exception,
   KernelAfterInitEvent,
 } from "@bluelibs/core";
-import { ISchemaResult, Loader } from "@bluelibs/graphql-bundle";
+import {
+  IContextReducer,
+  IResolverMap,
+  ISchemaResult,
+  Loader,
+} from "@bluelibs/graphql-bundle";
 import { LoggerService } from "@bluelibs/logger-bundle";
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { Handler } from "aws-lambda";
 import * as bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import { RequestHandler } from "express";
 import { GraphQLError, GraphQLFormattedError } from "graphql";
 import { useServer } from "graphql-ws/lib/use/ws";
 import * as http from "http";
 import { inspect } from "node:util";
 import { WebSocketServer } from "ws";
-import { ApolloBundleConfigType, IRouteType } from "./defs";
+import { ApolloBundleConfigType, IGraphQLContext, IRouteType } from "./defs";
 import {
   ApolloServerAfterInitEvent,
   ApolloServerBeforeInitEvent,
@@ -40,9 +47,11 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     url: "http://localhost:4000",
     apollo: {},
     enableSubscriptions: true,
-    middlewares: [],
+    middlewares: [] as (RequestHandler | RequestHandler[])[],
     uploads: {
-      maxFileSize: 1000000000,
+      // 1GB per file is a DoS vector: a handful of concurrent multipart
+      // requests can exhaust memory. 10MB covers legitimate file uploads.
+      maxFileSize: 10000000,
       maxFiles: 10,
     },
     jit: true,
@@ -50,19 +59,19 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     serverless: false,
   };
 
-  public httpServer: http.Server;
-  public app: express.Application;
-  public server: ApolloServer;
-  public subscriptionServer: WebSocketServer;
+  public httpServer!: http.Server;
+  public app!: express.Application;
+  public server!: ApolloServer;
+  public subscriptionServer!: WebSocketServer;
   /**
    * This is used to creating the serverless handler
    */
-  public serverlessHandler: any;
-  protected logger: LoggerService;
-  protected currentSchema: ISchemaResult;
+  public serverlessHandler!: Handler;
+  protected logger!: LoggerService;
+  protected currentSchema!: ISchemaResult;
 
-  async validate(config) {
-    const keys = Object.keys(config.apollo);
+  async validate(config: ApolloBundleConfigType) {
+    const keys = Object.keys(config.apollo || {});
     if (
       keys.includes("typeDefs") ||
       keys.includes("schemaDirectives") ||
@@ -78,8 +87,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   async prepare() {
     // We add the container to the context in the preparation phase
     // As loading should be done in initial phase and we have the container as the first reducer
-    const loader = this.get<Loader>(Loader);
-
     // JIT works fine when the same dataset is being loaded, for serverless it just becomes too much
     if (this.config.serverless) {
       this.config.jit = false;
@@ -100,7 +107,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         logger.info(`Serverless Apollo handler ready.`);
       } else {
         logger.info(`HTTP Server listening on port: ${this.config.port}`);
-        let url = this.config.url;
+        let url = this.config.url ?? "";
         url += url.endsWith("/") ? "graphql" : "/graphql";
         logger.info(`GraphQL endpoint ready: ${url}`);
       }
@@ -120,7 +127,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     } else {
       // Hand in the schema we just created and have the
       // WebSocketServer start listening.
-      let serverCleanup;
+      let serverCleanup: { dispose(): void | Promise<void> } | undefined;
       if (enableSubscriptions) {
         this.attachSubscriptionService(apolloServerConfig, this.httpServer);
 
@@ -144,7 +151,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
             async serverWillStart() {
               return {
                 async drainServer() {
-                  enableSubscriptions && (await serverCleanup.dispose());
+                  if (enableSubscriptions && serverCleanup) {
+                    await serverCleanup.dispose();
+                  }
                 },
               };
             },
@@ -164,7 +173,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     }
   }
 
-  async createServerlessHandler() {
+  async createServerlessHandler(): Promise<Handler | undefined> {
     if (this.serverlessHandler) {
       return this.serverlessHandler;
     }
@@ -174,11 +183,17 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
       this.server = new ApolloServer(apolloConfig);
       this.serverlessHandler = startServerAndCreateLambdaHandler(
-        this.server,
+        // The integration resolves the cjs build of @apollo/server while the
+        // bundle's import resolves the esm build; both are the same server.
+        this.server as unknown as Parameters<
+          typeof startServerAndCreateLambdaHandler
+        >[0],
         // We will be using the Proxy V2 handler
         handlers.createAPIGatewayProxyEventV2RequestHandler()
       );
     }
+
+    return undefined;
   }
 
   protected storeSchema() {
@@ -200,9 +215,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
         typeDefs: `
           scalar Upload
         `,
-        resolvers: {
-          Upload: GraphQLUpload,
-        },
+        // The vendored scalar's type is inferred against the ambient
+        // `graphql` typings, which drift from the Loader's `IResolverMap`.
+        resolvers: { Upload: GraphQLUpload } as unknown as IResolverMap,
       });
     }
 
@@ -234,7 +249,11 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   protected async instantiateExpress() {
     const app = express();
     app.use(
-      (req, res, next) => {
+      (
+        _req: express.Request,
+        res: express.Response,
+        next: express.NextFunction
+      ) => {
         res.setHeader("X-Framework", "BlueLibs");
         next();
       },
@@ -246,8 +265,9 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       app.use(express.json());
     }
 
-    for (const middleware of this.config.middlewares) {
-      app.use.apply(app, Array.isArray(middleware) ? middleware : [middleware]);
+    for (const middleware of this.config.middlewares ?? []) {
+      const args = Array.isArray(middleware) ? middleware : [middleware];
+      (app.use as (...args: RequestHandler[]) => void).apply(app, args);
     }
 
     this.app = app;
@@ -257,7 +277,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    * This function purely initialises the server
    */
   protected async prepareApolloServer(
-    apolloServerConfig: ApolloServerOptions<any>,
+    _apolloServerConfig: ApolloServerOptions<BaseContext>,
     apolloServer: ApolloServer,
     httpServer: http.Server
   ) {
@@ -303,7 +323,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   }
 
   private attachSubscriptionService(
-    apolloServerConfig: ApolloServerOptions<any>,
+    _apolloServerConfig: ApolloServerOptions<BaseContext>,
     httpServer: http.Server
   ) {
     this.subscriptionServer = new WebSocketServer({
@@ -324,13 +344,14 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Returns the ApolloConfiguration for ApolloServer
    */
-  protected getApolloConfig(): ApolloServerOptions<any> {
+  protected getApolloConfig(): ApolloServerOptions<BaseContext> {
+    const typeDefs = this.currentSchema.typeDefs ?? "";
     const schema = makeExecutableSchema({
-      typeDefs: this.currentSchema.typeDefs,
+      typeDefs,
       resolvers: this.currentSchema.resolvers,
     });
 
-    const config: ApolloServerOptions<any> = Object.assign(
+    const config: ApolloServerOptions<BaseContext> = Object.assign(
       {
         cors: true,
         formatError: (
@@ -375,7 +396,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
    */
   protected async printError(e: unknown) {
     if (e instanceof GraphQLError) {
-      const stackTrace: string[] = (e.extensions.stacktrace as any[]) || [];
+      const stackTrace: string[] = (e.extensions?.stacktrace as string[]) || [];
       const rootPath = __dirname.split("/").slice(0, -1).join("/");
       const replacement = "";
 
@@ -386,7 +407,6 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       const pathsString = e.path?.join(" -> ");
 
       const logCtx = `GraphQL`;
-      const humanReadableTimestamp = new Date().toLocaleString();
 
       if (e.originalError instanceof Exception) {
         await this.logger.error(
@@ -396,7 +416,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
       }
 
       await this.logger.error(
-        `${e.extensions.code}\n${e.message}\nPath: ${pathsString}`,
+        `${e.extensions?.code}\n${e.message}\nPath: ${pathsString}`,
         logCtx
       );
 
@@ -424,12 +444,12 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
     }
 
     try {
-      await this.logger.error(e.toString());
-    } catch {
+      await this.logger.error((e as Error).toString());
+    } catch (err: unknown) {
       await this.logger.error(
         "Failed to print error. Printing raw error below."
       );
-      console.error(e);
+      console.error(err);
     }
 
     return;
@@ -438,8 +458,10 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Creates the function for handling GraphQL contexts
    */
-  protected createContext(contextReducers = []) {
-    const contextHandler = async (context) => {
+  protected createContext(
+    contextReducers: IContextReducer[] = []
+  ): (context: unknown) => Promise<IGraphQLContext> {
+    const contextHandler = async (context: unknown) => {
       return await this.applyContextReducers(context, contextReducers);
     };
 
@@ -449,11 +471,15 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Creates the object necessary to pass `subscriptions` to apollo
    */
-  protected createSubscriptions(contextReducers: any) {
+  protected createSubscriptions(contextReducers: IContextReducer[]) {
     const manager = this.container.get(EventManager);
 
     return {
-      onConnect: async (connectionParams, webSocket, context) => {
+      onConnect: async (
+        connectionParams: Record<string, unknown>,
+        webSocket: unknown,
+        context: unknown
+      ) => {
         context = await this.applyContextReducers(
           Object.assign({ connectionParams }, context),
           contextReducers
@@ -469,7 +495,7 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
 
         return context;
       },
-      onDisconnect: async (webSocket, context) => {
+      onDisconnect: async (webSocket: unknown, context: unknown) => {
         await manager.emit(
           new WebSocketOnDisconnectEvent({
             webSocket,
@@ -485,25 +511,31 @@ export class ApolloBundle extends Bundle<ApolloBundleConfigType> {
   /**
    * Applies reducing of context
    */
-  protected async applyContextReducers(context: any, reducers: any) {
-    context.container = this.container;
+  protected async applyContextReducers(
+    context: unknown,
+    reducers: IContextReducer[]
+  ): Promise<IGraphQLContext> {
+    const ctx = context as IGraphQLContext;
+    ctx.container = this.container;
 
+    let result: IGraphQLContext = ctx;
     for (const reducer of reducers) {
       try {
-        context = await reducer(context);
+        result = (await reducer(result)) as IGraphQLContext;
       } catch (e) {
         this.logger.error(`Error was found when creating context: `, e);
         throw e;
       }
     }
 
-    return context;
+    return result;
   }
 
   /**
    * Add a middleware for express() before server initialises
    */
-  public addMiddleware(middleware) {
+  public addMiddleware(middleware: RequestHandler | RequestHandler[]) {
+    this.config.middlewares = this.config.middlewares ?? [];
     this.config.middlewares.push(middleware);
   }
 

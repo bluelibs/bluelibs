@@ -1,5 +1,5 @@
 import { Constructor } from "@bluelibs/core";
-import { TestContext, MixedSchema, string, AnySchema, StringSchema } from "yup";
+import { TestContext, AnySchema } from "yup";
 import { ValidateOptions } from "./yup-decorator";
 
 // Copied from yup beause they don't export it
@@ -7,10 +7,10 @@ export interface IValidateOptions extends ValidateOptions {
   /**
    * This represents a schema model class created with @Schema decorator
    */
-  model?: any;
+  model?: Function;
 }
 
-export interface IValidationMethod<T = any, V = any> {
+export interface IValidationMethod<T = unknown, V = unknown> {
   name: string;
   message?: string;
   parent?: () => AnySchema | Constructor<AnySchema>;
@@ -27,13 +27,12 @@ export interface IValidationMethod<T = any, V = any> {
   ): Promise<boolean | string | undefined>;
 }
 
-export interface IValidationTransformer<C = any, V = any, Schema = AnySchema> {
+export interface IValidationTransformer<
+  C = unknown,
+  V = unknown,
+  Schema = AnySchema,
+> {
   name: string;
   parent?: () => AnySchema | Constructor<AnySchema>;
-  transform(
-    value: any | V,
-    originalValue: any | V,
-    config: C,
-    schema: Schema
-  ): V;
+  transform(value: V, originalValue: V, config: C, schema: Schema): V;
 }

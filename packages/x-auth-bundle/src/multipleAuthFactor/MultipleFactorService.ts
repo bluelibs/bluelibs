@@ -7,7 +7,6 @@ import {
   UserId,
   ISession,
   ICreateSessionOptions,
-  SessionExpiredException,
 } from "@bluelibs/security-bundle";
 import {
   SessionNotFound,

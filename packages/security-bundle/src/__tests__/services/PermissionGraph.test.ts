@@ -1,6 +1,4 @@
 import { PermissionGraph } from "../../services/PermissionGraph";
-import { IPermissionTree } from "../../defs";
-import { assert } from "chai";
 import { Permissions, PermissionTree } from "./mocks/permissionTree.mock";
 
 describe("PermissionGraph", () => {

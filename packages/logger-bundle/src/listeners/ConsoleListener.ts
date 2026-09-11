@@ -1,11 +1,11 @@
 import { Listener, Service } from "@bluelibs/core";
 import { LogEvent } from "../events";
-import chalk from "chalk";
+import chalk, { Chalk } from "chalk";
 import { LogLevel, LogLevelOrder } from "../defs";
 
 @Service()
 export class ConsoleListener extends Listener {
-  lastLogDate: Date;
+  lastLogDate?: Date;
   minLogLevel: LogLevel = LogLevel.DEBUG;
 
   init() {
@@ -19,7 +19,7 @@ export class ConsoleListener extends Listener {
         return;
       }
 
-      let color = chalk.gray;
+      let color: Chalk = chalk.gray;
       // what are some good colors?
       if (log.level == LogLevel.INFO) {
         color = chalk.blueBright;
@@ -55,7 +55,7 @@ export class ConsoleListener extends Listener {
         .toString()
         .padStart(3, "0")}`;
 
-      const contextPrefix = log.context ? `${log.context} ` : "";
+      const contextPrefix = log.context ? `${String(log.context)} ` : "";
 
       let msSinceLastLog = "";
       if (diff === 0) {
@@ -73,9 +73,9 @@ export class ConsoleListener extends Listener {
         log.level === LogLevel.CRITICAL ? "!!! CRITICAL !!! " : "";
 
       console.log(
-        `${color(humanReadableDate)} ${chalk.bold(
+        `${color!(humanReadableDate)} ${chalk.bold(
           contextPrefix
-        )}${msSinceLastLog}${color(criticalAlertPrefix)}\n${log.message}\n`
+        )}${msSinceLastLog}${color!(criticalAlertPrefix)}\n${log.message}\n`
       );
     });
   }

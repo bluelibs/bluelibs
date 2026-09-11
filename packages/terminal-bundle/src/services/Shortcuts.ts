@@ -1,8 +1,12 @@
 import * as fuzzy from "fuzzy";
 import { IPrompt } from "../defs";
+import { DistinctQuestion } from "inquirer";
 
 export class Shortcuts {
-  static input(message: string, questionOptions = {}) {
+  static input(
+    message: string,
+    questionOptions: Partial<DistinctQuestion> = {}
+  ) {
     return {
       question: {
         message,
@@ -15,7 +19,7 @@ export class Shortcuts {
   static confirm(
     message: string,
     defaultValue = true,
-    questionOptions = {}
+    questionOptions: Partial<DistinctQuestion> = {}
   ): IPrompt {
     return {
       question: {
@@ -28,12 +32,12 @@ export class Shortcuts {
   }
 
   static autocomplete(
-    message,
+    message: string,
     list: string[] | IAutocompleteOption[],
-    questionOptions = {},
+    questionOptions: Partial<DistinctQuestion> = {},
     options?: {
       allowCustomValue?: boolean;
-      defaultValue?: any;
+      defaultValue?: unknown;
     }
   ): IPrompt {
     const myList = formatList(list);
@@ -70,8 +74,9 @@ export class Shortcuts {
 }
 
 export interface IAutocompleteOption {
-  id: any;
-  value: any;
+  id: string;
+  // The value is passed through the prompt unchanged; it is consumer-defined.
+  value: unknown;
 }
 
 function formatList(list: string[] | IAutocompleteOption[]) {

@@ -1,5 +1,6 @@
 import { Kernel } from "@bluelibs/core";
 import { MikroORMBundle } from "../MikroORMBundle";
+import { MongoDriver } from "@mikro-orm/mongodb";
 
 export const createKernel = (): Kernel => {
   return new Kernel({
@@ -7,8 +8,9 @@ export const createKernel = (): Kernel => {
       new MikroORMBundle({
         options: {
           dbName: "test-orm",
-          type: "mongo",
+          driver: MongoDriver,
           clientUrl: "mongodb://localhost:27017",
+          allowGlobalContext: true,
         },
       }),
     ],

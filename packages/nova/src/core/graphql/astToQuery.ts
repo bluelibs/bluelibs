@@ -1,6 +1,6 @@
 // import intersectDeep from "../../core/query/lib/intersectDeep";
 import * as _ from "lodash";
-import * as graphqlFields from "graphql-fields";
+import graphqlFields from "graphql-fields";
 import { SPECIAL_PARAM_FIELD } from "../constants";
 import Query from "../query/Query";
 import intersectBody from "./intersectBody";
@@ -8,10 +8,17 @@ import {
   QueryBodyType,
   IAstToQueryOptions,
   IQueryContext,
+  IQueryOptions,
   ISecureOptions,
 } from "../defs";
 import { mergeDeep } from "./mergeDeep";
 import { Collection } from "mongodb";
+import type {
+  DocumentNode,
+  FragmentDefinitionNode,
+  OperationDefinitionNode,
+  SelectionNode,
+} from "graphql";
 
 export const ArgumentStore = Symbol("GraphQLArgumentStore");
 
@@ -19,43 +26,53 @@ const Errors = {
   MAX_DEPTH: "The maximum depth of this request exceeds the depth allowed.",
 };
 
-export function astToBody(ast): QueryBodyType {
-  const body = graphqlFields(
-    ast,
-    {},
-    { processArguments: true, excludedFields: ["__typename"] }
-  );
+type QueryBodyWithArguments = QueryBodyType & { [ArgumentStore]?: Record<string, unknown> };
+
+/**
+ * The GraphQL query input accepted by the body builders: either a parsed
+ * document node, or the fieldNodes/fragments projection produced by
+ * `astQueryToInfo` (the resolve-info shape consumed by graphql-fields).
+ */
+export type GraphqlQueryInput =
+  | DocumentNode
+  | {
+      fieldNodes: readonly SelectionNode[];
+      fragments: Record<string, FragmentDefinitionNode>;
+    };
+
+export function astToBody(ast: GraphqlQueryInput): QueryBodyType {
+  const body = graphqlFields(ast, {}, { processArguments: true, excludedFields: ["__typename"] });
 
   replaceArgumentsWithOurs(body);
 
   return body;
 }
 
-function replaceArgumentsWithOurs(body: any) {
+function replaceArgumentsWithOurs(body: Record<string, unknown>) {
   _.forEach(body, (value, key) => {
     if (key === "__arguments") {
-      let args = {};
-      (value as any[]).forEach((argument) => {
+      const args: Record<string, unknown> = {};
+      (value as Array<Record<string, { value: unknown }>>).forEach((argument) => {
         _.forEach(argument, (value, key) => {
           args[key] = value.value;
         });
       });
 
-      body[ArgumentStore] = args;
+      (body as QueryBodyWithArguments)[ArgumentStore] = args;
       delete body[key];
 
       return;
     }
 
     if (_.isObject(value)) {
-      replaceArgumentsWithOurs(value);
+      replaceArgumentsWithOurs(value as Record<string, unknown>);
     }
   });
 }
 
-export default function astToQuery<T = any>(
+export default function astToQuery<T = Document>(
   collection: Collection<T>,
-  ast,
+  ast: GraphqlQueryInput,
   config: IAstToQueryOptions = {},
   context?: IQueryContext
 ) {
@@ -78,10 +95,7 @@ export default function astToQuery<T = any>(
  * @param config
  * @returns
  */
-export function secureBody<T = null>(
-  body: QueryBodyType<T>,
-  config: ISecureOptions<T> = {}
-) {
+export function secureBody<T = null>(body: QueryBodyType<T>, config: ISecureOptions<T> = {}) {
   body = Object.assign({}, body) as QueryBodyType<T>;
 
   if (!body.$) {
@@ -132,11 +146,11 @@ export function secureBody<T = null>(
   return body;
 }
 
-export function getMaxDepth(body) {
-  const depths = [];
+export function getMaxDepth(body: QueryBodyType) {
+  const depths: number[] = [];
   for (const key in body) {
     if (key !== SPECIAL_PARAM_FIELD && _.isObject(body[key])) {
-      depths.push(getMaxDepth(body[key]));
+      depths.push(getMaxDepth(body[key] as QueryBodyType));
     }
   }
 
@@ -154,10 +168,10 @@ export function getMaxDepth(body) {
  * @param body
  * @param fields
  */
-export function deny(body, fields) {
+export function deny(body: QueryBodyType, fields: string[]) {
   fields.forEach((field) => {
-    let parts = field.split(".");
-    let accessor = body;
+    const parts = field.split(".");
+    let accessor: Record<string, unknown> = body as Record<string, unknown>;
     while (parts.length !== 0) {
       if (parts.length === 1) {
         delete accessor[parts[0]];
@@ -165,20 +179,20 @@ export function deny(body, fields) {
         if (!_.isObject(accessor)) {
           break;
         }
-        accessor = accessor[parts[0]];
+        accessor = accessor[parts[0]] as Record<string, unknown>;
       }
       parts.shift();
     }
   });
 
-  return clearEmptyObjects(body);
+  return clearEmptyObjects(body as Record<string, unknown>);
 }
 
-export function clearEmptyObjects(body) {
+export function clearEmptyObjects(body: Record<string, unknown>) {
   // clear empty nodes then back-propagate
-  for (let key in body) {
+  for (const key in body) {
     if (_.isObject(body[key])) {
-      const shouldDelete = clearEmptyObjects(body[key]);
+      const shouldDelete = clearEmptyObjects(body[key] as Record<string, unknown>);
       if (shouldDelete) {
         delete body[key];
       }
@@ -193,7 +207,7 @@ export function clearEmptyObjects(body) {
  * @param props
  * @param maxLimit
  */
-export function enforceMaxLimit(props: any, maxLimit: number) {
+export function enforceMaxLimit(props: { options?: IQueryOptions }, maxLimit: number) {
   if (!props.options) {
     props.options = {};
   }
@@ -214,13 +228,16 @@ export function enforceMaxLimit(props: any, maxLimit: number) {
 }
 
 // The converter function
-export function astQueryToInfo(astToInfo) {
+export function astQueryToInfo(astToInfo: DocumentNode): {
+  fieldNodes: readonly SelectionNode[];
+  fragments: Record<string, FragmentDefinitionNode>;
+} {
   const operation = astToInfo.definitions.find(
-    ({ kind }) => kind === "OperationDefinition"
+    (def): def is OperationDefinitionNode => def.kind === "OperationDefinition"
   );
   const fragments = astToInfo.definitions
-    .filter(({ kind }) => kind === "FragmentDefinition")
-    .reduce(
+    .filter((def): def is FragmentDefinitionNode => def.kind === "FragmentDefinition")
+    .reduce<Record<string, FragmentDefinitionNode>>(
       (result, current) => ({
         ...result,
         [current.name.value]: current,
@@ -234,19 +251,19 @@ export function astQueryToInfo(astToInfo) {
   };
 }
 
-export function createGetArguments(body) {
-  return function (path) {
+export function createGetArguments(body: QueryBodyType) {
+  return function (path: string): Record<string, unknown> {
     const parts = path.split(".");
     let stopped = false;
-    let accessor = body;
-    for (var i = 0; i < parts.length; i++) {
+    let accessor: Record<string, unknown> = body as Record<string, unknown>;
+    for (let i = 0; i < parts.length; i++) {
       if (!accessor) {
         stopped = true;
         break;
       }
 
       if (accessor[parts[i]]) {
-        accessor = accessor[parts[i]];
+        accessor = accessor[parts[i]] as Record<string, unknown>;
       }
     }
 
@@ -254,8 +271,8 @@ export function createGetArguments(body) {
       return {};
     }
 
-    if (accessor) {
-      return accessor[ArgumentStore] || {};
-    }
+    // accessor is guaranteed non-null here: the loop above breaks with stopped
+    // set whenever accessor becomes falsy.
+    return (accessor as QueryBodyWithArguments)[ArgumentStore] || {};
   };
 }

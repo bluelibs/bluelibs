@@ -1,16 +1,8 @@
-<h1 align="center">BlueLibs APOLLO SECURITY BUNDLE</h1>
+<h1 align="center">BlueLibs X-UI-I18N-BUNDLE</h1>
 
-<p align="center">
-  <a href="https://travis-ci.org/bluelibs/apollo-bundle">
-    <img src="https://api.travis-ci.org/bluelibs/apollo-bundle.svg?branch=master" />
-  </a>
-  <a href="https://coveralls.io/github/bluelibs/apollo-bundle?branch=master">
-    <img src="https://coveralls.io/repos/github/bluelibs/apollo-bundle/badge.svg?branch=master" />
-  </a>
-</p>
-
-<br />
-<br />
+[![npm version](https://badge.fury.io/js/%40bluelibs%2Fx-ui-i18n-bundle.svg)](https://badge.fury.io/js/%40bluelibs%2Fx-ui-i18n-bundle)
+[![CI](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/bluelibs/bluelibs/actions/workflows/lint-and-test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This bundle is to inject into the context the token read from the request and decoded to an userId via the SecurityBundle.
 

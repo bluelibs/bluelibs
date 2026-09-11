@@ -4,20 +4,20 @@ import {
   RouteType,
   RouteHandlerPreviousResultStore,
 } from "./defs";
-import * as express from "express";
+import express from "express";
 import * as http from "http";
 import { LoggerService } from "@bluelibs/logger-bundle";
-import * as cookieParser from "cookie-parser";
+import cookieParser from "cookie-parser";
 import {
   HTTPServerBeforeInitialisationEvent,
   HTTPServerInitialisedEvent,
 } from "./events";
 
 export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
-  public app: express.Application;
-  public router: express.Router;
+  public app!: express.Application;
+  public router!: express.Router;
   public routes: RouteType[] = [];
-  public httpServer: http.Server;
+  public httpServer!: http.Server;
   public isInitialised: boolean = false;
 
   defaultConfig = {
@@ -27,7 +27,7 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
   async hook() {
     const logger = this.container.get(LoggerService);
 
-    this.eventManager.addListener(KernelAfterInitEvent, async (e) => {
+    this.eventManager.addListener(KernelAfterInitEvent, async () => {
       await this.eventManager.emit(new HTTPServerBeforeInitialisationEvent());
 
       return new Promise((resolve, reject) => {
@@ -53,8 +53,11 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
         if (Array.isArray(route.handler)) {
           for (const handler of route.handler) {
             const result = await handler(this.container, req, res, next);
-            req[RouteHandlerPreviousResultStore] = result;
+            (req as unknown as Record<symbol, unknown>)[
+              RouteHandlerPreviousResultStore
+            ] = result;
           }
+          return;
         } else {
           return route.handler(this.container, req, res, next);
         }
@@ -64,9 +67,9 @@ export class HTTPBundle extends Bundle<HTTPBundleConfigType> {
 
   async prepare() {
     this.app = express();
-    this.app.use((req, res, next) => {
+    this.app.use((_req, res, next) => {
       res.setHeader("X-Framework", "BlueLibs");
-      next();
+      next!();
     });
     this.app.use(cookieParser());
     this.app.use(express.json()); // for parsing application/json

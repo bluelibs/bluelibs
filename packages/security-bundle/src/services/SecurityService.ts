@@ -1,13 +1,15 @@
 import { UserBeforeCreateEvent } from "./../events";
 import { Service, Inject, EventManager } from "@bluelibs/core";
-import * as ms from "ms";
+import ms from "ms";
 import {
   ISecurityService,
   IUser,
+  IUserData,
   ICreateSessionOptions,
   IFieldMap,
   FindAuthenticationStrategyResponse,
   ISession,
+  ISessionData,
   UserId,
 } from "../defs";
 import {
@@ -20,11 +22,7 @@ import {
   SessionRetrievedEvent,
   SessionBeforeCreateEvent,
 } from "../events";
-import {
-  UserDisabledException,
-  SessionExpiredException,
-  UserNotFoundException,
-} from "../exceptions";
+import { UserDisabledException, SessionExpiredException } from "../exceptions";
 import { UserDisabledEvent, UserEnabledEvent } from "../events";
 import {
   SessionAfterCreateEvent,
@@ -55,7 +53,7 @@ export class SecurityService implements ISecurityService {
    *
    * @param data
    */
-  async createUser(data: Partial<IUser> = {}): Promise<UserId> {
+  async createUser(data: IUserData = {}): Promise<UserId> {
     const user = Object.assign(
       {},
       {
@@ -77,7 +75,7 @@ export class SecurityService implements ISecurityService {
     return userId;
   }
 
-  async updateUser(userId, data) {
+  async updateUser(userId: UserId, data: IUserData) {
     await this.eventManager.emit(
       new UserBeforeUpdateEvent({
         userId,
@@ -121,7 +119,10 @@ export class SecurityService implements ISecurityService {
    * @param filters
    * @param fields
    */
-  async findUser(filters, fields?: any): Promise<Partial<IUser>> {
+  async findUser(
+    filters: Record<string, unknown>,
+    fields?: IFieldMap
+  ): Promise<Partial<IUser>> {
     return this.userPersistanceLayer.findUser(filters, fields);
   }
 
@@ -131,7 +132,10 @@ export class SecurityService implements ISecurityService {
    * @param filters
    * @param fields
    */
-  async findUserById(userId, fields?: IFieldMap): Promise<Partial<IUser>> {
+  async findUserById(
+    userId: UserId,
+    fields?: IFieldMap
+  ): Promise<Partial<IUser>> {
     return this.userPersistanceLayer.findUserById(userId, fields);
   }
 
@@ -141,7 +145,7 @@ export class SecurityService implements ISecurityService {
    * @param userId
    * @param options
    */
-  async createSession(userId, options: ICreateSessionOptions = {}) {
+  async createSession(userId: UserId, options: ICreateSessionOptions = {}) {
     if (!options.expiresIn) {
       options.expiresIn = "14d";
     }
@@ -167,7 +171,7 @@ export class SecurityService implements ISecurityService {
    * @param userId
    * @param options
    */
-  async login(userId, options: ICreateSessionOptions): Promise<string> {
+  async login(userId: UserId, options: ICreateSessionOptions): Promise<string> {
     if (!(await this.isUserEnabled(userId))) {
       throw new UserDisabledException();
     }
@@ -283,7 +287,7 @@ export class SecurityService implements ISecurityService {
    * @param authMethodName
    * @param data
    */
-  async updateAuthenticationStrategyData<T = any>(
+  async updateAuthenticationStrategyData<T = unknown>(
     userId: UserId,
     authMethodName: string,
     data: Partial<T>
@@ -301,7 +305,7 @@ export class SecurityService implements ISecurityService {
    * @param userId
    * @param methodName
    */
-  async getAuthenticationStrategyData<T = any>(
+  async getAuthenticationStrategyData<T = unknown>(
     userId: UserId,
     methodName: string,
     fields?: IFieldMap
@@ -313,9 +317,9 @@ export class SecurityService implements ISecurityService {
     );
   }
 
-  async findThroughAuthenticationStrategy<T = any>(
+  async findThroughAuthenticationStrategy<T = unknown>(
     methodName: string,
-    filters: any,
+    filters: Record<string, unknown>,
     fields?: IFieldMap
   ): Promise<null | FindAuthenticationStrategyResponse<T>> {
     return this.userPersistanceLayer.findThroughAuthenticationStrategy<T>(
@@ -334,7 +338,7 @@ export class SecurityService implements ISecurityService {
   async removeAuthenticationStrategyData(
     userId: UserId,
     methodName: string
-  ): Promise<any> {
+  ): Promise<void> {
     return this.userPersistanceLayer.removeAuthenticationStrategyData(
       userId,
       methodName
@@ -345,7 +349,7 @@ export class SecurityService implements ISecurityService {
    * Disables the user, user can no longer login
    * @param userId
    */
-  async disableUser(userId) {
+  async disableUser(userId: UserId) {
     await this.sessionPersistanceLayer.deleteAllSessionsForUser(userId);
 
     await this.updateUser(userId, {
@@ -363,7 +367,7 @@ export class SecurityService implements ISecurityService {
    * Enables the user
    * @param userId
    */
-  async enableUser(userId) {
+  async enableUser(userId: UserId) {
     await this.updateUser(userId, {
       isEnabled: true,
     });
@@ -379,7 +383,7 @@ export class SecurityService implements ISecurityService {
    * Check if the user is enabled and can login
    * @param userId
    */
-  async isUserEnabled(userId): Promise<boolean> {
+  async isUserEnabled(userId: UserId): Promise<boolean> {
     const user = await this.findUserById(userId, {
       isEnabled: 1,
     });
@@ -412,7 +416,7 @@ export class SecurityService implements ISecurityService {
    * @param roles
    * @returns
    */
-  async setRoles(userId, roles: string[]) {
+  async setRoles(userId: UserId, roles: string[]) {
     return this.updateUser(userId, {
       roles,
     });
@@ -428,7 +432,10 @@ export class SecurityService implements ISecurityService {
     );
   }
 
-  async findSession(userId: UserId, data: any): Promise<ISession | null> {
+  async findSession(
+    userId: UserId,
+    data: Partial<ISessionData>
+  ): Promise<ISession | null> {
     return this.sessionPersistanceLayer.findSession(userId, data);
   }
 

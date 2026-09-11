@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { Collection } from "mongodb";
 import { addLinks } from "./api";
 
@@ -15,11 +14,7 @@ export interface IQuickLinkingArguments {
   foreignField?: string;
 }
 
-export function oneToOne(
-  C1: Collection,
-  C2: Collection,
-  options: IQuickLinkingArguments
-) {
+export function oneToOne(C1: Collection, C2: Collection, options: IQuickLinkingArguments) {
   addLinks(C1, {
     [options.linkName]: {
       collection: () => C2,
@@ -37,11 +32,7 @@ export function oneToOne(
   });
 }
 
-export function manyToOne(
-  C1: Collection,
-  C2: Collection,
-  options: IQuickLinkingArguments
-) {
+export function manyToOne(C1: Collection, C2: Collection, options: IQuickLinkingArguments) {
   addLinks(C1, {
     [options.linkName]: {
       collection: () => C2,
@@ -58,11 +49,7 @@ export function manyToOne(
   });
 }
 
-export function oneToMany(
-  C1: Collection,
-  C2: Collection,
-  options: IQuickLinkingArguments
-) {
+export function oneToMany(C1: Collection, C2: Collection, options: IQuickLinkingArguments) {
   addLinks(C1, {
     [options.linkName]: {
       collection: () => C2,
@@ -81,11 +68,7 @@ export function oneToMany(
   });
 }
 
-export function manyToMany(
-  C1: Collection,
-  C2: Collection,
-  options: IQuickLinkingArguments
-) {
+export function manyToMany(C1: Collection, C2: Collection, options: IQuickLinkingArguments) {
   addLinks(C1, {
     [options.linkName]: {
       collection: () => C2,

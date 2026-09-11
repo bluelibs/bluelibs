@@ -3,6 +3,7 @@ import {
   IPermissionPersistance,
   IPermission,
   IPermissionSearchFilters,
+  UserId,
 } from "../../../defs";
 
 export class PermissionsPersistanceService implements IPermissionPersistance {
@@ -38,7 +39,7 @@ export class PermissionsPersistanceService implements IPermissionPersistance {
     return this.db.find((p) => this.isMatch(p, search));
   }
 
-  async findDomains(userId): Promise<string[]> {
+  async findDomains(userId: UserId): Promise<string[]> {
     const unique = (value, index, self) => {
       return self.indexOf(value) === index;
     };
@@ -68,7 +69,7 @@ export class PermissionsPersistanceService implements IPermissionPersistance {
       domainIdentifierCheck = search.domainIdentifier.some(
         (id: string | ObjectId) =>
           id instanceof ObjectId
-            ? id.equals(permission.domainIdentifier as any)
+            ? id.equals(permission.domainIdentifier)
             : id === permission.domainIdentifier
       );
     }

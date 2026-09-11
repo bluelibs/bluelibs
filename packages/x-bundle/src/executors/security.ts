@@ -1,7 +1,8 @@
 import { Constructor } from "@bluelibs/core";
 import { IGraphQLContext } from "@bluelibs/graphql-bundle";
 import { Collection } from "@bluelibs/mongo-bundle";
-import * as graphqlFields from "graphql-fields";
+import { GraphQLResolveInfo } from "graphql";
+import graphqlFields from "graphql-fields";
 import * as dot from "dot-object";
 import { intersectGraphQLBodies } from "./utils/intersectGraphQLBodies";
 import {
@@ -21,7 +22,7 @@ export const NOVA_AST_TO_QUERY_OPTIONS = Symbol("NOVA_AST_TO_QUERY_OPTIONS");
 export const NOVA_INTERSECTION = Symbol("NOVA_INTERSECTION");
 
 export function CheckLoggedIn() {
-  return async function (_, args, ctx, ast) {
+  return async function (_: unknown, args: unknown, ctx: IGraphQLContext) {
     if (!ctx.userId) {
       throw new UserNotAuthorizedException();
     }
@@ -29,10 +30,10 @@ export function CheckLoggedIn() {
 }
 
 export type PermissionResolver = (
-  _,
-  args,
-  ctx,
-  ast
+  _: unknown,
+  args: unknown,
+  ctx: IGraphQLContext,
+  ast: GraphQLResolveInfo
 ) => Promise<IPermissionSearchFilter>;
 
 /**
@@ -43,7 +44,12 @@ export type PermissionResolver = (
 export function CheckPermission(
   permissions: string | string[] | PermissionResolver
 ) {
-  return async function (_, args, ctx, ast) {
+  return async function (
+    _: unknown,
+    args: unknown,
+    ctx: IGraphQLContext,
+    ast: GraphQLResolveInfo
+  ) {
     const permissionService: PermissionService =
       ctx.container.get(PermissionService);
 
@@ -94,7 +100,12 @@ Secure.Intersect = function <T = null>(
 ): SecureGraphQLResolver<void> {
   // const intersection = intersectGraphQLBodies()
   const dottedIntersection = dot.dot(intersectBody);
-  return async function (_, args, ctx, ast) {
+  return async function (
+    _: unknown,
+    args: unknown,
+    ctx: IGraphQLContext,
+    ast: GraphQLResolveInfo
+  ) {
     const requestAsJSON = graphqlFields(
       ast,
       {},
@@ -122,10 +133,14 @@ Secure.IsUser = function (
   databaseField: string,
   argumentIdField: string
 ): SecureGraphQLResolver<void> {
-  return async function (_, args, ctx, ast) {
+  return async function (
+    _: unknown,
+    args: Record<string, unknown>,
+    ctx: IGraphQLContext
+  ) {
     const collection: Collection = ctx.container.get(collectionClass);
     const _id = args[argumentIdField];
-    const userId = (ctx as any).userId;
+    const userId = ctx.userId;
 
     if (!userId) {
       // Maybe we should have a different error here?
@@ -154,8 +169,13 @@ Secure.IsUser = function (
 Secure.ApplyNovaOptions = function (
   options: IAstToQueryOptions | SecureGraphQLResolver<IAstToQueryOptions>
 ): SecureGraphQLResolver<void> {
-  return async function (_, args, ctx, ast) {
-    let $options =
+  return async function (
+    _: unknown,
+    args: unknown,
+    ctx: IGraphQLContext,
+    ast: GraphQLResolveInfo
+  ) {
+    const $options =
       typeof options === "function" ? options(_, args, ctx, ast) : options;
 
     ctx[NOVA_AST_TO_QUERY_OPTIONS] = $options;
@@ -169,8 +189,8 @@ Secure.Match = {
    * @returns
    */
   Roles: function (roles: string | string[]): SecureGraphQLResolver<boolean> {
-    return async function (_, args, ctx, ast) {
-      const userId = (ctx as any).userId;
+    return async function (_: unknown, args: unknown, ctx: IGraphQLContext) {
+      const userId = ctx.userId;
       if (!userId) {
         return false;
       }
@@ -191,8 +211,8 @@ Secure.Match = {
  * @param value
  * @returns
  */
-Secure.RunIf = function (value) {
-  return async function (_, args, ctx, ast) {
+Secure.RunIf = function (value: unknown) {
+  return async function (_: unknown) {
     if (!value) {
       throw new Error(`Security: this request is not allowed to run.`);
     }

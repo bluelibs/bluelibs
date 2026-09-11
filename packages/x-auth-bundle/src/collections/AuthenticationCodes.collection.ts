@@ -1,4 +1,4 @@
-import { Collection, Behaviors } from "@bluelibs/mongo-bundle";
+import { Collection } from "@bluelibs/mongo-bundle";
 import { AuthenticationCodes } from "./AuthenticationCodes.model";
 
 export class AuthenticationCodesCollection extends Collection<AuthenticationCodes> {

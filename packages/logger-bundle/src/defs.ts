@@ -11,17 +11,17 @@ export interface ILoggerBundleConfig {
   level?: LogLevel;
 }
 
-export interface ILog<TContext = any> {
+export interface ILog<TContext = unknown> {
   message: string;
   level: LogLevel;
-  context: TContext;
+  context?: TContext;
 }
 
 export interface ILogger {
-  info(message: string, context: any): Promise<void>;
-  warning(message: string, context: any): Promise<void>;
-  error(message: string, context: any): Promise<void>;
-  critical(message: string, context: any): Promise<void>;
+  info(message: string, context?: unknown): Promise<void>;
+  warning(message: string, context?: unknown): Promise<void>;
+  error(message: string, context?: unknown): Promise<void>;
+  critical(message: string, context?: unknown): Promise<void>;
 }
 
 export enum LogLevel {

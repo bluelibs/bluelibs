@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-check
 
 import defaultProcessRequest from "./processRequest";
@@ -35,7 +36,7 @@ import defaultProcessRequest from "./processRequest";
 export default function graphqlUploadKoa({
   processRequest = defaultProcessRequest,
   ...processRequestOptions
-} = {}) {
+}: any = {}) {
   /**
    * [Koa](https://koajs.com) middleware that processes incoming
    * [GraphQL multipart requests](https://github.com/jaydenseric/graphql-multipart-request-spec)
@@ -45,7 +46,7 @@ export default function graphqlUploadKoa({
    * @param {import("koa").ParameterizedContext} ctx
    * @param {() => Promise<unknown>} next
    */
-  async function graphqlUploadKoaMiddleware(ctx, next) {
+  async function graphqlUploadKoaMiddleware(ctx: any, next: any) {
     if (!ctx.request.is("multipart/form-data")) return next();
 
     const requestEnd = new Promise((resolve) => ctx.req.on("end", resolve));

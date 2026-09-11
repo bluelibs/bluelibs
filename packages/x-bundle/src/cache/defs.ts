@@ -1,6 +1,6 @@
 import { Store } from "cache-manager";
 
-export type CacheStore = {/* prettier-ignore */} | Store | "memory";
+export type CacheStore = Store | "memory";
 export type ICacheManagerConfig = {
   store: CacheStore;
   storeConfig: StoreConfig;
@@ -18,7 +18,7 @@ export type StoreConfig = (
   | FsBinaryStoreConfig
 ) & {
   ttl?: number;
-  isCacheableValue?: (value: any) => boolean;
+  isCacheableValue?: (value: unknown) => boolean;
   refreshThreshold?: number;
 };
 
@@ -51,7 +51,7 @@ export type MongoDbStoreConfig = {
   };
 };
 export type MongooseStoreConfig = {
-  mongoose: any;
+  mongoose: unknown;
   modelName?: string;
   modelOptions?: {
     collection: string; // mongodb collection name
@@ -85,7 +85,7 @@ export type HazelcastStoreConfig = {
   ttl: number;
 };
 export type MemcachedStoreConfig = {
-  driver: any;
+  driver: unknown;
   options: {
     hosts: string[];
   };

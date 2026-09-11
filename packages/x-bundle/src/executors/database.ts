@@ -10,14 +10,15 @@ import {
   AnyifyFieldsWithIDs as Clean,
 } from "@bluelibs/nova";
 
-const defaultNovaOptionsResolver: GraphQLToNovaOptionsResolverType<
-  any
-> = async (_, args) => {
+const defaultNovaOptionsResolver = async <T>(
+  _: unknown,
+  args: { query?: { filters?: unknown; options?: unknown } }
+): Promise<IAstToQueryOptions<T>> => {
   const { query } = args;
   return {
-    filters: query?.filters || {},
-    options: query?.options || {},
-  };
+    filters: (query?.filters as Filter<Clean<T>>) || {},
+    options: (query?.options as IAstToQueryOptions<T>["options"]) || {},
+  } as IAstToQueryOptions<T>;
 };
 
 /**
@@ -74,12 +75,12 @@ export function ToNovaByResultID<T>(
   optionsResolver?: GraphQLToNovaOptionsResolverType<T>
 ) {
   if (!optionsResolver) {
-    optionsResolver = async (_, args, ctx, ast) => {
+    optionsResolver = async (_, args, ctx) => {
       const graphqlOptions = {
         filters: {
           _id: getResult(ctx),
         },
-      } as any;
+      } as IAstToQueryOptions<T>;
 
       return graphqlOptions;
     };
@@ -134,13 +135,13 @@ export function ToCollectionCount<T>(
  */
 export function CheckDocumentExists<T>(
   collectionClass: Constructor<Collection<T>>,
-  idResolver?: (args: any) => any | Promise<any>
+  idResolver?: (args: Record<string, unknown>) => unknown | Promise<unknown>
 ) {
   if (!idResolver) {
     idResolver = (args) => args._id;
   }
 
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection = ctx.container.get(collectionClass);
 
     const document = await collection.findOne(
@@ -164,9 +165,9 @@ export function CheckDocumentExists<T>(
 export function ToDocumentInsert<T>(
   collectionClass: Constructor<Collection<T>>,
   field = "document",
-  extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
+  extend?: (document: Partial<T>, ctx: IGraphQLContext) => void | Promise<void>
 ) {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection: Collection = ctx.container.get(collectionClass);
     const document = args[field];
     if (extend) {
@@ -193,9 +194,9 @@ export function ToDocumentInsert<T>(
 export function ToDocumentDeepSync<T>(
   collectionClass: Constructor<Collection<T>>,
   field = "document",
-  extend?: (document: any, ctx: IGraphQLContext) => void | Promise<void>
+  extend?: (document: Partial<T>, ctx: IGraphQLContext) => void | Promise<void>
 ) {
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection: Collection = ctx.container.get(collectionClass);
     const document = args[field];
     if (extend) {
@@ -219,9 +220,11 @@ export function ToDocumentDeepSync<T>(
  */
 export function ToDocumentUpdateByID<T>(
   collectionClass: Constructor<Collection<T>>,
-  idArgumentResolver?: (args) => any | Promise<any>,
+  idArgumentResolver?: (
+    args: Record<string, unknown>
+  ) => unknown | Promise<unknown>,
   mutateResolver?: (
-    args
+    args: Record<string, unknown>
   ) => UpdateFilter<Clean<T>> | Promise<UpdateFilter<Clean<T>>>
 ) {
   if (!idArgumentResolver) {
@@ -233,7 +236,7 @@ export function ToDocumentUpdateByID<T>(
     };
   }
 
-  return async function (_, args, ctx, ast) {
+  return async function (_, args, ctx) {
     const collection: Collection = ctx.container.get(collectionClass);
     const _id = await idArgumentResolver(args);
 
@@ -249,14 +252,16 @@ export function ToDocumentUpdateByID<T>(
 
 export function ToDocumentDeleteByID<T>(
   collectionClass: Constructor<Collection<T>>,
-  idArgumentResolver?: (args) => any | Promise<any>
+  idArgumentResolver?: (
+    args: Record<string, unknown>
+  ) => unknown | Promise<unknown>
 ) {
   if (!idArgumentResolver) {
     idArgumentResolver = (args) => args._id;
   }
 
-  return async function (_, args, ctx, ast) {
-    const collection: Collection<any> = ctx.container.get(collectionClass);
+  return async function (_, args, ctx) {
+    const collection: Collection = ctx.container.get(collectionClass);
     const _id = await idArgumentResolver(args);
 
     await collection.deleteOne({ _id });
