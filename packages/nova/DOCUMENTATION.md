@@ -1003,6 +1003,37 @@ query(
 
 ## High Performance Queries
 
+Collection requests become ready after their parent has been fetched. Siblings run
+in parallel, and a completed sibling can start its descendants while other siblings
+are still fetching. To bound active database requests across the entire query, pass
+`maxCap` in its context:
+
+```ts
+const posts = await query(
+  Posts,
+  {
+    categories: { name: 1 },
+    author: { name: 1 },
+    comments: { author: { name: 1 } },
+  },
+  { maxCap: 3 }
+).fetch();
+```
+
+`maxCap` must be a positive safe integer. It includes the root request, every nested
+collection request, and each per-parent request needed for limit/skip or functional
+`$` parameters. A slot is released when its aggregation cursor finishes, before
+fetching descendants; `maxCap: 1` therefore serializes requests without deadlocking.
+Ready requests wait in FIFO order, and queued work stops if a database request fails.
+Requests already in flight are allowed to finish.
+
+Omitting `maxCap` preserves unlimited parallelism. Each query execution has its own
+cap, so simultaneous queries do not share a queue. You can also set it in the root
+`$context`; the explicit context argument takes precedence, and nested `$context`
+values cannot override the root cap. The same context option works with decorated,
+secure, and GraphQL queries. `maxCap` is a Nova scheduling option and is not forwarded
+to MongoDB as an aggregation option.
+
 Deeper queries are run in parallel, so make sure you have a connection `poolSize` of at least 10. This can be configured when creating your `MongoClient`. An even larger `poolSize` might increase performance, but it can also decrease it.
 
 If you have a lot of nested fields, you also have the `$all: true` option at your disposal: sending out a large projection to MongoDB can sometimes make it slower than getting all the data. If you specify any collection fields and `$all: true`, all fields will be fetched, but your result will still be projected in the final result of the query.

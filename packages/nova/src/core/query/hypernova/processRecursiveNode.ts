@@ -1,5 +1,6 @@
 import * as _ from "lodash";
 import CollectionNode from "../nodes/CollectionNode";
+import QueryScheduler from "../QueryScheduler";
 
 /**
  * This function is called only when the child collection can only be resolved by recursive fetch
@@ -8,7 +9,8 @@ import CollectionNode from "../nodes/CollectionNode";
  * @param childCollectionNode
  */
 export default async function processRecursiveNode(
-  childCollectionNode: CollectionNode
+  childCollectionNode: CollectionNode,
+  scheduler?: QueryScheduler
 ) {
   const parentResults = childCollectionNode.parent.results;
   const allResults = [];
@@ -25,7 +27,8 @@ export default async function processRecursiveNode(
         {
           [linkStorageField]: { $in: [parentResult[linkForeignStorageField]] },
         },
-        parentResult
+        parentResult,
+        scheduler
       );
 
       parentResult[linkName] = results;
@@ -46,7 +49,8 @@ export default async function processRecursiveNode(
         {
           [linkForeignStorageField]: { $in },
         },
-        parentResult
+        parentResult,
+        scheduler
       );
 
       allResults.push(...results);
