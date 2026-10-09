@@ -18,6 +18,11 @@ GraphQL is treated as a first-class citizen, by offering ability to transform th
 
 The incredible speed boost is possible thanks to the technology called Hypernova, you can read more about it [inside the documentation](./docs/index.md#hypernova).
 
+Nova requires the official MongoDB Node.js driver **6.21 or newer within 6.x**,
+Node.js **16.20.1+**, and MongoDB Server **6.0+**. Performance improvements are
+validated on MongoDB **8.3.13**. Driver 4.x/5.x and server versions below 6.0 are
+no longer supported.
+
 ## What does it solve?
 
 - It makes it a joy to use MongoDB as a relational database

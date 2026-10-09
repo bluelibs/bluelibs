@@ -26,6 +26,7 @@ import FieldNode from "./FieldNode";
 import ReducerNode from "./ReducerNode";
 import { Collection, ObjectId } from "mongodb";
 import { ALL_FIELDS } from "../../constants";
+import QueryScheduler from "../QueryScheduler";
 
 export interface CollectionNodeOptions {
   collection: Collection<any>;
@@ -85,6 +86,7 @@ export default class CollectionNode implements INode {
   public linkForeignStorageField: string;
   public readonly context: IQueryContext;
   public results: any = [];
+  public queryScheduler?: QueryScheduler;
 
   /**
    * This is used for self-referencing expanders
@@ -316,7 +318,16 @@ export default class CollectionNode implements INode {
   /**
    * Fetches the data accordingly
    */
-  public async toArray(additionalFilters = {}, parentObject?: any) {
+  public toArray(
+    additionalFilters = {},
+    parentObject?: any,
+    scheduler: QueryScheduler = this.queryScheduler
+  ) {
+    const execute = () => this.fetchArray(additionalFilters, parentObject);
+    return scheduler ? scheduler.run(execute) : execute();
+  }
+
+  private async fetchArray(additionalFilters = {}, parentObject?: any) {
     const { pipeline, aggregateOptions } = this.getAggregationPipeline(
       additionalFilters,
       parentObject

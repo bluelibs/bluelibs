@@ -1,58 +1,52 @@
 import * as _ from "lodash";
 import CollectionNode from "../nodes/CollectionNode";
+import QueryScheduler from "../QueryScheduler";
 
-/**
- * This function is called only when the child collection can only be resolved by recursive fetch
- * So instead of getting all results via hypernova, we get them recursively
- *
- * @param childCollectionNode
- */
+/** Resolves parent-dependent queries with bounded fan-out and stable result order. */
 export default async function processRecursiveNode(
-  childCollectionNode: CollectionNode
+  node: CollectionNode,
+  scheduler?: QueryScheduler,
 ) {
-  const parentResults = childCollectionNode.parent.results;
-  const allResults = [];
-  const linkStorageField = childCollectionNode.linkStorageField;
-  const linkForeignStorageField = childCollectionNode.linkForeignStorageField;
-  const linkName = childCollectionNode.name;
-  const isMany = childCollectionNode.linker.isMany();
+  const parents = node.parent.results;
+  const resultsByParent: any[][] = new Array(parents.length);
+  let next = 0;
+  let failed = false;
 
-  if (childCollectionNode.isVirtual) {
-    // Then it's either 1:M either M:M
-    // Lucky for us $in works with both arrays and strings, so there's no distinction in the filter
-    for (const parentResult of parentResults) {
-      const results = await childCollectionNode.toArray(
-        {
-          [linkStorageField]: { $in: [parentResult[linkForeignStorageField]] },
-        },
-        parentResult
-      );
-
-      parentResult[linkName] = results;
-      allResults.push(...results);
-    }
-  } else {
-    for (const parentResult of parentResults) {
-      if (!parentResult[linkStorageField]) {
-        parentResult[linkStorageField] = [];
-        continue;
+  async function worker() {
+    while (!failed && next < parents.length) {
+      const index = next++;
+      const parent = parents[index];
+      try {
+        const value = _.get(
+          parent,
+          node.isVirtual ? node.linkForeignStorageField : node.linkStorageField,
+        );
+        let results = [];
+        if (node.isVirtual || value) {
+          const ids = node.isVirtual || !node.linker.isMany() ? [value] : value;
+          const field = node.isVirtual
+            ? node.linkStorageField
+            : node.linkForeignStorageField;
+          results = await node.toArray(
+            { [field]: { $in: ids } },
+            parent,
+            scheduler,
+          );
+        }
+        parent[node.name] = results;
+        resultsByParent[index] = results;
+      } catch (error) {
+        failed = true;
+        throw error;
       }
-
-      const $in = isMany
-        ? parentResult[linkStorageField]
-        : [parentResult[linkStorageField]];
-
-      const results = await childCollectionNode.toArray(
-        {
-          [linkForeignStorageField]: { $in },
-        },
-        parentResult
-      );
-
-      allResults.push(...results);
-      parentResult[linkName] = results;
     }
   }
 
-  childCollectionNode.results = _.uniqBy(allResults, (id) => id.toString());
+  const concurrency = node.session?.inTransaction?.() ? 1 : 8;
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, parents.length) }, worker),
+  );
+  // Separate fetches can return distinct copies of the same _id. Every copy
+  // needs its descendants, reducers and projection applied before delivery.
+  node.results = resultsByParent.flat();
 }

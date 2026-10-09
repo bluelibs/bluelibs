@@ -1,9 +1,12 @@
 import prepareForDelivery from "../lib/prepareForDelivery";
 import storeHypernovaResults from "./storeHypernovaResults";
 import CollectionNode from "../nodes/CollectionNode";
-import { performance } from "perf_hooks";
+import QueryScheduler from "../QueryScheduler";
 
-async function hypernovaRecursive(collectionNode: CollectionNode) {
+async function hypernovaRecursive(
+  collectionNode: CollectionNode,
+  scheduler?: QueryScheduler,
+) {
   if (collectionNode.collectionNodes.length === 0) {
     return;
   }
@@ -17,10 +20,11 @@ async function hypernovaRecursive(collectionNode: CollectionNode) {
   const promises = [];
 
   for (const childCollectionNode of collectionNodes) {
+    childCollectionNode.queryScheduler = scheduler;
     promises.push(
-      storeHypernovaResults(childCollectionNode).then(() => {
-        return hypernovaRecursive(childCollectionNode);
-      })
+      storeHypernovaResults(childCollectionNode, scheduler).then(() => {
+        return hypernovaRecursive(childCollectionNode, scheduler);
+      }),
     );
   }
 
@@ -28,9 +32,22 @@ async function hypernovaRecursive(collectionNode: CollectionNode) {
 }
 
 export default async function hypernova(collectionNode: CollectionNode) {
-  collectionNode.results = await collectionNode.toArray();
+  // Each execution owns its queue; separate queries and later retries stay independent.
+  const maxCap = collectionNode.context.maxCap;
+  let scheduler = maxCap === undefined ? undefined : new QueryScheduler(maxCap);
+  // The driver does not support concurrent operations within a transaction.
+  if (collectionNode.session?.inTransaction?.()) {
+    scheduler = new QueryScheduler(1);
+  }
+  // Existing read adapters may forward only the original two arguments.
+  collectionNode.queryScheduler = scheduler;
+  collectionNode.results = await collectionNode.toArray(
+    {},
+    undefined,
+    scheduler,
+  );
 
-  await hypernovaRecursive(collectionNode);
+  await hypernovaRecursive(collectionNode, scheduler);
   await prepareForDelivery(collectionNode);
 
   return collectionNode.results;

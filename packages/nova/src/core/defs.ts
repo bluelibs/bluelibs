@@ -7,6 +7,8 @@ export interface IToArrayable {
 
 export interface IQueryContext {
   session?: ClientSession;
+  /** Maximum active database requests across this query. Omitted means unlimited. */
+  maxCap?: number;
   // Do be extended by others
 }
 

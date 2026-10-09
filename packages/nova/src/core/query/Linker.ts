@@ -181,6 +181,21 @@ export default class Linker<T = any> {
       ? this.linkStorageField
       : this.linkForeignStorageField;
 
+    if (options.strategy === "equality") {
+      return {
+        $lookup: {
+          from: this.getLinkedCollection().collectionName,
+          localField,
+          foreignField,
+          as: options.as || this.linkName,
+          ...(options.pipeline?.length ? { pipeline: options.pipeline } : {}),
+        },
+      };
+    }
+    if (options.strategy && options.strategy !== "pipeline") {
+      throw new Error(`Unknown lookup strategy: ${options.strategy}`);
+    }
+
     let matches = this.createAggregationMatches(foreignField);
 
     const result: any = {
@@ -264,4 +279,6 @@ export default class Linker<T = any> {
 export interface IGetLookupOperatorOptions {
   pipeline?: any[];
   as?: string;
+  /** Equality uses MongoDB's native matching rules, including null/missing fields. */
+  strategy?: "pipeline" | "equality";
 }
