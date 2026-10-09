@@ -20,6 +20,7 @@ async function hypernovaRecursive(
   const promises = [];
 
   for (const childCollectionNode of collectionNodes) {
+    childCollectionNode.queryScheduler = scheduler;
     promises.push(
       storeHypernovaResults(childCollectionNode, scheduler).then(() => {
         return hypernovaRecursive(childCollectionNode, scheduler);
@@ -38,6 +39,8 @@ export default async function hypernova(collectionNode: CollectionNode) {
   if (collectionNode.session?.inTransaction?.()) {
     scheduler = new QueryScheduler(1);
   }
+  // Existing read adapters may forward only the original two arguments.
+  collectionNode.queryScheduler = scheduler;
   collectionNode.results = await collectionNode.toArray(
     {},
     undefined,

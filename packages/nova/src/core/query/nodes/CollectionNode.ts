@@ -86,6 +86,7 @@ export default class CollectionNode implements INode {
   public linkForeignStorageField: string;
   public readonly context: IQueryContext;
   public results: any = [];
+  public queryScheduler?: QueryScheduler;
 
   /**
    * This is used for self-referencing expanders
@@ -320,7 +321,7 @@ export default class CollectionNode implements INode {
   public toArray(
     additionalFilters = {},
     parentObject?: any,
-    scheduler?: QueryScheduler
+    scheduler: QueryScheduler = this.queryScheduler
   ) {
     const execute = () => this.fetchArray(additionalFilters, parentObject);
     return scheduler ? scheduler.run(execute) : execute();

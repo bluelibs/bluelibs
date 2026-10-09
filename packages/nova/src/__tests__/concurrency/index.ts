@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import { astQueryToInfo } from "../../core/graphql/astToQuery";
 import { query, decorate } from "../../core/api";
 import { Requests, deferred, tree } from "./helpers";
+import CollectionNode from "../../core/query/nodes/CollectionNode";
 import "./recursive";
 import "./failures";
 
@@ -63,6 +64,31 @@ describe("Query request concurrency", () => {
     }
     expect(await result).toEqual(expected);
     expect(requests.peak).toBe(1);
+  });
+
+  it("retains the cap through an existing two-argument read wrapper", async () => {
+    const { requests, gates, root, body, expected } = tree();
+    const prototype = CollectionNode.prototype;
+    const toArray = prototype.toArray;
+    // Existing empty-link adapters forward the original two arguments only.
+    prototype.toArray = function (filters, parent) {
+      return toArray.call(this, filters, parent);
+    };
+    const result = query(root, body, { maxCap: 1 }).fetch();
+    try {
+      gates.root.resolve();
+      for (const name of ["a", "b", "c", "next"] as const) {
+        await requests.waitForStart(name);
+        expect(requests.active).toBe(1);
+        gates[name].resolve();
+      }
+      expect(await result).toEqual(expected);
+      expect(requests.peak).toBe(1);
+    } finally {
+      Object.values(gates).forEach((gate) => gate.resolve());
+      await result;
+      prototype.toArray = toArray;
+    }
   });
 
   it("keeps queues independent even when queries share their context", async () => {
