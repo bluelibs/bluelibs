@@ -45,7 +45,7 @@ describe("Recursive query request concurrency", () => {
       ).fetch();
       await requests.waitForStart("a");
       if (maxCap === 2) {
-        await requests.waitForStart("b");
+        await requests.waitForStart("a", 2);
         expect(requests.active).toBe(2);
       }
       aGate.resolve();

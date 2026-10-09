@@ -5,7 +5,7 @@ import QueryScheduler from "../QueryScheduler";
 
 async function hypernovaRecursive(
   collectionNode: CollectionNode,
-  scheduler?: QueryScheduler
+  scheduler?: QueryScheduler,
 ) {
   if (collectionNode.collectionNodes.length === 0) {
     return;
@@ -23,7 +23,7 @@ async function hypernovaRecursive(
     promises.push(
       storeHypernovaResults(childCollectionNode, scheduler).then(() => {
         return hypernovaRecursive(childCollectionNode, scheduler);
-      })
+      }),
     );
   }
 
@@ -33,8 +33,16 @@ async function hypernovaRecursive(
 export default async function hypernova(collectionNode: CollectionNode) {
   // Each execution owns its queue; separate queries and later retries stay independent.
   const maxCap = collectionNode.context.maxCap;
-  const scheduler = maxCap === undefined ? undefined : new QueryScheduler(maxCap);
-  collectionNode.results = await collectionNode.toArray({}, undefined, scheduler);
+  let scheduler = maxCap === undefined ? undefined : new QueryScheduler(maxCap);
+  // The driver does not support concurrent operations within a transaction.
+  if (collectionNode.session?.inTransaction?.()) {
+    scheduler = new QueryScheduler(1);
+  }
+  collectionNode.results = await collectionNode.toArray(
+    {},
+    undefined,
+    scheduler,
+  );
 
   await hypernovaRecursive(collectionNode, scheduler);
   await prepareForDelivery(collectionNode);

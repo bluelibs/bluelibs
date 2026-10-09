@@ -22,7 +22,9 @@ export class Requests {
   public collection(
     name: string,
     documents: Document[] | ((pipeline: Document[]) => Document[]),
-    gate?: ReturnType<typeof deferred>,
+    gate?:
+      | ReturnType<typeof deferred>
+      | ((pipeline: Document[]) => ReturnType<typeof deferred>),
   ): Collection {
     return {
       collectionName: name,
@@ -36,7 +38,8 @@ export class Requests {
           toArray: async () => {
             try {
               if (gate) {
-                await gate.promise;
+                await (typeof gate === "function" ? gate(pipeline) : gate)
+                  .promise;
               }
               return cloneDeep(
                 typeof documents === "function"

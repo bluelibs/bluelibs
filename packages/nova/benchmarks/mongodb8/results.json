@@ -1,0 +1,163 @@
+{
+  "metadata": {
+    "mongodb": "8.3.13",
+    "node": "v25.7.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "driver": "6.21.0",
+    "baseline": "794b442",
+    "fixture": {
+      "parentsForPagination": 100,
+      "commentsPerParent": 100,
+      "posts": 5000,
+      "tags": 1000
+    },
+    "methodology": "Three warmups per variant, rotating measurement order, exact output equality; maxCap omitted."
+  },
+  "results": [
+    {
+      "group": "lookup-author",
+      "variant": "pipeline",
+      "samples": 12,
+      "p50Ms": 6.753,
+      "p95Ms": 7.734,
+      "commands": {
+        "aggregate": 1,
+        "getMore": 1
+      }
+    },
+    {
+      "group": "lookup-author",
+      "variant": "equality",
+      "samples": 12,
+      "p50Ms": 3.762,
+      "p95Ms": 4.537,
+      "commands": {
+        "aggregate": 1,
+        "getMore": 1
+      }
+    },
+    {
+      "group": "lookup-tags",
+      "variant": "pipeline",
+      "samples": 12,
+      "p50Ms": 9.983,
+      "p95Ms": 10.373,
+      "commands": {
+        "aggregate": 1,
+        "getMore": 1
+      }
+    },
+    {
+      "group": "lookup-tags",
+      "variant": "equality",
+      "samples": 12,
+      "p50Ms": 8.304,
+      "p95Ms": 8.953,
+      "commands": {
+        "aggregate": 1,
+        "getMore": 1
+      }
+    },
+    {
+      "group": "top-3-per-parent-local",
+      "variant": "baseline sequential",
+      "samples": 12,
+      "p50Ms": 18.457,
+      "p95Ms": 23.335,
+      "commands": {
+        "aggregate": 101
+      }
+    },
+    {
+      "group": "top-3-per-parent-local",
+      "variant": "production batched pagination",
+      "samples": 12,
+      "p50Ms": 6.126,
+      "p95Ms": 7.575,
+      "commands": {
+        "aggregate": 2
+      }
+    },
+    {
+      "group": "top-3-per-parent-local",
+      "variant": "production functional fallback",
+      "samples": 12,
+      "p50Ms": 7.812,
+      "p95Ms": 8.215,
+      "commands": {
+        "aggregate": 101
+      }
+    },
+    {
+      "group": "top-3-per-parent-added-5ms-per-request",
+      "variant": "baseline sequential",
+      "samples": 5,
+      "p50Ms": 771.379,
+      "p95Ms": 808.918,
+      "commands": {
+        "aggregate": 101
+      }
+    },
+    {
+      "group": "top-3-per-parent-added-5ms-per-request",
+      "variant": "production batched pagination",
+      "samples": 5,
+      "p50Ms": 23.654,
+      "p95Ms": 24.33,
+      "commands": {
+        "aggregate": 2
+      }
+    },
+    {
+      "group": "top-3-per-parent-added-5ms-per-request",
+      "variant": "production functional fallback",
+      "samples": 5,
+      "p50Ms": 114.087,
+      "p95Ms": 121.81,
+      "commands": {
+        "aggregate": 101
+      }
+    },
+    {
+      "group": "ordinary-batched-graph",
+      "variant": "baseline",
+      "samples": 12,
+      "p50Ms": 3.132,
+      "p95Ms": 3.783,
+      "commands": {
+        "aggregate": 3
+      }
+    },
+    {
+      "group": "ordinary-batched-graph",
+      "variant": "production",
+      "samples": 12,
+      "p50Ms": 3.08,
+      "p95Ms": 3.596,
+      "commands": {
+        "aggregate": 3
+      }
+    },
+    {
+      "group": "inverse-many-1000-parents-5000-children",
+      "variant": "baseline repeated scans",
+      "samples": 6,
+      "p50Ms": 4833.946,
+      "p95Ms": 4962.661,
+      "commands": {
+        "aggregate": 2
+      }
+    },
+    {
+      "group": "inverse-many-1000-parents-5000-children",
+      "variant": "production membership map",
+      "samples": 6,
+      "p50Ms": 26.455,
+      "p95Ms": 27.245,
+      "commands": {
+        "aggregate": 2
+      }
+    }
+  ]
+}

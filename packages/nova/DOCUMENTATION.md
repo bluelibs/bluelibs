@@ -16,10 +16,15 @@ The incredible speed boost is possible thanks to the technology called Hypernova
 ## Install
 
 ```
-npm i -S mongodb @bluelibs/nova
+npm i -S mongodb@^6.21.0 @bluelibs/nova
 ```
 
 ## Linking Collections
+
+Nova requires the official MongoDB Node.js driver 6.21+ within 6.x, Node.js
+16.20.1+, and MongoDB Server 6.0+. The optimized query paths are tested on MongoDB
+8.3.13. The peer dependency requires driver 6.21+; driver 4.x/5.x are no longer
+supported.
 
 Collections are linked through `addLinks(collection, linkingInformation)`, collections are instances of `mongodb.Collection`.
 
@@ -769,7 +774,17 @@ query(Posts, {
 }
 ```
 
-Hypernova is not able to retrieve all comments for all posts in one-go (because of limit/skip). Therefore it has to do it iteratively for each found post. However, hypernova works afterwards when we need to fetch the authors of comments. It will fetch all authors in one-go, and properly assemble it.
+Fixed pagination with an explicit sort is resolved with batched indexed lookups,
+using up to 128 parents and 256 KiB of link values per batch. Each parent's sort
+and pagination apply independently. Parent-dependent `$` functions, custom
+pipelines, pipeline reducers, dynamic hardwired filters, transactions and options
+that cannot apply to a foreign lookup (such as `hint`) use per-parent reads.
+Unsorted pagination also uses per-parent reads to preserve its query shape.
+Aggregate options such as `maxTimeMS` apply to each batch. Descendants such as
+comment authors are still fetched together afterward.
+
+For top comments per post, create an index matching the link and sort, for example
+`{ postId: 1, createdAt: -1, _id: 1 }`, and use `_id` as a sort tie-breaker.
 
 #### Dynamic Filterings
 
@@ -1021,20 +1036,47 @@ const posts = await query(
 ```
 
 `maxCap` must be a positive safe integer. It includes the root request, every nested
-collection request, and each per-parent request needed for limit/skip or functional
-`$` parameters. A slot is released when its aggregation cursor finishes, before
+collection request, each pagination batch, and each fallback per-parent request.
+It counts the cursor lifetime, including any `getMore` operations. A slot is
+released when its aggregation cursor finishes, before
 fetching descendants; `maxCap: 1` therefore serializes requests without deadlocking.
 Ready requests wait in FIFO order, and queued work stops if a database request fails.
 Requests already in flight are allowed to finish.
 
-Omitting `maxCap` preserves unlimited parallelism. Each query execution has its own
+Omitting `maxCap` preserves unlimited sibling parallelism. Per-parent fallback
+reads run with up to eight workers per link while preserving parent result order;
+the query cap can further limit them. Active transactions always serialize all
+requests in the query, regardless of `maxCap`. Each query execution has its own
 cap, so simultaneous queries do not share a queue. You can also set it in the root
 `$context`; the explicit context argument takes precedence, and nested `$context`
 values cannot override the root cap. The same context option works with decorated,
 secure, and GraphQL queries. `maxCap` is a Nova scheduling option and is not forwarded
 to MongoDB as an aggregation option.
 
-Deeper queries are run in parallel, so make sure you have a connection `poolSize` of at least 10. This can be configured when creating your `MongoClient`. An even larger `poolSize` might increase performance, but it can also decrease it.
+Use the driver's `maxPoolSize` option when configuring `MongoClient`.
+`maxCap` applies to one Nova execution; `maxPoolSize` applies to all operations
+sharing that client.
+
+Inverse many-to-many assembly builds a membership map once and keeps child
+encounter order. Duplicate memberships emit a child once per inverse parent;
+ordinary direct-many links still preserve the stored ID order and duplicates.
+
+For manually authored aggregation pipelines, you can opt into native equality
+matching:
+
+```ts
+lookup(Posts, "author", { strategy: "equality" });
+lookup(Posts, "tags", { strategy: "equality", as: "matchedTags" });
+```
+
+Without a custom foreign pipeline, this emits `localField`/`foreignField` lookup
+syntax that can use MongoDB's `EQ_LOOKUP` engine. The default `strategy: "pipeline"`
+keeps existing matching behavior. Equality matching follows MongoDB's array and
+null/missing-field semantics, so choose it when those semantics match your schema.
+Lookup results do not guarantee Nova's direct-many ordering or duplicate IDs.
+
+See [the reproducible MongoDB benchmark](./benchmarks/mongodb8/README.md) for
+fixtures, results and commands.
 
 If you have a lot of nested fields, you also have the `$all: true` option at your disposal: sending out a large projection to MongoDB can sometimes make it slower than getting all the data. If you specify any collection fields and `$all: true`, all fields will be fetched, but your result will still be projected in the final result of the query.
 
